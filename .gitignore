@@ -1,0 +1,3 @@
+# files generated from yacc
+parser/y.go
+parser/y.output
