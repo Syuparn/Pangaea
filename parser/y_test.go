@@ -110,6 +110,43 @@ func TestPropCall(t *testing.T) {
 }
 
 // TODO: Test multi method chain
+func TestRecursiveChain(t *testing.T) {
+	input := `foo.bar()@(10)hoge$piyo$(1)fuga().puts`
+	expectedVals := []struct {
+		prop         string
+		chainContext string
+		chainArg     interface{}
+	}{
+		{"bar", ".", nil},
+		{"hoge", "@", 10},
+		{"piyo", "$", nil},
+		{"fuga", "$", 1},
+		{"puts", ".", nil},
+	}
+
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+
+	callExpr, ok := expr.(*ast.PropCallExpr)
+	if !ok {
+		t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+	}
+
+	pc := callExpr
+
+	for i := len(expectedVals) - 1; i > 0; i-- {
+		exp := expectedVals[i]
+		testChainContext(t, pc, exp.chainContext, exp.chainArg)
+		testIdentifier(t, pc.Prop, exp.prop)
+		recv, ok := pc.Receiver.(*ast.PropCallExpr)
+		if ok {
+			pc = recv
+		} else {
+			t.Errorf("receiver is not *ast.PropCallExpr. got=%T(i=%d)",
+				pc.Receiver, i)
+		}
+	}
+}
 
 func TestArgOrders(t *testing.T) {
 	tests := []struct {
