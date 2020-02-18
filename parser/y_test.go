@@ -25,6 +25,7 @@ func TestInfixExpr(t *testing.T) {
 		{`5 - 2`, 5, "-", 2},
 		{`5 * 2`, 5, "*", 2},
 		{`5 / 2`, 5, "/", 2},
+		{`5+2`, 5, "+", 2}, // without space
 	}
 
 	for _, tt := range tests {
@@ -44,6 +45,7 @@ func TestInfixPrecedence(t *testing.T) {
 		{`3 * 4 / 5`, `((3 * 4) / 5)`},
 		{`3 * 4 + 2`, `((3 * 4) + 2)`},
 		{`3 + 4 * 2`, `(3 + (4 * 2))`},
+		{`3+4*2`, `(3 + (4 * 2))`}, // without space
 	}
 
 	for _, tt := range tests {
