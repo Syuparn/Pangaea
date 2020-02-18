@@ -62,9 +62,10 @@ func (es *ExprStmt) String() string {
 }
 
 type Ident struct {
-	Token string
-	Value string
-	Src   *Source
+	Token     string
+	Value     string
+	Src       *Source
+	IsPrivate bool
 }
 
 func (i *Ident) isExpr()              {}
@@ -73,33 +74,29 @@ func (i *Ident) String() string       { return i.Value }
 func (i *Ident) Source() *Source      { return i.Src }
 
 type CallExpr interface {
-	ChainLiteral() string
+	ChainToken() string
+	ChainArg() Expr
 	Expr
 }
 
 type PropCallExpr struct {
 	Token    string
-	Chain    Chain
-	ChainArg Expr
+	Chain    *Chain
 	Receiver Expr
-	Prop     Ident
+	Prop     *Ident
 	Args     []Expr
 	Src      *Source
 }
 
 func (pc *PropCallExpr) isExpr()              {}
 func (pc *PropCallExpr) TokenLiteral() string { return pc.Token }
-func (pc *PropCallExpr) ChainLiteral() string { return pc.Chain.String() }
+func (pc *PropCallExpr) ChainToken() string   { return pc.Chain.Token }
+func (pc *PropCallExpr) ChainArg() Expr       { return pc.Chain.Arg }
 func (pc *PropCallExpr) Source() *Source      { return pc.Src }
 func (pc *PropCallExpr) String() string {
 	var out bytes.Buffer
 	out.WriteString(pc.Receiver.String())
 	out.WriteString(pc.Chain.String())
-
-	if pc.ChainArg != nil {
-		out.WriteString("(" + pc.ChainArg.String() + ")")
-	}
-
 	out.WriteString(pc.Prop.String())
 
 	args := []string{}
@@ -129,7 +126,7 @@ const (
 	Strict
 )
 
-func MakeChain(addChain string, mainChain string) Chain {
+func MakeChain(addChain string, mainChain string, chainArg Expr) *Chain {
 	var addChainMap = map[string]AdditionalChain{
 		"":  Vanilla,
 		"&": Lonely,
@@ -143,10 +140,11 @@ func MakeChain(addChain string, mainChain string) Chain {
 		"$": Reduce,
 	}
 
-	return Chain{
+	return &Chain{
 		Token:      addChain + mainChain,
 		Additional: addChainMap[addChain],
 		Main:       mainChainMap[mainChain],
+		Arg:        chainArg,
 	}
 }
 
@@ -154,9 +152,17 @@ type Chain struct {
 	Token      string
 	Additional AdditionalChain
 	Main       MainChain
+	Arg        Expr
 }
 
-func (c *Chain) String() string { return c.Token }
+func (c *Chain) String() string {
+	var out bytes.Buffer
+	out.WriteString(c.Token)
+	if c.Arg != nil {
+		out.WriteString("(" + c.Arg.String() + ")")
+	}
+	return out.String()
+}
 
 type InfixExpr struct {
 	Token    string // i.e.: "+"

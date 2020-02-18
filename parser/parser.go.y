@@ -18,7 +18,9 @@ import (
 
 %union{
     token *simplexer.Token
-    expr  ast.Expr
+    chain *ast.Chain
+	ident *ast.Ident
+	expr  ast.Expr
 	stmt  ast.Stmt
 	stmts []ast.Stmt
 	program *ast.Program
@@ -27,10 +29,18 @@ import (
 %type<program> program
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
-%type<expr> expr literal infixExpr
-%token<token> INT PREC1_OPERATOR PREC2_OPERATOR
+%type<expr> expr literal infixExpr callExpr
+%type<ident> ident
+%type<chain> chain
+%type<token> opMethod
+%token<token> INT
+%token<token> PREC1_OPERATOR PREC2_OPERATOR
+%token<token> ADD_CHAIN MAIN_CHAIN
+%token<token> IDENT PRIVATE_IDENT
+%token<token> LPAREN RPAREN
 %left PREC1_OPERATOR
 %left PREC2_OPERATOR
+%left ADD_CHAIN MAIN_CHAIN
 
 %% 
 
@@ -75,6 +85,34 @@ expr
 	{
 		$$ = $1
 	}
+	| callExpr
+	{
+		$$ = $1
+	}
+	| ident
+	{
+		$$ = $1
+	}
+
+ident
+	: IDENT
+	{
+		$$ = &ast.Ident{
+			Token: $1.Literal,
+			Value: $1.Literal,
+			Src: yylex.(*Lexer).source,
+			IsPrivate: false,
+		}
+	}
+	| PRIVATE_IDENT
+	{
+		$$ = &ast.Ident{
+			Token: $1.Literal,
+			Value: $1.Literal,
+			Src: yylex.(*Lexer).source,
+			IsPrivate: true,
+		}
+	}
 
 literal
 	: INT
@@ -109,6 +147,92 @@ infixExpr
 		}
 	}
 
+callExpr
+	: expr chain ident
+	{
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: $2,
+			Receiver: $1,
+			Prop: $3,
+			Args: nil,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+	| expr chain ident LPAREN RPAREN
+	{
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: $2,
+			Receiver: $1,
+			Prop: $3,
+			Args: nil,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+	| expr chain opMethod
+	{
+		opIdent := &ast.Ident{
+			Token: $3.Literal,
+			Value: $3.Literal,
+			Src: yylex.(*Lexer).source,
+			IsPrivate: true,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: $2,
+			Receiver: $1,
+			Prop: opIdent,
+			Args: nil,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+	| expr chain opMethod LPAREN RPAREN
+	{
+		opIdent := &ast.Ident{
+			Token: $3.Literal,
+			Value: $3.Literal,
+			Src: yylex.(*Lexer).source,
+			IsPrivate: true,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: $2,
+			Receiver: $1,
+			Prop: opIdent,
+			Args: nil,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+
+opMethod
+	: PREC1_OPERATOR
+	{
+		$$ = $1
+	}
+	| PREC2_OPERATOR
+	{
+		$$ = $1
+	}
+
+chain
+	: ADD_CHAIN MAIN_CHAIN
+	{
+		$$ = ast.MakeChain($1.Literal, $2.Literal, nil)
+	}
+	| MAIN_CHAIN
+	{
+		$$ = ast.MakeChain("", $1.Literal, nil)
+	}
+	| MAIN_CHAIN LPAREN expr RPAREN
+	{
+		$$ = ast.MakeChain("", $1.Literal, $3)
+	}
+	| ADD_CHAIN MAIN_CHAIN LPAREN expr RPAREN
+	{
+		$$ = ast.MakeChain($1.Literal, $2.Literal, $4)
+	}
+
 %%
 
 func Parse(src io.Reader) (*ast.Program, error) {
@@ -137,8 +261,14 @@ type Lexer struct {
 
 var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(INT, `[0-9]+(\.[0-9]+)?`),
+	simplexer.NewRegexpTokenType(LPAREN, `\(`),
+	simplexer.NewRegexpTokenType(RPAREN, `\)`),
 	simplexer.NewRegexpTokenType(PREC1_OPERATOR, `[-+]`),
 	simplexer.NewRegexpTokenType(PREC2_OPERATOR, `[*/]`),
+	simplexer.NewRegexpTokenType(ADD_CHAIN, `[&~=]`),
+	simplexer.NewRegexpTokenType(MAIN_CHAIN, `[\.@$]`),
+	simplexer.NewRegexpTokenType(IDENT, `[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
+	simplexer.NewRegexpTokenType(PRIVATE_IDENT, `_[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
 }
 
 func NewLexer(reader io.Reader) *Lexer {

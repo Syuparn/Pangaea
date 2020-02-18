@@ -103,9 +103,8 @@ func TestPropCall(t *testing.T) {
 		}
 
 		testLiteralExpr(t, callExpr.Receiver, tt.receiver)
-		testChainContext(t, callExpr, tt.chainContext)
-		testLiteralExpr(t, callExpr.ChainArg, tt.chainArg)
-		testIdentifier(t, &callExpr.Prop, tt.propName)
+		testChainContext(t, callExpr, tt.chainContext, tt.chainArg)
+		testIdentifier(t, callExpr.Prop, tt.propName)
 
 	}
 }
@@ -171,12 +170,17 @@ func TestIntLiteralExpr(t *testing.T) {
 	}
 }
 
-func testChainContext(t *testing.T, ce ast.CallExpr, expected string) bool {
-	if ce.ChainLiteral() != expected {
-		t.Errorf("chain is not %s. got=%s", expected, ce.ChainLiteral())
+func testChainContext(t *testing.T, ce ast.CallExpr, expContext string,
+	expArg interface{}) bool {
+	if ce.ChainToken() != expContext {
+		t.Errorf("chain is not %s. got=%s", expContext, ce.ChainToken())
 		return false
 	}
-	return true
+
+	if expArg == nil {
+		return testNil(t, ce.ChainArg())
+	}
+	return testLiteralExpr(t, ce.ChainArg(), expArg)
 }
 
 func testIdentifier(t *testing.T, expr ast.Expr, expected string) bool {
@@ -246,6 +250,14 @@ func testLiteralExpr(t *testing.T, exp ast.Expr, expected interface{}) bool {
 	return false
 }
 
+func testNil(t *testing.T, val interface{}) bool {
+	if val != nil {
+		t.Errorf("type of value is not nil. got=%T", val)
+		return false
+	}
+	return true
+}
+
 func testIntLiteral(t *testing.T, ex ast.Expr, expected int64) bool {
 	il, ok := ex.(*ast.IntLiteral)
 
@@ -273,7 +285,8 @@ func testParse(t *testing.T, input string) *ast.Program {
 	// (because yacc cannot return error)
 	defer func() {
 		if err := recover(); err != nil {
-			t.Fatalf(fmt.Sprintf("%+v", err))
+			m := fmt.Sprintf("error occured while parsing\n%s", input)
+			t.Fatalf(m + "\n" + fmt.Sprintf("%+v", err))
 			t.FailNow()
 		}
 	}()
