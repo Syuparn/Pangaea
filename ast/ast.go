@@ -8,6 +8,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -85,7 +86,7 @@ type PropCallExpr struct {
 	Receiver Expr
 	Prop     *Ident
 	Args     []Expr
-	Kwargs   map[Ident]Expr
+	Kwargs   map[*Ident]Expr
 	Src      *Source
 }
 
@@ -104,6 +105,8 @@ func (pc *PropCallExpr) String() string {
 	for _, a := range pc.Args {
 		args = append(args, a.String())
 	}
+
+	args = append(args, sortedPairStrings(pc.Kwargs)...)
 
 	out.WriteString("(" + strings.Join(args, ", ") + ")")
 
@@ -163,6 +166,72 @@ func (c *Chain) String() string {
 		out.WriteString("(" + c.Arg.String() + ")")
 	}
 	return out.String()
+}
+
+type Pair struct {
+	Key *Ident
+	Val Expr
+}
+
+func sortedPairStrings(pairs map[*Ident]Expr) []string {
+	// NOTE: sort kwargs by ident name (otherwise order is random!)
+	type p struct {
+		k string
+		v string
+	}
+
+	kwargs := []p{}
+	for k, arg := range pairs {
+		kwargs = append(kwargs, p{k: k.String(), v: arg.String()})
+	}
+	sort.Slice(kwargs, func(i, j int) bool { return kwargs[i].k < kwargs[j].k })
+
+	sortedStrings := []string{}
+	for _, kwarg := range kwargs {
+		sortedStrings = append(sortedStrings, kwarg.k+": "+kwarg.v)
+	}
+	return sortedStrings
+}
+
+func ExprToArgList(e Expr) *ArgList {
+	return &ArgList{
+		Args:   []Expr{e},
+		Kwargs: map[*Ident]Expr{},
+	}
+}
+
+func PairToArgList(pair *Pair) *ArgList {
+	return &ArgList{
+		Args:   []Expr{},
+		Kwargs: map[*Ident]Expr{pair.Key: pair.Val},
+	}
+}
+
+type ArgList struct {
+	Args   []Expr
+	Kwargs map[*Ident]Expr
+}
+
+func (al *ArgList) String() string {
+	args := []string{}
+	for _, arg := range al.Args {
+		args = append(args, arg.String())
+	}
+
+	// NOTE: sort kwargs by ident name (otherwise order is random!)
+	args = append(args, sortedPairStrings(al.Kwargs)...)
+
+	return strings.Join(args, ", ")
+}
+
+func (al *ArgList) AppendArg(arg Expr) *ArgList {
+	al.Args = append(al.Args, arg)
+	return al
+}
+
+func (al *ArgList) AppendKwarg(key *Ident, arg Expr) *ArgList {
+	al.Kwargs[key] = arg
+	return al
 }
 
 type InfixExpr struct {

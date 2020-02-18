@@ -149,18 +149,59 @@ func TestRecursiveChain(t *testing.T) {
 
 func TestArgOrders(t *testing.T) {
 	tests := []struct {
-		input  string
-		args   []int
-		kwargs map[string]int
+		input   string
+		args    []int
+		kwargs  map[string]int
+		printed string
 	}{
-		{`5.a(1)`, []int{1}, map[string]int{}},
-		{`5.a(1, 2)`, []int{1, 2}, map[string]int{}},
-		{`5.a(1, foo=2)`, []int{1}, map[string]int{"foo": 2}},
-		{`5.a(foo=3, 1, 2)`, []int{1, 2}, map[string]int{"foo": 3}},
-		{`5.a(1, foo=3, 2)`, []int{1, 2}, map[string]int{"foo": 3}},
-		{`5.a(1, 2, foo=3)`, []int{1, 2}, map[string]int{"foo": 3}},
-		{`5.a(1, i=2, j=3)`, []int{1}, map[string]int{"i": 2, "j": 3}},
-		{`5.a(1, j=3, i=2)`, []int{1}, map[string]int{"i": 2, "j": 3}},
+		{
+			`5.a(1)`,
+			[]int{1},
+			map[string]int{},
+			`5.a(1)`,
+		},
+		{
+			`5.a(1, 2)`,
+			[]int{1, 2},
+			map[string]int{},
+			`5.a(1, 2)`,
+		},
+		{
+			`5.a(1, foo:2)`, // without space
+			[]int{1},
+			map[string]int{"foo": 2},
+			`5.a(1, foo: 2)`,
+		},
+		{
+			`5.a(foo: 3, 1, 2)`,
+			[]int{1, 2},
+			map[string]int{"foo": 3},
+			`5.a(1, 2, foo: 3)`,
+		},
+		{
+			`5.a(1, foo: 3, 2)`,
+			[]int{1, 2},
+			map[string]int{"foo": 3},
+			`5.a(1, 2, foo: 3)`,
+		},
+		{
+			`5.a(1, 2, foo: 3)`,
+			[]int{1, 2},
+			map[string]int{"foo": 3},
+			`5.a(1, 2, foo: 3)`,
+		},
+		{
+			`5.a(1, i: 2, j: 3)`,
+			[]int{1},
+			map[string]int{"i": 2, "j": 3},
+			`5.a(1, i: 2, j: 3)`,
+		},
+		{
+			`5.a(1, j: 3, i: 2)`,
+			[]int{1},
+			map[string]int{"i": 2, "j": 3},
+			`5.a(1, i: 2, j: 3)`,
+		},
 	}
 
 	// TODO: inplement test
@@ -181,6 +222,11 @@ func TestArgOrders(t *testing.T) {
 		if len(callExpr.Args) != len(tt.args) {
 			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
 				len(tt.kwargs), len(callExpr.Kwargs))
+		}
+
+		if callExpr.String() != tt.printed {
+			t.Errorf("wrong output.expected=\n%s,\ngot=\n%s",
+				tt.printed, callExpr.String())
 		}
 
 		for i, expArg := range tt.args {

@@ -21,6 +21,8 @@ import (
     chain *ast.Chain
 	ident *ast.Ident
 	expr  ast.Expr
+	argList *ast.ArgList
+	pair *ast.Pair
 	stmt  ast.Stmt
 	stmts []ast.Stmt
 	program *ast.Program
@@ -30,6 +32,8 @@ import (
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
 %type<expr> expr literal infixExpr callExpr
+%type<pair> pair
+%type<argList> argList
 %type<ident> ident
 %type<chain> chain
 %type<token> opMethod
@@ -37,7 +41,7 @@ import (
 %token<token> PREC1_OPERATOR PREC2_OPERATOR
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
-%token<token> LPAREN RPAREN
+%token<token> LPAREN RPAREN COMMA COLON
 %left PREC1_OPERATOR
 %left PREC2_OPERATOR
 %left ADD_CHAIN MAIN_CHAIN
@@ -156,6 +160,7 @@ callExpr
 			Receiver: $1,
 			Prop: $3,
 			Args: nil,
+			Kwargs: nil,
 			Src: yylex.(*Lexer).source,
 		}
 	}
@@ -167,6 +172,19 @@ callExpr
 			Receiver: $1,
 			Prop: $3,
 			Args: nil,
+			Kwargs: nil,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+	| expr chain ident LPAREN argList RPAREN
+	{
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: $2,
+			Receiver: $1,
+			Prop: $3,
+			Args: $5.Args,
+			Kwargs: $5.Kwargs,
 			Src: yylex.(*Lexer).source,
 		}
 	}
@@ -184,6 +202,7 @@ callExpr
 			Receiver: $1,
 			Prop: opIdent,
 			Args: nil,
+			Kwargs: nil,
 			Src: yylex.(*Lexer).source,
 		}
 	}
@@ -201,9 +220,29 @@ callExpr
 			Receiver: $1,
 			Prop: opIdent,
 			Args: nil,
+			Kwargs: nil,
 			Src: yylex.(*Lexer).source,
 		}
 	}
+	| expr chain opMethod LPAREN argList RPAREN
+	{
+		opIdent := &ast.Ident{
+			Token: $3.Literal,
+			Value: $3.Literal,
+			Src: yylex.(*Lexer).source,
+			IsPrivate: true,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: $2,
+			Receiver: $1,
+			Prop: opIdent,
+			Args: $5.Args,
+			Kwargs: $5.Kwargs,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+
 
 opMethod
 	: PREC1_OPERATOR
@@ -231,6 +270,30 @@ chain
 	| ADD_CHAIN MAIN_CHAIN LPAREN expr RPAREN
 	{
 		$$ = ast.MakeChain($1.Literal, $2.Literal, $4)
+	}
+
+argList
+	: argList COMMA expr
+	{
+		$$ = $1.AppendArg($3)
+	}
+	| argList COMMA pair
+	{
+		$$ = $1.AppendKwarg($3.Key, $3.Val)
+	}
+	| expr
+	{
+		$$ = ast.ExprToArgList($1)
+	}
+	| pair
+	{
+		$$ = ast.PairToArgList($1)
+	}
+
+pair
+	: ident COLON expr
+	{
+		$$ = &ast.Pair{Key: $1, Val: $3}
 	}
 
 %%
@@ -263,6 +326,8 @@ var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(INT, `[0-9]+(\.[0-9]+)?`),
 	simplexer.NewRegexpTokenType(LPAREN, `\(`),
 	simplexer.NewRegexpTokenType(RPAREN, `\)`),
+	simplexer.NewRegexpTokenType(COMMA, `,`),
+	simplexer.NewRegexpTokenType(COLON, `:`),
 	simplexer.NewRegexpTokenType(PREC1_OPERATOR, `[-+]`),
 	simplexer.NewRegexpTokenType(PREC2_OPERATOR, `[*/]`),
 	simplexer.NewRegexpTokenType(ADD_CHAIN, `[&~=]`),
