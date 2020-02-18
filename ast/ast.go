@@ -85,6 +85,7 @@ type PropCallExpr struct {
 	Receiver Expr
 	Prop     *Ident
 	Args     []Expr
+	Kwargs   map[Ident]Expr
 	Src      *Source
 }
 
