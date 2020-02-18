@@ -65,6 +65,92 @@ func TestInfixPrecedence(t *testing.T) {
 	}
 }
 
+func TestPropCall(t *testing.T) {
+	tests := []struct {
+		input        string
+		receiver     interface{}
+		chainContext string
+		chainArg     interface{}
+		propName     string
+	}{
+		{`5.times`, 5, ".", nil, "times"},
+		{`10@puts`, 10, "@", nil, "puts"},
+		{`5@(10)puts`, 5, "@", 10, "puts"},
+		{`10$add`, 10, "$", nil, "add"},
+		{`5$(0)add`, 5, "$", 0, "add"},
+		{`10$(0)+`, 10, "$", 0, "+"},
+		{`5.foo`, 5, ".", nil, "foo"},
+		{`5@foo`, 5, "@", nil, "foo"},
+		{`5$foo`, 5, "$", nil, "foo"},
+		{`5&.foo`, 5, "&.", nil, "foo"},
+		{`5~.foo`, 5, "~.", nil, "foo"},
+		{`5=.foo`, 5, "=.", nil, "foo"},
+		{`5&@foo`, 5, "&@", nil, "foo"},
+		{`5~@foo`, 5, "~@", nil, "foo"},
+		{`5=@foo`, 5, "=@", nil, "foo"},
+		{`5&$foo`, 5, "&$", nil, "foo"},
+		{`5~$foo`, 5, "~$", nil, "foo"},
+		{`5=$foo`, 5, "=$", nil, "foo"},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		testLiteralExpr(t, callExpr.Receiver, tt.receiver)
+		testChainContext(t, callExpr, tt.chainContext)
+		testLiteralExpr(t, callExpr.ChainArg, tt.chainArg)
+		testIdentifier(t, &callExpr.Prop, tt.propName)
+
+	}
+}
+
+// TODO: Test multi method chain
+
+func TestArgOrders(t *testing.T) {
+	tests := []struct {
+		input  string
+		args   []int
+		kwargs map[string]int
+	}{
+		{`5.a(1)`, []int{1}, map[string]int{}},
+		{`5.a(1, 2)`, []int{1, 2}, map[string]int{}},
+		{`5.a(1, foo=2)`, []int{1}, map[string]int{"foo": 2}},
+		{`5.a(foo=3, 1, 2)`, []int{1, 2}, map[string]int{"foo": 3}},
+		{`5.a(1, foo=3, 2)`, []int{1, 2}, map[string]int{"foo": 3}},
+		{`5.a(1, 2, foo=3)`, []int{1, 2}, map[string]int{"foo": 3}},
+		{`5.a(1, i=2, j=3)`, []int{1}, map[string]int{"i": 2, "j": 3}},
+		{`5.a(1, j=3, i=2)`, []int{1}, map[string]int{"i": 2, "j": 3}},
+	}
+
+	// TODO: inplement test
+	_ = tests
+}
+
+func TestCallWithArgs(t *testing.T) {
+	tests := []struct {
+		input    string
+		receiver interface{}
+		propName string
+		args     []interface{}
+	}{
+		{`5.hi`, 5, "hi", []interface{}{}},
+		{`5@hi`, 5, "hi", []interface{}{}},
+		{`5$hi`, 5, "hi", []interface{}{}},
+		{`5.hi(6)`, 5, "hi", []interface{}{6}},
+		{`5@hi(6)`, 5, "hi", []interface{}{6}},
+		{`5$hi(6)`, 5, "hi", []interface{}{6}},
+	}
+
+	// TODO: inplement test
+	_ = tests
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -83,6 +169,35 @@ func TestIntLiteralExpr(t *testing.T) {
 			return
 		}
 	}
+}
+
+func testChainContext(t *testing.T, ce ast.CallExpr, expected string) bool {
+	if ce.ChainLiteral() != expected {
+		t.Errorf("chain is not %s. got=%s", expected, ce.ChainLiteral())
+		return false
+	}
+	return true
+}
+
+func testIdentifier(t *testing.T, expr ast.Expr, expected string) bool {
+	ident, ok := expr.(*ast.Ident)
+	if !ok {
+		t.Errorf("exp not *ast.Ident. got=%T", expr)
+		return false
+	}
+
+	if ident.Value != expected {
+		t.Errorf("ident.Value not %s. got=%s", expected, ident.Value)
+		return false
+	}
+
+	if ident.TokenLiteral() != expected {
+		t.Errorf("ident.TokenLiteral() not %s. got=%s",
+			expected, ident.TokenLiteral())
+		return false
+	}
+
+	return true
 }
 
 func testInfixOperator(t *testing.T, expr ast.Expr,

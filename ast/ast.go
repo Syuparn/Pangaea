@@ -8,7 +8,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	//"strings"
+	"strings"
 )
 
 type Node interface {
@@ -60,6 +60,103 @@ func (es *ExprStmt) String() string {
 	}
 	return ""
 }
+
+type Ident struct {
+	Token string
+	Value string
+	Src   *Source
+}
+
+func (i *Ident) isExpr()              {}
+func (i *Ident) TokenLiteral() string { return i.Token }
+func (i *Ident) String() string       { return i.Value }
+func (i *Ident) Source() *Source      { return i.Src }
+
+type CallExpr interface {
+	ChainLiteral() string
+	Expr
+}
+
+type PropCallExpr struct {
+	Token    string
+	Chain    Chain
+	ChainArg Expr
+	Receiver Expr
+	Prop     Ident
+	Args     []Expr
+	Src      *Source
+}
+
+func (pc *PropCallExpr) isExpr()              {}
+func (pc *PropCallExpr) TokenLiteral() string { return pc.Token }
+func (pc *PropCallExpr) ChainLiteral() string { return pc.Chain.String() }
+func (pc *PropCallExpr) Source() *Source      { return pc.Src }
+func (pc *PropCallExpr) String() string {
+	var out bytes.Buffer
+	out.WriteString(pc.Receiver.String())
+	out.WriteString(pc.Chain.String())
+
+	if pc.ChainArg != nil {
+		out.WriteString("(" + pc.ChainArg.String() + ")")
+	}
+
+	out.WriteString(pc.Prop.String())
+
+	args := []string{}
+	for _, a := range pc.Args {
+		args = append(args, a.String())
+	}
+
+	out.WriteString("(" + strings.Join(args, ", ") + ")")
+
+	return out.String()
+}
+
+type MainChain int
+
+const (
+	Scalar MainChain = iota
+	List
+	Reduce
+)
+
+type AdditionalChain int
+
+const (
+	Vanilla AdditionalChain = iota
+	Lonely
+	Thoughtful
+	Strict
+)
+
+func MakeChain(addChain string, mainChain string) Chain {
+	var addChainMap = map[string]AdditionalChain{
+		"":  Vanilla,
+		"&": Lonely,
+		"~": Thoughtful,
+		"=": Strict,
+	}
+
+	var mainChainMap = map[string]MainChain{
+		".": Scalar,
+		"@": List,
+		"$": Reduce,
+	}
+
+	return Chain{
+		Token:      addChain + mainChain,
+		Additional: addChainMap[addChain],
+		Main:       mainChainMap[mainChain],
+	}
+}
+
+type Chain struct {
+	Token      string
+	Additional AdditionalChain
+	Main       MainChain
+}
+
+func (c *Chain) String() string { return c.Token }
 
 type InfixExpr struct {
 	Token    string // i.e.: "+"
