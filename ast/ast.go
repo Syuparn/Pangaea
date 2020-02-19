@@ -340,8 +340,9 @@ func (il *IntLiteral) String() string       { return il.Token }
 
 // for error message
 type Source struct {
-	Line string
-	Pos  Position
+	Line         string
+	Pos          Position
+	TokenLiteral string
 }
 
 type Position struct {

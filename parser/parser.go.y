@@ -34,16 +34,19 @@ import (
 %type<stmt> stmt exprStmt
 %type<expr> expr literal infixExpr callExpr funcLiteral
 %type<pair> pair
-%type<argList> argList
-%type<paramList> paramList
+%type<argList> argList callArgs
+%type<paramList> paramList funcParams
 %type<ident> ident
 %type<chain> chain
-%type<token> opMethod
+%type<token> opMethod breakLine
+%type<token> lBrace lParen comma
+
 %token<token> INT
 %token<token> PREC1_OPERATOR PREC2_OPERATOR
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT
+%token<token> RET SEMICOLON
 %left PREC1_OPERATOR
 %left PREC2_OPERATOR
 %left ADD_CHAIN MAIN_CHAIN
@@ -55,22 +58,37 @@ program
 	{
 		$$ = &ast.Program{Stmts: $1}
 		yylex.(*Lexer).program = $$
+		yylex.(*Lexer).curRule = "program -> stmts"
+	}
+	| RET stmts
+	{
+		$$ = &ast.Program{Stmts: $2}
+		yylex.(*Lexer).program = $$
+		yylex.(*Lexer).curRule = "program -> RET stmts"
 	}
 
 stmts
 	: stmt
 	{
 		$$ = []ast.Stmt{$1}
+		yylex.(*Lexer).curRule = "stmts -> stmt"
 	}
-	| stmts stmt
+	| stmts breakLine stmt
 	{
-		$$ = append($1, $2)
+		$$ = append($1, $3)
+		yylex.(*Lexer).curRule = "stmts -> stmts breakLine stmt"
+	}
+	| stmts breakLine
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "stmts -> stmts breakLine"
 	}
 
 stmt
 	: exprStmt
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "stmt -> exprStmt"
 	}
 
 exprStmt
@@ -80,24 +98,29 @@ exprStmt
 			Token: "(exprStmt)",
 			Expr: $1,
 		}
+		yylex.(*Lexer).curRule = "exprStmt -> expr"
 	}
 
 expr
 	: literal
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> literal"
 	}
 	| infixExpr
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> infixExpr"
 	}
 	| callExpr
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> callExpr"
 	}
 	| ident
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> ident"
 	}
 
 ident
@@ -106,18 +129,20 @@ ident
 		$$ = &ast.Ident{
 			Token: $1.Literal,
 			Value: $1.Literal,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 			IsPrivate: false,
 		}
+		yylex.(*Lexer).curRule = "ident -> IDENT"
 	}
 	| PRIVATE_IDENT
 	{
 		$$ = &ast.Ident{
 			Token: $1.Literal,
 			Value: $1.Literal,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 			IsPrivate: true,
 		}
+		yylex.(*Lexer).curRule = "ident -> PRIVATE_IDENT"
 	}
 
 literal
@@ -127,12 +152,14 @@ literal
 		$$ = &ast.IntLiteral{
 			Token: $1.Literal,
 			Value: n,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 		}
+		yylex.(*Lexer).curRule = "literal -> INT"
 	}
 	| funcLiteral
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> funcLiteral"
 	}
 
 infixExpr
@@ -143,8 +170,9 @@ infixExpr
 			Left: $1,
 			Operator: $2.Literal,
 			Right: $3,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr PREC2_OPERATOR expr"
 	}
 	| expr PREC1_OPERATOR expr
 	{
@@ -153,60 +181,82 @@ infixExpr
 			Left: $1,
 			Operator: $2.Literal,
 			Right: $3,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr PREC1_OPERATOR expr"
 	}
 
 funcLiteral
-	: LBRACE VERT VERT RBRACE
+	: lBrace funcParams RBRACE
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
-			Args: []*ast.Ident{},
-			Kwargs: map[*ast.Ident]ast.Expr{},
+			Args: $2.Args,
+			Kwargs: $2.Kwargs,
 			Body: []ast.Stmt{},
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 		}
+		yylex.(*Lexer).curRule = "funcLiteral -> lBrace funcParams RBRACE"
 	}
-	| LBRACE stmts RBRACE
+	| lBrace stmts RBRACE
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
 			Args: []*ast.Ident{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Body: $2,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 		}
+		yylex.(*Lexer).curRule = "funcLiteral -> lBrace stmts RBRACE"
 	}
-	| LBRACE VERT VERT stmts RBRACE
+	| lBrace funcParams stmts RBRACE
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
+			Args: $2.Args,
+			Kwargs: $2.Kwargs,
+			Body: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "funcLiteral -> lBrace funcParams stmts RBRACE"
+	}
+
+funcParams
+	: VERT VERT
+	{
+		$$ = &ast.ParamList{
 			Args: []*ast.Ident{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
-			Body: $4,
-			Src: yylex.(*Lexer).source,
 		}
+		yylex.(*Lexer).curRule = "funcParams -> VERT VERT"
 	}
-	| LBRACE VERT paramList VERT RBRACE
+	| VERT paramList VERT
 	{
-		$$ = &ast.FuncLiteral{
-			Token: $1.Literal,
-			Args: $3.Args,
-			Kwargs: $3.Kwargs,
-			Body: []ast.Stmt{},
-			Src: yylex.(*Lexer).source,
-		}
+		$$ = $2
+		yylex.(*Lexer).curRule = "funcParams -> VERT paramList VERT"
 	}
-	| LBRACE VERT paramList VERT stmts RBRACE
+	| VERT paramList RET VERT
 	{
-		$$ = &ast.FuncLiteral{
-			Token: $1.Literal,
-			Args: $3.Args,
-			Kwargs: $3.Kwargs,
-			Body: $5,
-			Src: yylex.(*Lexer).source,
+		$$ = $2
+		yylex.(*Lexer).curRule = "funcParams -> VERT paramList RET VERT"
+	}
+	|  VERT VERT RET
+	{
+		$$ = &ast.ParamList{
+			Args: []*ast.Ident{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
 		}
+		yylex.(*Lexer).curRule = "funcParams -> VERT VERT RET"
+	}
+	| VERT paramList VERT RET
+	{
+		$$ = $2
+		yylex.(*Lexer).curRule = "funcParams -> VERT paramList VERT RET"
+	}
+	| VERT paramList RET VERT RET
+	{
+		$$ = $2
+		yylex.(*Lexer).curRule = "funcParams -> VERT paramList RET VERT RET"
 	}
 
 callExpr
@@ -219,39 +269,29 @@ callExpr
 			Prop: $3,
 			Args: nil,
 			Kwargs: nil,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 		}
+		yylex.(*Lexer).curRule = "callExpr -> expr chain ident"
 	}
-	| expr chain ident LPAREN RPAREN
+	| expr chain ident callArgs
 	{
 		$$ = &ast.PropCallExpr{
 			Token: "(propCall)",
 			Chain: $2,
 			Receiver: $1,
 			Prop: $3,
-			Args: nil,
-			Kwargs: nil,
-			Src: yylex.(*Lexer).source,
+			Args: $4.Args,
+			Kwargs: $4.Kwargs,
+			Src: yylex.(*Lexer).Source,
 		}
-	}
-	| expr chain ident LPAREN argList RPAREN
-	{
-		$$ = &ast.PropCallExpr{
-			Token: "(propCall)",
-			Chain: $2,
-			Receiver: $1,
-			Prop: $3,
-			Args: $5.Args,
-			Kwargs: $5.Kwargs,
-			Src: yylex.(*Lexer).source,
-		}
+		yylex.(*Lexer).curRule = "callExpr -> expr chain ident callArgs"
 	}
 	| expr chain opMethod
 	{
 		opIdent := &ast.Ident{
 			Token: $3.Literal,
 			Value: $3.Literal,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 			IsPrivate: true,
 		}
 		$$ = &ast.PropCallExpr{
@@ -261,15 +301,16 @@ callExpr
 			Prop: opIdent,
 			Args: nil,
 			Kwargs: nil,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 		}
+		yylex.(*Lexer).curRule = "callExpr -> expr chain opMethod"
 	}
-	| expr chain opMethod LPAREN RPAREN
+	| expr chain opMethod callArgs
 	{
 		opIdent := &ast.Ident{
 			Token: $3.Literal,
 			Value: $3.Literal,
-			Src: yylex.(*Lexer).source,
+			Src: yylex.(*Lexer).Source,
 			IsPrivate: true,
 		}
 		$$ = &ast.PropCallExpr{
@@ -277,112 +318,181 @@ callExpr
 			Chain: $2,
 			Receiver: $1,
 			Prop: opIdent,
-			Args: nil,
-			Kwargs: nil,
-			Src: yylex.(*Lexer).source,
+			Args: $4.Args,
+			Kwargs: $4.Kwargs,
+			Src: yylex.(*Lexer).Source,
 		}
-	}
-	| expr chain opMethod LPAREN argList RPAREN
-	{
-		opIdent := &ast.Ident{
-			Token: $3.Literal,
-			Value: $3.Literal,
-			Src: yylex.(*Lexer).source,
-			IsPrivate: true,
-		}
-		$$ = &ast.PropCallExpr{
-			Token: "(propCall)",
-			Chain: $2,
-			Receiver: $1,
-			Prop: opIdent,
-			Args: $5.Args,
-			Kwargs: $5.Kwargs,
-			Src: yylex.(*Lexer).source,
-		}
+		yylex.(*Lexer).curRule = "callExpr -> expr chain opMethod callArgs"
 	}
 
+callArgs
+	: lParen RPAREN
+	{
+		$$ = &ast.ArgList{
+			Args: []ast.Expr{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+		}
+		yylex.(*Lexer).curRule = "callArgs -> lParen RPAREN"
+	}
+	| lParen argList RPAREN
+	{
+		$$ = $2
+		yylex.(*Lexer).curRule = "callArgs -> lParen argList RPAREN"
+	}
+	| lParen argList RET RPAREN
+	{
+		$$ = $2
+		yylex.(*Lexer).curRule = "callArgs -> lParen argList RET RPAREN"
+	}
 
 opMethod
 	: PREC1_OPERATOR
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> PREC1_OPERATOR"
 	}
 	| PREC2_OPERATOR
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> PREC2_OPERATOR"
 	}
 
 chain
 	: ADD_CHAIN MAIN_CHAIN
 	{
 		$$ = ast.MakeChain($1.Literal, $2.Literal, nil)
+		yylex.(*Lexer).curRule = "chain -> ADD_CHAIN MAIN_CHAIN"
 	}
 	| MAIN_CHAIN
 	{
 		$$ = ast.MakeChain("", $1.Literal, nil)
+		yylex.(*Lexer).curRule = "chain -> MAIN_CHAIN"
 	}
-	| MAIN_CHAIN LPAREN expr RPAREN
+	| MAIN_CHAIN lParen expr RPAREN
 	{
 		$$ = ast.MakeChain("", $1.Literal, $3)
+		yylex.(*Lexer).curRule = "chain -> MAIN_CHAIN lParen expr RPAREN"
 	}
-	| ADD_CHAIN MAIN_CHAIN LPAREN expr RPAREN
+	| ADD_CHAIN MAIN_CHAIN lParen expr RPAREN
 	{
 		$$ = ast.MakeChain($1.Literal, $2.Literal, $4)
+		yylex.(*Lexer).curRule = "chain -> ADD_CHAIN MAIN_CHAIN lParen expr RPAREN"
 	}
 
 argList
-	: argList COMMA expr
+	: argList comma expr
 	{
 		$$ = $1.AppendArg($3)
+		yylex.(*Lexer).curRule = "argList -> argList comma expr"
 	}
-	| argList COMMA pair
+	| argList comma pair
 	{
 		$$ = $1.AppendKwarg($3.Key, $3.Val)
+		yylex.(*Lexer).curRule = "argList -> argList comma pair"
 	}
 	| expr
 	{
 		$$ = ast.ExprToArgList($1)
+		yylex.(*Lexer).curRule = "argList -> expr"
 	}
 	| pair
 	{
 		$$ = ast.PairToArgList($1)
+		yylex.(*Lexer).curRule = "argList -> pair"
 	}
 
 paramList
-	: paramList COMMA ident
+	: paramList comma ident
 	{
 		$$ = $1.AppendArg($3)
+		yylex.(*Lexer).curRule = "paramList -> paramList comma ident"
 	}
-	| paramList COMMA pair
+	| paramList comma pair
 	{
 		$$ = $1.AppendKwarg($3.Key, $3.Val)
+		yylex.(*Lexer).curRule = "paramList -> paramList comma pair"
 	}
 	| ident
 	{
 		$$ = ast.IdentToParamList($1)
+		yylex.(*Lexer).curRule = "paramList -> ident"
 	}
 	| pair
 	{
 		$$ = ast.PairToParamList($1)
+		yylex.(*Lexer).curRule = "paramList -> pair"
 	}
 
 pair
 	: ident COLON expr
 	{
 		$$ = &ast.Pair{Key: $1, Val: $3}
+		yylex.(*Lexer).curRule = "pair -> ident COLON expr"
+	}
+
+lBrace
+	: LBRACE
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "lBrace -> LBRACE RET"
+	}
+	| LBRACE RET
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "lBrace -> LBRACE RET"
+	}
+
+lParen
+	: LPAREN
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "lParen -> LPAREN"
+	}
+	| LPAREN RET
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "lParen -> LPAREN RET"
+	}
+
+breakLine
+	: SEMICOLON
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "breakLine -> SEMICOLON"
+	}
+	| RET
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "breakLine -> RET"
+	}
+
+comma
+	: COMMA
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "comma -> COMMA"
+	}
+	| COMMA RET
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "comma -> COMMA RET"
 	}
 
 %%
 
-func Parse(src io.Reader) (*ast.Program, error) {
+func Parse(src io.Reader) (*ast.Program, error) {	
 	lexer := NewLexer(src)
-	yyParse(lexer)
+	prog, err := tryParse(src, lexer)
+	
+	if err != nil {
+		return nil, err
+	}
 
-	if lexer.program == nil {
+	if prog == nil {
 		return nil, errors.New("failed to parse")
 	}
 
-	program, ok := lexer.program.(*ast.Program)
+	program, ok := prog.(*ast.Program)
 	if !ok {
 		msg := fmt.Sprintf("could not parsed to *ast.Program. got=%+v", program)
 		return nil, errors.New(msg)
@@ -391,15 +501,37 @@ func Parse(src io.Reader) (*ast.Program, error) {
 	return program, nil
 }
 
+func tryParse(src io.Reader, l *Lexer) (a ast.Node, e error) {
+	// HACK: catch yyParse error by recover
+	// (because yacc cannot return error)
+	defer func(l *Lexer) {
+		if err := recover(); err != nil {
+			m := "error occured:"
+			if l.Source != nil {
+				m = fmt.Sprintf("%s\n%s", m,
+					l.ErrMsg()) 
+			} else {
+				m = m + "\nbefore lexing"
+			}
+			e = errors.New(m)
+		}
+	}(l)
+	
+	yyParse(l)
+	return l.program, nil
+}
+
 type Lexer struct {
 	lexer        *simplexer.Lexer
 	// NOTE: embed final ast in lexer because yyParse cannot return ast
 	program      ast.Node
-	source		 *ast.Source
+	Source		 *ast.Source
+	curRule		 string
 }
 
 var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(INT, `[0-9]+(\.[0-9]+)?`),
+	simplexer.NewRegexpTokenType(RET, `(\r|\n|\r\n)+`),
 	simplexer.NewRegexpTokenType(LPAREN, `\(`),
 	simplexer.NewRegexpTokenType(RPAREN, `\)`),
 	simplexer.NewRegexpTokenType(VERT, `\|`),
@@ -407,6 +539,7 @@ var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(RBRACE, `\}`),
 	simplexer.NewRegexpTokenType(COMMA, `,`),
 	simplexer.NewRegexpTokenType(COLON, `:`),
+	simplexer.NewRegexpTokenType(SEMICOLON, `;`),
 	simplexer.NewRegexpTokenType(PREC1_OPERATOR, `[-+]`),
 	simplexer.NewRegexpTokenType(PREC2_OPERATOR, `[*/]`),
 	simplexer.NewRegexpTokenType(ADD_CHAIN, `[&~=]`),
@@ -418,6 +551,10 @@ var tokenTypes = []simplexer.TokenType{
 func NewLexer(reader io.Reader) *Lexer {
 	l := simplexer.NewLexer(reader)
 	l.TokenTypes = tokenTypes
+	// NOTE: remove "\n" from whitespace list
+	// to use it stmts separator
+	l.Whitespace = simplexer.NewPatternTokenType(
+		-1, []string{" ", "\t"})
 	return &Lexer{ lexer: l }
 }
 
@@ -427,7 +564,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	if _, ok := err.(*simplexer.UnknownTokenError); ok {
 		l.Error(l.unknownTokenErrMsg())
 	} else if err != nil {
-		l.Error(l.errMsg())
+		l.Error(l.ErrMsg())
 	}
 
 	if token == nil {
@@ -435,23 +572,36 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	}
 
 	lval.token = token
-	l.source = l.convertSourceInfo(token)
+	l.Source = l.convertSourceInfo(token)
 	return int(token.Type.GetID())
 }
 
 func (l *Lexer) unknownTokenErrMsg() string {
 	var out bytes.Buffer
-	out.WriteString("Lexer Error: unknown token was found\n")
-	out.WriteString("after " + l.source.Pos.String() + "\n")
-	out.WriteString(l.source.Line + "\n")
+	tok := l.Source.TokenLiteral
+	if tok == "\n" {
+		tok = "\\n" // for readability
+	}
+	
+	out.WriteString(fmt.Sprintf("Lexer Error: unknown token '%s'was found\n",
+		tok))
+	out.WriteString("after " + l.Source.Pos.String() + "\n")
+	out.WriteString(l.Source.Line + "\n")
+	out.WriteString(fmt.Sprintf("in rule: %s\n", l.curRule))
 	return out.String()
 }
 
-func (l *Lexer) errMsg() string {
+func (l *Lexer) ErrMsg() string {
 	var out bytes.Buffer
-	out.WriteString("Lexer Error:\n")
-	out.WriteString("after " + l.source.Pos.String() + "\n")
-	out.WriteString(l.source.Line + "\n")
+	tok := l.Source.TokenLiteral
+	if tok == "\n" {
+		tok = "\\n" // for readability
+	}
+
+	out.WriteString(fmt.Sprintf("Lexer Error in token '%s':\n", tok))
+	out.WriteString("after " + l.Source.Pos.String() + "\n")
+	out.WriteString(l.Source.Line + "\n")
+	out.WriteString(fmt.Sprintf("in rule: %s\n", l.curRule))
 	return out.String()
 }
 
@@ -468,5 +618,6 @@ func (l *Lexer) convertSourceInfo(token *simplexer.Token) *ast.Source {
 	return &ast.Source{
 		Line: l.lexer.GetLastLine(),
 		Pos: pos,
+		TokenLiteral: token.Literal,
 	}
 }

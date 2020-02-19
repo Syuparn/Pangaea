@@ -861,20 +861,16 @@ func testIntLiteral(t *testing.T, ex ast.Expr, expected int64) bool {
 }
 
 func testParse(t *testing.T, input string) *ast.Program {
-	// HACK: catch yacc error by recover
-	// (because yacc cannot return error)
-	defer func() {
-		if err := recover(); err != nil {
-			m := fmt.Sprintf("error occured while parsing\n%s", input)
-			t.Fatalf(m + "\n" + fmt.Sprintf("%+v", err))
-			t.FailNow()
-		}
-	}()
-
 	ast, err := Parse(strings.NewReader(input))
 	if err != nil {
 		t.Fatalf(err.Error())
 		t.FailNow()
 	}
+
+	if ast == nil {
+		t.Fatalf("ast not generated.")
+		t.FailNow()
+	}
+
 	return ast
 }
