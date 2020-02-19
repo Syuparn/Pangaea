@@ -219,7 +219,7 @@ func TestArgOrders(t *testing.T) {
 				len(tt.args), len(callExpr.Args))
 		}
 
-		if len(callExpr.Args) != len(tt.args) {
+		if len(callExpr.Kwargs) != len(tt.kwargs) {
 			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
 				len(tt.kwargs), len(callExpr.Kwargs))
 		}
