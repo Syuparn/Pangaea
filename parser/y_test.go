@@ -418,8 +418,106 @@ func TestFuncLiteralArgs(t *testing.T) {
 	}
 }
 
-// TODO: check exprs in body
-// TODO: check multiple stmts func
+func TestFuncLiteralBody(t *testing.T) {
+	tests := []struct {
+		input    string
+		bodyType string
+		body     interface{}
+	}{
+		{`{|| 2}`, "literal", 2},
+		{`{|a| a}`, "ident", "a"},
+		{`{|a: 1| 1+1}`, "infix", []interface{}{1, "+", 1}},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		f, ok := expr.(*ast.FuncLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.FuncLiteral. got=%T", expr)
+		}
+
+		if len(f.Body) != 1 {
+			t.Fatalf("body length is not 1. got=%d", len(f.Body))
+		}
+
+		es, ok := f.Body[0].(*ast.ExprStmt)
+		if !ok {
+			t.Fatalf("f.Body[0] is not *ast.ExprStmt. got=%T", f.Body[0])
+		}
+
+		e := es.Expr
+		switch tt.bodyType {
+		case "literal":
+			testLiteralExpr(t, e, tt.body)
+		case "ident":
+			s, _ := tt.body.(string)
+			testIdentifier(t, e, s)
+		case "infix":
+			arr, _ := tt.body.([]interface{})
+			left, _ := arr[0].(int)
+			op, _ := arr[1].(string)
+			right, _ := arr[2].(int)
+			testInfixOperator(t, e, left, op, right)
+		}
+	}
+}
+
+func TestFuncLiteralBodies(t *testing.T) {
+	input := `
+	{|a, b|
+	  2
+	  a
+	  1 + 1
+	}
+	`
+
+	tests := []struct {
+		bodyType string
+		body     interface{}
+	}{
+		{"literal", 2},
+		{"ident", "a"},
+		{"infix", []interface{}{1, "+", 1}},
+	}
+
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+
+	f, ok := expr.(*ast.FuncLiteral)
+	if !ok {
+		t.Fatalf("f is not *ast.FuncLiteral. got=%T", expr)
+	}
+
+	if len(f.Body) != len(tests) {
+		t.Fatalf("body length is not %d. got=%d",
+			len(tests), len(f.Body))
+	}
+
+	for i, tt := range tests {
+		es, ok := f.Body[i].(*ast.ExprStmt)
+		if !ok {
+			t.Fatalf("f.Body[%d] is not *ast.ExprStmt. got=%T",
+				i, f.Body[i])
+		}
+
+		e := es.Expr
+		switch tt.bodyType {
+		case "literal":
+			testLiteralExpr(t, e, tt.body)
+		case "ident":
+			s, _ := tt.body.(string)
+			testIdentifier(t, e, s)
+		case "infix":
+			arr, _ := tt.body.([]interface{})
+			left, _ := arr[0].(int)
+			op, _ := arr[1].(string)
+			right, _ := arr[2].(int)
+			testInfixOperator(t, e, left, op, right)
+		}
+	}
+}
 
 func testChainContext(t *testing.T, ce ast.CallExpr, expContext string,
 	expArg interface{}) bool {
@@ -513,7 +611,7 @@ func testIntLiteral(t *testing.T, ex ast.Expr, expected int64) bool {
 	il, ok := ex.(*ast.IntLiteral)
 
 	if !ok {
-		t.Errorf("il not *ast.IntegerLiteral. got=%T", il)
+		t.Errorf("il not *ast.IntLiteral. got=%T", ex)
 		return false
 	}
 
