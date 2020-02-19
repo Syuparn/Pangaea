@@ -284,6 +284,143 @@ func TestIntLiteralExpr(t *testing.T) {
 	}
 }
 
+func TestFuncLiteralArgs(t *testing.T) {
+	tests := []struct {
+		input   string
+		args    []string
+		kwargs  map[string]interface{}
+		printed string
+	}{
+		// NOTE: `{}` is recognized as Obj
+		{
+			`{||}`,
+			nil,
+			nil,
+			`{||}`,
+		},
+		{
+			`{|| a}`,
+			nil,
+			nil,
+			`{|| a}`,
+		},
+		{
+			`{|a| 1}`,
+			[]string{"a"},
+			nil,
+			`{|a| 1}`,
+		},
+		{
+			`{1}`,
+			[]string{},
+			nil,
+			`{|| 1}`,
+		},
+		{
+			`{|a, foo| 1}`,
+			[]string{"a", "foo"},
+			nil,
+			`{|a, foo| 1}`,
+		},
+		{
+			`{|val: 1| val}`,
+			[]string{},
+			map[string]interface{}{"val": 1},
+			`{|val: 1| val}`,
+		},
+		{
+			`{|a, val: 1| val}`,
+			[]string{"a"},
+			map[string]interface{}{"val": 1},
+			`{|a, val: 1| val}`,
+		},
+		{
+			`{|val: 1, a| val}`,
+			[]string{"a"},
+			map[string]interface{}{"val": 1},
+			`{|a, val: 1| val}`,
+		},
+		{
+			`{|a, b, c: 1, d: 2| val}`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`{|a, b, c: 1, d: 2| val}`,
+		},
+		{
+			`{|a, b, c: 1, d: 2| val}`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`{|a, b, c: 1, d: 2| val}`,
+		},
+		{
+			`{|a, b, d: 2, c: 1| val}`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`{|a, b, c: 1, d: 2| val}`,
+		},
+		{
+			`{|a, c: 1, b, d: 2| val}`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`{|a, b, c: 1, d: 2| val}`,
+		},
+		{
+			`{|d: 2, c: 1, a, b| val}`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`{|a, b, c: 1, d: 2| val}`,
+		},
+		{
+			`{|d: 2, a, c: 1, b| val}`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`{|a, b, c: 1, d: 2| val}`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		f, ok := expr.(*ast.FuncLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.FuncLiteral. got=%T", expr)
+		}
+
+		if len(f.Args) != len(tt.args) {
+			t.Fatalf("wrong arity of args, expected=%d, got=%d",
+				len(tt.args), len(f.Args))
+		}
+
+		if len(f.Kwargs) != len(tt.kwargs) {
+			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
+				len(tt.kwargs), len(f.Kwargs))
+		}
+
+		for i, expArg := range tt.args {
+			testLiteralExpr(t, f.Args[i], expArg)
+		}
+
+		for ident, val := range f.Kwargs {
+			name := ident.Token
+			exp, ok := tt.kwargs[name]
+			if ok {
+				testLiteralExpr(t, val, exp)
+			} else {
+				t.Errorf("unexpected kwarg %s found.", name)
+			}
+		}
+
+		if f.String() != tt.printed {
+			t.Errorf("wrong output.expected=\n%s,\ngot=\n%s",
+				tt.printed, f.String())
+		}
+	}
+}
+
+// TODO: check exprs in body
+// TODO: check multiple stmts func
+
 func testChainContext(t *testing.T, ce ast.CallExpr, expContext string,
 	expArg interface{}) bool {
 	if ce.ChainToken() != expContext {
