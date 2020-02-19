@@ -65,6 +65,212 @@ func TestInfixPrecedence(t *testing.T) {
 	}
 }
 
+func TestCallArgBreakLines(t *testing.T) {
+	tests := []struct {
+		input  string
+		args   []int
+		kwargs map[string]int
+	}{
+		{
+			`a.b(1, b: 2, 3)`,
+			[]int{1, 3},
+			map[string]int{"b": 2},
+		},
+		{
+			`a.b(
+			  1, b: 2, 3)`,
+			[]int{1, 3},
+			map[string]int{"b": 2},
+		},
+		{
+			`a.b(1,
+				b: 2, 3)`,
+			[]int{1, 3},
+			map[string]int{"b": 2},
+		},
+		{
+			`a.b(1, b: 2,
+				3)`,
+			[]int{1, 3},
+			map[string]int{"b": 2},
+		},
+		{
+			`a.b(
+				1,
+				b: 2,
+				3
+			)`,
+			[]int{1, 3},
+			map[string]int{"b": 2},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		f, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("f is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		if len(f.Args) != len(tt.args) {
+			t.Fatalf("arity of args is not %d. got=%d",
+				len(tt.args), len(f.Args))
+		}
+
+		if len(f.Kwargs) != len(tt.kwargs) {
+			t.Fatalf("arity of kwargs is not %d. got=%d",
+				len(tt.kwargs), len(f.Kwargs))
+		}
+
+		for i, expArg := range tt.args {
+			testLiteralExpr(t, f.Args[i], expArg)
+		}
+
+		for ident, val := range f.Kwargs {
+			name := ident.Token
+			exp, ok := tt.kwargs[name]
+			if ok {
+				testLiteralExpr(t, val, exp)
+			} else {
+				t.Errorf("unexpected kwarg %s found.", name)
+			}
+		}
+	}
+}
+
+func TestFuncArgBreakLines(t *testing.T) {
+	tests := []struct {
+		input  string
+		args   []string
+		kwargs map[string]int64
+	}{
+		{
+			`{|a, b: 2, c|}`,
+			[]string{"a", "c"},
+			map[string]int64{"b": 2},
+		},
+		{
+			`{|a,
+			   b: 2, c|}`,
+			[]string{"a", "c"},
+			map[string]int64{"b": 2},
+		},
+		{
+			`{
+				|a, b: 2,
+				 c|}`,
+			[]string{"a", "c"},
+			map[string]int64{"b": 2},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		f, ok := expr.(*ast.FuncLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.FuncLiteral. got=%T", expr)
+		}
+
+		if len(f.Args) != len(tt.args) {
+			t.Fatalf("arity of args is not %d. got=%d",
+				len(tt.args), len(f.Args))
+		}
+
+		if len(f.Kwargs) != len(tt.kwargs) {
+			t.Fatalf("arity of kwargs is not %d. got=%d",
+				len(tt.kwargs), len(f.Kwargs))
+		}
+
+		for i, expArg := range tt.args {
+			testIdentifier(t, f.Args[i], expArg)
+		}
+
+		for ident, val := range f.Kwargs {
+			name := ident.Token
+			exp, ok := tt.kwargs[name]
+			if ok {
+				testLiteralExpr(t, val, exp)
+			} else {
+				t.Errorf("unexpected kwarg %s found.", name)
+			}
+		}
+
+	}
+}
+
+func TestFuncBodyBreakLines(t *testing.T) {
+	tests := []struct {
+		input  string
+		bodies []int64
+	}{
+		{
+			`{|a| 1;2}`,
+			[]int64{1, 2},
+		},
+		{
+			`{|a| 1
+			2}`,
+			[]int64{1, 2},
+		},
+		{
+			`{|a|
+			   1
+			   2
+			 }`,
+			[]int64{1, 2},
+		},
+		{
+			`{1;2}`,
+			[]int64{1, 2},
+		},
+		{
+			`{1
+			2}`,
+			[]int64{1, 2},
+		},
+		{
+			`{
+			   1
+			   2
+			 }`,
+			[]int64{1, 2},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		f, ok := expr.(*ast.FuncLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.FuncLiteral. got=%T", expr)
+		}
+
+		if len(f.Body) != len(tt.bodies) {
+			t.Fatalf("body length is not 1. got=%d", len(f.Body))
+		}
+
+		for i, b := range f.Body {
+			es, ok := b.(*ast.ExprStmt)
+			if !ok {
+				t.Fatalf("f.Body[%d] is not *ast.ExprStmt. got=%T",
+					i, f.Body[0])
+			}
+			lit, ok := es.Expr.(*ast.IntLiteral)
+			if !ok {
+				t.Fatalf("f.Body[%d] does not have *ast.IntLiteral. got=%T",
+					i, es.Expr)
+			}
+
+			testIntLiteral(t, lit, tt.bodies[i])
+		}
+	}
+}
+
 func TestPropCall(t *testing.T) {
 	tests := []struct {
 		input        string
