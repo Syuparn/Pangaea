@@ -204,7 +204,6 @@ func TestArgOrders(t *testing.T) {
 		},
 	}
 
-	// TODO: inplement test
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
 		expr := testIfExprStmt(t, program)
@@ -258,10 +257,36 @@ func TestCallWithArgs(t *testing.T) {
 		{`5.hi(6)`, 5, "hi", []interface{}{6}},
 		{`5@hi(6)`, 5, "hi", []interface{}{6}},
 		{`5$hi(6)`, 5, "hi", []interface{}{6}},
+		{`5&.hi(6)`, 5, "hi", []interface{}{6}},
+		{`5&@hi(6)`, 5, "hi", []interface{}{6}},
+		{`5&$hi(6)`, 5, "hi", []interface{}{6}},
+		{`5~.hi(6)`, 5, "hi", []interface{}{6}},
+		{`5~@hi(6)`, 5, "hi", []interface{}{6}},
+		{`5~$hi(6)`, 5, "hi", []interface{}{6}},
+		{`5=.hi(6)`, 5, "hi", []interface{}{6}},
+		{`5=@hi(6)`, 5, "hi", []interface{}{6}},
+		{`5=$hi(6)`, 5, "hi", []interface{}{6}},
 	}
 
 	// TODO: inplement test
-	_ = tests
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		if len(callExpr.Args) != len(tt.args) {
+			t.Fatalf("wrong arity of args, expected=%d, got=%d",
+				len(tt.args), len(callExpr.Args))
+		}
+
+		for i, expArg := range tt.args {
+			testLiteralExpr(t, callExpr.Args[i], expArg)
+		}
+	}
 }
 
 func TestIntLiteralExpr(t *testing.T) {
