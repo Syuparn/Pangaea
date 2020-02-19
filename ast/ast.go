@@ -256,6 +256,48 @@ func (ie *InfixExpr) String() string {
 	return out.String()
 }
 
+type FuncLiteral struct {
+	Token  string
+	Args   []*Ident
+	Kwargs map[*Ident]Expr
+	Body   []Stmt
+	Src    *Source
+}
+
+func (fl *FuncLiteral) isExpr()              {}
+func (fl *FuncLiteral) TokenLiteral() string { return fl.Token }
+func (fl *FuncLiteral) Source() *Source      { return fl.Src }
+func (fl *FuncLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("{")
+
+	args := []string{}
+	for _, a := range fl.Args {
+		args = append(args, a.String())
+	}
+	args = append(args, sortedPairStrings(fl.Kwargs)...)
+
+	out.WriteString("|" + strings.Join(args, ", ") + "|")
+
+	bodies := []string{}
+	for _, stmt := range fl.Body {
+		bodies = append(bodies, stmt.String())
+	}
+
+	switch len(bodies) {
+	case 0:
+		// nothing
+	case 1:
+		out.WriteString(bodies[0])
+	default:
+		out.WriteString("\n" + strings.Join(bodies, "\n") + "\n")
+	}
+
+	out.WriteString("}")
+
+	return out.String()
+}
+
 type IntLiteral struct {
 	Token string
 	Value int64

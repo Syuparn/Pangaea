@@ -294,32 +294,32 @@ func TestFuncLiteralArgs(t *testing.T) {
 		// NOTE: `{}` is recognized as Obj
 		{
 			`{||}`,
-			nil,
-			nil,
+			[]string{},
+			map[string]interface{}{},
 			`{||}`,
 		},
 		{
 			`{|| a}`,
-			nil,
-			nil,
+			[]string{},
+			map[string]interface{}{},
 			`{|| a}`,
 		},
 		{
 			`{|a| 1}`,
 			[]string{"a"},
-			nil,
+			map[string]interface{}{},
 			`{|a| 1}`,
 		},
 		{
 			`{1}`,
 			[]string{},
-			nil,
+			map[string]interface{}{},
 			`{|| 1}`,
 		},
 		{
 			`{|a, foo| 1}`,
 			[]string{"a", "foo"},
-			nil,
+			map[string]interface{}{},
 			`{|a, foo| 1}`,
 		},
 		{
