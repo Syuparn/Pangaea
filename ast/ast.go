@@ -193,6 +193,35 @@ func sortedPairStrings(pairs map[*Ident]Expr) []string {
 	return sortedStrings
 }
 
+func IdentToParamList(i *Ident) *ParamList {
+	return &ParamList{
+		Args:   []*Ident{i},
+		Kwargs: map[*Ident]Expr{},
+	}
+}
+
+func PairToParamList(pair *Pair) *ParamList {
+	return &ParamList{
+		Args:   []*Ident{},
+		Kwargs: map[*Ident]Expr{pair.Key: pair.Val},
+	}
+}
+
+type ParamList struct {
+	Args   []*Ident
+	Kwargs map[*Ident]Expr
+}
+
+func (pl *ParamList) AppendArg(arg *Ident) *ParamList {
+	pl.Args = append(pl.Args, arg)
+	return pl
+}
+
+func (pl *ParamList) AppendKwarg(key *Ident, arg Expr) *ParamList {
+	pl.Kwargs[key] = arg
+	return pl
+}
+
 func ExprToArgList(e Expr) *ArgList {
 	return &ArgList{
 		Args:   []Expr{e},
@@ -277,7 +306,7 @@ func (fl *FuncLiteral) String() string {
 	}
 	args = append(args, sortedPairStrings(fl.Kwargs)...)
 
-	out.WriteString("|" + strings.Join(args, ", ") + "|")
+	out.WriteString("|" + strings.Join(args, ", ") + "| ")
 
 	bodies := []string{}
 	for _, stmt := range fl.Body {

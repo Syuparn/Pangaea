@@ -22,6 +22,7 @@ import (
 	ident *ast.Ident
 	expr  ast.Expr
 	argList *ast.ArgList
+	paramList *ast.ParamList
 	pair *ast.Pair
 	stmt  ast.Stmt
 	stmts []ast.Stmt
@@ -31,9 +32,10 @@ import (
 %type<program> program
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
-%type<expr> expr literal infixExpr callExpr
+%type<expr> expr literal infixExpr callExpr funcLiteral
 %type<pair> pair
 %type<argList> argList
+%type<paramList> paramList
 %type<ident> ident
 %type<chain> chain
 %type<token> opMethod
@@ -41,7 +43,7 @@ import (
 %token<token> PREC1_OPERATOR PREC2_OPERATOR
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
-%token<token> LPAREN RPAREN COMMA COLON
+%token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT
 %left PREC1_OPERATOR
 %left PREC2_OPERATOR
 %left ADD_CHAIN MAIN_CHAIN
@@ -128,6 +130,10 @@ literal
 			Src: yylex.(*Lexer).source,
 		}
 	}
+	| funcLiteral
+	{
+		$$ = $1
+	}
 
 infixExpr
 	: expr PREC2_OPERATOR expr
@@ -147,6 +153,58 @@ infixExpr
 			Left: $1,
 			Operator: $2.Literal,
 			Right: $3,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+
+funcLiteral
+	: LBRACE VERT VERT RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: []*ast.Ident{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: []ast.Stmt{},
+			Src: yylex.(*Lexer).source,
+		}
+	}
+	| LBRACE stmts RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: []*ast.Ident{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: $2,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+	| LBRACE VERT VERT stmts RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: []*ast.Ident{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: $4,
+			Src: yylex.(*Lexer).source,
+		}
+	}
+	| LBRACE VERT paramList VERT RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: $3.Args,
+			Kwargs: $3.Kwargs,
+			Body: []ast.Stmt{},
+			Src: yylex.(*Lexer).source,
+		}
+	}
+	| LBRACE VERT paramList VERT stmts RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: $3.Args,
+			Kwargs: $3.Kwargs,
+			Body: $5,
 			Src: yylex.(*Lexer).source,
 		}
 	}
@@ -290,6 +348,24 @@ argList
 		$$ = ast.PairToArgList($1)
 	}
 
+paramList
+	: paramList COMMA ident
+	{
+		$$ = $1.AppendArg($3)
+	}
+	| paramList COMMA pair
+	{
+		$$ = $1.AppendKwarg($3.Key, $3.Val)
+	}
+	| ident
+	{
+		$$ = ast.IdentToParamList($1)
+	}
+	| pair
+	{
+		$$ = ast.PairToParamList($1)
+	}
+
 pair
 	: ident COLON expr
 	{
@@ -326,6 +402,9 @@ var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(INT, `[0-9]+(\.[0-9]+)?`),
 	simplexer.NewRegexpTokenType(LPAREN, `\(`),
 	simplexer.NewRegexpTokenType(RPAREN, `\)`),
+	simplexer.NewRegexpTokenType(VERT, `\|`),
+	simplexer.NewRegexpTokenType(LBRACE, `\{`),
+	simplexer.NewRegexpTokenType(RBRACE, `\}`),
 	simplexer.NewRegexpTokenType(COMMA, `,`),
 	simplexer.NewRegexpTokenType(COLON, `:`),
 	simplexer.NewRegexpTokenType(PREC1_OPERATOR, `[-+]`),

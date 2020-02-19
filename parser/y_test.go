@@ -296,7 +296,7 @@ func TestFuncLiteralArgs(t *testing.T) {
 			`{||}`,
 			[]string{},
 			map[string]interface{}{},
-			`{||}`,
+			`{|| }`,
 		},
 		{
 			`{|| a}`,
@@ -398,7 +398,7 @@ func TestFuncLiteralArgs(t *testing.T) {
 		}
 
 		for i, expArg := range tt.args {
-			testLiteralExpr(t, f.Args[i], expArg)
+			testIdentifier(t, f.Args[i], expArg)
 		}
 
 		for ident, val := range f.Kwargs {
