@@ -177,7 +177,18 @@ literal
 	}
 
 infixExpr
-	: expr STAR expr
+	: expr DOUBLE_STAR expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr DOUBLE_STAR expr"
+	}
+	| expr STAR expr
 	{
 		$$ = &ast.InfixExpr{
 			Token: $2.Literal,
