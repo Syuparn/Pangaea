@@ -188,6 +188,45 @@ func TestArrLiteral(t *testing.T) {
 	}
 }
 
+func TestNestedArrLiteral(t *testing.T) {
+	input := `[1, *foo, [2, 3]]`
+
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+
+	a, ok := expr.(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("a is not *ast.ArrLiteral. got=%T", expr)
+	}
+
+	if len(a.Elems) != 3 {
+		t.Fatalf("number of elements is not 6. got=%d", len(a.Elems))
+	}
+
+	testLiteralExpr(t, a.Elems[0], 1)
+
+	elem1, ok := a.Elems[1].(*ast.PrefixExpr)
+
+	if !ok {
+		t.Fatalf("a.Elems[1] is not *ast.PrefixExpr. got=%T", a.Elems[1])
+	}
+
+	if elem1.Operator != "*" {
+		t.Errorf("a.Elems[1] does not have `*`. got=%s", elem1.Operator)
+	}
+
+	testIdentifier(t, elem1.Right, "foo")
+
+	elem2, ok := a.Elems[2].(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("a.Elems[2] is not *ast.ArrLiteral. got=%T", a.Elems[2])
+	}
+
+	testLiteralExpr(t, elem2.Elems[0], 2)
+	testLiteralExpr(t, elem2.Elems[1], 3)
+
+}
+
 func TestCallArgBreakLines(t *testing.T) {
 	tests := []struct {
 		input  string
