@@ -33,7 +33,7 @@ import (
 %type<program> program
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
-%type<expr> expr literal infixExpr callExpr funcLiteral arrLiteral
+%type<expr> expr literal infixExpr prefixExpr callExpr funcLiteral arrLiteral
 %type<pair> pair
 %type<argList> argList callArgs
 %type<paramList> paramList funcParams
@@ -44,14 +44,16 @@ import (
 %type<token> lBrace lParen lBracket comma
 
 %token<token> INT
-%token<token> PREC1_OPERATOR PREC2_OPERATOR
+%token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET
 %token<token> RET SEMICOLON
-%left PREC1_OPERATOR
-%left PREC2_OPERATOR
+%left PLUS MINUS
+%left STAR SLASH
+%left DOUBLE_STAR
 %left ADD_CHAIN MAIN_CHAIN
+%left UNARY_OP
 
 %% 
 
@@ -114,6 +116,11 @@ expr
 		$$ = $1
 		yylex.(*Lexer).curRule = "expr -> infixExpr"
 	}
+	| prefixExpr
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> prefixExpr"
+	}
 	| callExpr
 	{
 		$$ = $1
@@ -170,7 +177,7 @@ literal
 	}
 
 infixExpr
-	: expr PREC2_OPERATOR expr
+	: expr STAR expr
 	{
 		$$ = &ast.InfixExpr{
 			Token: $2.Literal,
@@ -179,9 +186,9 @@ infixExpr
 			Right: $3,
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "infixExpr -> expr PREC2_OPERATOR expr"
+		yylex.(*Lexer).curRule = "infixExpr -> expr STAR expr"
 	}
-	| expr PREC1_OPERATOR expr
+	| expr SLASH expr
 	{
 		$$ = &ast.InfixExpr{
 			Token: $2.Literal,
@@ -190,7 +197,81 @@ infixExpr
 			Right: $3,
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "infixExpr -> expr PREC1_OPERATOR expr"
+		yylex.(*Lexer).curRule = "infixExpr -> expr SLASH expr"
+	}
+	| expr PLUS expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr PLUS expr"
+	}
+	| expr MINUS expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr MINUS expr"
+	}
+
+prefixExpr
+	: PLUS expr %prec UNARY_OP
+	{
+		$$ = &ast.PrefixExpr{
+			Token: $1.Literal,
+			Operator: $1.Literal,
+			Right: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "prefixExpr -> PLUS expr"
+	}
+	| MINUS expr %prec UNARY_OP
+	{
+		$$ = &ast.PrefixExpr{
+			Token: $1.Literal,
+			Operator: $1.Literal,
+			Right: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "prefixExpr -> MINUS expr"
+	}
+	| STAR expr %prec UNARY_OP
+	{
+		$$ = &ast.PrefixExpr{
+			Token: $1.Literal,
+			Operator: $1.Literal,
+			Right: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "prefixExpr -> STAR expr"
+	}
+	| DOUBLE_STAR expr %prec UNARY_OP
+	{
+		$$ = &ast.PrefixExpr{
+			Token: $1.Literal,
+			Operator: $1.Literal,
+			Right: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "prefixExpr -> DOUBLE_STAR expr"
+	}
+	| BANG expr %prec UNARY_OP
+	{
+		$$ = &ast.PrefixExpr{
+			Token: $1.Literal,
+			Operator: $1.Literal,
+			Right: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "prefixExpr -> BANG expr"
 	}
 
 arrLiteral
@@ -375,15 +456,25 @@ callArgs
 	}
 
 opMethod
-	: PREC1_OPERATOR
+	: PLUS
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "opMethod -> PREC1_OPERATOR"
+		yylex.(*Lexer).curRule = "opMethod -> PLUS"
 	}
-	| PREC2_OPERATOR
+	| MINUS
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "opMethod -> PREC2_OPERATOR"
+		yylex.(*Lexer).curRule = "opMethod -> MINUS"
+	}
+	| STAR
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> STAR"
+	}
+	| SLASH
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> SLASH"
 	}
 
 chain
@@ -595,8 +686,12 @@ var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(COMMA, `,`),
 	simplexer.NewRegexpTokenType(COLON, `:`),
 	simplexer.NewRegexpTokenType(SEMICOLON, `;`),
-	simplexer.NewRegexpTokenType(PREC1_OPERATOR, `[-+]`),
-	simplexer.NewRegexpTokenType(PREC2_OPERATOR, `[*/]`),
+	simplexer.NewRegexpTokenType(BANG, `!`),
+	simplexer.NewRegexpTokenType(DOUBLE_STAR, `\*\*`),
+	simplexer.NewRegexpTokenType(PLUS, `\+`),
+	simplexer.NewRegexpTokenType(MINUS, `\-`),
+	simplexer.NewRegexpTokenType(STAR, `\*`),
+	simplexer.NewRegexpTokenType(SLASH, `/`),
 	simplexer.NewRegexpTokenType(ADD_CHAIN, `[&~=]`),
 	simplexer.NewRegexpTokenType(MAIN_CHAIN, `[\.@$]`),
 	simplexer.NewRegexpTokenType(IDENT, `[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
