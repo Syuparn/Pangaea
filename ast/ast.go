@@ -263,6 +263,26 @@ func (al *ArgList) AppendKwarg(key *Ident, arg Expr) *ArgList {
 	return al
 }
 
+type PrefixExpr struct {
+	Token    string
+	Operator string
+	Right    Expr
+	Src      *Source
+}
+
+func (pe *PrefixExpr) isExpr()              {}
+func (pe *PrefixExpr) TokenLiteral() string { return pe.Token }
+func (pe *PrefixExpr) Source() *Source      { return pe.Src }
+func (pe *PrefixExpr) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(pe.Operator + " ")
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
 type InfixExpr struct {
 	Token    string // i.e.: "+"
 	Left     Expr

@@ -65,6 +65,26 @@ func TestInfixPrecedence(t *testing.T) {
 	}
 }
 
+func TestPrefixExpression(t *testing.T) {
+	tests := []struct {
+		input string
+		op    string
+		right interface{}
+	}{
+		{`+5`, "+", 5},
+		{`-10`, "-", 10},
+		{`!1`, "!", 1},
+		{`*1`, "*", 1},       // arr expansion
+		{`**100`, "**", 100}, // obj expansion
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		testPrefixOperator(t, expr, tt.op, tt.right)
+	}
+}
+
 func TestArrLiteral(t *testing.T) {
 	tests := []struct {
 		input string
@@ -814,8 +834,23 @@ func testIdentifier(t *testing.T, expr ast.Expr, expected string) bool {
 	return true
 }
 
+func testPrefixOperator(t *testing.T, expr ast.Expr,
+	op string, right interface{}) {
+	prefixExpr, ok := expr.(*ast.PrefixExpr)
+
+	if !ok {
+		t.Fatalf("expr is not ast.PrefixExpr. got=%T", expr)
+	}
+
+	testLiteralExpr(t, prefixExpr.Right, right)
+
+	if prefixExpr.Operator != op {
+		t.Errorf("operator is not '%s'. got=%s", op, prefixExpr.Operator)
+	}
+}
+
 func testInfixOperator(t *testing.T, expr ast.Expr,
-	left int, op string, right int) {
+	left interface{}, op string, right interface{}) {
 	infixExpr, ok := expr.(*ast.InfixExpr)
 
 	if !ok {
