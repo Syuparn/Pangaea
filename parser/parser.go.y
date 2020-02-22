@@ -465,6 +465,16 @@ callArgs
 		$$ = $2
 		yylex.(*Lexer).curRule = "callArgs -> lParen argList RET RPAREN"
 	}
+	| callArgs funcLiteral
+	{
+		$$ = $1.AppendArg($2)
+		yylex.(*Lexer).curRule = "callArgs -> callArgs funcLiteral"
+	}
+	| funcLiteral
+	{
+		$$ = ast.ExprToArgList($1)
+		yylex.(*Lexer).curRule = "callArgs -> funcLiteral"
+	}
 
 opMethod
 	: PLUS

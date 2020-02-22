@@ -116,6 +116,48 @@ func TestPrefixPrecedence(t *testing.T) {
 	}
 }
 
+func TestChainPrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`-3.even?`,
+			`(-3).even?()`,
+		},
+		{
+			`2.p ** 3.q`,
+			`(2.p() ** 3.q())`,
+		},
+		{
+			`10.find {|a| a+b}.sum`,
+			`10.find({|a| (a + b)}).sum()`,
+		},
+		{
+			`10.find(1) {|a| a+b}.sum`,
+			`10.find(1, {|a| (a + b)}).sum()`,
+		},
+		{
+			`10.find(1, 2) {|a| a+b}.sum`,
+			`10.find(1, 2, {|a| (a + b)}).sum()`,
+		},
+		{
+			`10.find(1, 2) {|a| a+b} {|c| c+d}.sum`,
+			`10.find(1, 2, {|a| (a + b)}, {|c| (c + d)}).sum()`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		actual := expr.String()
+		if actual != tt.expected {
+			t.Errorf("wrong precedence. expected=%s, got=%s",
+				tt.expected, actual)
+		}
+	}
+}
+
 func TestArrLiteral(t *testing.T) {
 	tests := []struct {
 		input string
