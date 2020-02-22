@@ -276,8 +276,7 @@ func (pe *PrefixExpr) Source() *Source      { return pe.Src }
 func (pe *PrefixExpr) String() string {
 	var out bytes.Buffer
 	out.WriteString("(")
-	out.WriteString(pe.Operator + " ")
-	out.WriteString(pe.Right.String())
+	out.WriteString(pe.Operator + pe.Right.String())
 	out.WriteString(")")
 
 	return out.String()

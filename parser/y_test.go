@@ -90,6 +90,32 @@ func TestPrefixExpression(t *testing.T) {
 	}
 }
 
+func TestPrefixPrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`-3+1`, `((-3) + 1)`},
+		{`!3-1`, `((!3) - 1)`},
+		{`-3*1`, `((-3) * 1)`},
+		{`-3**1`, `((-3) ** 1)`},
+		{`--1`, `(-(-1))`},
+		{`+-1`, `(+(-1))`},
+		{`-1+-1`, `((-1) + (-1))`},
+		{`-1---1`, `((-1) - (-(-1)))`},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		actual := expr.String()
+		if actual != tt.expected {
+			t.Errorf("wrong precedence. expected=%s, got=%s",
+				tt.expected, actual)
+		}
+	}
+}
+
 func TestArrLiteral(t *testing.T) {
 	tests := []struct {
 		input string
