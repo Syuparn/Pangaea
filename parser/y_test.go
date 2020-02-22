@@ -65,6 +65,36 @@ func TestInfixPrecedence(t *testing.T) {
 	}
 }
 
+func TestArrLiteral(t *testing.T) {
+	tests := []struct {
+		input string
+		vals  []interface{}
+	}{
+		{`[]`, []interface{}{}},
+		{`[1]`, []interface{}{1}},
+		{`[1, 2, 3]`, []interface{}{1, 2, 3}},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		a, ok := expr.(*ast.ArrLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.ArrLiteral. got=%T", expr)
+		}
+
+		if len(a.Elems) != len(tt.vals) {
+			t.Fatalf("number of elements is not %d. got=%d",
+				len(tt.vals), len(a.Elems))
+		}
+
+		for i, elem := range a.Elems {
+			testLiteralExpr(t, elem, tt.vals[i])
+		}
+	}
+}
+
 func TestCallArgBreakLines(t *testing.T) {
 	tests := []struct {
 		input  string

@@ -327,6 +327,25 @@ func (fl *FuncLiteral) String() string {
 	return out.String()
 }
 
+type ArrLiteral struct {
+	Token string
+	Elems []Expr
+	Src   *Source
+}
+
+func (al *ArrLiteral) isExpr()              {}
+func (al *ArrLiteral) TokenLiteral() string { return al.Token }
+func (al *ArrLiteral) Source() *Source      { return al.Src }
+func (al *ArrLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("[")
+	for _, elem := range al.Elems {
+		out.WriteString(elem.String() + ", ")
+	}
+	out.WriteString("]")
+	return out.String()
+}
+
 type IntLiteral struct {
 	Token string
 	Value int64

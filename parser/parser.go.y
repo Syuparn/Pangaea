@@ -23,6 +23,7 @@ import (
 	expr  ast.Expr
 	argList *ast.ArgList
 	paramList *ast.ParamList
+	exprList []ast.Expr
 	pair *ast.Pair
 	stmt  ast.Stmt
 	stmts []ast.Stmt
@@ -32,20 +33,21 @@ import (
 %type<program> program
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
-%type<expr> expr literal infixExpr callExpr funcLiteral
+%type<expr> expr literal infixExpr callExpr funcLiteral arrLiteral
 %type<pair> pair
 %type<argList> argList callArgs
 %type<paramList> paramList funcParams
+%type<exprList> exprList
 %type<ident> ident
 %type<chain> chain
 %type<token> opMethod breakLine
-%type<token> lBrace lParen comma
+%type<token> lBrace lParen lBracket comma
 
 %token<token> INT
 %token<token> PREC1_OPERATOR PREC2_OPERATOR
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
-%token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT
+%token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET
 %token<token> RET SEMICOLON
 %left PREC1_OPERATOR
 %left PREC2_OPERATOR
@@ -161,6 +163,11 @@ literal
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> funcLiteral"
 	}
+	| arrLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> arrLiteral"
+	}
 
 infixExpr
 	: expr PREC2_OPERATOR expr
@@ -184,6 +191,28 @@ infixExpr
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "infixExpr -> expr PREC1_OPERATOR expr"
+	}
+
+arrLiteral
+	: lBracket RBRACKET
+	{
+		$$ = &ast.ArrLiteral{
+			Token: $1.Literal,
+			Elems: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+
+		}
+		yylex.(*Lexer).curRule = "arrLiteral -> lBracket RBRACKET"
+	}
+	| lBracket exprList RBRACKET
+	{
+		$$ = &ast.ArrLiteral{
+			Token: $1.Literal,
+			Elems: $2,
+			Src: yylex.(*Lexer).Source,
+
+		}
+		yylex.(*Lexer).curRule = "arrLiteral -> lBracket exprList RBRACKET"
 	}
 
 funcLiteral
@@ -379,6 +408,18 @@ chain
 		yylex.(*Lexer).curRule = "chain -> ADD_CHAIN MAIN_CHAIN lParen expr RPAREN"
 	}
 
+exprList
+	: exprList comma expr
+	{
+		$$ = append($1, $3)
+		yylex.(*Lexer).curRule = "exprList -> exprList comma expr"
+	}
+	| expr
+	{
+		$$ = []ast.Expr{$1}
+		yylex.(*Lexer).curRule = "exprList -> expr"
+	}
+
 argList
 	: argList comma expr
 	{
@@ -452,6 +493,18 @@ lParen
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "lParen -> LPAREN RET"
+	}
+
+lBracket
+	: LBRACKET
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "lBracket -> LBRACKET"
+	}
+	| LBRACKET RET
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "lBracket -> LBRACKET RET"
 	}
 
 breakLine
@@ -537,6 +590,8 @@ var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(VERT, `\|`),
 	simplexer.NewRegexpTokenType(LBRACE, `\{`),
 	simplexer.NewRegexpTokenType(RBRACE, `\}`),
+	simplexer.NewRegexpTokenType(LBRACKET, `\[`),
+	simplexer.NewRegexpTokenType(RBRACKET, `\]`),
 	simplexer.NewRegexpTokenType(COMMA, `,`),
 	simplexer.NewRegexpTokenType(COLON, `:`),
 	simplexer.NewRegexpTokenType(SEMICOLON, `;`),
