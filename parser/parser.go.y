@@ -53,7 +53,8 @@ import (
 %token<token> INT SYMBOL
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
 %token<token> SPACESHIP EQ NEQ LT LE GT GE
-%token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT AND OR
+%token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT
+%token<token> AND OR IADD ISUB
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET
@@ -829,6 +830,101 @@ opMethod
 		$$ = $1
 		yylex.(*Lexer).curRule = "opMethod -> SLASH"
 	}
+	| DOUBLE_SLASH
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> DOUBLE_SLASH"
+	}
+	| PERCENT
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> PERCENT"
+	}
+	| DOUBLE_STAR
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> DOUBLE_STAR"
+	}
+	| SPACESHIP
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> SPACESHIP"
+	}
+	| EQ
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> EQ"
+	}
+	| NEQ
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> NEQ"
+	}
+	| GE
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> GE"
+	}
+	| LE
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> LE"
+	}
+	| GT
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> GT"
+	}
+	| LT
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> LT"
+	}
+	| BIT_LSHIFT
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> BIT_LSHIFT"
+	}
+	| BIT_RSHIFT
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> BIT_RSHIFT"
+	}
+	| BIT_AND
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> BIT_AND"
+	}
+	| BIT_OR
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> BIT_OR"
+	}
+	| BIT_XOR
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> BIT_XOR"
+	}
+	| BIT_NOT
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> BIT_NOT"
+	}
+	| BANG
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> BANG"
+	}
+	| IADD
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> IADD"
+	}
+	| ISUB
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "opMethod -> ISUB"
+	}
 
 chain
 	: ADD_CHAIN MAIN_CHAIN
@@ -1128,6 +1224,8 @@ func tokenTypes() []simplexer.TokenType{
 		t(BIT_OR, methodOps["bitOr"]),
 		t(BIT_XOR, methodOps["bitXor"]),
 		t(BIT_NOT, methodOps["bitNot"]),
+		t(IADD, methodOps["iAdd"]),
+		t(ISUB, methodOps["iSub"]),
 		t(LPAREN, `\(`),
 		t(RPAREN, `\)`),
 		t(VERT, `\|`),
