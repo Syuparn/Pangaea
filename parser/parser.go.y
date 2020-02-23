@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -999,6 +1000,7 @@ func tokenTypes() []simplexer.TokenType{
 		"plus": `\+`,
 		"minus": `\-`,
 		"star": `\*`,
+		"doubleStar": `\*\*`,
 		"slash": `/`,
 		// NOTE: Do not use backquote! (otherwise commented out)
 		"doubleSlash": "//",
@@ -1014,9 +1016,19 @@ func tokenTypes() []simplexer.TokenType{
 		methodOpTokens = append(methodOpTokens, op)
 	}
 
+	// sort by each token length (the longer, the earlier)
+	sort.Slice(methodOpTokens, func(i, j int) bool {
+		return len(methodOpTokens[i]) > len(methodOpTokens[j])
+	})
+	// NOTE: order is important!
+	// in regex group with pipes, first match is selected (not the longest one!)
+	// Therefore, a long token is never matched if there is a substring token
+	// for that reason, sort methodOpTokens by token length
+	// (e.g. : `'>>` should be tokenized [`'>>`], not [`'>`, `>`])
+
 	// ident or private_ident or methodOps
-	symbolable := fmt.Sprintf(`(_*%s|(%s))`,
-		ident, strings.Join(methodOpTokens, "|"))
+	symbolable := fmt.Sprintf(`(%s|_+(%s)?|(%s))`,
+		ident, ident, strings.Join(methodOpTokens, "|"))
 
 	t := simplexer.NewRegexpTokenType
 
@@ -1026,8 +1038,9 @@ func tokenTypes() []simplexer.TokenType{
 	return []simplexer.TokenType{
 		t(INT, `[0-9]+(\.[0-9]+)?`),
 		t(RET, `(\r|\n|\r\n)+`),
+		t(SYMBOL, "'"+symbolable),
 		t(SPACESHIP, methodOps["spaceship"]),
-		t(DOUBLE_STAR, `\*\*`),
+		t(DOUBLE_STAR, methodOps["doubleStar"]),
 		t(DOUBLE_SLASH, methodOps["doubleSlash"]),
 		t(BIT_LSHIFT, methodOps["bitLShift"]),
 		t(BIT_RSHIFT, methodOps["bitRShift"]),
@@ -1063,7 +1076,6 @@ func tokenTypes() []simplexer.TokenType{
 		t(MAIN_CHAIN, `[\.@$]`),
 		t(IDENT, ident),
 		t(PRIVATE_IDENT, fmt.Sprintf(`_+(%s)?`, ident)),
-		t(SYMBOL, "'"+symbolable),
 	}
 }
 
