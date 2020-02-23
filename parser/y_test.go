@@ -379,6 +379,67 @@ func TestObjLiteral(t *testing.T) {
 	}
 }
 
+func TestObjString(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`{}`,
+			`{}`,
+		},
+		{
+			`{'a:1,'b:2}`,
+			`{'a: 1, 'b: 2}`,
+		},
+		{
+			`{'a:1,b:2}`,
+			`{'a: 1, b: 2}`,
+		},
+		{
+			`{'a: 1, 'b: 2,}`,
+			`{'a: 1, 'b: 2}`,
+		},
+		{
+			`{
+				'a: 1,
+				'b: 2,
+			}`,
+			`{'a: 1, 'b: 2}`,
+		},
+		{
+			`{'a:1,**foo,**bar}`,
+			`{'a: 1, **foo, **bar}`,
+		},
+		{
+			`{'a: 1, **foo,}`,
+			`{'a: 1, **foo}`,
+		},
+		{
+			`{
+				'a: 1,
+				**foo,
+				**bar,
+			}`,
+			`{'a: 1, **foo, **bar}`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		obj, ok := expr.(*ast.ObjLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", obj)
+		}
+
+		if obj.String() != tt.expected {
+			t.Errorf("wrong string. expected=`\n%s\n`, got=`\n%s\n`",
+				tt.expected, obj.String())
+		}
+	}
+}
+
 func TestObjBreaklines(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -608,6 +669,56 @@ func TestArrLiteral(t *testing.T) {
 
 		for i, elem := range a.Elems {
 			testLiteralExpr(t, elem, tt.vals[i])
+		}
+	}
+}
+
+func TestArrString(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`[1,2,3]`,
+			`[1, 2, 3]`,
+		},
+		{
+			`[]`,
+			`[]`,
+		},
+		{
+			`[1,]`,
+			`[1]`,
+		},
+		{
+			`[1,2,]`,
+			`[1, 2]`,
+		},
+		{
+			`[
+				1,
+				2,
+			]`,
+			`[1, 2]`,
+		},
+		{
+			`[1, *a,]`,
+			`[1, (*a)]`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		a, ok := expr.(*ast.ArrLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.ArrLiteral. got=%T", expr)
+		}
+
+		if a.String() != tt.expected {
+			t.Errorf("wrong string. expected=`\n%s\n`, got=`\n%s\n`",
+				tt.expected, a.String())
 		}
 	}
 }
