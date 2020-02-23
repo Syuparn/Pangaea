@@ -25,6 +25,8 @@ import (
 	paramList *ast.ParamList
 	exprList []ast.Expr
 	pair *ast.Pair
+	pairList []*ast.Pair
+	kwargPair *ast.KwargPair
 	stmt  ast.Stmt
 	stmts []ast.Stmt
 	program *ast.Program
@@ -33,17 +35,20 @@ import (
 %type<program> program
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
-%type<expr> expr literal infixExpr prefixExpr callExpr funcLiteral arrLiteral
+%type<expr> expr infixExpr prefixExpr callExpr
+%type<expr> literal funcLiteral arrLiteral objLiteral symLiteral
+%type<kwargPair> kwargPair
 %type<pair> pair
+%type<pairList> pairList
 %type<argList> argList callArgs
 %type<paramList> paramList funcParams
-%type<exprList> exprList
+%type<exprList> exprList kwargExpansionList
 %type<ident> ident
 %type<chain> chain
 %type<token> opMethod breakLine
 %type<token> lBrace lParen lBracket comma
 
-%token<token> INT
+%token<token> INT SYMBOL
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
 %token<token> SPACESHIP EQ NEQ LT LE GT GE
 %token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT AND OR
@@ -183,6 +188,16 @@ literal
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> arrLiteral"
+	}
+	| objLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> objLiteral"
+	}
+	| symLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> symLiteral"
 	}
 
 infixExpr
@@ -449,16 +464,6 @@ prefixExpr
 		}
 		yylex.(*Lexer).curRule = "prefixExpr -> STAR expr"
 	}
-	| DOUBLE_STAR expr %prec UNARY_OP
-	{
-		$$ = &ast.PrefixExpr{
-			Token: $1.Literal,
-			Operator: $1.Literal,
-			Right: $2,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "prefixExpr -> DOUBLE_STAR expr"
-	}
 	| BANG expr %prec UNARY_OP
 	{
 		$$ = &ast.PrefixExpr{
@@ -478,6 +483,44 @@ prefixExpr
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "prefixExpr -> BIT_NOT expr"
+	}
+
+objLiteral
+	: lBrace RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: []*ast.Pair{},
+			EmbeddedExprs: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| lBrace pairList RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| lBrace kwargExpansionList RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: []*ast.Pair{},
+			EmbeddedExprs: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| lBrace pairList comma kwargExpansionList RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: $4,
+			Src: yylex.(*Lexer).Source,
+		}
 	}
 
 arrLiteral
@@ -500,6 +543,16 @@ arrLiteral
 
 		}
 		yylex.(*Lexer).curRule = "arrLiteral -> lBracket exprList RBRACKET"
+	}
+
+symLiteral
+	: SYMBOL
+	{
+		$$ = &ast.SymLiteral{
+			Token: $1.Literal,
+			Value: $1.Literal[1:],
+			Src: yylex.(*Lexer).Source,
+		}
 	}
 
 funcLiteral
@@ -741,7 +794,7 @@ argList
 		$$ = $1.AppendArg($3)
 		yylex.(*Lexer).curRule = "argList -> argList comma expr"
 	}
-	| argList comma pair
+	| argList comma kwargPair
 	{
 		$$ = $1.AppendKwarg($3.Key, $3.Val)
 		yylex.(*Lexer).curRule = "argList -> argList comma pair"
@@ -751,9 +804,9 @@ argList
 		$$ = ast.ExprToArgList($1)
 		yylex.(*Lexer).curRule = "argList -> expr"
 	}
-	| pair
+	| kwargPair
 	{
-		$$ = ast.PairToArgList($1)
+		$$ = ast.KwargPairToArgList($1)
 		yylex.(*Lexer).curRule = "argList -> pair"
 	}
 
@@ -763,7 +816,7 @@ paramList
 		$$ = $1.AppendArg($3)
 		yylex.(*Lexer).curRule = "paramList -> paramList comma ident"
 	}
-	| paramList comma pair
+	| paramList comma kwargPair
 	{
 		$$ = $1.AppendKwarg($3.Key, $3.Val)
 		yylex.(*Lexer).curRule = "paramList -> paramList comma pair"
@@ -773,14 +826,41 @@ paramList
 		$$ = ast.IdentToParamList($1)
 		yylex.(*Lexer).curRule = "paramList -> ident"
 	}
-	| pair
+	| kwargPair
 	{
-		$$ = ast.PairToParamList($1)
+		$$ = ast.KwargPairToParamList($1)
 		yylex.(*Lexer).curRule = "paramList -> pair"
 	}
 
-pair
+pairList
+	: pairList comma pair
+	{
+		$$ = append($1, $3)
+	}
+	| pair
+	{
+		$$ = []*ast.Pair{$1}
+	}
+
+kwargExpansionList
+	: kwargExpansionList comma DOUBLE_STAR expr
+	{
+		$$ = append($1, $4)
+	}
+	| DOUBLE_STAR expr
+	{
+		$$ = []ast.Expr{$2}
+	}
+
+kwargPair
 	: ident COLON expr
+	{
+		$$ = &ast.KwargPair{Key: $1, Val: $3}
+		yylex.(*Lexer).curRule = "kwargPair -> ident COLON expr"
+	}
+
+pair
+	: expr COLON expr
 	{
 		$$ = &ast.Pair{Key: $1, Val: $3}
 		yylex.(*Lexer).curRule = "pair -> ident COLON expr"
@@ -938,6 +1018,7 @@ var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(MAIN_CHAIN, `[\.@$]`),
 	simplexer.NewRegexpTokenType(IDENT, `[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
 	simplexer.NewRegexpTokenType(PRIVATE_IDENT, `_[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
+	simplexer.NewRegexpTokenType(SYMBOL, `'_?[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
 }
 
 func NewLexer(reader io.Reader) *Lexer {

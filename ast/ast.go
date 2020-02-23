@@ -168,9 +168,22 @@ func (c *Chain) String() string {
 	return out.String()
 }
 
-type Pair struct {
+type KwargPair struct {
 	Key *Ident
 	Val Expr
+}
+
+func (qp *KwargPair) String() string {
+	return qp.Key.String() + ": " + qp.Val.String()
+}
+
+type Pair struct {
+	Key Expr
+	Val Expr
+}
+
+func (p *Pair) String() string {
+	return p.Key.String() + ": " + p.Val.String()
 }
 
 func sortedPairStrings(pairs map[*Ident]Expr) []string {
@@ -200,7 +213,7 @@ func IdentToParamList(i *Ident) *ParamList {
 	}
 }
 
-func PairToParamList(pair *Pair) *ParamList {
+func KwargPairToParamList(pair *KwargPair) *ParamList {
 	return &ParamList{
 		Args:   []*Ident{},
 		Kwargs: map[*Ident]Expr{pair.Key: pair.Val},
@@ -229,7 +242,7 @@ func ExprToArgList(e Expr) *ArgList {
 	}
 }
 
-func PairToArgList(pair *Pair) *ArgList {
+func KwargPairToArgList(pair *KwargPair) *ArgList {
 	return &ArgList{
 		Args:   []Expr{},
 		Kwargs: map[*Ident]Expr{pair.Key: pair.Val},
@@ -304,6 +317,17 @@ func (ie *InfixExpr) String() string {
 	return out.String()
 }
 
+type SymLiteral struct {
+	Token string
+	Value string
+	Src   *Source
+}
+
+func (sl *SymLiteral) isExpr()              {}
+func (sl *SymLiteral) TokenLiteral() string { return sl.Token }
+func (sl *SymLiteral) Source() *Source      { return sl.Src }
+func (sl *SymLiteral) String() string       { return sl.Value }
+
 type FuncLiteral struct {
 	Token  string
 	Args   []*Ident
@@ -343,6 +367,31 @@ func (fl *FuncLiteral) String() string {
 
 	out.WriteString("}")
 
+	return out.String()
+}
+
+type ObjLiteral struct {
+	Token         string
+	Pairs         []*Pair
+	EmbeddedExprs []Expr
+	Src           *Source
+}
+
+func (ol *ObjLiteral) isExpr()              {}
+func (ol *ObjLiteral) TokenLiteral() string { return ol.Token }
+func (ol *ObjLiteral) Source() *Source      { return ol.Src }
+func (ol *ObjLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("{")
+	for _, pair := range ol.Pairs {
+		out.WriteString(pair.String() + ", ")
+	}
+
+	for _, expr := range ol.EmbeddedExprs {
+		out.WriteString(expr.String() + ", ")
+	}
+
+	out.WriteString("}")
 	return out.String()
 }
 

@@ -137,8 +137,7 @@ func TestPrefixExpression(t *testing.T) {
 		{`+5`, "+", 5},
 		{`-10`, "-", 10},
 		{`!1`, "!", 1},
-		{`*1`, "*", 1},       // arr expansion
-		{`**100`, "**", 100}, // obj expansion
+		{`*1`, "*", 1}, // arr expansion
 		// NOTE: bitwise not is "/~" (not "~") otherwise
 		// conflict occurs in `~.a`
 		// ("~" of ".a" or thoughtful scalar chain of prop "a"?)
@@ -216,6 +215,112 @@ func TestChainPrecedence(t *testing.T) {
 		if actual != tt.expected {
 			t.Errorf("wrong precedence. expected=%s, got=%s",
 				tt.expected, actual)
+		}
+	}
+}
+
+func TestSymLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`'a`, "a"},
+		{`'FooBar`, "FooBar"},
+		{`'_hidden`, "_hidden"},
+		{`'even?`, "even?"},
+		//{`'_`, "_"},
+		//{`'+`, "+"},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		sym, ok := expr.(*ast.SymLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.SymLiteral.got=%T", sym)
+		}
+
+		testSymbol(t, sym, tt.expected)
+	}
+}
+
+func TestObjLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		keys     []string
+		vals     []interface{}
+		embedded []string
+	}{
+		{
+			`{}`,
+			[]string{},
+			[]interface{}{},
+			[]string{},
+		},
+		{
+			`{'a: 2}`,
+			[]string{"a"},
+			[]interface{}{2},
+			[]string{},
+		},
+		{
+			`{**a}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a"},
+		},
+		{
+			`{'a: 2, 'b: 3, 'c: 4}`,
+			[]string{"a", "b", "c"},
+			[]interface{}{2, 3, 4},
+			[]string{},
+		},
+		{
+			`{'b: 3, 'd: 5, **a, **c}`,
+			[]string{"b", "d"},
+			[]interface{}{3, 5},
+			[]string{"a", "c"},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		obj, ok := expr.(*ast.ObjLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", obj)
+		}
+
+		if len(tt.keys) != len(obj.Pairs) {
+			t.Fatalf("wrong number of elements. expected=%d, got=%d.",
+				len(tt.keys), len(obj.Pairs))
+		}
+
+		for i, pair := range obj.Pairs {
+			key, ok := pair.Key.(*ast.SymLiteral)
+			if !ok {
+				t.Errorf("obj.Pairs[%d].Key is not *ast.SymLiteral. got=%T",
+					i, pair.Key)
+			}
+
+			testSymbol(t, key, tt.keys[i])
+
+			val, ok := pair.Val.(ast.Expr)
+			if !ok {
+				t.Errorf("obj.Pairs[%d].Val is not ast.Expr. got=%T",
+					i, pair.Val)
+			}
+
+			testLiteralExpr(t, val, tt.vals[i])
+		}
+
+		if len(tt.embedded) != len(obj.EmbeddedExprs) {
+			t.Fatalf("wrong number of embedded. expected=%d, got=%d.",
+				len(tt.embedded), len(obj.EmbeddedExprs))
+		}
+
+		for i, expr := range obj.EmbeddedExprs {
+			testIdentifier(t, expr, tt.embedded[i])
 		}
 	}
 }
@@ -1067,6 +1172,21 @@ func testLiteralExpr(t *testing.T, exp ast.Expr, expected interface{}) bool {
 	}
 	t.Errorf("type of exp not expected. got=%T", exp)
 	return false
+}
+
+func testSymbol(t *testing.T, expr ast.Expr, expected string) bool {
+	sl, ok := expr.(*ast.SymLiteral)
+	if !ok {
+		t.Errorf("sl not *ast.SymLiteral. got=%T", expr)
+		return false
+	}
+
+	if sl.Value != expected {
+		t.Errorf("il.Value not %s. got=%v", expected, sl.Value)
+		return false
+	}
+
+	return true
 }
 
 func testNil(t *testing.T, val interface{}) bool {
