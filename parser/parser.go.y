@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/macrat/simplexer"
 
@@ -977,53 +978,98 @@ type Lexer struct {
 	curRule		 string
 }
 
-var tokenTypes = []simplexer.TokenType{
-	simplexer.NewRegexpTokenType(INT, `[0-9]+(\.[0-9]+)?`),
-	simplexer.NewRegexpTokenType(RET, `(\r|\n|\r\n)+`),
-	simplexer.NewRegexpTokenType(SPACESHIP, `<=>`),
-	simplexer.NewRegexpTokenType(DOUBLE_STAR, `\*\*`),
-	simplexer.NewRegexpTokenType(DOUBLE_SLASH, "//"),
-	simplexer.NewRegexpTokenType(BIT_LSHIFT, `<<`),
-	simplexer.NewRegexpTokenType(BIT_RSHIFT, `>>`),
-	simplexer.NewRegexpTokenType(EQ, `==`),
-	simplexer.NewRegexpTokenType(NEQ, `!=`),
-	simplexer.NewRegexpTokenType(GE, `>=`),
-	simplexer.NewRegexpTokenType(LE, `<=`),
-	simplexer.NewRegexpTokenType(AND, `&&`),
-	simplexer.NewRegexpTokenType(OR, `\|\|`),
-	simplexer.NewRegexpTokenType(BIT_AND, `/&`),
-	simplexer.NewRegexpTokenType(BIT_OR, `/\|`),
-	simplexer.NewRegexpTokenType(BIT_XOR, `/\^`),
-	simplexer.NewRegexpTokenType(BIT_NOT, `/~`),
-	simplexer.NewRegexpTokenType(LPAREN, `\(`),
-	simplexer.NewRegexpTokenType(RPAREN, `\)`),
-	simplexer.NewRegexpTokenType(VERT, `\|`),
-	simplexer.NewRegexpTokenType(LBRACE, `\{`),
-	simplexer.NewRegexpTokenType(RBRACE, `\}`),
-	simplexer.NewRegexpTokenType(LBRACKET, `\[`),
-	simplexer.NewRegexpTokenType(RBRACKET, `\]`),
-	simplexer.NewRegexpTokenType(COMMA, `,`),
-	simplexer.NewRegexpTokenType(COLON, `:`),
-	simplexer.NewRegexpTokenType(SEMICOLON, `;`),
-	simplexer.NewRegexpTokenType(BANG, `!`),
-	simplexer.NewRegexpTokenType(PLUS, `\+`),
-	simplexer.NewRegexpTokenType(MINUS, `\-`),
-	simplexer.NewRegexpTokenType(STAR, `\*`),
-	simplexer.NewRegexpTokenType(SLASH, `/`),
-	// NOTE: Do not use backquote! (otherwise commented out)
-	simplexer.NewRegexpTokenType(PERCENT, `%`),
-	simplexer.NewRegexpTokenType(GT, `>`),
-	simplexer.NewRegexpTokenType(LT, `<`),
-	simplexer.NewRegexpTokenType(ADD_CHAIN, `[&~=]`),
-	simplexer.NewRegexpTokenType(MAIN_CHAIN, `[\.@$]`),
-	simplexer.NewRegexpTokenType(IDENT, `[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
-	simplexer.NewRegexpTokenType(PRIVATE_IDENT, `_[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
-	simplexer.NewRegexpTokenType(SYMBOL, `'_?[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
+func tokenTypes() []simplexer.TokenType{
+	// NOTE: make operators map to generate symbol regex easily
+	// (for operator symbol such as '+ or '<=>)
+	methodOps := map[string]string{
+		"spaceship": `<=>`,
+		"eq": `==`,
+		"neq": `!=`,
+		"ge": `>=`,
+		"le": `<=`,
+		"gt": `>`,
+		"lt": `<`,
+		"bitLShift": `<<`,
+		"bitRShift": `>>`,
+		"bitAnd": `/&`,
+		"bitOr": `/\|`,
+		"bitXor": `/\^`,
+		"bitNot": `/~`,
+		"bang": `!`,
+		"plus": `\+`,
+		"minus": `\-`,
+		"star": `\*`,
+		"slash": `/`,
+		// NOTE: Do not use backquote! (otherwise commented out)
+		"doubleSlash": "//",
+		"percent": `%`,
+		"iAdd": `\-%`,
+		"iSub": `\+%`,
+	}
+
+	ident := `[a-zA-Z][a-zA-Z0-9_]*[!?]?`
+
+	methodOpTokens := []string{}
+	for _, op := range methodOps {
+		methodOpTokens = append(methodOpTokens, op)
+	}
+
+	// ident or private_ident or methodOps
+	symbolable := fmt.Sprintf(`(_*%s|(%s))`,
+		ident, strings.Join(methodOpTokens, "|"))
+
+	t := simplexer.NewRegexpTokenType
+
+	// NOTE: order is important (the longer, the earlier)!
+	// otherwise longer token is divided to shorter tokens unexpectedly
+	// (e.g. : `>>` should be recognized one token (not `>` `>`))
+	return []simplexer.TokenType{
+		t(INT, `[0-9]+(\.[0-9]+)?`),
+		t(RET, `(\r|\n|\r\n)+`),
+		t(SPACESHIP, methodOps["spaceship"]),
+		t(DOUBLE_STAR, `\*\*`),
+		t(DOUBLE_SLASH, methodOps["doubleSlash"]),
+		t(BIT_LSHIFT, methodOps["bitLShift"]),
+		t(BIT_RSHIFT, methodOps["bitRShift"]),
+		t(EQ, methodOps["eq"]),
+		t(NEQ, methodOps["neq"]),
+		t(GE, methodOps["ge"]),
+		t(LE, methodOps["le"]),
+		t(AND, `&&`),
+		t(OR, `\|\|`),
+		t(BIT_AND, methodOps["bitAnd"]),
+		t(BIT_OR, methodOps["bitOr"]),
+		t(BIT_XOR, methodOps["bitXor"]),
+		t(BIT_NOT, methodOps["bitNot"]),
+		t(LPAREN, `\(`),
+		t(RPAREN, `\)`),
+		t(VERT, `\|`),
+		t(LBRACE, `\{`),
+		t(RBRACE, `\}`),
+		t(LBRACKET, `\[`),
+		t(RBRACKET, `\]`),
+		t(COMMA, `,`),
+		t(COLON, `:`),
+		t(SEMICOLON, `;`),
+		t(BANG, methodOps["bang"]),
+		t(PLUS, methodOps["plus"]),
+		t(MINUS, methodOps["minus"]),
+		t(STAR, methodOps["star"]),
+		t(SLASH, methodOps["slash"]),
+		t(PERCENT, methodOps["percent"]),
+		t(GT, methodOps["gt"]),
+		t(LT, methodOps["lt"]),
+		t(ADD_CHAIN, `[&~=]`),
+		t(MAIN_CHAIN, `[\.@$]`),
+		t(IDENT, ident),
+		t(PRIVATE_IDENT, fmt.Sprintf(`_+(%s)?`, ident)),
+		t(SYMBOL, "'"+symbolable),
+	}
 }
 
 func NewLexer(reader io.Reader) *Lexer {
 	l := simplexer.NewLexer(reader)
-	l.TokenTypes = tokenTypes
+	l.TokenTypes = tokenTypes()
 	// NOTE: remove "\n" from whitespace list
 	// to use it stmts separator
 	l.Whitespace = simplexer.NewPatternTokenType(
