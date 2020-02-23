@@ -409,6 +409,84 @@ func TestArrLiteral(t *testing.T) {
 	}
 }
 
+func TestArrBreakLines(t *testing.T) {
+	tests := []struct {
+		input string
+		vals  []interface{}
+	}{
+		{
+			`[1,
+			2]`,
+			[]interface{}{1, 2},
+		},
+		{
+			`[1,
+			2
+			]`,
+			[]interface{}{1, 2},
+		},
+		{
+			`[
+			 1, 2]`,
+			[]interface{}{1, 2},
+		},
+		{
+			`[
+				1, 2
+			]`,
+			[]interface{}{1, 2},
+		},
+		{
+			`[
+				1,
+				2
+			]`,
+			[]interface{}{1, 2},
+		},
+		{
+			`[
+				1,
+				2,
+			]`,
+			[]interface{}{1, 2},
+		},
+		{
+			`[1,
+			2,
+			]`,
+			[]interface{}{1, 2},
+		},
+		{
+			`[
+			1,2,]`,
+			[]interface{}{1, 2},
+		},
+		{
+			`[1,2,]`,
+			[]interface{}{1, 2},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		a, ok := expr.(*ast.ArrLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.ArrLiteral. got=%T", expr)
+		}
+
+		if len(a.Elems) != len(tt.vals) {
+			t.Fatalf("number of elements is not %d. got=%d",
+				len(tt.vals), len(a.Elems))
+		}
+
+		for i, elem := range a.Elems {
+			testLiteralExpr(t, elem, tt.vals[i])
+		}
+	}
+}
+
 func TestNestedArrLiteral(t *testing.T) {
 	input := `[1, *foo, [2, 3]]`
 
