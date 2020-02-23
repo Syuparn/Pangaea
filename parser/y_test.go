@@ -379,6 +379,193 @@ func TestObjLiteral(t *testing.T) {
 	}
 }
 
+func TestObjBreaklines(t *testing.T) {
+	tests := []struct {
+		input    string
+		keys     []string
+		vals     []interface{}
+		embedded []string
+	}{
+		{
+			`{'a: 1,
+			'b: 2}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`{
+			'a: 1, 'b: 2}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`{
+				'a: 1, 'b: 2
+			}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`{
+				'a: 1,
+				'b: 2
+			}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`{
+				'a: 1,
+				'b: 2,
+			}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`{'a: 1,
+			'b: 2,}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`{
+				'a: 1,'b: 2,}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`{'a: 1,'b: 2,}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`{**a,
+			**b}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`{
+				**a, **b}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`{
+				**a,**b
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`{
+				**a,
+				**b
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`{
+				**a,
+				**b,
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`{**a,
+			**b,
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`{
+			**a,**b,}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`{**a,**b,}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`{'foo: 1,
+			**a, **b}`,
+			[]string{"foo"},
+			[]interface{}{1},
+			[]string{"a", "b"},
+		},
+		{
+			`{'foo: 1,
+			**a, **b
+			}`,
+			[]string{"foo"},
+			[]interface{}{1},
+			[]string{"a", "b"},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		obj, ok := expr.(*ast.ObjLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", obj)
+		}
+
+		if len(tt.keys) != len(obj.Pairs) {
+			t.Fatalf("wrong number of elements. expected=%d, got=%d.",
+				len(tt.keys), len(obj.Pairs))
+		}
+
+		for i, pair := range obj.Pairs {
+			key, ok := pair.Key.(*ast.SymLiteral)
+			if !ok {
+				t.Errorf("obj.Pairs[%d].Key is not *ast.SymLiteral. got=%T",
+					i, pair.Key)
+			}
+
+			testSymbol(t, key, tt.keys[i])
+
+			val, ok := pair.Val.(ast.Expr)
+			if !ok {
+				t.Errorf("obj.Pairs[%d].Val is not ast.Expr. got=%T",
+					i, pair.Val)
+			}
+
+			testLiteralExpr(t, val, tt.vals[i])
+		}
+
+		if len(tt.embedded) != len(obj.EmbeddedExprs) {
+			t.Fatalf("wrong number of embedded. expected=%d, got=%d.",
+				len(tt.embedded), len(obj.EmbeddedExprs))
+		}
+
+		for i, expr := range obj.EmbeddedExprs {
+			testIdentifier(t, expr, tt.embedded[i])
+		}
+	}
+}
+
 func TestArrLiteral(t *testing.T) {
 	tests := []struct {
 		input string
