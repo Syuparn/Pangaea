@@ -326,7 +326,7 @@ type SymLiteral struct {
 func (sl *SymLiteral) isExpr()              {}
 func (sl *SymLiteral) TokenLiteral() string { return sl.Token }
 func (sl *SymLiteral) Source() *Source      { return sl.Src }
-func (sl *SymLiteral) String() string       { return sl.Value }
+func (sl *SymLiteral) String() string       { return "'" + sl.Value }
 
 type FuncLiteral struct {
 	Token  string
@@ -383,13 +383,17 @@ func (ol *ObjLiteral) Source() *Source      { return ol.Src }
 func (ol *ObjLiteral) String() string {
 	var out bytes.Buffer
 	out.WriteString("{")
+
+	elems := []string{}
 	for _, pair := range ol.Pairs {
-		out.WriteString(pair.String() + ", ")
+		elems = append(elems, pair.String())
 	}
 
 	for _, expr := range ol.EmbeddedExprs {
-		out.WriteString(expr.String() + ", ")
+		elems = append(elems, "**"+expr.String())
 	}
+
+	out.WriteString(strings.Join(elems, ", "))
 
 	out.WriteString("}")
 	return out.String()
@@ -407,9 +411,14 @@ func (al *ArrLiteral) Source() *Source      { return al.Src }
 func (al *ArrLiteral) String() string {
 	var out bytes.Buffer
 	out.WriteString("[")
+
+	elems := []string{}
+
 	for _, elem := range al.Elems {
-		out.WriteString(elem.String() + ", ")
+		elems = append(elems, elem.String())
 	}
+
+	out.WriteString(strings.Join(elems, ", "))
 	out.WriteString("]")
 	return out.String()
 }
