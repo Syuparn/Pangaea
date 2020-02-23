@@ -506,6 +506,24 @@ objLiteral
 			Src: yylex.(*Lexer).Source,
 		}
 	}
+	| lBrace pairList RET RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| lBrace pairList comma RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
 	| lBrace kwargExpansionList RBRACE
 	{
 		$$ = &ast.ObjLiteral{
@@ -515,7 +533,43 @@ objLiteral
 			Src: yylex.(*Lexer).Source,
 		}
 	}
+	| lBrace kwargExpansionList RET RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: []*ast.Pair{},
+			EmbeddedExprs: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| lBrace kwargExpansionList comma RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: []*ast.Pair{},
+			EmbeddedExprs: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
 	| lBrace pairList comma kwargExpansionList RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: $4,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| lBrace pairList comma kwargExpansionList RET RBRACE
+	{
+		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: $4,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| lBrace pairList comma kwargExpansionList comma RBRACE
 	{
 		$$ = &ast.ObjLiteral{
 			Token: $1.Literal,
