@@ -44,13 +44,22 @@ import (
 %type<token> lBrace lParen lBracket comma
 
 %token<token> INT
-%token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG
+%token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
+%token<token> SPACESHIP EQ NEQ LT LE GT GE
+%token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT AND OR
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET
 %token<token> RET SEMICOLON
+
+%left OR
+%left AND
+%left SPACESHIP EQ NEQ LT LE GT GE
+%left BIT_OR BIT_XOR
+%left BIT_AND
+%left BIT_LSHIFT BIT_RSHIFT
 %left PLUS MINUS
-%left STAR SLASH
+%left STAR SLASH DOUBLE_SLASH PERCENT
 %left DOUBLE_STAR
 %left ADD_CHAIN MAIN_CHAIN
 %left UNARY_OP
@@ -210,6 +219,28 @@ infixExpr
 		}
 		yylex.(*Lexer).curRule = "infixExpr -> expr SLASH expr"
 	}
+	| expr DOUBLE_SLASH expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr DOUBLE_SLASH expr"
+	}
+	| expr PERCENT expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr PERCENT expr"
+	}
 	| expr PLUS expr
 	{
 		$$ = &ast.InfixExpr{
@@ -231,6 +262,160 @@ infixExpr
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "infixExpr -> expr MINUS expr"
+	}
+	| expr BIT_LSHIFT expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr BIT_LSHIFT expr"
+	}
+	| expr BIT_RSHIFT expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr BIT_RSHIFT expr"
+	}
+	| expr BIT_AND expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr BIT_AND expr"
+	}
+	| expr BIT_OR expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr BIT_OR expr"
+	}
+	| expr BIT_XOR expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr BIT_XOR expr"
+	}
+	| expr SPACESHIP expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr SPACESHIP expr"
+	}
+	| expr EQ expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr EQ expr"
+	}
+	| expr NEQ expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr NEQ expr"
+	}
+	| expr LT expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr LT expr"
+	}
+	| expr GT expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr GT expr"
+	}
+	| expr LE expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr LE expr"
+	}
+	| expr GE expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr GE expr"
+	}
+	| expr AND expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr AND expr"
+	}
+	| expr OR expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr OR expr"
 	}
 
 prefixExpr
@@ -283,6 +468,16 @@ prefixExpr
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "prefixExpr -> BANG expr"
+	}
+	| BIT_NOT expr %prec UNARY_OP
+	{
+		$$ = &ast.PrefixExpr{
+			Token: $1.Literal,
+			Operator: $1.Literal,
+			Right: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "prefixExpr -> BIT_NOT expr"
 	}
 
 arrLiteral
@@ -350,6 +545,14 @@ funcParams
 			Kwargs: map[*ast.Ident]ast.Expr{},
 		}
 		yylex.(*Lexer).curRule = "funcParams -> VERT VERT"
+	}
+	| OR
+	{
+		$$ = &ast.ParamList{
+			Args: []*ast.Ident{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+		}
+		yylex.(*Lexer).curRule = "funcParams -> OR"
 	}
 	| VERT paramList VERT
 	{
@@ -697,6 +900,21 @@ type Lexer struct {
 var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(INT, `[0-9]+(\.[0-9]+)?`),
 	simplexer.NewRegexpTokenType(RET, `(\r|\n|\r\n)+`),
+	simplexer.NewRegexpTokenType(SPACESHIP, `<=>`),
+	simplexer.NewRegexpTokenType(DOUBLE_STAR, `\*\*`),
+	simplexer.NewRegexpTokenType(DOUBLE_SLASH, "//"),
+	simplexer.NewRegexpTokenType(BIT_LSHIFT, `<<`),
+	simplexer.NewRegexpTokenType(BIT_RSHIFT, `>>`),
+	simplexer.NewRegexpTokenType(EQ, `==`),
+	simplexer.NewRegexpTokenType(NEQ, `!=`),
+	simplexer.NewRegexpTokenType(GE, `>=`),
+	simplexer.NewRegexpTokenType(LE, `<=`),
+	simplexer.NewRegexpTokenType(AND, `&&`),
+	simplexer.NewRegexpTokenType(OR, `\|\|`),
+	simplexer.NewRegexpTokenType(BIT_AND, `/&`),
+	simplexer.NewRegexpTokenType(BIT_OR, `/\|`),
+	simplexer.NewRegexpTokenType(BIT_XOR, `/\^`),
+	simplexer.NewRegexpTokenType(BIT_NOT, `/~`),
 	simplexer.NewRegexpTokenType(LPAREN, `\(`),
 	simplexer.NewRegexpTokenType(RPAREN, `\)`),
 	simplexer.NewRegexpTokenType(VERT, `\|`),
@@ -708,11 +926,14 @@ var tokenTypes = []simplexer.TokenType{
 	simplexer.NewRegexpTokenType(COLON, `:`),
 	simplexer.NewRegexpTokenType(SEMICOLON, `;`),
 	simplexer.NewRegexpTokenType(BANG, `!`),
-	simplexer.NewRegexpTokenType(DOUBLE_STAR, `\*\*`),
 	simplexer.NewRegexpTokenType(PLUS, `\+`),
 	simplexer.NewRegexpTokenType(MINUS, `\-`),
 	simplexer.NewRegexpTokenType(STAR, `\*`),
 	simplexer.NewRegexpTokenType(SLASH, `/`),
+	// NOTE: Do not use backquote! (otherwise commented out)
+	simplexer.NewRegexpTokenType(PERCENT, `%`),
+	simplexer.NewRegexpTokenType(GT, `>`),
+	simplexer.NewRegexpTokenType(LT, `<`),
 	simplexer.NewRegexpTokenType(ADD_CHAIN, `[&~=]`),
 	simplexer.NewRegexpTokenType(MAIN_CHAIN, `[\.@$]`),
 	simplexer.NewRegexpTokenType(IDENT, `[a-zA-Z][a-zA-Z0-9_]*([!?])?`),
