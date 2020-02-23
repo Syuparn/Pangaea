@@ -219,6 +219,34 @@ func TestChainPrecedence(t *testing.T) {
 	}
 }
 
+func TestIdentifier(t *testing.T) {
+	tests := []string{
+		"a",
+		"Foo",
+		"even?",
+		"rand!",
+		"_private",
+		"__foo",
+		"i0",
+		"n0u1m2b3e4r",
+		"snake_case",
+		"snake_case_",
+		"CamelCase",
+		"pascalCase",
+		"CONST",
+		"v1234_56ab",
+		"_",
+		"___",
+		//"_123", // not allowed
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt)
+		expr := testIfExprStmt(t, program)
+		testIdentifier(t, expr, tt)
+	}
+}
+
 func TestSymLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
