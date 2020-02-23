@@ -546,6 +546,26 @@ arrLiteral
 		}
 		yylex.(*Lexer).curRule = "arrLiteral -> lBracket exprList RBRACKET"
 	}
+	| lBracket exprList RET RBRACKET
+	{
+		$$ = &ast.ArrLiteral{
+			Token: $1.Literal,
+			Elems: $2,
+			Src: yylex.(*Lexer).Source,
+
+		}
+		yylex.(*Lexer).curRule = "arrLiteral -> lBracket exprList RBRACKET"
+	}
+	| lBracket exprList comma RBRACKET
+	{
+		$$ = &ast.ArrLiteral{
+			Token: $1.Literal,
+			Elems: $2,
+			Src: yylex.(*Lexer).Source,
+
+		}
+		yylex.(*Lexer).curRule = "arrLiteral -> lBracket exprList RBRACKET"
+	}
 
 symLiteral
 	: SYMBOL
