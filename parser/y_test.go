@@ -522,6 +522,22 @@ func TestObjBreaklines(t *testing.T) {
 			[]interface{}{1},
 			[]string{"a", "b"},
 		},
+		{
+			`{
+			**a,
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a"},
+		},
+		{
+			`{
+			'a: 1,
+			}`,
+			[]string{"a"},
+			[]interface{}{1},
+			[]string{},
+		},
 	}
 
 	for _, tt := range tests {
@@ -601,6 +617,16 @@ func TestArrBreakLines(t *testing.T) {
 		input string
 		vals  []interface{}
 	}{
+		{
+			`[1,]`,
+			[]interface{}{1},
+		},
+		{
+			`[
+			1,
+			]`,
+			[]interface{}{1},
+		},
 		{
 			`[1,
 			2]`,
