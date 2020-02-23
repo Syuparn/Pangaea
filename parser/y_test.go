@@ -1138,6 +1138,57 @@ func TestRecursiveChain(t *testing.T) {
 	}
 }
 
+func TestOpMethods(t *testing.T) {
+	tests := []struct {
+		input string
+		op    string
+	}{
+		{`10.+(1)`, `+`},
+		{`10.-(1)`, `-`},
+		{`10.*(1)`, `*`},
+		{`10./(1)`, `/`},
+		{`10.//(1)`, `//`},
+		{`10.%(1)`, `%`},
+		{`10.**(1)`, `**`},
+		{`10.<=>(1)`, `<=>`},
+		{`10.==(1)`, `==`},
+		{`10.!=(1)`, `!=`},
+		{`10.<=(1)`, `<=`},
+		{`10.>=(1)`, `>=`},
+		{`10.<(1)`, `<`},
+		{`10.>(1)`, `>`},
+		{`10.>>(1)`, `>>`},
+		{`10.<<(1)`, `<<`},
+		{`10./&(1)`, `/&`},
+		{`10./|(1)`, `/|`},
+		{`10./^(1)`, `/^`},
+		{`10./^(1)`, `/~`},
+		{`10.!(1)`, `!`},
+		{`10.+%(1)`, `+%`},
+		{`10.-%(1)`, `-%`},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		testLiteralExpr(t, callExpr.Receiver, 10)
+		testChainContext(t, callExpr, ".", nil)
+		testIdentifier(t, callExpr.Prop, tt.op)
+
+		if len(callExpr.Args) != 1 {
+			t.Fatalf("arity must be 1. got=%d", len(callExpr.Args))
+		}
+
+		testLiteralExpr(t, callExpr.Args[0], 1)
+	}
+}
+
 func TestArgOrders(t *testing.T) {
 	tests := []struct {
 		input   string
