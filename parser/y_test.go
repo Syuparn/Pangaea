@@ -1859,14 +1859,14 @@ func TestFuncLiteralArgs(t *testing.T) {
 		},
 		{
 			`m{|opt: 1, a|}`,
-			[]string{"self"},
+			[]string{"self", "a"},
 			map[string]interface{}{"opt": 1},
 			`{|self, a, opt: 1| }`,
 		},
 		{
 			`m{|b: 1, a, c: 2|}`,
-			[]string{"self"},
-			map[string]interface{}{"a": 1, "c": 2},
+			[]string{"self", "a"},
+			map[string]interface{}{"b": 1, "c": 2},
 			`{|self, a, b: 1, c: 2| }`,
 		},
 	}
@@ -1881,8 +1881,8 @@ func TestFuncLiteralArgs(t *testing.T) {
 		}
 
 		if len(f.Args) != len(tt.args) {
-			t.Fatalf("wrong arity of args, expected=%d, got=%d",
-				len(tt.args), len(f.Args))
+			t.Fatalf("wrong arity of args, expected=%d, got=%d in\n%s",
+				len(tt.args), len(f.Args), tt.input)
 		}
 
 		if len(f.Kwargs) != len(tt.kwargs) {
