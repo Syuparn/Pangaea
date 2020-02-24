@@ -206,6 +206,20 @@ func sortedPairStrings(pairs map[*Ident]Expr) []string {
 	return sortedStrings
 }
 
+func SelfIdentParamList(src *Source) *ParamList {
+	selfIdent := &Ident{
+		Token:     "self",
+		Value:     "self",
+		Src:       src,
+		IsPrivate: false,
+	}
+
+	return &ParamList{
+		Args:   []*Ident{selfIdent},
+		Kwargs: map[*Ident]Expr{},
+	}
+}
+
 func IdentToParamList(i *Ident) *ParamList {
 	return &ParamList{
 		Args:   []*Ident{i},
@@ -223,6 +237,17 @@ func KwargPairToParamList(pair *KwargPair) *ParamList {
 type ParamList struct {
 	Args   []*Ident
 	Kwargs map[*Ident]Expr
+}
+
+func (pl *ParamList) PrependSelf(src *Source) *ParamList {
+	selfIdent := &Ident{
+		Token:     "self",
+		Value:     "self",
+		Src:       src,
+		IsPrivate: false,
+	}
+	pl.Args = append([]*Ident{selfIdent}, pl.Args...)
+	return pl
 }
 
 func (pl *ParamList) AppendArg(arg *Ident) *ParamList {

@@ -48,7 +48,7 @@ import (
 %type<ident> ident
 %type<chain> chain
 %type<token> opMethod breakLine
-%type<token> lBrace lParen lBracket comma mapLBrace
+%type<token> lBrace lParen lBracket comma mapLBrace methodLBrace
 
 %token<token> INT SYMBOL
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
@@ -58,7 +58,7 @@ import (
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET
-%token<token> MAP_LBRACE
+%token<token> MAP_LBRACE METHOD_LBRACE
 %token<token> RET SEMICOLON
 
 %left OR
@@ -764,6 +764,50 @@ funcLiteral
 		}
 		yylex.(*Lexer).curRule = "funcLiteral -> lBrace funcParams stmts RBRACE"
 	}
+	| methodLBrace RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: ast.SelfIdentParamList(yylex.(*Lexer).Source).Args,
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: []ast.Stmt{},
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace RBRACE"
+	}
+	| methodLBrace funcParams RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: $2.PrependSelf(yylex.(*Lexer).Source).Args,
+			Kwargs: $2.Kwargs,
+			Body: []ast.Stmt{},
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace funcParams RBRACE"
+	}
+	| methodLBrace stmts RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: ast.SelfIdentParamList(yylex.(*Lexer).Source).Args,
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace stmts RBRACE"
+	}
+	| methodLBrace funcParams stmts RBRACE
+	{
+		$$ = &ast.FuncLiteral{
+			Token: $1.Literal,
+			Args: $2.PrependSelf(yylex.(*Lexer).Source).Args,
+			Kwargs: $2.Kwargs,
+			Body: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace funcParams stmts RBRACE"
+	}
 
 funcParams
 	: VERT VERT
@@ -1184,6 +1228,18 @@ mapLBrace
 		yylex.(*Lexer).curRule = "mapLBrace -> MAP_LBRACE RET"
 	}
 
+methodLBrace
+	: METHOD_LBRACE
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "mapLBrace -> METHOD_LBRACE"
+	}
+	| METHOD_LBRACE RET
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "mapLBrace -> METHOD_LBRACE RET"
+	}
+
 breakLine
 	: SEMICOLON
 	{
@@ -1337,6 +1393,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(IADD, methodOps["iAdd"]),
 		t(ISUB, methodOps["iSub"]),
 		t(MAP_LBRACE, `%\{`),
+		t(METHOD_LBRACE, `m\{`),
 		t(LPAREN, `\(`),
 		t(RPAREN, `\)`),
 		t(VERT, `\|`),
