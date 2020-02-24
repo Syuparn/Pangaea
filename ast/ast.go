@@ -60,29 +60,26 @@ func (es *ExprStmt) String() string {
 	return ""
 }
 
+type IdentAttr int
+
+const (
+	NormalIdent IdentAttr = iota
+	ArgIdent
+	KwargIdent
+)
+
 type Ident struct {
 	Token     string
 	Value     string
 	Src       *Source
 	IsPrivate bool
+	IdentAttr IdentAttr
 }
 
 func (i *Ident) isExpr()              {}
 func (i *Ident) TokenLiteral() string { return i.Token }
 func (i *Ident) String() string       { return i.Value }
 func (i *Ident) Source() *Source      { return i.Src }
-
-type ArgIdent struct {
-	Token     string
-	Value     int
-	Src       *Source
-	IsPrivate bool
-}
-
-func (i *ArgIdent) isExpr()              {}
-func (i *ArgIdent) TokenLiteral() string { return i.Token }
-func (i *ArgIdent) String() string       { return fmt.Sprintf("\\%d", i.Value) }
-func (i *ArgIdent) Source() *Source      { return i.Src }
 
 type CallExpr interface {
 	ChainToken() string

@@ -248,24 +248,21 @@ func TestIdentifier(t *testing.T) {
 }
 
 func TestArgIdentifier(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected int
-	}{
-		{`\1`, 1},
-		{`\0`, 0},
-		{`\2`, 2},
-		{`\10`, 10},
-		{`\999`, 999},
+	tests := []string{
+		`\1`,
+		`\0`,
+		`\2`,
+		`\10`,
+		`\999`,
+		"\\",
 		// `\` is syntax sugar of `\1`
-		// NOTE: write `\` as escape otherwise editor syntax-highlighter breaks
-		{"\\", 1},
+		// NOTE: write `\` as escape otherwise editor syntax-highlighter breaks		{`\1`, `\1`},
 	}
 
 	for _, tt := range tests {
-		program := testParse(t, tt.input)
+		program := testParse(t, tt)
 		expr := testIfExprStmt(t, program)
-		testArgIdent(t, expr, tt.expected)
+		testArgIdent(t, expr, tt)
 	}
 }
 
@@ -2692,6 +2689,12 @@ func testIdentifier(t *testing.T, expr ast.Expr, expected string) bool {
 		return false
 	}
 
+	if ident.IdentAttr != ast.NormalIdent {
+		t.Errorf("ident.IdentAttr not ast.NormalIdent. got=%T",
+			ident.IdentAttr)
+		return false
+	}
+
 	if ident.Value != expected {
 		t.Errorf("ident.Value not %s. got=%s", expected, ident.Value)
 		return false
@@ -2706,20 +2709,26 @@ func testIdentifier(t *testing.T, expr ast.Expr, expected string) bool {
 	return true
 }
 
-func testArgIdent(t *testing.T, expr ast.Expr, expected int) bool {
-	ident, ok := expr.(*ast.ArgIdent)
+func testArgIdent(t *testing.T, expr ast.Expr, expected string) bool {
+	ident, ok := expr.(*ast.Ident)
 	if !ok {
-		t.Errorf("exp not *ast.ArgIdent. got=%T", expr)
+		t.Errorf("exp not *ast.Ident. got=%T", expr)
+		return false
+	}
+
+	if ident.IdentAttr != ast.ArgIdent {
+		t.Errorf("ident.IdentAttr not ast.ArgIdent. got=%T",
+			ident.IdentAttr)
 		return false
 	}
 
 	if ident.Value != expected {
-		t.Errorf("ident.Value not %d. got=%d", expected, ident.Value)
+		t.Errorf("ident.Value not %s. got=%s", expected, ident.Value)
 		return false
 	}
 
-	if ident.TokenLiteral() != fmt.Sprintf("%d", expected) {
-		t.Errorf("ident.TokenLiteral() not %d. got=%s",
+	if ident.TokenLiteral() != expected {
+		t.Errorf("ident.TokenLiteral() not %s. got=%s",
 			expected, ident.TokenLiteral())
 		return false
 	}
