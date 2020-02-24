@@ -2097,7 +2097,12 @@ func TestComment(t *testing.T) {
 				t.Fatalf("stmts[%d] is not *ast.ExprStmt. got=%T", i, stmt)
 			}
 
-			testLiteralExpr(t, exprStmt.Expr, tt.vals[i])
+			switch val := tt.vals[i].(type) {
+			case string:
+				testIdentifier(t, exprStmt.Expr, val)
+			default:
+				testLiteralExpr(t, exprStmt.Expr, val)
+			}
 		}
 	}
 }
