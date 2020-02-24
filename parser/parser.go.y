@@ -88,6 +88,18 @@ program
 		yylex.(*Lexer).program = $$
 		yylex.(*Lexer).curRule = "program -> RET stmts"
 	}
+	| RET
+	{
+		$$ = &ast.Program{Stmts: []ast.Stmt{}}
+		yylex.(*Lexer).program = $$
+		yylex.(*Lexer).curRule = "program -> RET"
+	}
+	|
+	{
+		$$ = &ast.Program{Stmts: []ast.Stmt{}}
+		yylex.(*Lexer).program = $$
+		yylex.(*Lexer).curRule = "program -> (nothing)"
+	}
 
 stmts
 	: stmt
@@ -1373,7 +1385,8 @@ func tokenTypes() []simplexer.TokenType{
 	// (e.g. : `>>` should be recognized one token (not `>` `>`))
 	return []simplexer.TokenType{
 		t(INT, `[0-9]+(\.[0-9]+)?`),
-		t(RET, `(\r|\n|\r\n)+`),
+		// NOTE: comment(, which starts with "#") is included in RET
+		t(RET, `((#[^\n\r]*)?(\r|\n|\r\n)+|#[^\n\r]*)`),
 		t(SYMBOL, "'"+symbolable),
 		t(SPACESHIP, methodOps["spaceship"]),
 		t(DOUBLE_STAR, methodOps["doubleStar"]),

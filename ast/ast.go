@@ -35,13 +35,11 @@ type Program struct {
 
 func (p *Program) TokenLiteral() string { return "" }
 func (p *Program) String() string {
-	var out bytes.Buffer
-
+	stmts := []string{}
 	for _, s := range p.Stmts {
-		out.WriteString(s.String())
+		stmts = append(stmts, s.String())
 	}
-
-	return out.String()
+	return strings.Join(stmts, "\n")
 }
 func (p *Program) Source() *Source { return p.Stmts[0].Source() }
 
