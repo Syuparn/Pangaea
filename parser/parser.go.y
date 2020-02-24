@@ -948,8 +948,8 @@ callExpr
 			Chain: $2,
 			Receiver: $1,
 			Prop: $3,
-			Args: nil,
-			Kwargs: nil,
+			Args: []ast.Expr{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "callExpr -> expr chain ident"
@@ -980,8 +980,8 @@ callExpr
 			Chain: $2,
 			Receiver: $1,
 			Prop: opIdent,
-			Args: nil,
-			Kwargs: nil,
+			Args: []ast.Expr{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "callExpr -> expr chain opMethod"
@@ -1004,6 +1004,30 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "callExpr -> expr chain opMethod callArgs"
+	}
+	| expr chain funcLiteral
+	{
+		$$ = &ast.LiteralCallExpr{
+			Token: "(literalCall)",
+			Chain: $2,
+			Receiver: $1,
+			Func: $3.(*ast.FuncLiteral),
+			Args: []ast.Expr{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| expr chain funcLiteral callArgs
+	{
+		$$ = &ast.LiteralCallExpr{
+			Token: "(literalCall)",
+			Chain: $2,
+			Receiver: $1,
+			Func: $3.(*ast.FuncLiteral),
+			Args: $4.Args,
+			Kwargs: $4.Kwargs,
+			Src: yylex.(*Lexer).Source,
+		}
 	}
 
 callArgs
