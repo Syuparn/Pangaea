@@ -144,6 +144,39 @@ func (lc *LiteralCallExpr) String() string {
 	return out.String()
 }
 
+type VarCallExpr struct {
+	Token    string
+	Chain    *Chain
+	Receiver Expr
+	Var      *Ident
+	Args     []Expr
+	Kwargs   map[*Ident]Expr
+	Src      *Source
+}
+
+func (vc *VarCallExpr) isExpr()              {}
+func (vc *VarCallExpr) TokenLiteral() string { return vc.Token }
+func (vc *VarCallExpr) ChainToken() string   { return vc.Chain.Token }
+func (vc *VarCallExpr) ChainArg() Expr       { return vc.Chain.Arg }
+func (vc *VarCallExpr) Source() *Source      { return vc.Src }
+func (vc *VarCallExpr) String() string {
+	var out bytes.Buffer
+	out.WriteString(vc.Receiver.String())
+	out.WriteString(vc.Chain.String())
+	out.WriteString("^" + vc.Var.String())
+
+	args := []string{}
+	for _, a := range vc.Args {
+		args = append(args, a.String())
+	}
+
+	args = append(args, sortedPairStrings(vc.Kwargs)...)
+
+	out.WriteString("(" + strings.Join(args, ", ") + ")")
+
+	return out.String()
+}
+
 type MainChain int
 
 const (
