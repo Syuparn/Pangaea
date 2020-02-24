@@ -1966,7 +1966,7 @@ func TestLiteralCallFunc(t *testing.T) {
 
 	for k, v := range f.Kwargs {
 		testIdentifier(t, k, "hoge")
-		testLiteralExpr(t, v, 1)
+		testLiteralExpr(t, v, 3)
 	}
 
 	if len(f.Body) != 2 {
@@ -1997,7 +1997,7 @@ func TestLiteralCallFuncArgs(t *testing.T) {
 	}{
 		{
 			`a.{|b| c}()`,
-			[]interface{}{1},
+			[]interface{}{},
 			map[string]interface{}{},
 			`a.{|b| c}()`,
 		},
@@ -2058,22 +2058,25 @@ func TestLiteralCallFuncArgs(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		errPrefix := fmt.Sprintf("err in ```\n%s\n```\n", tt.input)
+
 		program := testParse(t, tt.input)
 		expr := testIfExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.LiteralCallExpr)
 
 		if !ok {
-			t.Fatalf("expr is not *ast.LiteralCallExpr. got=%T", expr)
+			t.Fatalf("%sexpr is not *ast.LiteralCallExpr. got=%T",
+				errPrefix, expr)
 		}
 		if len(callExpr.Args) != len(tt.args) {
-			t.Fatalf("wrong arity of args, expected=%d, got=%d",
-				len(tt.args), len(callExpr.Args))
+			t.Fatalf("%swrong arity of args, expected=%d, got=%d",
+				errPrefix, len(tt.args), len(callExpr.Args))
 		}
 
 		if len(callExpr.Kwargs) != len(tt.kwargs) {
-			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
-				len(tt.kwargs), len(callExpr.Kwargs))
+			t.Fatalf("%swrong arity of kwargs, expected=%d, got=%d",
+				errPrefix, len(tt.kwargs), len(callExpr.Kwargs))
 		}
 
 		if callExpr.String() != tt.printed {
@@ -2082,7 +2085,12 @@ func TestLiteralCallFuncArgs(t *testing.T) {
 		}
 
 		for i, expArg := range tt.args {
-			testLiteralExpr(t, callExpr.Args[i], expArg)
+			switch a := expArg.(type) {
+			case string:
+				testIdentifier(t, callExpr.Args[i], a)
+			default:
+				testLiteralExpr(t, callExpr.Args[i], a)
+			}
 		}
 
 		for ident, val := range callExpr.Kwargs {
