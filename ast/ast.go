@@ -355,6 +355,7 @@ func (es *EmbeddedStr) String() string {
 }
 
 type FormerStrPiece struct {
+	Token  string
 	Former *FormerStrPiece
 	Str    string
 	Expr   Expr
