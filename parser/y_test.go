@@ -376,6 +376,37 @@ func TestBackQuoteStrLiteral(t *testing.T) {
 	}
 }
 
+func TestDoubleQuoteStrLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`""`, ""},
+		{`"foo"`, "foo"},
+		{`"12345"`, "12345"},
+		{`"Hello, world!"`, "Hello, world!"},
+		{`"comment?"`, "comment?"},
+		// NOTE: escape is not evaluated in parser
+		{`"\n"`, `\n`},
+		{`"` + "``" + `"`, "``"},
+		{`".hoge"`, ".hoge"},
+		{`"1 + 1"`, "1 + 1"},
+		{`"_"`, "_"},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		str, ok := expr.(*ast.StrLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.StrLiteral.got=%T", expr)
+		}
+
+		// IsRaw should be false
+		testStr(t, str, tt.expected, false)
+	}
+}
+
 func TestObjLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
