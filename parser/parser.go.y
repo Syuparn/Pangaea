@@ -59,7 +59,7 @@ import (
 %token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT
 %token<token> AND OR IADD ISUB
 %token<token> ADD_CHAIN MAIN_CHAIN
-%token<token> IDENT PRIVATE_IDENT
+%token<token> IDENT PRIVATE_IDENT ARG_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
 %token<token> MAP_LBRACE METHOD_LBRACE
 %token<token> RET SEMICOLON
@@ -178,6 +178,7 @@ ident
 			Value: $1.Literal,
 			Src: yylex.(*Lexer).Source,
 			IsPrivate: false,
+			IdentAttr: ast.NormalIdent,
 		}
 		yylex.(*Lexer).curRule = "ident -> IDENT"
 	}
@@ -188,8 +189,20 @@ ident
 			Value: $1.Literal,
 			Src: yylex.(*Lexer).Source,
 			IsPrivate: true,
+			IdentAttr: ast.NormalIdent,
 		}
 		yylex.(*Lexer).curRule = "ident -> PRIVATE_IDENT"
+	}
+	| ARG_IDENT
+	{
+		$$ = &ast.Ident{
+			Token: $1.Literal,
+			Value: $1.Literal,
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: true,
+			IdentAttr: ast.ArgIdent,
+		}
+		yylex.(*Lexer).curRule = "ident -> ARG_IDENT"
 	}
 
 literal
@@ -1505,6 +1518,7 @@ func tokenTypes() []simplexer.TokenType{
 	// otherwise longer token is divided to shorter tokens unexpectedly
 	// (e.g. : `>>` should be recognized one token (not `>` `>`))
 	return []simplexer.TokenType{
+		t(ARG_IDENT, `\\(0|[1-9][0-9]*)?`),
 		t(INT, `[0-9]+(\.[0-9]+)?`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
