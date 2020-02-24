@@ -247,6 +247,28 @@ func TestIdentifier(t *testing.T) {
 	}
 }
 
+func TestArgIdentifier(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`\1`, 1},
+		{`\0`, 0},
+		{`\2`, 2},
+		{`\10`, 10},
+		{`\999`, 999},
+		// `\` is syntax sugar of `\1`
+		// NOTE: write `\` as escape otherwise editor syntax-highlighter breaks
+		{"\\", 1},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		testArgIdent(t, expr, tt.expected)
+	}
+}
+
 func TestSymLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -2677,6 +2699,27 @@ func testIdentifier(t *testing.T, expr ast.Expr, expected string) bool {
 
 	if ident.TokenLiteral() != expected {
 		t.Errorf("ident.TokenLiteral() not %s. got=%s",
+			expected, ident.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testArgIdent(t *testing.T, expr ast.Expr, expected int) bool {
+	ident, ok := expr.(*ast.ArgIdent)
+	if !ok {
+		t.Errorf("exp not *ast.ArgIdent. got=%T", expr)
+		return false
+	}
+
+	if ident.Value != expected {
+		t.Errorf("ident.Value not %d. got=%d", expected, ident.Value)
+		return false
+	}
+
+	if ident.TokenLiteral() != fmt.Sprintf("%d", expected) {
+		t.Errorf("ident.TokenLiteral() not %d. got=%s",
 			expected, ident.TokenLiteral())
 		return false
 	}
