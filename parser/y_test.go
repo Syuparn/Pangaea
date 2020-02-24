@@ -1900,6 +1900,203 @@ func TestCallWithArgs(t *testing.T) {
 	}
 }
 
+func TestLiteralCall(t *testing.T) {
+	tests := []struct {
+		input        string
+		receiver     interface{}
+		chainContext string
+		chainArg     interface{}
+	}{
+		{`5.{|a| 1}`, 5, ".", nil},
+		{`10@{|a| 1}`, 10, "@", nil},
+		{`5@(10){|a| 1}`, 5, "@", 10},
+		{`10${|a| 1}`, 10, "$", nil},
+		{`5$(0){|a| 1}`, 5, "$", 0},
+		{`5.{|a| 1}`, 5, ".", nil},
+		{`5@{|a| 1}`, 5, "@", nil},
+		{`5${|a| 1}`, 5, "$", nil},
+		{`5&.{|a| 1}`, 5, "&.", nil},
+		{`5~.{|a| 1}`, 5, "~.", nil},
+		{`5=.{|a| 1}`, 5, "=.", nil},
+		{`5&@{|a| 1}`, 5, "&@", nil},
+		{`5~@{|a| 1}`, 5, "~@", nil},
+		{`5=@{|a| 1}`, 5, "=@", nil},
+		{`5&${|a| 1}`, 5, "&$", nil},
+		{`5~${|a| 1}`, 5, "~$", nil},
+		{`5=${|a| 1}`, 5, "=$", nil},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.LiteralCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.LiteralCallExpr. got=%T", expr)
+		}
+
+		testLiteralExpr(t, callExpr.Receiver, tt.receiver)
+		testChainContext(t, callExpr, tt.chainContext, tt.chainArg)
+	}
+}
+
+func TestLiteralCallFunc(t *testing.T) {
+	input := `a.{|foo, hoge: 3, bar| 1+2; 3}`
+
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+
+	callExpr, ok := expr.(*ast.LiteralCallExpr)
+	if !ok {
+		t.Fatalf("expr is not *ast.LiteralCallExpr. got=%T", expr)
+	}
+
+	f := callExpr.Func
+
+	if len(f.Args) != 2 {
+		t.Fatalf("wrong arity of args. expected=2, got=%d", len(f.Args))
+	}
+
+	testIdentifier(t, f.Args[0], "foo")
+	testIdentifier(t, f.Args[1], "bar")
+
+	if len(f.Kwargs) != 1 {
+		t.Fatalf("wrong arity of kwargs. expected=1, got=%d", len(f.Kwargs))
+	}
+
+	for k, v := range f.Kwargs {
+		testIdentifier(t, k, "hoge")
+		testLiteralExpr(t, v, 1)
+	}
+
+	if len(f.Body) != 2 {
+		t.Fatalf("wrong num of stmts. expected=2, got=%d", len(f.Body))
+	}
+
+	es0, ok := f.Body[0].(*ast.ExprStmt)
+	if !ok {
+		t.Fatalf("Body[0] is not ast*ExprStmt. got=%T", f.Body[0])
+	}
+
+	testInfixOperator(t, es0.Expr, 1, "+", 2)
+
+	es1, ok := f.Body[1].(*ast.ExprStmt)
+	if !ok {
+		t.Fatalf("Body[1] is not ast*ExprStmt. got=%T", f.Body[1])
+	}
+
+	testLiteralExpr(t, es1.Expr, 3)
+}
+
+func TestLiteralCallFuncArgs(t *testing.T) {
+	tests := []struct {
+		input   string
+		args    []interface{}
+		kwargs  map[string]interface{}
+		printed string
+	}{
+		{
+			`a.{|b| c}()`,
+			[]interface{}{1},
+			map[string]interface{}{},
+			`a.{|b| c}()`,
+		},
+		{
+			`a.{|b| c}`,
+			[]interface{}{},
+			map[string]interface{}{},
+			`a.{|b| c}()`,
+		},
+		{
+			`a.m{c}`,
+			[]interface{}{},
+			map[string]interface{}{},
+			`a.{|self| c}()`,
+		},
+		{
+			`a.m{c}(1)`,
+			[]interface{}{1},
+			map[string]interface{}{},
+			`a.{|self| c}(1)`,
+		},
+		{
+			`a.{|b| c}(1)`,
+			[]interface{}{1},
+			map[string]interface{}{},
+			`a.{|b| c}(1)`,
+		},
+		{
+			`a.{|b| c}(1, foo)`,
+			[]interface{}{1, "foo"},
+			map[string]interface{}{},
+			`a.{|b| c}(1, foo)`,
+		},
+		{
+			`a.{|b| c}(foo: 2)`,
+			[]interface{}{},
+			map[string]interface{}{"foo": 2},
+			`a.{|b| c}(foo: 2)`,
+		},
+		{
+			`a.{|b| c}(1, foo, bar: 2)`,
+			[]interface{}{1, "foo"},
+			map[string]interface{}{"bar": 2},
+			`a.{|b| c}(1, foo, bar: 2)`,
+		},
+		{
+			`a.{|b| c}(1, bar: 2, foo)`,
+			[]interface{}{1, "foo"},
+			map[string]interface{}{"bar": 2},
+			`a.{|b| c}(1, foo, bar: 2)`,
+		},
+		{
+			`a.{|b| c}(1, f: 3, e, d: 2)`,
+			[]interface{}{1, "e"},
+			map[string]interface{}{"d": 2, "f": 3},
+			`a.{|b| c}(1, e, d: 2, f: 3)`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.LiteralCallExpr)
+
+		if !ok {
+			t.Fatalf("expr is not *ast.LiteralCallExpr. got=%T", expr)
+		}
+		if len(callExpr.Args) != len(tt.args) {
+			t.Fatalf("wrong arity of args, expected=%d, got=%d",
+				len(tt.args), len(callExpr.Args))
+		}
+
+		if len(callExpr.Kwargs) != len(tt.kwargs) {
+			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
+				len(tt.kwargs), len(callExpr.Kwargs))
+		}
+
+		if callExpr.String() != tt.printed {
+			t.Errorf("wrong output.expected=\n%s,\ngot=\n%s",
+				tt.printed, callExpr.String())
+		}
+
+		for i, expArg := range tt.args {
+			testLiteralExpr(t, callExpr.Args[i], expArg)
+		}
+
+		for ident, val := range callExpr.Kwargs {
+			name := ident.Token
+			exp, ok := tt.kwargs[name]
+			if ok {
+				testLiteralExpr(t, val, exp)
+			} else {
+				t.Errorf("unexpected kwarg %s found.", name)
+			}
+		}
+	}
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
