@@ -2055,7 +2055,7 @@ func TestComment(t *testing.T) {
 		{
 			`a#foo`,
 			[]interface{}{"a"},
-			"",
+			"a",
 		},
 		{
 			`1 #foo
