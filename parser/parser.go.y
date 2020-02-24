@@ -60,7 +60,7 @@ import (
 %token<token> AND OR IADD ISUB
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
-%token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET
+%token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
 %token<token> MAP_LBRACE METHOD_LBRACE
 %token<token> RET SEMICOLON
 
@@ -1029,6 +1029,30 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
+	| expr chain CARET ident
+	{
+		$$ = &ast.VarCallExpr{
+			Token: "(varCall)",
+			Chain: $2,
+			Receiver: $1,
+			Var: $4,
+			Args: []ast.Expr{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| expr chain CARET ident callArgs
+	{
+		$$ = &ast.VarCallExpr{
+			Token: "(varCall)",
+			Chain: $2,
+			Receiver: $1,
+			Var: $4,
+			Args: $5.Args,
+			Kwargs: $5.Kwargs,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
 
 callArgs
 	: lParen RPAREN
@@ -1521,6 +1545,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(COMMA, `,`),
 		t(COLON, `:`),
 		t(SEMICOLON, `;`),
+		t(CARET, `\^`),
 		t(BANG, methodOps["bang"]),
 		t(PLUS, methodOps["plus"]),
 		t(MINUS, methodOps["minus"]),
