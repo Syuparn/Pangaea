@@ -38,7 +38,7 @@ import (
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
 %type<expr> expr infixExpr prefixExpr callExpr
-%type<expr> literal funcLiteral arrLiteral objLiteral mapLiteral symLiteral
+%type<expr> literal funcLiteral arrLiteral objLiteral mapLiteral strLiteral symLiteral
 %type<kwargPair> kwargPair
 %type<pair> pair
 %type<pairList> pairList
@@ -50,7 +50,7 @@ import (
 %type<token> opMethod breakLine
 %type<token> lBrace lParen lBracket comma mapLBrace methodLBrace
 
-%token<token> INT SYMBOL
+%token<token> INT SYMBOL CHAR_STR
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
 %token<token> SPACESHIP EQ NEQ LT LE GT GE
 %token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT
@@ -214,6 +214,11 @@ literal
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> mapLiteral"
+	}
+	| strLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> strLiteral"
 	}
 	| symLiteral
 	{
@@ -730,6 +735,17 @@ arrLiteral
 
 		}
 		yylex.(*Lexer).curRule = "arrLiteral -> lBracket exprList RBRACKET"
+	}
+
+strLiteral
+	: CHAR_STR
+	{
+		$$ = &ast.StrLiteral{
+			Token: $1.Literal,
+			Value: $1.Literal[1:],
+			IsRaw: false,
+			Src: yylex.(*Lexer).Source,
+		}
 	}
 
 symLiteral
@@ -1385,6 +1401,7 @@ func tokenTypes() []simplexer.TokenType{
 	// (e.g. : `>>` should be recognized one token (not `>` `>`))
 	return []simplexer.TokenType{
 		t(INT, `[0-9]+(\.[0-9]+)?`),
+		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		// NOTE: comment(, which starts with "#") is included in RET
 		// `#[^\n\r]*` is neseccery to lex final line comment (i.e. `#`)
 		t(RET, `((#[^\n\r]*)?(\r|\n|\r\n)+|#[^\n\r]*)`),
