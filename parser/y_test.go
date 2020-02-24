@@ -342,7 +342,7 @@ func TestObjLiteral(t *testing.T) {
 		expr := testIfExprStmt(t, program)
 		obj, ok := expr.(*ast.ObjLiteral)
 		if !ok {
-			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", obj)
+			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", expr)
 		}
 
 		if len(tt.keys) != len(obj.Pairs) {
@@ -430,7 +430,7 @@ func TestObjString(t *testing.T) {
 		expr := testIfExprStmt(t, program)
 		obj, ok := expr.(*ast.ObjLiteral)
 		if !ok {
-			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", obj)
+			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", expr)
 		}
 
 		if obj.String() != tt.expected {
@@ -606,7 +606,7 @@ func TestObjBreaklines(t *testing.T) {
 		expr := testIfExprStmt(t, program)
 		obj, ok := expr.(*ast.ObjLiteral)
 		if !ok {
-			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", obj)
+			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", expr)
 		}
 
 		if len(tt.keys) != len(obj.Pairs) {
@@ -711,7 +711,7 @@ func TestMapLiteral(t *testing.T) {
 		expr := testIfExprStmt(t, program)
 		obj, ok := expr.(*ast.MapLiteral)
 		if !ok {
-			t.Fatalf("expr is not *ast.MapLiteral.got=%T", obj)
+			t.Fatalf("expr is not *ast.MapLiteral.got=%T", expr)
 		}
 
 		if len(tt.keys) != len(obj.Pairs) {
@@ -808,7 +808,7 @@ func TestMapString(t *testing.T) {
 		expr := testIfExprStmt(t, program)
 		obj, ok := expr.(*ast.MapLiteral)
 		if !ok {
-			t.Fatalf("expr is not *ast.MapLiteral.got=%T", obj)
+			t.Fatalf("expr is not *ast.MapLiteral.got=%T", expr)
 		}
 
 		if obj.String() != tt.expected {
@@ -984,7 +984,7 @@ func TestMapBreaklines(t *testing.T) {
 		expr := testIfExprStmt(t, program)
 		obj, ok := expr.(*ast.MapLiteral)
 		if !ok {
-			t.Fatalf("expr is not *ast.MapLiteral.got=%T", obj)
+			t.Fatalf("expr is not *ast.MapLiteral.got=%T", expr)
 		}
 
 		if len(tt.keys) != len(obj.Pairs) {
