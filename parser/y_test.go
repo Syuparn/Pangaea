@@ -643,6 +643,384 @@ func TestObjBreaklines(t *testing.T) {
 	}
 }
 
+func TestMapLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		keys     []interface{}
+		vals     []interface{}
+		embedded []string
+	}{
+		{
+			`%{}`,
+			[]interface{}{},
+			[]interface{}{},
+			[]string{},
+		},
+		{
+			`%{'a: 2}`,
+			[]interface{}{"a"},
+			[]interface{}{2},
+			[]string{},
+		},
+		{
+			`%{**a}`,
+			[]interface{}{},
+			[]interface{}{},
+			[]string{"a"},
+		},
+		{
+			`%{'a: 2, 'b: 3, 'c: 4}`,
+			[]interface{}{"a", "b", "c"},
+			[]interface{}{2, 3, 4},
+			[]string{},
+		},
+		{
+			`%{'b: 3, 'd: 5, **a, **c}`,
+			[]interface{}{"b", "d"},
+			[]interface{}{3, 5},
+			[]string{"a", "c"},
+		},
+		{
+			`%{1: 2}`,
+			[]interface{}{1},
+			[]interface{}{2},
+			[]string{},
+		},
+		{
+			`%{1: 2, 3: 4}`,
+			[]interface{}{1, 3},
+			[]interface{}{2, 4},
+			[]string{},
+		},
+		{
+			`%{1: 2, 'a: 3}`,
+			[]interface{}{1, "a"},
+			[]interface{}{2, 3},
+			[]string{},
+		},
+		{
+			`%{1: 2, 'a: 3, **foo}`,
+			[]interface{}{1, "a"},
+			[]interface{}{2, 3},
+			[]string{"foo"},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		obj, ok := expr.(*ast.MapLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.MapLiteral.got=%T", obj)
+		}
+
+		if len(tt.keys) != len(obj.Pairs) {
+			t.Fatalf("wrong number of elements. expected=%d, got=%d.",
+				len(tt.keys), len(obj.Pairs))
+		}
+
+		for i, pair := range obj.Pairs {
+			switch expectedKey := tt.keys[i].(type) {
+			case string:
+				key, ok := pair.Key.(*ast.SymLiteral)
+				if !ok {
+					t.Errorf("obj.Pairs[%d].Key is not *ast.SymLiteral. got=%T",
+						i, pair.Key)
+				}
+
+				testSymbol(t, key, expectedKey)
+			default:
+				testLiteralExpr(t, pair.Key, expectedKey)
+			}
+
+			val, ok := pair.Val.(ast.Expr)
+			if !ok {
+				t.Errorf("obj.Pairs[%d].Val is not ast.Expr. got=%T",
+					i, pair.Val)
+			}
+
+			testLiteralExpr(t, val, tt.vals[i])
+		}
+
+		if len(tt.embedded) != len(obj.EmbeddedExprs) {
+			t.Fatalf("wrong number of embedded. expected=%d, got=%d.",
+				len(tt.embedded), len(obj.EmbeddedExprs))
+		}
+
+		for i, expr := range obj.EmbeddedExprs {
+			testIdentifier(t, expr, tt.embedded[i])
+		}
+	}
+}
+
+func TestMapString(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`%{}`,
+			`%{}`,
+		},
+		{
+			`%{'a:1,'b:2}`,
+			`%{'a: 1, 'b: 2}`,
+		},
+		{
+			`%{'a:1,b:2}`,
+			`%{'a: 1, b: 2}`,
+		},
+		{
+			`%{'a: 1, 'b: 2,}`,
+			`%{'a: 1, 'b: 2}`,
+		},
+		{
+			`%{
+				'a: 1,
+				'b: 2,
+			}`,
+			`%{'a: 1, 'b: 2}`,
+		},
+		{
+			`%{'a:1,**foo,**bar}`,
+			`%{'a: 1, **foo, **bar}`,
+		},
+		{
+			`%{'a: 1, **foo,}`,
+			`%{'a: 1, **foo}`,
+		},
+		{
+			`%{
+				'a: 1,
+				**foo,
+				**bar,
+			}`,
+			`%{'a: 1, **foo, **bar}`,
+		},
+		{
+			`%{1:2,3:4}`,
+			`%{1: 2, 3: 4}`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		obj, ok := expr.(*ast.MapLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.MapLiteral.got=%T", obj)
+		}
+
+		if obj.String() != tt.expected {
+			t.Errorf("wrong string. expected=`\n%s\n`, got=`\n%s\n`",
+				tt.expected, obj.String())
+		}
+	}
+}
+
+func TestMapBreaklines(t *testing.T) {
+	tests := []struct {
+		input    string
+		keys     []string
+		vals     []interface{}
+		embedded []string
+	}{
+		{
+			`%{'a: 1,
+			'b: 2}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`%{
+			'a: 1, 'b: 2}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`%{
+				'a: 1, 'b: 2
+			}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`%{
+				'a: 1,
+				'b: 2
+			}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`%{
+				'a: 1,
+				'b: 2,
+			}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`%{'a: 1,
+			'b: 2,}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`%{
+				'a: 1,'b: 2,}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`%{'a: 1,'b: 2,}`,
+			[]string{"a", "b"},
+			[]interface{}{1, 2},
+			[]string{},
+		},
+		{
+			`%{**a,
+			**b}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`%{
+				**a, **b}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`%{
+				**a,**b
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`%{
+				**a,
+				**b
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`%{
+				**a,
+				**b,
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`%{**a,
+			**b,
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`%{
+			**a,**b,}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`%{**a,**b,}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a", "b"},
+		},
+		{
+			`%{'foo: 1,
+			**a, **b}`,
+			[]string{"foo"},
+			[]interface{}{1},
+			[]string{"a", "b"},
+		},
+		{
+			`%{'foo: 1,
+			**a, **b
+			}`,
+			[]string{"foo"},
+			[]interface{}{1},
+			[]string{"a", "b"},
+		},
+		{
+			`%{
+			**a,
+			}`,
+			[]string{},
+			[]interface{}{},
+			[]string{"a"},
+		},
+		{
+			`%{
+			'a: 1,
+			}`,
+			[]string{"a"},
+			[]interface{}{1},
+			[]string{},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		obj, ok := expr.(*ast.MapLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.MapLiteral.got=%T", obj)
+		}
+
+		if len(tt.keys) != len(obj.Pairs) {
+			t.Fatalf("wrong number of elements. expected=%d, got=%d.",
+				len(tt.keys), len(obj.Pairs))
+		}
+
+		for i, pair := range obj.Pairs {
+			key, ok := pair.Key.(*ast.SymLiteral)
+			if !ok {
+				t.Errorf("obj.Pairs[%d].Key is not *ast.SymLiteral. got=%T",
+					i, pair.Key)
+			}
+
+			testSymbol(t, key, tt.keys[i])
+
+			val, ok := pair.Val.(ast.Expr)
+			if !ok {
+				t.Errorf("obj.Pairs[%d].Val is not ast.Expr. got=%T",
+					i, pair.Val)
+			}
+
+			testLiteralExpr(t, val, tt.vals[i])
+		}
+
+		if len(tt.embedded) != len(obj.EmbeddedExprs) {
+			t.Fatalf("wrong number of embedded. expected=%d, got=%d.",
+				len(tt.embedded), len(obj.EmbeddedExprs))
+		}
+
+		for i, expr := range obj.EmbeddedExprs {
+			testIdentifier(t, expr, tt.embedded[i])
+		}
+	}
+}
+
 func TestArrLiteral(t *testing.T) {
 	tests := []struct {
 		input string

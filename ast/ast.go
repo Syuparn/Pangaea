@@ -399,6 +399,35 @@ func (ol *ObjLiteral) String() string {
 	return out.String()
 }
 
+type MapLiteral struct {
+	Token         string
+	Pairs         []*Pair
+	EmbeddedExprs []Expr
+	Src           *Source
+}
+
+func (ml *MapLiteral) isExpr()              {}
+func (ml *MapLiteral) TokenLiteral() string { return ml.Token }
+func (ml *MapLiteral) Source() *Source      { return ml.Src }
+func (ml *MapLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("%{")
+
+	elems := []string{}
+	for _, pair := range ml.Pairs {
+		elems = append(elems, pair.String())
+	}
+
+	for _, expr := range ml.EmbeddedExprs {
+		elems = append(elems, "**"+expr.String())
+	}
+
+	out.WriteString(strings.Join(elems, ", "))
+
+	out.WriteString("}")
+	return out.String()
+}
+
 type ArrLiteral struct {
 	Token string
 	Elems []Expr
