@@ -1386,6 +1386,7 @@ func tokenTypes() []simplexer.TokenType{
 	return []simplexer.TokenType{
 		t(INT, `[0-9]+(\.[0-9]+)?`),
 		// NOTE: comment(, which starts with "#") is included in RET
+		// `#[^\n\r]*` is neseccery to lex final line comment (i.e. `#`)
 		t(RET, `((#[^\n\r]*)?(\r|\n|\r\n)+|#[^\n\r]*)`),
 		t(SYMBOL, "'"+symbolable),
 		t(SPACESHIP, methodOps["spaceship"]),
