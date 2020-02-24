@@ -340,6 +340,24 @@ func (ie *InfixExpr) String() string {
 	return out.String()
 }
 
+type StrLiteral struct {
+	Token string
+	Value string
+	IsRaw bool
+	Src   *Source
+}
+
+func (sl *StrLiteral) isExpr()              {}
+func (sl *StrLiteral) TokenLiteral() string { return sl.Token }
+func (sl *StrLiteral) Source() *Source      { return sl.Src }
+func (sl *StrLiteral) String() string {
+	if sl.IsRaw {
+		return "`" + sl.Value + "`"
+	} else {
+		return `"` + sl.Value + `"`
+	}
+}
+
 type SymLiteral struct {
 	Token string
 	Value string

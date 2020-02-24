@@ -291,10 +291,50 @@ func TestSymLiteral(t *testing.T) {
 		expr := testIfExprStmt(t, program)
 		sym, ok := expr.(*ast.SymLiteral)
 		if !ok {
-			t.Fatalf("expr is not *ast.SymLiteral.got=%T", sym)
+			t.Fatalf("expr is not *ast.SymLiteral.got=%T", expr)
 		}
 
 		testSymbol(t, sym, tt.expected)
+	}
+}
+
+func TestCharStrLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`?a`, "a"},
+		{`?b`, "b"},
+		{`?I`, "I"},
+		{`?1`, "1"},
+		{`?_`, "_"},
+		// espaced char is not evaluated in parser
+		{`?\n`, `\n`},
+		{`?\t`, `\t`},
+		{`?\s`, `\s`},
+		// `?\` is not allowed (for compatibility with other escaped form)
+		{`?\\`, `\\`},
+		{`? `, " "},
+		{`?!`, "!"},
+		{`??`, "?"},
+		{`?"`, `"`},
+		{`?'`, "'"},
+		{`?.`, "."},
+		{`?@`, "@"},
+		{`?$`, "$"},
+		{`?#`, "#"},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		sym, ok := expr.(*ast.StrLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.StrLiteral.got=%T", expr)
+		}
+
+		// IsRaw should be false (to evaluate escapes)
+		testStr(t, sym, tt.expected, false)
 	}
 }
 
@@ -2200,6 +2240,27 @@ func testLiteralExpr(t *testing.T, exp ast.Expr, expected interface{}) bool {
 	}
 	t.Errorf("type of exp not expected. got=%T", exp)
 	return false
+}
+
+func testStr(t *testing.T, expr ast.Expr,
+	expected string, isRaw bool) bool {
+	sl, ok := expr.(*ast.StrLiteral)
+	if !ok {
+		t.Errorf("sl not *ast.StrLiteral. got=%T", expr)
+		return false
+	}
+
+	if sl.Value != expected {
+		t.Errorf("sl.Value not %s. got=%v", expected, sl.Value)
+		return false
+	}
+
+	if sl.IsRaw != isRaw {
+		t.Errorf("sl.IsRaw should be %v. got=%v", isRaw, sl.IsRaw)
+		return false
+	}
+
+	return true
 }
 
 func testSymbol(t *testing.T, expr ast.Expr, expected string) bool {
