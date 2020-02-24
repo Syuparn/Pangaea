@@ -266,6 +266,25 @@ func TestArgIdentifier(t *testing.T) {
 	}
 }
 
+func TestKwargIdentifier(t *testing.T) {
+	tests := []string{
+		`\_`,
+		`\foo`,
+		`\_foo`,
+		`\foo_`,
+		`\i0`,
+		`\__`,
+		`\even?`,
+		`\fugafuga`,
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt)
+		expr := testIfExprStmt(t, program)
+		testKwargIdent(t, expr, tt)
+	}
+}
+
 func TestSymLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -2718,6 +2737,33 @@ func testArgIdent(t *testing.T, expr ast.Expr, expected string) bool {
 
 	if ident.IdentAttr != ast.ArgIdent {
 		t.Errorf("ident.IdentAttr not ast.ArgIdent. got=%T",
+			ident.IdentAttr)
+		return false
+	}
+
+	if ident.Value != expected {
+		t.Errorf("ident.Value not %s. got=%s", expected, ident.Value)
+		return false
+	}
+
+	if ident.TokenLiteral() != expected {
+		t.Errorf("ident.TokenLiteral() not %s. got=%s",
+			expected, ident.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testKwargIdent(t *testing.T, expr ast.Expr, expected string) bool {
+	ident, ok := expr.(*ast.Ident)
+	if !ok {
+		t.Errorf("exp not *ast.Ident. got=%T", expr)
+		return false
+	}
+
+	if ident.IdentAttr != ast.KwargIdent {
+		t.Errorf("ident.IdentAttr not ast.KwargIdent. got=%T",
 			ident.IdentAttr)
 		return false
 	}
