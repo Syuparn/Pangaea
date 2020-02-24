@@ -407,6 +407,88 @@ func TestDoubleQuoteStrLiteral(t *testing.T) {
 	}
 }
 
+func TestEmbeddedStr(t *testing.T) {
+	input := `"abc#{1}def#{1+1}ghi#{foo.bar}jkl"`
+
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+	embeddedStr, ok := expr.(*ast.EmbeddedStr)
+	if !ok {
+		t.Fatalf("expr is not *ast.EmbeddedStr. got=%T", expr)
+	}
+
+	if embeddedStr.Latter != "jkl" {
+		t.Errorf("str is not `jkl`. got=`%s`", embeddedStr.Latter)
+	}
+
+	former1 := embeddedStr.Former
+
+	if former1 == nil {
+		t.Fatalf("former1 must not be nil.")
+	}
+
+	ce1, ok := former1.Expr.(*ast.PropCallExpr)
+
+	if !ok {
+		t.Fatalf("former1 is not *ast.CallExpr. got=%T", former1)
+	}
+
+	testIdentifier(t, ce1.Receiver, "foo")
+
+	if ce1.ChainToken() != "." {
+		t.Errorf("chain is not `.`. got=%s", ce1.ChainToken())
+	}
+
+	testIdentifier(t, ce1.Prop, "bar")
+
+	if former1.Str != "ghi" {
+		t.Errorf("str is not `ghi`. got=`%s`", former1.Str)
+	}
+
+	former2 := former1.Former
+
+	if former2 == nil {
+		t.Fatalf("former2 must not be nil.")
+	}
+
+	infix2, ok := former2.Expr.(*ast.InfixExpr)
+
+	if !ok {
+		t.Fatalf("former2 is not *ast.InfixExpr. got=%T", former2)
+	}
+
+	testInfixOperator(t, infix2, 1, "+", 1)
+
+	if former2.Str != "def" {
+		t.Errorf("str is not `def`. got=`%s`", former2.Str)
+	}
+
+	former3 := former2.Former
+
+	if former3 == nil {
+		t.Fatalf("former3 must not be nil.")
+	}
+
+	testLiteralExpr(t, former3.Expr, 1)
+
+	if former3.Str != "abc" {
+		t.Errorf("str is not `abc`. got=`%s`", former3.Str)
+	}
+
+	former4 := former3.Former
+
+	if former4 != nil {
+		t.Fatalf("former4 must be nil")
+	}
+
+	expectedStr := `"abc#{ 1 }def#{ (1 + 1) }ghi#{ foo.bar() }jkl"`
+
+	if embeddedStr.String() != expectedStr {
+		t.Errorf("wrong str output. expected=`\n%s\n`. got=`\n%s\n`",
+			expectedStr, embeddedStr.String())
+	}
+}
+
 func TestObjLiteral(t *testing.T) {
 	tests := []struct {
 		input    string

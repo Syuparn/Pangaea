@@ -340,6 +340,38 @@ func (ie *InfixExpr) String() string {
 	return out.String()
 }
 
+type EmbeddedStr struct {
+	Token  string
+	Former *FormerStrPiece
+	Latter string
+	Src    *Source
+}
+
+func (es *EmbeddedStr) isExpr()              {}
+func (es *EmbeddedStr) TokenLiteral() string { return es.Token }
+func (es *EmbeddedStr) Source() *Source      { return es.Src }
+func (es *EmbeddedStr) String() string {
+	return `"` + es.Former.String() + es.Latter + `"`
+}
+
+type FormerStrPiece struct {
+	Former *FormerStrPiece
+	Str    string
+	Expr   Expr
+}
+
+func (fs *FormerStrPiece) String() string {
+	var out bytes.Buffer
+
+	if fs.Former != nil {
+		out.WriteString(fs.Former.String())
+	}
+
+	out.WriteString(fs.Str)
+	out.WriteString(fmt.Sprintf("#{ %s }", fs.Expr.String()))
+	return out.String()
+}
+
 type StrLiteral struct {
 	Token string
 	Value string
