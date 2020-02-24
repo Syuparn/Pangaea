@@ -50,7 +50,7 @@ import (
 %type<token> opMethod breakLine
 %type<token> lBrace lParen lBracket comma mapLBrace methodLBrace
 
-%token<token> INT SYMBOL CHAR_STR BACKQUOTE_STR
+%token<token> INT SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
 %token<token> SPACESHIP EQ NEQ LT LE GT GE
 %token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT
@@ -756,6 +756,15 @@ strLiteral
 			Src: yylex.(*Lexer).Source,
 		}
 	}
+	| DOUBLEQUOTE_STR
+	{
+		$$ = &ast.StrLiteral{
+			Token: $1.Literal,
+			Value: $1.Literal[1:len($1.Literal)-1],
+			IsRaw: false,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
 
 symLiteral
 	: SYMBOL
@@ -1412,6 +1421,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(INT, `[0-9]+(\.[0-9]+)?`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
+		t(DOUBLEQUOTE_STR, `"[^\"\n\r]*"`),
 		// NOTE: comment(, which starts with "#") is included in RET
 		// `#[^\n\r]*` is neseccery to lex final line comment (i.e. `#`)
 		t(RET, `((#[^\n\r]*)?(\r|\n|\r\n)+|#[^\n\r]*)`),
