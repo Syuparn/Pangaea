@@ -328,13 +328,13 @@ func TestCharStrLiteral(t *testing.T) {
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
 		expr := testIfExprStmt(t, program)
-		sym, ok := expr.(*ast.StrLiteral)
+		str, ok := expr.(*ast.StrLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.StrLiteral.got=%T", expr)
 		}
 
 		// IsRaw should be false (to evaluate escapes)
-		testStr(t, sym, tt.expected, false)
+		testStr(t, str, tt.expected, false)
 	}
 }
 
