@@ -1821,6 +1821,54 @@ func TestFuncLiteralArgs(t *testing.T) {
 			map[string]interface{}{"c": 1, "d": 2},
 			`{|a, b, c: 1, d: 2| val}`,
 		},
+		{
+			`m{}`,
+			[]string{"self"},
+			map[string]interface{}{},
+			`{|self| }`,
+		},
+		{
+			`m{val}`,
+			[]string{"self"},
+			map[string]interface{}{},
+			`{|self| val}`,
+		},
+		{
+			`m{||}`,
+			[]string{"self"},
+			map[string]interface{}{},
+			`{|self| }`,
+		},
+		{
+			`m{|a|}`,
+			[]string{"self", "a"},
+			map[string]interface{}{},
+			`{|self, a| }`,
+		},
+		{
+			`m{|opt: 1|}`,
+			[]string{"self"},
+			map[string]interface{}{"opt": 1},
+			`{|self, opt: 1| }`,
+		},
+		{
+			`m{|opt: 1| val}`,
+			[]string{"self"},
+			map[string]interface{}{"opt": 1},
+			`{|self, opt: 1| val}`,
+		},
+		{
+			`m{|opt: 1, a|}`,
+			[]string{"self"},
+			map[string]interface{}{"opt": 1},
+			`{|self, a, opt: 1| }`,
+		},
+		{
+			`m{|b: 1, a, c: 2|}`,
+			[]string{"self"},
+			map[string]interface{}{"a": 1, "c": 2},
+			`{|self, a, b: 1, c: 2| }`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1872,6 +1920,10 @@ func TestFuncLiteralBody(t *testing.T) {
 		{`{|| 2}`, "literal", 2},
 		{`{|a| a}`, "ident", "a"},
 		{`{|a: 1| 1+1}`, "infix", []interface{}{1, "+", 1}},
+		{`m{2}`, "literal", 2},
+		{`m{|| 2}`, "literal", 2},
+		{`m{|a| a}`, "ident", "a"},
+		{`m{|a: 1| 1+1}`, "infix", []interface{}{1, "+", 1}},
 	}
 
 	for _, tt := range tests {
