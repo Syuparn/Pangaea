@@ -2016,6 +2016,92 @@ func TestFuncLiteralBodies(t *testing.T) {
 	}
 }
 
+func TestComment(t *testing.T) {
+	tests := []struct {
+		input   string
+		vals    []interface{}
+		printed string
+	}{
+		{
+			`#`,
+			[]interface{}{},
+			"",
+		},
+		{
+			`#foo`,
+			[]interface{}{},
+			"",
+		},
+		{
+			`1 #foo`,
+			[]interface{}{1},
+			"1",
+		},
+		{
+			`1#foo`,
+			[]interface{}{1},
+			"1",
+		},
+		{
+			`1 ##f#o#o`,
+			[]interface{}{1},
+			"1",
+		},
+		{
+			`1 #+2`,
+			[]interface{}{1},
+			"1",
+		},
+		{
+			`a#foo`,
+			[]interface{}{"a"},
+			"",
+		},
+		{
+			`1 #foo
+			#2 * 3
+			4`,
+			[]interface{}{1, 4},
+			"1\n4",
+		},
+		{
+			`#foo
+			4`,
+			[]interface{}{4},
+			"4",
+		},
+		{
+			`4
+			#foo`,
+			[]interface{}{4},
+			"4",
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+
+		if len(program.Stmts) != len(tt.vals) {
+			t.Fatalf("wrong length of stmts in`\n%s\n`. expected=%d, got=%d",
+				tt.input, len(tt.vals), len(program.Stmts))
+		}
+
+		if program.String() != tt.printed {
+			t.Errorf("wrong output of String. expected=`\n%s\n`. got=`\n%s\n`.",
+				tt.printed, program.String())
+		}
+
+		for i, stmt := range program.Stmts {
+			exprStmt, ok := stmt.(*ast.ExprStmt)
+			if !ok {
+				t.Fatalf("stmts[%d] is not *ast.ExprStmt. got=%T", i, stmt)
+			}
+
+			testLiteralExpr(t, exprStmt.Expr, tt.vals[i])
+		}
+	}
+}
+
 func testChainContext(t *testing.T, ce ast.CallExpr, expContext string,
 	expArg interface{}) bool {
 	if ce.ChainToken() != expContext {
