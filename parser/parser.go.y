@@ -38,7 +38,7 @@ import (
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
 %type<expr> expr infixExpr prefixExpr callExpr
-%type<expr> literal funcLiteral arrLiteral objLiteral symLiteral
+%type<expr> literal funcLiteral arrLiteral objLiteral mapLiteral symLiteral
 %type<kwargPair> kwargPair
 %type<pair> pair
 %type<pairList> pairList
@@ -48,7 +48,7 @@ import (
 %type<ident> ident
 %type<chain> chain
 %type<token> opMethod breakLine
-%type<token> lBrace lParen lBracket comma
+%type<token> lBrace lParen lBracket comma mapLBrace
 
 %token<token> INT SYMBOL
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
@@ -58,6 +58,7 @@ import (
 %token<token> ADD_CHAIN MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET
+%token<token> MAP_LBRACE
 %token<token> RET SEMICOLON
 
 %left OR
@@ -196,6 +197,11 @@ literal
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> objLiteral"
+	}
+	| mapLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> mapLiteral"
 	}
 	| symLiteral
 	{
@@ -573,6 +579,98 @@ objLiteral
 	| lBrace pairList comma kwargExpansionList comma RBRACE
 	{
 		$$ = &ast.ObjLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: $4,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+
+mapLiteral
+	: mapLBrace RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: []*ast.Pair{},
+			EmbeddedExprs: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace pairList RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace pairList RET RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace pairList comma RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: []ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace kwargExpansionList RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: []*ast.Pair{},
+			EmbeddedExprs: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace kwargExpansionList RET RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: []*ast.Pair{},
+			EmbeddedExprs: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace kwargExpansionList comma RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: []*ast.Pair{},
+			EmbeddedExprs: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace pairList comma kwargExpansionList RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: $4,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace pairList comma kwargExpansionList RET RBRACE
+	{
+		$$ = &ast.MapLiteral{
+			Token: $1.Literal,
+			Pairs: $2,
+			EmbeddedExprs: $4,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| mapLBrace pairList comma kwargExpansionList comma RBRACE
+	{
+		$$ = &ast.MapLiteral{
 			Token: $1.Literal,
 			Pairs: $2,
 			EmbeddedExprs: $4,
@@ -1074,6 +1172,18 @@ lBracket
 		yylex.(*Lexer).curRule = "lBracket -> LBRACKET RET"
 	}
 
+mapLBrace
+	: MAP_LBRACE
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "mapLBrace -> MAP_LBRACE"
+	}
+	| MAP_LBRACE RET
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "mapLBrace -> MAP_LBRACE RET"
+	}
+
 breakLine
 	: SEMICOLON
 	{
@@ -1226,6 +1336,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(BIT_NOT, methodOps["bitNot"]),
 		t(IADD, methodOps["iAdd"]),
 		t(ISUB, methodOps["iSub"]),
+		t(MAP_LBRACE, `%\{`),
 		t(LPAREN, `\(`),
 		t(RPAREN, `\)`),
 		t(VERT, `\|`),
