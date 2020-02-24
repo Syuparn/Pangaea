@@ -338,6 +338,44 @@ func TestCharStrLiteral(t *testing.T) {
 	}
 }
 
+func TestBackQuoteStrLiteral(t *testing.T) {
+	tests := []string{
+		// NOTE: each input is wrapped by ``
+		// (because `` cannot be written in ``)
+		``,
+		`foo`,
+		`12345`,
+		`\n`,
+		`Hello, world!`,
+		`#comment?`,
+		`break
+		
+		line
+		s`,
+		`"a"`,
+		`#{1 + 1}`,
+		`#{}`,
+		`.hoge`,
+		`1 + 1`,
+		`_`,
+	}
+
+	for _, tt := range tests {
+		// NOTE: each input is wrapped by ``
+		// (because `` cannot be written in ``)
+		input := "`" + tt + "`"
+		program := testParse(t, input)
+		expr := testIfExprStmt(t, program)
+		str, ok := expr.(*ast.StrLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.StrLiteral.got=%T", expr)
+		}
+
+		// IsRaw should be true
+		testStr(t, str, tt, true)
+	}
+}
+
 func TestObjLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
