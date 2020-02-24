@@ -2245,7 +2245,9 @@ func testIntLiteral(t *testing.T, ex ast.Expr, expected int64) bool {
 func testParse(t *testing.T, input string) *ast.Program {
 	ast, err := Parse(strings.NewReader(input))
 	if err != nil {
-		t.Fatalf(err.Error())
+		msg := fmt.Sprintf("%v\nOccurred in input ```\n%s\n```",
+			err.Error(), input)
+		t.Fatalf(msg)
 		t.FailNow()
 	}
 
