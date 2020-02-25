@@ -2550,6 +2550,79 @@ func TestAnonVarCall(t *testing.T) {
 	}
 }
 
+func TestMultipleLineChain(t *testing.T) {
+	input := `
+	foo
+	  |.bar(1)
+	  |@{|i| i*2}
+	  |$(3)^hoge
+	  |.+
+	`
+
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+
+	callExpr1, ok := expr.(*ast.PropCallExpr)
+	if !ok {
+		t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+	}
+	testIdentifier(t, callExpr1.Prop, "+")
+	testChainContext(t, callExpr1, ".", nil)
+
+	expr2 := callExpr1.Receiver
+	if expr2 == nil {
+		t.Fatalf("expr2 must not be nil.")
+	}
+
+	callExpr2, ok := expr2.(*ast.VarCallExpr)
+	if !ok {
+		t.Fatalf("expr2 is not *ast.VarCallExpr. got=%T", expr2)
+	}
+	testIdentifier(t, callExpr2.Var, "hoge")
+	testChainContext(t, callExpr2, "$", 3)
+
+	expr3 := callExpr2.Receiver
+	if expr3 == nil {
+		t.Fatalf("expr3 must not be nil.")
+	}
+
+	callExpr3, ok := expr3.(*ast.LiteralCallExpr)
+	if !ok {
+		t.Fatalf("expr3 is not *ast.LiteralCallExpr. got=%T", expr3)
+	}
+
+	if len(callExpr3.Func.Args) != 1 {
+		t.Fatalf("callExpr3.Func must have 1 arg. got=%d",
+			len(callExpr3.Func.Args))
+	}
+	testIdentifier(t, callExpr3.Func.Args[0], "i")
+	testChainContext(t, callExpr2, "@", nil)
+
+	expr4 := callExpr3.Receiver
+	if expr4 == nil {
+		t.Fatalf("expr4 must not be nil.")
+	}
+
+	callExpr4, ok := expr4.(*ast.PropCallExpr)
+	if !ok {
+		t.Fatalf("expr4 is not *ast.PropCallExpr. got=%T", expr4)
+	}
+	testIdentifier(t, callExpr4.Prop, "bar")
+	testChainContext(t, callExpr4, ".", nil)
+
+	if len(callExpr4.Args) != 1 {
+		t.Fatalf("callExpr4 must have 1 arg. got=%d",
+			len(callExpr4.Args))
+	}
+	testLiteralExpr(t, callExpr4.Args[0], 1)
+
+	expr5 := callExpr4.Receiver
+	if expr5 == nil {
+		t.Fatalf("expr5 must not be nil.")
+	}
+	testIdentifier(t, expr5, "foo")
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
