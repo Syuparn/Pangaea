@@ -39,7 +39,7 @@ import (
 %type<program> program
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
-%type<expr> expr infixExpr prefixExpr callExpr embeddedStr
+%type<expr> expr infixExpr prefixExpr callExpr embeddedStr indexExpr
 %type<expr> literal funcLiteral arrLiteral objLiteral mapLiteral strLiteral symLiteral
 %type<kwargPair> kwargPair
 %type<pair> pair
@@ -78,6 +78,7 @@ import (
 %left MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %left ADD_CHAIN MAIN_CHAIN
 %left UNARY_OP
+%left INDEXING
 
 %% 
 
@@ -171,6 +172,11 @@ expr
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "expr -> ident"
+	}
+	| indexExpr
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> indexExpr"
 	}
 
 ident
@@ -544,6 +550,65 @@ prefixExpr
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "prefixExpr -> BIT_NOT expr"
+	}
+
+indexExpr
+	: literal arrLiteral %prec INDEXING
+	{
+		atIdent := &ast.Ident{
+			Token: "at",
+			Value: "at",
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: false,
+			IdentAttr: ast.NormalIdent,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: $1.TokenLiteral(),
+			Chain: ast.MakeChain("", ".", nil),
+			Receiver: $1,
+			Prop: atIdent,
+			Args: []ast.Expr{$2},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| ident arrLiteral %prec INDEXING
+	{
+		atIdent := &ast.Ident{
+			Token: "at",
+			Value: "at",
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: false,
+			IdentAttr: ast.NormalIdent,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: $1.TokenLiteral(),
+			Chain: ast.MakeChain("", ".", nil),
+			Receiver: $1,
+			Prop: atIdent,
+			Args: []ast.Expr{$2},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| callExpr arrLiteral %prec INDEXING
+	{
+		atIdent := &ast.Ident{
+			Token: "at",
+			Value: "at",
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: false,
+			IdentAttr: ast.NormalIdent,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: $1.TokenLiteral(),
+			Chain: ast.MakeChain("", ".", nil),
+			Receiver: $1,
+			Prop: atIdent,
+			Args: []ast.Expr{$2},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
 	}
 
 objLiteral
