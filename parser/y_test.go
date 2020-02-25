@@ -2441,6 +2441,24 @@ func TestVarCallFuncArgs(t *testing.T) {
 			map[string]interface{}{"d": 2, "f": 3},
 			`a.^foo(1, e, d: 2, f: 3)`,
 		},
+		{
+			`.^foo()`,
+			[]interface{}{},
+			map[string]interface{}{},
+			`.^foo()`,
+		},
+		{
+			`.^foo`,
+			[]interface{}{},
+			map[string]interface{}{},
+			`.^foo()`,
+		},
+		{
+			`.^foo(1)`,
+			[]interface{}{1},
+			map[string]interface{}{},
+			`.^foo(1)`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -2488,6 +2506,47 @@ func TestVarCallFuncArgs(t *testing.T) {
 				t.Errorf("unexpected kwarg %s found.", name)
 			}
 		}
+	}
+}
+
+func TestAnonVarCall(t *testing.T) {
+	tests := []struct {
+		input        string
+		chainContext string
+		chainArg     interface{}
+		varName      string
+	}{
+		{`.^times`, ".", nil, "times"},
+		{`@^puts`, "@", nil, "puts"},
+		{`@(10)^puts`, "@", 10, "puts"},
+		{`$^add`, "$", nil, "add"},
+		{`$(0)^add`, "$", 0, "add"},
+		{`.^foo`, ".", nil, "foo"},
+		{`@^foo`, "@", nil, "foo"},
+		{`$^foo`, "$", nil, "foo"},
+		{`&.^foo`, "&.", nil, "foo"},
+		{`~.^foo`, "~.", nil, "foo"},
+		{`=.^foo`, "=.", nil, "foo"},
+		{`&@^foo`, "&@", nil, "foo"},
+		{`~@^foo`, "~@", nil, "foo"},
+		{`=@^foo`, "=@", nil, "foo"},
+		{`&$^foo`, "&$", nil, "foo"},
+		{`~$^foo`, "~$", nil, "foo"},
+		{`=$^foo`, "=$", nil, "foo"},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.VarCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.VarCallExpr. got=%T", expr)
+		}
+
+		testNil(t, callExpr.Receiver)
+		testChainContext(t, callExpr, tt.chainContext, tt.chainArg)
+		testIdentifier(t, callExpr.Var, tt.varName)
 	}
 }
 
