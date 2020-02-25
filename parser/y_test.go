@@ -1938,6 +1938,144 @@ func TestCallWithArgs(t *testing.T) {
 	}
 }
 
+func TestAnonPropCall(t *testing.T) {
+	tests := []struct {
+		input        string
+		chainContext string
+		chainArg     interface{}
+		propName     string
+	}{
+		{`.times`, ".", nil, "times"},
+		{`@puts`, "@", nil, "puts"},
+		{`@(10)puts`, "@", 10, "puts"},
+		{`$add`, "$", nil, "add"},
+		{`$(0)add`, "$", 0, "add"},
+		{`$(0)+`, "$", 0, "+"},
+		{`.foo`, ".", nil, "foo"},
+		{`@foo`, "@", nil, "foo"},
+		{`$foo`, "$", nil, "foo"},
+		{`&.foo`, "&.", nil, "foo"},
+		{`~.foo`, "~.", nil, "foo"},
+		{`=.foo`, "=.", nil, "foo"},
+		{`&@foo`, "&@", nil, "foo"},
+		{`~@foo`, "~@", nil, "foo"},
+		{`=@foo`, "=@", nil, "foo"},
+		{`&$foo`, "&$", nil, "foo"},
+		{`~$foo`, "~$", nil, "foo"},
+		{`=$foo`, "=$", nil, "foo"},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		testNil(t, callExpr.Receiver)
+		testChainContext(t, callExpr, tt.chainContext, tt.chainArg)
+		testIdentifier(t, callExpr.Prop, tt.propName)
+	}
+}
+
+func TestAnonPropCallWithArgs(t *testing.T) {
+	tests := []struct {
+		input    string
+		propName string
+		args     []interface{}
+	}{
+		{`.hi`, "hi", []interface{}{}},
+		{`@hi`, "hi", []interface{}{}},
+		{`$hi`, "hi", []interface{}{}},
+		{`.hi(6)`, "hi", []interface{}{6}},
+		{`@hi(6)`, "hi", []interface{}{6}},
+		{`$hi(6)`, "hi", []interface{}{6}},
+		{`&.hi(6)`, "hi", []interface{}{6}},
+		{`&@hi(6)`, "hi", []interface{}{6}},
+		{`&$hi(6)`, "hi", []interface{}{6}},
+		{`~.hi(6)`, "hi", []interface{}{6}},
+		{`~@hi(6)`, "hi", []interface{}{6}},
+		{`~$hi(6)`, "hi", []interface{}{6}},
+		{`=.hi(6)`, "hi", []interface{}{6}},
+		{`=@hi(6)`, "hi", []interface{}{6}},
+		{`=$hi(6)`, "hi", []interface{}{6}},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		if len(callExpr.Args) != len(tt.args) {
+			t.Fatalf("wrong arity of args, expected=%d, got=%d",
+				len(tt.args), len(callExpr.Args))
+		}
+
+		testNil(t, callExpr.Receiver)
+
+		for i, expArg := range tt.args {
+			testLiteralExpr(t, callExpr.Args[i], expArg)
+		}
+	}
+}
+
+func TestAnonOpMethods(t *testing.T) {
+	tests := []struct {
+		input string
+		op    string
+	}{
+		{`.+(1)`, `+`},
+		{`.-(1)`, `-`},
+		{`.*(1)`, `*`},
+		{`./(1)`, `/`},
+		{`.//(1)`, `//`},
+		{`.%(1)`, `%`},
+		{`.**(1)`, `**`},
+		{`.<=>(1)`, `<=>`},
+		{`.==(1)`, `==`},
+		{`.!=(1)`, `!=`},
+		{`.<=(1)`, `<=`},
+		{`.>=(1)`, `>=`},
+		{`.<(1)`, `<`},
+		{`.>(1)`, `>`},
+		{`.>>(1)`, `>>`},
+		{`.<<(1)`, `<<`},
+		{`./&(1)`, `/&`},
+		{`./|(1)`, `/|`},
+		{`./^(1)`, `/^`},
+		{`./~(1)`, `/~`},
+		{`.!(1)`, `!`},
+		{`.+%(1)`, `+%`},
+		{`.-%(1)`, `-%`},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		testNil(t, callExpr.Receiver)
+		testChainContext(t, callExpr, ".", nil)
+		testIdentifier(t, callExpr.Prop, tt.op)
+
+		if len(callExpr.Args) != 1 {
+			t.Fatalf("arity must be 1. got=%d", len(callExpr.Args))
+		}
+
+		testLiteralExpr(t, callExpr.Args[0], 1)
+	}
+}
+
 func TestLiteralCall(t *testing.T) {
 	tests := []struct {
 		input        string
