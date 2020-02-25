@@ -104,7 +104,10 @@ func (pc *PropCallExpr) ChainArg() Expr       { return pc.Chain.Arg }
 func (pc *PropCallExpr) Source() *Source      { return pc.Src }
 func (pc *PropCallExpr) String() string {
 	var out bytes.Buffer
-	out.WriteString(pc.Receiver.String())
+
+	if pc.Receiver != nil {
+		out.WriteString(pc.Receiver.String())
+	}
 	out.WriteString(pc.Chain.String())
 	out.WriteString(pc.Prop.String())
 
@@ -137,7 +140,9 @@ func (lc *LiteralCallExpr) ChainArg() Expr       { return lc.Chain.Arg }
 func (lc *LiteralCallExpr) Source() *Source      { return lc.Src }
 func (lc *LiteralCallExpr) String() string {
 	var out bytes.Buffer
-	out.WriteString(lc.Receiver.String())
+	if lc.Receiver != nil {
+		out.WriteString(lc.Receiver.String())
+	}
 	out.WriteString(lc.Chain.String())
 	out.WriteString(lc.Func.String())
 
@@ -170,7 +175,9 @@ func (vc *VarCallExpr) ChainArg() Expr       { return vc.Chain.Arg }
 func (vc *VarCallExpr) Source() *Source      { return vc.Src }
 func (vc *VarCallExpr) String() string {
 	var out bytes.Buffer
-	out.WriteString(vc.Receiver.String())
+	if vc.Receiver != nil {
+		out.WriteString(vc.Receiver.String())
+	}
 	out.WriteString(vc.Chain.String())
 	out.WriteString("^" + vc.Var.String())
 

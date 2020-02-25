@@ -2231,6 +2231,30 @@ func TestLiteralCallFuncArgs(t *testing.T) {
 			map[string]interface{}{"d": 2, "f": 3},
 			`a.{|b| c}(1, e, d: 2, f: 3)`,
 		},
+		{
+			`.{|b| c}()`,
+			[]interface{}{},
+			map[string]interface{}{},
+			`.{|b| c}()`,
+		},
+		{
+			`.{|b| c}`,
+			[]interface{}{},
+			map[string]interface{}{},
+			`.{|b| c}()`,
+		},
+		{
+			`.m{c}`,
+			[]interface{}{},
+			map[string]interface{}{},
+			`.{|self| c}()`,
+		},
+		{
+			`.m{c}(1)`,
+			[]interface{}{1},
+			map[string]interface{}{},
+			`.{|self| c}(1)`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -2278,6 +2302,45 @@ func TestLiteralCallFuncArgs(t *testing.T) {
 				t.Errorf("unexpected kwarg %s found.", name)
 			}
 		}
+	}
+}
+
+func TestAnonLiteralCall(t *testing.T) {
+	tests := []struct {
+		input        string
+		chainContext string
+		chainArg     interface{}
+	}{
+		{`.{|a| 1}`, ".", nil},
+		{`@{|a| 1}`, "@", nil},
+		{`@(10){|a| 1}`, "@", 10},
+		{`${|a| 1}`, "$", nil},
+		{`$(0){|a| 1}`, "$", 0},
+		{`.{|a| 1}`, ".", nil},
+		{`@{|a| 1}`, "@", nil},
+		{`${|a| 1}`, "$", nil},
+		{`&.{|a| 1}`, "&.", nil},
+		{`~.{|a| 1}`, "~.", nil},
+		{`=.{|a| 1}`, "=.", nil},
+		{`&@{|a| 1}`, "&@", nil},
+		{`~@{|a| 1}`, "~@", nil},
+		{`=@{|a| 1}`, "=@", nil},
+		{`&${|a| 1}`, "&$", nil},
+		{`~${|a| 1}`, "~$", nil},
+		{`=${|a| 1}`, "=$", nil},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.LiteralCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.LiteralCallExpr. got=%T", expr)
+		}
+
+		testNil(t, callExpr.Receiver)
+		testChainContext(t, callExpr, tt.chainContext, tt.chainArg)
 	}
 }
 
