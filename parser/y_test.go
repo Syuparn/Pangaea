@@ -2629,6 +2629,188 @@ func TestMultipleLineChain(t *testing.T) {
 	testIdentifier(t, expr5, "foo")
 }
 
+func TestIndexExprRecv(t *testing.T) {
+	// `expr[arg]` is syntax sugar of `expr.at([arg])`
+
+	parseIndexRecv := func(input string) (ast.Expr, bool) {
+		program := testParse(t, input)
+		expr := testIfExprStmt(t, program)
+		idxExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+			return nil, false
+		}
+		if !testIdentifier(t, idxExpr.Prop, "at") {
+			return nil, false
+		}
+		if !testChainContext(t, idxExpr, ".", nil) {
+			return nil, false
+		}
+		if len(idxExpr.Args) != 1 {
+			t.Fatalf("arity must be 1. got=%d", len(idxExpr.Args))
+			return nil, false
+		}
+		if _, ok := idxExpr.Args[0].(*ast.ArrLiteral); !ok {
+			t.Fatalf("1st arg must be *ast.ArrLiteral. got=%T",
+				idxExpr.Args[0])
+			return nil, false
+		}
+
+		return idxExpr.Receiver, true
+	}
+
+	input0 := `a[0]`
+	recv0, ok := parseIndexRecv(input0)
+	if !ok {
+		t.Fatalf("recv0 test failed")
+	}
+	testIdentifier(t, recv0, "a")
+
+	input1 := `10[0]`
+	recv1, ok := parseIndexRecv(input1)
+	if !ok {
+		t.Fatalf("recv1 test failed")
+	}
+	testLiteralExpr(t, recv1, 10)
+
+	input2 := `"a"[0]`
+	recv2, ok := parseIndexRecv(input2)
+	if !ok {
+		t.Fatalf("recv2 test failed")
+	}
+	testStr(t, recv2, "a", false)
+
+	input3 := `[0,1,2][0]`
+	recv3, ok := parseIndexRecv(input3)
+	if !ok {
+		t.Fatalf("recv3 test failed")
+	}
+	arr, ok := recv3.(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("recv3 is not *ast.ArrLiteral. got=%T", recv3)
+	}
+	if len(arr.Elems) != 3 {
+		t.Fatalf("length of recv3 must be 3. got=%d", len(arr.Elems))
+	}
+	for i, e := range arr.Elems {
+		testLiteralExpr(t, e, i)
+	}
+
+	input4 := `{'a: 1}[0]`
+	recv4, ok := parseIndexRecv(input4)
+	if !ok {
+		t.Fatalf("recv4 test failed")
+	}
+	obj, ok := recv4.(*ast.ObjLiteral)
+	if !ok {
+		t.Fatalf("recv4 is not *ast.ObjLiteral. got=%T", recv4)
+	}
+	if len(obj.Pairs) != 1 {
+		t.Fatalf("length of recv4 must be 1. got=%d", len(obj.Pairs))
+	}
+	p := obj.Pairs[0]
+	testSymbol(t, p.Key, "a")
+	testLiteralExpr(t, p.Val, 1)
+
+	input5 := `a.foo[0]`
+	recv5, ok := parseIndexRecv(input5)
+	if !ok {
+		t.Fatalf("recv5 test failed")
+	}
+	ce, ok := recv5.(*ast.PropCallExpr)
+	if !ok {
+		t.Fatalf("recv5 is not *ast.PropCallExpr. got=%T", recv5)
+	}
+	testIdentifier(t, ce.Receiver, "a")
+	testIdentifier(t, ce.Prop, "foo")
+	if len(ce.Args) != 0 {
+		t.Errorf("arity of ce must be 0. got=%d", len(ce.Args))
+	}
+}
+
+func TestIndexExprArg(t *testing.T) {
+	tests := []struct {
+		input     string
+		elemTypes []string
+		elems     []interface{}
+	}{
+		{`a[1]`, []string{"Int"}, []interface{}{1}},
+		{`a[2,3]`, []string{"Int", "Int"}, []interface{}{2, 3}},
+		{`a[4,5,"a"]`, []string{"Int", "Int", "Str"}, []interface{}{4, 5, "a"}},
+		{`a[[6,7]]`, []string{"Arr"}, []interface{}{[]int{6, 7}}},
+		{`a[[8,9], 10]`, []string{"Arr", "Int"}, []interface{}{[]int{8, 9}, 10}},
+		{`a[{'a: 11}]`, []string{"Obj"}, []interface{}{[]interface{}{"a", 11}}},
+		{`a[b]`, []string{"Ident"}, []interface{}{"b"}},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		idxExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		testIdentifier(t, idxExpr.Prop, "at")
+		testChainContext(t, idxExpr, ".", nil)
+
+		if len(idxExpr.Args) != 1 {
+			t.Fatalf("arity must be 1. got=%d", len(idxExpr.Args))
+		}
+
+		lst, ok := idxExpr.Args[0].(*ast.ArrLiteral)
+		if !ok {
+			t.Fatalf("1st arg must be *ast.ArrLiteral. got=%T",
+				idxExpr.Args[0])
+		}
+
+		if len(lst.Elems) != len(tt.elems) {
+			t.Fatalf("wrong length of elems. expected=%d. got=%d",
+				len(tt.elems), len(lst.Elems))
+		}
+
+		for i, e := range lst.Elems {
+			switch tt.elemTypes[i] {
+			case "Int":
+				testLiteralExpr(t, e, tt.elems[i])
+			case "Str":
+				str := tt.elems[i].(string)
+				testStr(t, e, str, false)
+			case "Ident":
+				id := tt.elems[i].(string)
+				testIdentifier(t, e, id)
+			case "Arr":
+				arr, ok := e.(*ast.ArrLiteral)
+				if !ok {
+					t.Fatalf("Elems[%d] in `%s` is not Arr. got=%T",
+						i, tt.input, e)
+				}
+				ttArr := tt.elems[i].([]int)
+				if len(arr.Elems) != len(ttArr) {
+					t.Fatalf("wrong arr length. expected=%d, got=%d",
+						len(ttArr), len(arr.Elems))
+				}
+				for j, arrElem := range arr.Elems {
+					testLiteralExpr(t, arrElem, ttArr[j])
+				}
+			case "Obj":
+				obj, ok := e.(*ast.ObjLiteral)
+				if !ok {
+					t.Fatalf("Elems[%d] in `%s` is not Obj. got=%T",
+						i, tt.input, e)
+				}
+				if len(obj.Pairs) != 1 {
+					t.Fatalf("length of obj.Pairs must be 1. got=%d(%s)",
+						len(obj.Pairs), obj.String())
+				}
+				pair := obj.Pairs[0]
+				testSymbol(t, pair.Key, "a")
+				testLiteralExpr(t, pair.Val, 11)
+			}
+		}
+	}
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
