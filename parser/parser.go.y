@@ -60,7 +60,7 @@ import (
 %token<token> SPACESHIP EQ NEQ LT LE GT GE
 %token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT
 %token<token> AND OR IADD ISUB
-%token<token> ADD_CHAIN MAIN_CHAIN
+%token<token> ADD_CHAIN MAIN_CHAIN MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT ARG_IDENT KWARG_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
 %token<token> MAP_LBRACE METHOD_LBRACE
@@ -75,6 +75,7 @@ import (
 %left PLUS MINUS
 %left STAR SLASH DOUBLE_SLASH PERCENT
 %left DOUBLE_STAR
+%left MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %left ADD_CHAIN MAIN_CHAIN
 %left UNARY_OP
 
@@ -1260,6 +1261,26 @@ chain
 		$$ = ast.MakeChain($1.Literal, $2.Literal, $4)
 		yylex.(*Lexer).curRule = "chain -> ADD_CHAIN MAIN_CHAIN lParen expr RPAREN"
 	}
+	| MULTILINE_ADD_CHAIN MAIN_CHAIN
+	{
+		ac := string($1.Literal[len($1.Literal)-1])
+		$$ = ast.MakeChain(ac, $2.Literal, nil)
+	}
+	| MULTILINE_MAIN_CHAIN
+	{
+		mc := string($1.Literal[len($1.Literal)-1])
+		$$ = ast.MakeChain("", mc, nil)
+	}
+	| MULTILINE_MAIN_CHAIN lParen expr RPAREN
+	{
+		mc := string($1.Literal[len($1.Literal)-1])
+		$$ = ast.MakeChain("", mc, $3)
+	}
+	| MULTILINE_ADD_CHAIN MAIN_CHAIN lParen expr RPAREN
+	{
+		ac := string($1.Literal[len($1.Literal)-1])
+		$$ = ast.MakeChain(ac, $2.Literal, $4)
+	}
 
 exprList
 	: exprList comma expr
@@ -1517,6 +1538,15 @@ func tokenTypes() []simplexer.TokenType{
 	}
 
 	ident := `[a-zA-Z][a-zA-Z0-9_]*[!?]?`
+	// NOTE: comment(, which starts with "#") is included in RET
+	// `#[^\n\r]*` is neseccery to lex final line comment (i.e. `#`)
+	comment := `#[^\n\r]*`
+	retChar := `(\r|\n|\r\n)`
+	ret := fmt.Sprintf(`(([ \t]*(%s)?%s)+|%s)`, comment, retChar, comment)
+	
+	// NOTE: lexer deals with multiline chain
+	// (if parser does, shift/reduce conflict occurs)
+	keepChainRet := fmt.Sprintf(`([ \t]*(%s)?%s)+[ \t]*\|`, comment, retChar)
 
 	methodOpTokens := []string{}
 	for _, op := range methodOps {
@@ -1552,9 +1582,13 @@ func tokenTypes() []simplexer.TokenType{
 		t(MID_STR_PIECE, `\}[^\"\n\r#]*#\{`),
 		t(TAIL_STR_PIECE, `\}[^\"\n\r#]*"`),
 		t(DOUBLEQUOTE_STR, `"[^\"\n\r]*"`),
+		// NOTE: lexer deals with multiline chain
+		// (if parser does, shift/reduce conflict occurs)
+		t(MULTILINE_ADD_CHAIN, fmt.Sprintf(`%s[&~=]`, keepChainRet)),
+		t(MULTILINE_MAIN_CHAIN, fmt.Sprintf(`%s[\.@$]`, keepChainRet)),
 		// NOTE: comment(, which starts with "#") is included in RET
 		// `#[^\n\r]*` is neseccery to lex final line comment (i.e. `#`)
-		t(RET, `((#[^\n\r]*)?(\r|\n|\r\n)+|#[^\n\r]*)`),
+		t(RET, ret),
 		t(SYMBOL, "'"+symbolable),
 		t(SPACESHIP, methodOps["spaceship"]),
 		t(DOUBLE_STAR, methodOps["doubleStar"]),
