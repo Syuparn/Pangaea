@@ -20,6 +20,7 @@ import (
 
 %union{
     token *simplexer.Token
+	recvAndChain *ast.RecvAndChain
     chain *ast.Chain
 	ident *ast.Ident
 	expr  ast.Expr
@@ -48,6 +49,7 @@ import (
 %type<exprList> exprList kwargExpansionList
 %type<ident> ident
 %type<chain> chain
+%type<recvAndChain> recvAndChain
 %type<formerStrPiece> formerStrPiece
 %type<token> opMethod breakLine
 %type<token> lBrace lParen lBracket comma mapLBrace methodLBrace
@@ -965,116 +967,128 @@ funcParams
 	}
 
 callExpr
-	: expr chain ident
+	: recvAndChain ident
 	{
 		$$ = &ast.PropCallExpr{
 			Token: "(propCall)",
-			Chain: $2,
-			Receiver: $1,
-			Prop: $3,
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
+			Prop: $2,
 			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "callExpr -> expr chain ident"
 	}
-	| expr chain ident callArgs
+	| recvAndChain ident callArgs
 	{
 		$$ = &ast.PropCallExpr{
 			Token: "(propCall)",
-			Chain: $2,
-			Receiver: $1,
-			Prop: $3,
-			Args: $4.Args,
-			Kwargs: $4.Kwargs,
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
+			Prop: $2,
+			Args: $3.Args,
+			Kwargs: $3.Kwargs,
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "callExpr -> expr chain ident callArgs"
 	}
-	| expr chain opMethod
+	| recvAndChain opMethod
 	{
 		opIdent := &ast.Ident{
-			Token: $3.Literal,
-			Value: $3.Literal,
+			Token: $2.Literal,
+			Value: $2.Literal,
 			Src: yylex.(*Lexer).Source,
 			IsPrivate: true,
 		}
 		$$ = &ast.PropCallExpr{
 			Token: "(propCall)",
-			Chain: $2,
-			Receiver: $1,
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
 			Prop: opIdent,
 			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "callExpr -> expr chain opMethod"
 	}
-	| expr chain opMethod callArgs
+	| recvAndChain opMethod callArgs
 	{
 		opIdent := &ast.Ident{
-			Token: $3.Literal,
-			Value: $3.Literal,
+			Token: $2.Literal,
+			Value: $2.Literal,
 			Src: yylex.(*Lexer).Source,
 			IsPrivate: true,
 		}
 		$$ = &ast.PropCallExpr{
 			Token: "(propCall)",
-			Chain: $2,
-			Receiver: $1,
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
 			Prop: opIdent,
-			Args: $4.Args,
-			Kwargs: $4.Kwargs,
+			Args: $3.Args,
+			Kwargs: $3.Kwargs,
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "callExpr -> expr chain opMethod callArgs"
 	}
-	| expr chain funcLiteral
+	| recvAndChain funcLiteral
 	{
 		$$ = &ast.LiteralCallExpr{
 			Token: "(literalCall)",
-			Chain: $2,
-			Receiver: $1,
-			Func: $3.(*ast.FuncLiteral),
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
+			Func: $2.(*ast.FuncLiteral),
 			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| expr chain funcLiteral callArgs
+	| recvAndChain funcLiteral callArgs
 	{
 		$$ = &ast.LiteralCallExpr{
 			Token: "(literalCall)",
-			Chain: $2,
-			Receiver: $1,
-			Func: $3.(*ast.FuncLiteral),
-			Args: $4.Args,
-			Kwargs: $4.Kwargs,
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
+			Func: $2.(*ast.FuncLiteral),
+			Args: $3.Args,
+			Kwargs: $3.Kwargs,
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| expr chain CARET ident
+	| recvAndChain CARET ident
 	{
 		$$ = &ast.VarCallExpr{
 			Token: "(varCall)",
-			Chain: $2,
-			Receiver: $1,
-			Var: $4,
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
+			Var: $3,
 			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| expr chain CARET ident callArgs
+	| recvAndChain CARET ident callArgs
 	{
 		$$ = &ast.VarCallExpr{
 			Token: "(varCall)",
-			Chain: $2,
-			Receiver: $1,
-			Var: $4,
-			Args: $5.Args,
-			Kwargs: $5.Kwargs,
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
+			Var: $3,
+			Args: $4.Args,
+			Kwargs: $4.Kwargs,
 			Src: yylex.(*Lexer).Source,
+		}
+	}
+
+recvAndChain
+	: expr chain
+	{
+		$$ = &ast.RecvAndChain{
+			Recv: $1,
+			Chain: $2,
+		}
+	}
+	| chain
+	{
+		$$ = &ast.RecvAndChain{
+			Recv: nil,
+			Chain: $1,
 		}
 	}
 

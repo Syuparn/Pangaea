@@ -186,6 +186,12 @@ func (vc *VarCallExpr) String() string {
 	return out.String()
 }
 
+// type only for parser (to make rules simple)
+type RecvAndChain struct {
+	Recv  Expr
+	Chain *Chain
+}
+
 type MainChain int
 
 const (
