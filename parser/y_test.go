@@ -2556,18 +2556,24 @@ func TestMultipleLineChain(t *testing.T) {
 	  |.bar(1)
 	  |@{|i| i*2}
 	  |$(3)^hoge
-	  |.+
+	  |~.+
 	`
 
 	program := testParse(t, input)
 	expr := testIfExprStmt(t, program)
+
+	expectedStr := `foo.bar(1)@{|i| (i * 2)}()$(3)^hoge()~.+()`
+	if expr.String() != expectedStr {
+		t.Errorf("wrong output. expected=`\n%s\n`, got=`\n%s\n`",
+			expectedStr, expr.String())
+	}
 
 	callExpr1, ok := expr.(*ast.PropCallExpr)
 	if !ok {
 		t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
 	}
 	testIdentifier(t, callExpr1.Prop, "+")
-	testChainContext(t, callExpr1, ".", nil)
+	testChainContext(t, callExpr1, "~.", nil)
 
 	expr2 := callExpr1.Receiver
 	if expr2 == nil {
@@ -2596,7 +2602,7 @@ func TestMultipleLineChain(t *testing.T) {
 			len(callExpr3.Func.Args))
 	}
 	testIdentifier(t, callExpr3.Func.Args[0], "i")
-	testChainContext(t, callExpr2, "@", nil)
+	testChainContext(t, callExpr3, "@", nil)
 
 	expr4 := callExpr3.Receiver
 	if expr4 == nil {
