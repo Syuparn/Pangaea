@@ -2869,6 +2869,35 @@ func TestNestedIndexExpr(t *testing.T) {
 	testIdentifier(t, recv3, "a")
 }
 
+func TestIndexPrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`-[1,2,3][0]`,
+			`(-[1, 2, 3].at([0]))`,
+		},
+		{
+			`1 ** 2[3]`,
+			`(1 ** 2.at([3]))`,
+		},
+		{
+			`foo.bar[0]`,
+			`foo.bar().at([0])`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		if expr.String() != tt.expected {
+			t.Errorf("wrong precedence. expected=`\n%s\n`, got=`\n%s\n`",
+				tt.expected, expr.String())
+		}
+	}
+}
+
 func TestAssignExpr(t *testing.T) {
 	tests := []struct {
 		input     string
