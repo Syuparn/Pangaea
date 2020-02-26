@@ -81,7 +81,7 @@ import (
 %left MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %left ADD_CHAIN MAIN_CHAIN
 %left UNARY_OP
-%left INDEXING
+%left INDEXING GROUPING
 
 %% 
 
@@ -184,6 +184,11 @@ expr
 	| indexExpr
 	{
 		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> indexExpr"
+	}
+	| LPAREN expr RPAREN %prec GROUPING
+	{
+		$$ = $2
 		yylex.(*Lexer).curRule = "expr -> indexExpr"
 	}
 
