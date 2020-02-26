@@ -2902,7 +2902,7 @@ func TestAssignPrecedence(t *testing.T) {
 }
 
 func TestCompoundAssign(t *testing.T) {
-	// NOTE: unary and comparison ops cannot use compound assign
+	// NOTE: unary and comparison ops cannot be used for compound assign
 	tests := []struct {
 		input string
 		op    string
