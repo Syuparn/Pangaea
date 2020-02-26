@@ -3837,6 +3837,100 @@ func TestIfElseExpr(t *testing.T) {
 	testStr(t, ifExpr.Else, "s", false)
 }
 
+func TestIfPrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`1 if 2`,
+			`(1 if 2)`,
+		},
+		{
+			`1 if 2 else 3`,
+			`(1 if 2 else 3)`,
+		},
+		{
+			`1 if 2 == 2`,
+			`(1 if (2 == 2))`,
+		},
+		{
+			`1 if 2 + 2`,
+			`(1 if (2 + 2))`,
+		},
+		{
+			`1 if 2 && 2`,
+			`(1 if (2 && 2))`,
+		},
+		{
+			`1 if a := 2`,
+			`(1 if (a := 2))`,
+		},
+		{
+			`1 if 2 => a`,
+			`(1 if (a := 2))`,
+		},
+		{
+			`2 && 2 if 1`,
+			`((2 && 2) if 1)`,
+		},
+		{
+			`a := 2 if 1`,
+			`((a := 2) if 1)`,
+		},
+		{
+			`a := (2 if 1)`,
+			`(a := (2 if 1))`,
+		},
+		{
+			`(1 if 2) == 2`,
+			`((1 if 2) == 2)`,
+		},
+		{
+			`0 if 1 else 2 == 2`,
+			`(0 if 1 else (2 == 2))`,
+		},
+		{
+			`0 if 1 else 2 + 2`,
+			`(0 if 1 else (2 + 2))`,
+		},
+		{
+			`0 if 1 else 2 && 2`,
+			`(0 if 1 else (2 && 2))`,
+		},
+		{
+			`0 if 1 else a := 2`,
+			`(0 if 1 else (a := 2))`,
+		},
+		{
+			`0 if 1 else 2 => a`,
+			`(0 if 1 else (a := 2))`,
+		},
+		// IfExpr is left-join
+		{
+			`0 if 1 if 2`,
+			`((0 if 1) if 2)`,
+		},
+		// NOTE: else is stronger than if
+		// (to be consist with nested if)
+		{
+			`a if b if c else d`,
+			`((a if b) if c else d)`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := extractExprStmt(t, program)
+
+		output := expr.String()
+		if output != tt.expected {
+			t.Errorf("precedence is wrong. expected=`\n%s\n`. got=`\n%s\n`",
+				tt.expected, output)
+		}
+	}
+}
+
 func TestComment(t *testing.T) {
 	tests := []struct {
 		input   string
