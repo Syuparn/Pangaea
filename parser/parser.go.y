@@ -65,8 +65,9 @@ import (
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
 %token<token> MAP_LBRACE METHOD_LBRACE
 %token<token> RET SEMICOLON
-%token<token> ASSIGN COMPOUND_ASSIGN
+%token<token> ASSIGN COMPOUND_ASSIGN RIGHT_ASSIGN
 
+%left RIGHT_ASSIGN
 %right ASSIGN COMPOUND_ASSIGN
 %left OR
 %left AND
@@ -583,6 +584,16 @@ assignExpr
 			Token: ":=",
 			Left: $1,
 			Right: ie,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| expr RIGHT_ASSIGN ident
+	{
+		// NOTE: "Left" and "Right" are reversed!
+		$$ = &ast.AssignExpr{
+			Token: ":=",
+			Left: $3,
+			Right: $1,
 			Src: yylex.(*Lexer).Source,
 		}
 	}
@@ -1716,6 +1727,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(SYMBOL, "'"+symbolable),
 		t(SPACESHIP, methodOps["spaceship"]),
 		t(ASSIGN, `:=`),
+		t(RIGHT_ASSIGN, `=>`),
 		t(DOUBLE_STAR, methodOps["doubleStar"]),
 		t(DOUBLE_SLASH, methodOps["doubleSlash"]),
 		t(BIT_LSHIFT, methodOps["bitLShift"]),
