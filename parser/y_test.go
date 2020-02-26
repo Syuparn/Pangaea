@@ -2811,6 +2811,64 @@ func TestIndexExprArg(t *testing.T) {
 	}
 }
 
+func TestNestedIndexExpr(t *testing.T) {
+	testIndex := func(expr ast.Expr, expected int) (ast.Expr, bool) {
+		idxExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T (in test %d)",
+				expr, expected)
+			return nil, false
+		}
+		if !testIdentifier(t, idxExpr.Prop, "at") {
+			return nil, false
+		}
+		if !testChainContext(t, idxExpr, ".", nil) {
+			return nil, false
+		}
+		if len(idxExpr.Args) != 1 {
+			t.Fatalf("arity must be 1. got=%d (in test %d)",
+				len(idxExpr.Args), expected)
+			return nil, false
+		}
+		lst, ok := idxExpr.Args[0].(*ast.ArrLiteral)
+		if !ok {
+			t.Fatalf("1st arg must be *ast.ArrLiteral. got=%T (in test %d)",
+				idxExpr.Args[0], expected)
+			return nil, false
+		}
+
+		if len(lst.Elems) != 1 {
+			t.Fatalf("wrong element length. expected=1, got=%d(in test %d)",
+				len(lst.Elems), expected)
+		}
+
+		if !testLiteralExpr(t, lst.Elems[0], expected) {
+			t.Fatalf("wrong element")
+			return nil, false
+		}
+		return idxExpr.Receiver, true
+	}
+
+	input := `a[3][2][1]`
+
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+
+	recv, ok := testIndex(expr, 1)
+	if !ok {
+		return
+	}
+	recv2, ok := testIndex(recv, 2)
+	if !ok {
+		return
+	}
+	recv3, ok := testIndex(recv2, 3)
+	if !ok {
+		return
+	}
+	testIdentifier(t, recv3, "a")
+}
+
 func TestAssignExpr(t *testing.T) {
 	tests := []struct {
 		input     string
