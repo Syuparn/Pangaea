@@ -39,7 +39,7 @@ import (
 %type<program> program
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
-%type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr
+%type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr ifExpr
 %type<expr> literal funcLiteral arrLiteral objLiteral mapLiteral strLiteral symLiteral
 %type<expr> rangeLiteral bareRange
 %type<kwargPair> kwargPair
@@ -67,7 +67,9 @@ import (
 %token<token> MAP_LBRACE METHOD_LBRACE
 %token<token> RET SEMICOLON
 %token<token> ASSIGN COMPOUND_ASSIGN RIGHT_ASSIGN
+%token<token> IF
 
+%left IF
 %left RIGHT_ASSIGN
 %right ASSIGN COMPOUND_ASSIGN
 %left OR
@@ -193,6 +195,11 @@ expr
 		$$ = $2
 		yylex.(*Lexer).curRule = "expr -> indexExpr"
 	}
+	| ifExpr
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> ifExpr"
+	}
 
 ident
 	: IDENT
@@ -285,6 +292,18 @@ literal
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> rangeLiteral"
+	}
+
+ifExpr
+	: expr IF expr
+	{
+		$$ = &ast.IfExpr{
+			Token: $2.Literal,
+			Cond: $3,
+			Then: $1,
+			Else: nil,
+			Src: yylex.(*Lexer).Source,
+		}
 	}
 
 infixExpr
@@ -1886,6 +1905,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(LT, methodOps["lt"]),
 		t(ADD_CHAIN, `[&~=]`),
 		t(MAIN_CHAIN, `[\.@$]`),
+		t(IF, `if`),
 		t(IDENT, ident),
 		t(PRIVATE_IDENT, fmt.Sprintf(`_+(%s)?`, ident)),
 	}
