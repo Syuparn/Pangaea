@@ -65,9 +65,9 @@ import (
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
 %token<token> MAP_LBRACE METHOD_LBRACE
 %token<token> RET SEMICOLON
-%token<token> ASSIGN
+%token<token> ASSIGN COMPOUND_ASSIGN
 
-%right ASSIGN
+%right ASSIGN COMPOUND_ASSIGN
 %left OR
 %left AND
 %left SPACESHIP EQ NEQ LT LE GT GE
@@ -566,6 +566,23 @@ assignExpr
 			Token: $2.Literal,
 			Left: $1,
 			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| ident COMPOUND_ASSIGN expr
+	{
+		op := $2.Literal[:len($2.Literal)-1]
+		ie := &ast.InfixExpr{
+			Token: op,
+			Left: $1,
+			Operator: op,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		$$ = &ast.AssignExpr{
+			Token: ":=",
+			Left: $1,
+			Right: ie,
 			Src: yylex.(*Lexer).Source,
 		}
 	}
@@ -1620,6 +1637,10 @@ func tokenTypes() []simplexer.TokenType{
 		"iSub": `\+%`,
 	}
 
+	// NOTE: unary and comparison ops cannot be used for compound assign
+	// `&&` and `||` are not methodops but can be used for compound assign
+	compoundAssign := `(<<|>>|/&|/\||/\^|\+|\-|\*|\*\*|/|//|%|&&|\|\|)=`
+
 	ident := `[a-zA-Z][a-zA-Z0-9_]*[!?]?`
 	// NOTE: comment(, which starts with "#") is included in RET
 	// `#[^\n\r]*` is neseccery to lex final line comment (i.e. `#`)
@@ -1672,6 +1693,7 @@ func tokenTypes() []simplexer.TokenType{
 		// NOTE: comment(, which starts with "#") is included in RET
 		// `#[^\n\r]*` is neseccery to lex final line comment (i.e. `#`)
 		t(RET, ret),
+		t(COMPOUND_ASSIGN, compoundAssign),
 		t(SYMBOL, "'"+symbolable),
 		t(SPACESHIP, methodOps["spaceship"]),
 		t(ASSIGN, `:=`),
