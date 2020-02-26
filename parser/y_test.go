@@ -2901,6 +2901,61 @@ func TestAssignPrecedence(t *testing.T) {
 	}
 }
 
+func TestCompoundAssign(t *testing.T) {
+	// NOTE: unary and comparison ops cannot use compound assign
+	tests := []struct {
+		input string
+		op    string
+	}{
+		{`a += 1`, "+"},
+		{`a -= 1`, "-"},
+		{`a *= 1`, "*"},
+		{`a /= 1`, "/"},
+		{`a **= 1`, "**"},
+		{`a %= 1`, "%"},
+		{`a //= 1`, "//"},
+		{`a <<= 1`, "<<"},
+		{`a >>= 1`, ">>"},
+		{`a /&= 1`, "/&"},
+		{`a /|= 1`, "/|"},
+		{`a &&= 1`, "&&"},
+		{`a ||= 1`, "||"},
+		{`a+=1`, "+"},   // without space
+		{`a||=1`, "||"}, // without space
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		ae, ok := expr.(*ast.AssignExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
+		}
+
+		if !testIdentifier(t, ae.Left, "a") {
+			t.Errorf("left ident is wrong. (in `%s`)", tt.input)
+		}
+
+		ie, ok := ae.Right.(*ast.InfixExpr)
+		if !ok {
+			t.Fatalf("right must be *ast.InfixExpr. got=%T", ae.Right)
+		}
+
+		if !testIdentifier(t, ie.Left, "a") {
+			t.Errorf("infix left is wrong. (in `%s`)", tt.input)
+		}
+
+		if !testLiteralExpr(t, ie.Right, 1) {
+			t.Errorf("infix right is wrong. (in `%s`)", tt.input)
+		}
+
+		if ie.Operator != tt.op {
+			t.Errorf("infix op is wrong. expected=`%s`, got=`%s`",
+				tt.op, ie.Operator)
+		}
+	}
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
