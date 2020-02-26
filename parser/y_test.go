@@ -637,6 +637,10 @@ func TestObjString(t *testing.T) {
 			`{'a: 1, 'b: 2}`,
 		},
 		{
+			`({'a: 1, 'b: 2})`,
+			`{'a: 1, 'b: 2}`,
+		},
+		{
 			`{
 				'a: 1,
 				'b: 2,
@@ -649,6 +653,10 @@ func TestObjString(t *testing.T) {
 		},
 		{
 			`{'a: 1, **foo,}`,
+			`{'a: 1, **foo}`,
+		},
+		{
+			`({'a: 1, **foo,})`,
 			`{'a: 1, **foo}`,
 		},
 		{
