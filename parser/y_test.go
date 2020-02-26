@@ -47,7 +47,7 @@ func TestInfixExpr(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		testInfixOperator(t, expr, tt.left, tt.op, tt.right)
 	}
 }
@@ -119,7 +119,7 @@ func TestInfixPrecedence(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		infixExpr, ok := expr.(*ast.InfixExpr)
 
 		if !ok {
@@ -152,7 +152,7 @@ func TestPrefixExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		testPrefixOperator(t, expr, tt.op, tt.right)
 	}
 }
@@ -175,7 +175,7 @@ func TestPrefixPrecedence(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		actual := expr.String()
 		if actual != tt.expected {
 			t.Errorf("wrong precedence. expected=%s, got=%s",
@@ -221,7 +221,7 @@ func TestChainPrecedence(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		actual := expr.String()
 		if actual != tt.expected {
 			t.Errorf("wrong precedence. expected=%s, got=%s",
@@ -253,7 +253,7 @@ func TestIdentifier(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		testIdentifier(t, expr, tt)
 	}
 }
@@ -272,7 +272,7 @@ func TestArgIdentifier(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		testArgIdent(t, expr, tt)
 	}
 }
@@ -291,7 +291,7 @@ func TestKwargIdentifier(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		testKwargIdent(t, expr, tt)
 	}
 }
@@ -337,7 +337,7 @@ func TestSymLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		sym, ok := expr.(*ast.SymLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.SymLiteral.got=%T", expr)
@@ -376,7 +376,7 @@ func TestCharStrLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		str, ok := expr.(*ast.StrLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.StrLiteral.got=%T", expr)
@@ -414,7 +414,7 @@ func TestBackQuoteStrLiteral(t *testing.T) {
 		// (because `` cannot be written in ``)
 		input := "`" + tt + "`"
 		program := testParse(t, input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		str, ok := expr.(*ast.StrLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.StrLiteral.got=%T", expr)
@@ -445,7 +445,7 @@ func TestDoubleQuoteStrLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		str, ok := expr.(*ast.StrLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.StrLiteral.got=%T", expr)
@@ -460,7 +460,7 @@ func TestEmbeddedStr(t *testing.T) {
 	input := `"abc#{1}def#{1+1}ghi#{foo.bar}jkl"`
 
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 	embeddedStr, ok := expr.(*ast.EmbeddedStr)
 	if !ok {
 		t.Fatalf("expr is not *ast.EmbeddedStr. got=%T", expr)
@@ -579,7 +579,7 @@ func TestObjLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		obj, ok := expr.(*ast.ObjLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", expr)
@@ -675,7 +675,7 @@ func TestObjString(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		obj, ok := expr.(*ast.ObjLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", expr)
@@ -851,7 +851,7 @@ func TestObjBreaklines(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		obj, ok := expr.(*ast.ObjLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.ObjLiteral.got=%T", expr)
@@ -956,7 +956,7 @@ func TestMapLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		obj, ok := expr.(*ast.MapLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.MapLiteral.got=%T", expr)
@@ -1053,7 +1053,7 @@ func TestMapString(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		obj, ok := expr.(*ast.MapLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.MapLiteral.got=%T", expr)
@@ -1229,7 +1229,7 @@ func TestMapBreaklines(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		obj, ok := expr.(*ast.MapLiteral)
 		if !ok {
 			t.Fatalf("expr is not *ast.MapLiteral.got=%T", expr)
@@ -1281,7 +1281,7 @@ func TestArrLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		a, ok := expr.(*ast.ArrLiteral)
 		if !ok {
@@ -1347,7 +1347,7 @@ func TestArrString(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		a, ok := expr.(*ast.ArrLiteral)
 		if !ok {
@@ -1431,7 +1431,7 @@ func TestArrBreakLines(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		a, ok := expr.(*ast.ArrLiteral)
 		if !ok {
@@ -1453,7 +1453,7 @@ func TestNestedArrLiteral(t *testing.T) {
 	input := `[1, *foo, [2, 3]]`
 
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 
 	a, ok := expr.(*ast.ArrLiteral)
 	if !ok {
@@ -1530,7 +1530,7 @@ func TestCallArgBreakLines(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		f, ok := expr.(*ast.PropCallExpr)
 		if !ok {
@@ -1591,7 +1591,7 @@ func TestFuncArgBreakLines(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		f, ok := expr.(*ast.FuncLiteral)
 		if !ok {
@@ -1666,7 +1666,7 @@ func TestFuncBodyBreakLines(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		f, ok := expr.(*ast.FuncLiteral)
 		if !ok {
@@ -1724,7 +1724,7 @@ func TestPropCall(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
@@ -1753,7 +1753,7 @@ func TestRecursiveChain(t *testing.T) {
 	}
 
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 
 	callExpr, ok := expr.(*ast.PropCallExpr)
 	if !ok {
@@ -1808,7 +1808,7 @@ func TestOpMethods(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
@@ -1886,7 +1886,7 @@ func TestArgOrders(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
@@ -1951,7 +1951,7 @@ func TestCallWithArgs(t *testing.T) {
 	// TODO: inplement test
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
@@ -1998,7 +1998,7 @@ func TestAnonPropCall(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
@@ -2036,7 +2036,7 @@ func TestAnonPropCallWithArgs(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
@@ -2088,7 +2088,7 @@ func TestAnonOpMethods(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
@@ -2135,7 +2135,7 @@ func TestLiteralCall(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.LiteralCallExpr)
 		if !ok {
@@ -2151,7 +2151,7 @@ func TestLiteralCallFunc(t *testing.T) {
 	input := `a.{|foo, hoge: 3, bar| 1+2; 3}`
 
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 
 	callExpr, ok := expr.(*ast.LiteralCallExpr)
 	if !ok {
@@ -2292,7 +2292,7 @@ func TestLiteralCallFuncArgs(t *testing.T) {
 		errPrefix := fmt.Sprintf("err in ```\n%s\n```\n", tt.input)
 
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.LiteralCallExpr)
 
@@ -2363,7 +2363,7 @@ func TestAnonLiteralCall(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.LiteralCallExpr)
 		if !ok {
@@ -2404,7 +2404,7 @@ func TestVarCall(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.VarCallExpr)
 		if !ok {
@@ -2496,7 +2496,7 @@ func TestVarCallFuncArgs(t *testing.T) {
 		errPrefix := fmt.Sprintf("err in ```\n%s\n```\n", tt.input)
 
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.VarCallExpr)
 
@@ -2568,7 +2568,7 @@ func TestAnonVarCall(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		callExpr, ok := expr.(*ast.VarCallExpr)
 		if !ok {
@@ -2591,7 +2591,7 @@ func TestMultipleLineChain(t *testing.T) {
 	`
 
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 
 	expectedStr := `foo.bar(1)@{|i| (i * 2)}()$(3)^hoge()~.+()`
 	if expr.String() != expectedStr {
@@ -2665,7 +2665,7 @@ func TestIndexExprRecv(t *testing.T) {
 
 	parseIndexRecv := func(input string) (ast.Expr, bool) {
 		program := testParse(t, input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		idxExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
 			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
@@ -2776,7 +2776,7 @@ func TestIndexExprArg(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		idxExpr, ok := expr.(*ast.PropCallExpr)
 		if !ok {
 			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
@@ -2883,7 +2883,7 @@ func TestNestedIndexExpr(t *testing.T) {
 	input := `a[3][2][1]`
 
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 
 	recv, ok := testIndex(expr, 1)
 	if !ok {
@@ -2929,7 +2929,7 @@ func TestIndexPrecedence(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		if expr.String() != tt.expected {
 			t.Errorf("wrong precedence. expected=`\n%s\n`, got=`\n%s\n`",
 				tt.expected, expr.String())
@@ -2951,7 +2951,7 @@ func TestAssignExpr(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		ae, ok := expr.(*ast.AssignExpr)
 		if !ok {
 			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
@@ -3013,7 +3013,7 @@ func TestAssignPrecedence(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		ae, ok := expr.(*ast.AssignExpr)
 		if !ok {
 			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
@@ -3053,7 +3053,7 @@ func TestCompoundAssign(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		ae, ok := expr.(*ast.AssignExpr)
 		if !ok {
 			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
@@ -3140,7 +3140,7 @@ func TestCompoundAssignPrec(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		ae, ok := expr.(*ast.AssignExpr)
 		if !ok {
 			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
@@ -3168,7 +3168,7 @@ func TestRightAssignExpr(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		ae, ok := expr.(*ast.AssignExpr)
 		if !ok {
 			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
@@ -3230,7 +3230,7 @@ func TestRightAssignPrecedence(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		ae, ok := expr.(*ast.AssignExpr)
 		if !ok {
 			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
@@ -3277,7 +3277,7 @@ func TestAssignParen(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 		output := expr.String()
 		if output != tt.expected {
 			t.Errorf("wrong precedence. expected=`\n%s\n`. got=`\n%s\n`",
@@ -3298,7 +3298,7 @@ func TestIntLiteralExpr(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		if !testIntLiteral(t, expr, tt.expected) {
 			return
@@ -3450,7 +3450,7 @@ func TestFuncLiteralArgs(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		f, ok := expr.(*ast.FuncLiteral)
 		if !ok {
@@ -3505,7 +3505,7 @@ func TestFuncLiteralBody(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		f, ok := expr.(*ast.FuncLiteral)
 		if !ok {
@@ -3557,7 +3557,7 @@ func TestFuncLiteralBodies(t *testing.T) {
 	}
 
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 
 	f, ok := expr.(*ast.FuncLiteral)
 	if !ok {
@@ -3671,7 +3671,7 @@ func TestRangeLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
-		expr := testIfExprStmt(t, program)
+		expr := extractExprStmt(t, program)
 
 		r, ok := expr.(*ast.RangeLiteral)
 		if !ok {
@@ -3687,7 +3687,7 @@ func TestRangeLiteral(t *testing.T) {
 func TestBareRangeArrLiteral(t *testing.T) {
 	input := `[1:2]`
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 	lst, ok := expr.(*ast.ArrLiteral)
 	if !ok {
 		t.Fatalf("expr is not *ast.ArrLiteral. got=%T", expr)
@@ -3702,7 +3702,7 @@ func TestBareRangeArrLiteral(t *testing.T) {
 
 	input2 := `[:2:3]`
 	program2 := testParse(t, input2)
-	expr2 := testIfExprStmt(t, program2)
+	expr2 := extractExprStmt(t, program2)
 	lst2, ok := expr2.(*ast.ArrLiteral)
 	if !ok {
 		t.Fatalf("expr2 is not *ast.ArrLiteral. got=%T", expr2)
@@ -3717,7 +3717,7 @@ func TestBareRangeArrLiteral(t *testing.T) {
 
 	input3 := `[:2:3, 1]`
 	program3 := testParse(t, input3)
-	expr3 := testIfExprStmt(t, program3)
+	expr3 := extractExprStmt(t, program3)
 	lst3, ok := expr3.(*ast.ArrLiteral)
 	if !ok {
 		t.Fatalf("expr3 is not *ast.ArrLiteral. got=%T", expr3)
@@ -3733,7 +3733,7 @@ func TestBareRangeArrLiteral(t *testing.T) {
 
 	input4 := `[1, :2:3]`
 	program4 := testParse(t, input4)
-	expr4 := testIfExprStmt(t, program4)
+	expr4 := extractExprStmt(t, program4)
 	lst4, ok := expr4.(*ast.ArrLiteral)
 	if !ok {
 		t.Fatalf("expr4 is not *ast.ArrLiteral. got=%T", expr4)
@@ -3749,7 +3749,7 @@ func TestBareRangeArrLiteral(t *testing.T) {
 
 	input5 := `[1:2, :2:3]`
 	program5 := testParse(t, input5)
-	expr5 := testIfExprStmt(t, program5)
+	expr5 := extractExprStmt(t, program5)
 	lst5, ok := expr5.(*ast.ArrLiteral)
 	if !ok {
 		t.Fatalf("expr5 is not *ast.ArrLiteral. got=%T", expr5)
@@ -3771,7 +3771,7 @@ func TestBareRangeArrLiteral(t *testing.T) {
 func TestBareRangeIndex(t *testing.T) {
 	input := `foo[1:100]`
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 	idxExpr, ok := expr.(*ast.PropCallExpr)
 	if !ok {
 		t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
@@ -3801,10 +3801,25 @@ func TestBareRangeIndex(t *testing.T) {
 func TestRangeLiteralPrecedence(t *testing.T) {
 	input := `(1:(2+3):4)`
 	program := testParse(t, input)
-	expr := testIfExprStmt(t, program)
+	expr := extractExprStmt(t, program)
 	testRange(t, expr,
 		[]string{"Int", "Infix", "Int"},
 		[]interface{}{1, []interface{}{2, "+", 3}, 4})
+}
+
+func TestIfExpr(t *testing.T) {
+	input := `1 if foo`
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+
+	ifExpr, ok := expr.(*ast.IfExpr)
+	if !ok {
+		t.Fatalf("expr is not *ast.IfExpr. got=%T", expr)
+	}
+
+	testIdentifier(t, ifExpr.Cond, "foo")
+	testLiteralExpr(t, ifExpr.Then, 1)
+	testNil(t, ifExpr.Else)
 }
 
 func TestComment(t *testing.T) {
@@ -4031,7 +4046,7 @@ func testInfixOperator(t *testing.T, expr ast.Expr,
 	return true
 }
 
-func testIfExprStmt(t *testing.T, program *ast.Program) ast.Expr {
+func extractExprStmt(t *testing.T, program *ast.Program) ast.Expr {
 	if len(program.Stmts) != 1 {
 		t.Fatalf("program does not contain %d statements. got=%d",
 			1, len(program.Stmts))

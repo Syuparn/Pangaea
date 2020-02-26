@@ -545,6 +545,29 @@ func (rl *RangeLiteral) String() string {
 	return out.String()
 }
 
+type IfExpr struct {
+	Token string
+	Cond  Expr
+	Then  Expr
+	Else  Expr
+	Src   *Source
+}
+
+func (ie *IfExpr) isExpr()              {}
+func (ie *IfExpr) TokenLiteral() string { return ie.Token }
+func (ie *IfExpr) Source() *Source      { return ie.Src }
+func (ie *IfExpr) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(ie.Then.String() + " if " + ie.Cond.String())
+	if ie.Else != nil {
+		out.WriteString(" else " + ie.Else.String())
+	}
+	out.WriteString(")")
+
+	return out.String()
+}
+
 type FuncLiteral struct {
 	Token  string
 	Args   []*Ident
