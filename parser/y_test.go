@@ -3798,6 +3798,15 @@ func TestBareRangeIndex(t *testing.T) {
 		[]string{"Int", "Int", ""}, []interface{}{1, 100, nil})
 }
 
+func TestRangeLiteralPrecedence(t *testing.T) {
+	input := `(1:(2+3):4)`
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+	testRange(t, expr,
+		[]string{"Int", "Infix", "Int"},
+		[]interface{}{1, []interface{}{2, "+", 3}, 4})
+}
+
 func TestComment(t *testing.T) {
 	tests := []struct {
 		input   string
@@ -3999,19 +4008,27 @@ func testPrefixOperator(t *testing.T, expr ast.Expr,
 }
 
 func testInfixOperator(t *testing.T, expr ast.Expr,
-	left interface{}, op string, right interface{}) {
+	left interface{}, op string, right interface{}) bool {
 	infixExpr, ok := expr.(*ast.InfixExpr)
 
 	if !ok {
 		t.Fatalf("expr is not ast.InfixExpr. got=%T", expr)
+		return false
 	}
 
-	testLiteralExpr(t, infixExpr.Left, left)
-	testLiteralExpr(t, infixExpr.Right, right)
+	if !testLiteralExpr(t, infixExpr.Left, left) {
+		return false
+	}
+	if !testLiteralExpr(t, infixExpr.Right, right) {
+		return false
+	}
 
 	if infixExpr.Operator != op {
 		t.Errorf("operator is not '%s'. got=%s", op, infixExpr.Operator)
+		return false
 	}
+
+	return true
 }
 
 func testIfExprStmt(t *testing.T, program *ast.Program) ast.Expr {
@@ -4126,6 +4143,12 @@ func testRange(t *testing.T, expr ast.Expr,
 		case "Ident":
 			str := v.(string)
 			return testIdentifier(t, e, str)
+		case "Infix":
+			opVals := v.([]interface{})
+			left := opVals[0]
+			op := opVals[1].(string)
+			right := opVals[2]
+			return testInfixOperator(t, e, left, op, right)
 		case "":
 			return testNil(t, e)
 		}
