@@ -3244,6 +3244,48 @@ func TestRightAssignPrecedence(t *testing.T) {
 	}
 }
 
+func TestAssignParen(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`a := (1 + 2)`,
+			`(a := (1 + 2))`,
+		},
+		{
+			`(a := 1) + 2`,
+			`((a := 1) + 2)`,
+		},
+		{
+			`a += (1 + 2)`,
+			`(a := (a + (1 + 2)))`,
+		},
+		{
+			`(a += 1) + 2`,
+			`((a := (a + 1)) + 2)`,
+		},
+		{
+			`(1 + 2) => a`,
+			`(a := (1 + 2))`,
+		},
+		{
+			`1 + (2 => a)`,
+			`(1 + (a := 2))`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		output := expr.String()
+		if output != tt.expected {
+			t.Errorf("wrong precedence. expected=`\n%s\n`. got=`\n%s\n`",
+				tt.expected, output)
+		}
+	}
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
