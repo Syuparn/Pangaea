@@ -67,9 +67,10 @@ import (
 %token<token> MAP_LBRACE METHOD_LBRACE
 %token<token> RET SEMICOLON
 %token<token> ASSIGN COMPOUND_ASSIGN RIGHT_ASSIGN
-%token<token> IF
+%token<token> IF ELSE
 
 %left IF
+%left ELSE
 %left RIGHT_ASSIGN
 %right ASSIGN COMPOUND_ASSIGN
 %left OR
@@ -302,6 +303,18 @@ ifExpr
 			Cond: $3,
 			Then: $1,
 			Else: nil,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| expr IF expr ELSE expr %prec ELSE
+	{
+		// NOTE: to refrain shift/reduce conflict, else has higher prec than if
+		// `a if b if c else d` means `((a if b) if c else d)`
+		$$ = &ast.IfExpr{
+			Token: $2.Literal,
+			Cond: $3,
+			Then: $1,
+			Else: $5,
 			Src: yylex.(*Lexer).Source,
 		}
 	}
@@ -1906,6 +1919,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(ADD_CHAIN, `[&~=]`),
 		t(MAIN_CHAIN, `[\.@$]`),
 		t(IF, `if`),
+		t(ELSE, `else`),
 		t(IDENT, ident),
 		t(PRIVATE_IDENT, fmt.Sprintf(`_+(%s)?`, ident)),
 	}
