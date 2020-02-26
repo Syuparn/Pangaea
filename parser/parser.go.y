@@ -39,7 +39,7 @@ import (
 %type<program> program
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
-%type<expr> expr infixExpr prefixExpr callExpr embeddedStr indexExpr
+%type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr
 %type<expr> literal funcLiteral arrLiteral objLiteral mapLiteral strLiteral symLiteral
 %type<kwargPair> kwargPair
 %type<pair> pair
@@ -65,7 +65,9 @@ import (
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
 %token<token> MAP_LBRACE METHOD_LBRACE
 %token<token> RET SEMICOLON
+%token<token> ASSIGN
 
+%right ASSIGN
 %left OR
 %left AND
 %left SPACESHIP EQ NEQ LT LE GT GE
@@ -157,6 +159,11 @@ expr
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "expr -> prefixExpr"
+	}
+	| assignExpr
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "expr -> assignExpr"
 	}
 	| callExpr
 	{
@@ -550,6 +557,17 @@ prefixExpr
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "prefixExpr -> BIT_NOT expr"
+	}
+
+assignExpr
+	: ident ASSIGN expr
+	{
+		$$ = &ast.AssignExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
 	}
 
 indexExpr
@@ -1656,6 +1674,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(RET, ret),
 		t(SYMBOL, "'"+symbolable),
 		t(SPACESHIP, methodOps["spaceship"]),
+		t(ASSIGN, `:=`),
 		t(DOUBLE_STAR, methodOps["doubleStar"]),
 		t(DOUBLE_SLASH, methodOps["doubleSlash"]),
 		t(BIT_LSHIFT, methodOps["bitLShift"]),
