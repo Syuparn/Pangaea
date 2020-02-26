@@ -2957,6 +2957,77 @@ func TestCompoundAssign(t *testing.T) {
 	}
 }
 
+func TestCompoundAssignPrec(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`a += 1`,
+			`(a := (a + 1))`,
+		},
+		{
+			`a += 1 + 2`,
+			`(a := (a + (1 + 2)))`,
+		},
+		{
+			`a += 1 == 2`,
+			`(a := (a + (1 == 2)))`,
+		},
+		{
+			`a += 1 && 2`,
+			`(a := (a + (1 && 2)))`,
+		},
+		{
+			`a += [1 + 2] == [3 + 0]`,
+			`(a := (a + ([(1 + 2)] == [(3 + 0)])))`,
+		},
+		{
+			`a += {'b: 2+2} != {'c: 5}`,
+			`(a := (a + ({'b: (2 + 2)} != {'c: 5})))`,
+		},
+		{
+			`foo += bar := hoge := 100`,
+			`(foo := (foo + (bar := (hoge := 100))))`,
+		},
+		{
+			`foo += bar := hoge := 1 && 2 + 3`,
+			`(foo := (foo + (bar := (hoge := (1 && (2 + 3))))))`,
+		},
+		{
+			`foo += -3`,
+			`(foo := (foo + (-3)))`,
+		},
+		{
+			`foo := bar += baz`,
+			`(foo := (bar := (bar + baz)))`,
+		},
+		{
+			`foo += bar := baz`,
+			`(foo := (foo + (bar := baz)))`,
+		},
+		{
+			`foo += bar += baz`,
+			`(foo := (foo + (bar := (bar + baz))))`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		ae, ok := expr.(*ast.AssignExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
+		}
+
+		output := ae.String()
+		if output != tt.expected {
+			t.Errorf("wrong precedence. expected=`\n%s\n`. got=`\n%s\n`",
+				tt.expected, output)
+		}
+	}
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
