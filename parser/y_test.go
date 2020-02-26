@@ -2846,6 +2846,61 @@ func TestAssignExpr(t *testing.T) {
 	}
 }
 
+func TestAssignPrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`a := 1 + 2`,
+			`(a := (1 + 2))`,
+		},
+		{
+			`a := 1 == 2`,
+			`(a := (1 == 2))`,
+		},
+		{
+			`a := 1 && 2`,
+			`(a := (1 && 2))`,
+		},
+		{
+			`a := [1 + 2] == [3 + 0]`,
+			`(a := ([(1 + 2)] == [(3 + 0)]))`,
+		},
+		{
+			`a := {'a: 2+2} != {'b: 5}`,
+			`(a := ({'a: (2 + 2)} != {'b: 5}))`,
+		},
+		{
+			`foo := bar := hoge := 100`,
+			`(foo := (bar := (hoge := 100)))`,
+		},
+		{
+			`foo := bar := hoge := 1 && 2 + 3`,
+			`(foo := (bar := (hoge := (1 && (2 + 3)))))`,
+		},
+		{
+			`foo := -3`,
+			`(foo := (-3))`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		ae, ok := expr.(*ast.AssignExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
+		}
+
+		output := ae.String()
+		if output != tt.expected {
+			t.Errorf("wrong precedence. expected=`\n%s\n`. got=`\n%s\n`",
+				tt.expected, output)
+		}
+	}
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
