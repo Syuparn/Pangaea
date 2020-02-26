@@ -428,6 +428,27 @@ func (ie *InfixExpr) String() string {
 	return out.String()
 }
 
+type AssignExpr struct {
+	Token string // ":="
+	Left  *Ident
+	Right Expr
+	Src   *Source
+}
+
+func (ae *AssignExpr) isExpr()              {}
+func (ae *AssignExpr) TokenLiteral() string { return ae.Token }
+func (ae *AssignExpr) Source() *Source      { return ae.Src }
+func (ae *AssignExpr) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(ae.Left.String())
+	out.WriteString(" " + ae.Token + " ")
+	out.WriteString(ae.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
 type EmbeddedStr struct {
 	Token  string
 	Former *FormerStrPiece

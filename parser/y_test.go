@@ -2811,6 +2811,41 @@ func TestIndexExprArg(t *testing.T) {
 	}
 }
 
+func TestAssignExpr(t *testing.T) {
+	tests := []struct {
+		input     string
+		left      string
+		rightType string
+		right     interface{}
+	}{
+		{`a := 10`, "a", "Int", 10},
+		{`hello := "Hello, world!"`, "hello", "Str", "Hello, world!"},
+		{`newVar := myVar`, "newVar", "Ident", "myVar"},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		ae, ok := expr.(*ast.AssignExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
+		}
+
+		testIdentifier(t, ae.Left, tt.left)
+
+		switch tt.rightType {
+		case "Int":
+			testLiteralExpr(t, ae.Right, tt.right)
+		case "Str":
+			r := tt.right.(string)
+			testStr(t, ae.Right, r, false)
+		case "Ident":
+			r := tt.right.(string)
+			testIdentifier(t, ae.Right, r)
+		}
+	}
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
