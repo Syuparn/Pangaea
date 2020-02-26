@@ -2917,6 +2917,14 @@ func TestIndexPrecedence(t *testing.T) {
 			`foo.bar[0]`,
 			`foo.bar().at([0])`,
 		},
+		{
+			`(1 + a)[0]`,
+			`(1 + a).at([0])`,
+		},
+		{
+			`(-a)[0]`,
+			`(-a).at([0])`,
+		},
 	}
 
 	for _, tt := range tests {
