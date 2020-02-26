@@ -81,7 +81,8 @@ import (
 %left MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %left ADD_CHAIN MAIN_CHAIN
 %left UNARY_OP
-%left INDEXING GROUPING
+%left GROUPING
+%left INDEXING
 
 %% 
 
@@ -676,6 +677,25 @@ indexExpr
 			Receiver: $1,
 			Prop: atIdent,
 			Args: []ast.Expr{$2},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| LPAREN expr RPAREN arrLiteral
+	{
+		atIdent := &ast.Ident{
+			Token: "at",
+			Value: "at",
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: false,
+			IdentAttr: ast.NormalIdent,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: $2.TokenLiteral(),
+			Chain: ast.MakeChain("", ".", nil),
+			Receiver: $2,
+			Prop: atIdent,
+			Args: []ast.Expr{$4},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Src: yylex.(*Lexer).Source,
 		}
