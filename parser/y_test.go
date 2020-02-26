@@ -3684,6 +3684,90 @@ func TestRangeLiteral(t *testing.T) {
 	}
 }
 
+func TestBareRangeArrLiteral(t *testing.T) {
+	input := `[1:2]`
+	program := testParse(t, input)
+	expr := testIfExprStmt(t, program)
+	lst, ok := expr.(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("expr is not *ast.ArrLiteral. got=%T", expr)
+	}
+	if len(lst.Elems) != 1 {
+		t.Fatalf("length must be 1. got=%d", len(lst.Elems))
+	}
+	e := lst.Elems[0]
+	if !testRange(t, e, []string{"Int", "Int", ""}, []interface{}{1, 2, nil}) {
+		t.Errorf("test failed in `%s`.", input)
+	}
+
+	input2 := `[:2:3]`
+	program2 := testParse(t, input2)
+	expr2 := testIfExprStmt(t, program2)
+	lst2, ok := expr2.(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("expr2 is not *ast.ArrLiteral. got=%T", expr2)
+	}
+	if len(lst2.Elems) != 1 {
+		t.Fatalf("length must be 1. got=%d", len(lst2.Elems))
+	}
+	e2 := lst2.Elems[0]
+	if !testRange(t, e2, []string{"", "Int", "Int"}, []interface{}{nil, 2, 3}) {
+		t.Errorf("test failed in `%s`.", input2)
+	}
+
+	input3 := `[:2:3, 1]`
+	program3 := testParse(t, input3)
+	expr3 := testIfExprStmt(t, program3)
+	lst3, ok := expr3.(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("expr3 is not *ast.ArrLiteral. got=%T", expr3)
+	}
+	if len(lst3.Elems) != 2 {
+		t.Fatalf("length must be 2. got=%d", len(lst3.Elems))
+	}
+	e3 := lst3.Elems[0]
+	if !testRange(t, e3, []string{"", "Int", "Int"}, []interface{}{nil, 2, 3}) {
+		t.Errorf("test failed in `%s`.", input3)
+	}
+	testLiteralExpr(t, lst3.Elems[1], 1)
+
+	input4 := `[1, :2:3]`
+	program4 := testParse(t, input4)
+	expr4 := testIfExprStmt(t, program4)
+	lst4, ok := expr4.(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("expr4 is not *ast.ArrLiteral. got=%T", expr4)
+	}
+	if len(lst4.Elems) != 2 {
+		t.Fatalf("length must be 2. got=%d", len(lst4.Elems))
+	}
+	e4 := lst4.Elems[1]
+	if !testRange(t, e4, []string{"", "Int", "Int"}, []interface{}{nil, 2, 3}) {
+		t.Errorf("test failed in `%s`.", input4)
+	}
+	testLiteralExpr(t, lst4.Elems[0], 1)
+
+	input5 := `[1:2, :2:3]`
+	program5 := testParse(t, input5)
+	expr5 := testIfExprStmt(t, program5)
+	lst5, ok := expr5.(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("expr5 is not *ast.ArrLiteral. got=%T", expr5)
+	}
+	if len(lst5.Elems) != 2 {
+		t.Fatalf("length must be 2. got=%d", len(lst5.Elems))
+	}
+	e5 := lst5.Elems[0]
+	if !testRange(t, e5, []string{"Int", "Int", ""}, []interface{}{1, 2, nil}) {
+		t.Errorf("test failed in `%s`.", input5)
+	}
+
+	e5_2 := lst5.Elems[1]
+	if !testRange(t, e5_2, []string{"", "Int", "Int"}, []interface{}{nil, 2, 3}) {
+		t.Errorf("test failed in `%s`.", input5)
+	}
+}
+
 func TestComment(t *testing.T) {
 	tests := []struct {
 		input   string
