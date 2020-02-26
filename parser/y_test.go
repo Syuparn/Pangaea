@@ -3115,6 +3115,96 @@ func TestCompoundAssignPrec(t *testing.T) {
 	}
 }
 
+func TestRightAssignExpr(t *testing.T) {
+	tests := []struct {
+		input     string
+		left      string
+		rightType string
+		right     interface{}
+	}{
+		{`10 => a`, "a", "Int", 10},
+		{`"Hello, world!" => hello`, "hello", "Str", "Hello, world!"},
+		{`myVar => newVar`, "newVar", "Ident", "myVar"},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		ae, ok := expr.(*ast.AssignExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
+		}
+
+		testIdentifier(t, ae.Left, tt.left)
+
+		switch tt.rightType {
+		case "Int":
+			testLiteralExpr(t, ae.Right, tt.right)
+		case "Str":
+			r := tt.right.(string)
+			testStr(t, ae.Right, r, false)
+		case "Ident":
+			r := tt.right.(string)
+			testIdentifier(t, ae.Right, r)
+		}
+	}
+}
+
+func TestRightAssignPrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`1 + 2 => a`,
+			`(a := (1 + 2))`,
+		},
+		{
+			`1 == 2 => a`,
+			`(a := (1 == 2))`,
+		},
+		{
+			`1 && 2 => a`,
+			`(a := (1 && 2))`,
+		},
+		{
+			`[1 + 2] == [3 + 0] => a`,
+			`(a := ([(1 + 2)] == [(3 + 0)]))`,
+		},
+		{
+			`{'a: 2+2} != {'b: 5} => a`,
+			`(a := ({'a: (2 + 2)} != {'b: 5}))`,
+		},
+		{
+			`100 => hoge => bar => foo`,
+			`(foo := (bar := (hoge := 100)))`,
+		},
+		{
+			`1 && 2 + 3 => hoge => bar => foo`,
+			`(foo := (bar := (hoge := (1 && (2 + 3)))))`,
+		},
+		{
+			`-3 => foo`,
+			`(foo := (-3))`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+		ae, ok := expr.(*ast.AssignExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.AssignExpr. got=%T", expr)
+		}
+
+		output := ae.String()
+		if output != tt.expected {
+			t.Errorf("wrong precedence. expected=`\n%s\n`. got=`\n%s\n`",
+				tt.expected, output)
+		}
+	}
+}
+
 func TestIntLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input    string
