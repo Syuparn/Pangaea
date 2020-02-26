@@ -3822,6 +3822,21 @@ func TestIfExpr(t *testing.T) {
 	testNil(t, ifExpr.Else)
 }
 
+func TestIfElseExpr(t *testing.T) {
+	input := `1 if foo else "s"`
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+
+	ifExpr, ok := expr.(*ast.IfExpr)
+	if !ok {
+		t.Fatalf("expr is not *ast.IfExpr. got=%T", expr)
+	}
+
+	testIdentifier(t, ifExpr.Cond, "foo")
+	testLiteralExpr(t, ifExpr.Then, 1)
+	testStr(t, ifExpr.Else, "s", false)
+}
+
 func TestComment(t *testing.T) {
 	tests := []struct {
 		input   string
