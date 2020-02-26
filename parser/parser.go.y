@@ -41,6 +41,7 @@ import (
 %type<stmt> stmt exprStmt
 %type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr
 %type<expr> literal funcLiteral arrLiteral objLiteral mapLiteral strLiteral symLiteral
+%type<expr> rangeLiteral bareRange
 %type<kwargPair> kwargPair
 %type<pair> pair
 %type<pairList> pairList
@@ -279,6 +280,11 @@ literal
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> symLiteral"
+	}
+	| rangeLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> rangeLiteral"
 	}
 
 infixExpr
@@ -966,6 +972,84 @@ symLiteral
 		}
 	}
 
+rangeLiteral
+	: LPAREN bareRange RPAREN
+	{
+		$$ = $2
+	}
+
+bareRange
+	: expr COLON expr COLON expr
+	{
+		$$ = &ast.RangeLiteral{
+			Token: $2.Literal,
+			Start: $1,
+			Stop: $3,
+			Step: $5,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| expr COLON expr
+	{
+		$$ = &ast.RangeLiteral{
+			Token: $2.Literal,
+			Start: $1,
+			Stop: $3,
+			Step: nil,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| expr COLON COLON expr
+	{
+		$$ = &ast.RangeLiteral{
+			Token: $2.Literal,
+			Start: $1,
+			Stop: nil,
+			Step: $4,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| COLON expr COLON expr
+	{
+		$$ = &ast.RangeLiteral{
+			Token: $1.Literal,
+			Start: nil,
+			Stop: $2,
+			Step: $4,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| expr COLON
+	{
+		$$ = &ast.RangeLiteral{
+			Token: $2.Literal,
+			Start: $1,
+			Stop: nil,
+			Step: nil,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| COLON expr
+	{
+		$$ = &ast.RangeLiteral{
+			Token: $1.Literal,
+			Start: nil,
+			Stop: $2,
+			Step: nil,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| COLON COLON expr
+	{
+		$$ = &ast.RangeLiteral{
+			Token: $1.Literal,
+			Start: nil,
+			Stop: nil,
+			Step: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+
 embeddedStr
 	: formerStrPiece TAIL_STR_PIECE
 	{
@@ -1447,6 +1531,16 @@ exprList
 	{
 		$$ = []ast.Expr{$1}
 		yylex.(*Lexer).curRule = "exprList -> expr"
+	}
+	| exprList comma bareRange
+	{
+		$$ = append($1, $3)
+		yylex.(*Lexer).curRule = "exprList -> exprList comma expr"
+	}
+	| bareRange
+	{
+		$$ = []ast.Expr{$1}
+		yylex.(*Lexer).curRule = "exprList -> bareRange"
 	}
 
 argList
