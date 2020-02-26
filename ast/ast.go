@@ -511,6 +511,40 @@ func (sl *SymLiteral) TokenLiteral() string { return sl.Token }
 func (sl *SymLiteral) Source() *Source      { return sl.Src }
 func (sl *SymLiteral) String() string       { return "'" + sl.Value }
 
+type RangeLiteral struct {
+	Token string
+	Start Expr
+	Stop  Expr
+	Step  Expr
+	Src   *Source
+}
+
+func (rl *RangeLiteral) isExpr()              {}
+func (rl *RangeLiteral) TokenLiteral() string { return rl.Token }
+func (rl *RangeLiteral) Source() *Source      { return rl.Src }
+func (rl *RangeLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+
+	if rl.Start != nil {
+		out.WriteString(rl.Start.String())
+	}
+	out.WriteString(":")
+
+	if rl.Stop != nil {
+		out.WriteString(rl.Stop.String())
+	}
+	out.WriteString(":")
+
+	if rl.Step != nil {
+		out.WriteString(rl.Step.String())
+	}
+
+	out.WriteString(")")
+
+	return out.String()
+}
+
 type FuncLiteral struct {
 	Token  string
 	Args   []*Ident

@@ -3593,6 +3593,97 @@ func TestFuncLiteralBodies(t *testing.T) {
 	}
 }
 
+func TestRangeLiteral(t *testing.T) {
+	// NOTE: rangeLiteral should be wrapped with parens
+	// to refrain from ambiguity
+	// i.e.) Is `1:2:3:4` `(1:2:3):4`? `1:2:(3:4)`? or `(1:2):(3:4)`?
+	tests := []struct {
+		input         string
+		expectedTypes []string
+		expectedVals  []interface{}
+	}{
+		{
+			`(1:2)`,
+			[]string{"Int", "Int", ""},
+			[]interface{}{1, 2, nil},
+		},
+		{
+			`("a":2)`,
+			[]string{"Str", "Int", ""},
+			[]interface{}{"a", 2, nil},
+		},
+		{
+			`(2:"a")`,
+			[]string{"Int", "Str", ""},
+			[]interface{}{2, "a", nil},
+		},
+		{
+			`('i:foo)`,
+			[]string{"Sym", "Ident", ""},
+			[]interface{}{"i", "foo", nil},
+		},
+		{
+			`('i:foo:bar)`,
+			[]string{"Sym", "Ident", "Ident"},
+			[]interface{}{"i", "foo", "bar"},
+		},
+		{
+			`(i:"hoge":2)`,
+			[]string{"Ident", "Str", "Int"},
+			[]interface{}{"i", "hoge", 2},
+		},
+		{
+			`("start":"stop":"step")`,
+			[]string{"Str", "Str", "Str"},
+			[]interface{}{"start", "stop", "step"},
+		},
+		{
+			`("start":"stop")`,
+			[]string{"Str", "Str", ""},
+			[]interface{}{"start", "stop", nil},
+		},
+		{
+			`("start"::"step")`,
+			[]string{"Str", "", "Str"},
+			[]interface{}{"start", nil, "step"},
+		},
+		{
+			`(:"stop":"step")`,
+			[]string{"", "Str", "Str"},
+			[]interface{}{nil, "stop", "step"},
+		},
+		{
+			`("start":)`,
+			[]string{"Str", "", ""},
+			[]interface{}{"start", nil, nil},
+		},
+		{
+			`(:"stop")`,
+			[]string{"", "Str", ""},
+			[]interface{}{nil, "stop", nil},
+		},
+		{
+			`(::"step")`,
+			[]string{"", "", "Str"},
+			[]interface{}{nil, nil, "step"},
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := testIfExprStmt(t, program)
+
+		r, ok := expr.(*ast.RangeLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.RangeLiteral. got=%T", expr)
+		}
+
+		if !testRange(t, r, tt.expectedTypes, tt.expectedVals) {
+			t.Errorf("test failed in `\n%s\n`.", tt.input)
+		}
+	}
+}
+
 func TestComment(t *testing.T) {
 	tests := []struct {
 		input   string
@@ -3899,6 +3990,55 @@ func testIntLiteral(t *testing.T, ex ast.Expr, expected int64) bool {
 	if il.TokenLiteral() != fmt.Sprintf("%d", expected) {
 		t.Errorf("il.TokenLiteral() not %d. got=%s", expected,
 			il.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testRange(t *testing.T, expr ast.Expr,
+	valTypes []string, vals []interface{}) bool {
+
+	testElem := func(e ast.Expr, vType string, v interface{}) bool {
+		switch vType {
+		case "Int":
+			return testLiteralExpr(t, e, v)
+		case "Str":
+			str := v.(string)
+			return testStr(t, e, str, false)
+		case "Sym":
+			str := v.(string)
+			return testSymbol(t, e, str)
+		case "Ident":
+			str := v.(string)
+			return testIdentifier(t, e, str)
+		case "":
+			return testNil(t, e)
+		}
+		return false
+	}
+
+	r, ok := expr.(*ast.RangeLiteral)
+	if !ok {
+		t.Fatalf("expr is not *ast.RangeLiteral. got=%T", expr)
+		return false
+	}
+
+	if !testElem(r.Start, valTypes[0], vals[0]) {
+		t.Errorf("r.Start has wrong value. (expected %v (type %s))",
+			vals[0], valTypes[0])
+		return false
+	}
+
+	if !testElem(r.Stop, valTypes[1], vals[1]) {
+		t.Errorf("r.Stop has wrong value. (expected %v (type %s))",
+			vals[1], valTypes[1])
+		return false
+	}
+
+	if !testElem(r.Step, valTypes[2], vals[2]) {
+		t.Errorf("r.Step has wrong value. (expected %v (type %s))",
+			vals[2], valTypes[2])
 		return false
 	}
 
