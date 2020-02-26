@@ -213,6 +213,10 @@ func TestChainPrecedence(t *testing.T) {
 			`10.find(1, 2) {|a| a+b} {|c| c+d}.sum`,
 			`10.find(1, 2, {|a| (a + b)}, {|c| (c + d)}).sum()`,
 		},
+		{
+			`(4-3).even?`,
+			`(4 - 3).even?()`,
+		},
 	}
 
 	for _, tt := range tests {
