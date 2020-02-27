@@ -2783,7 +2783,7 @@ func TestIndexExprRecv(t *testing.T) {
 			"one", ef.Str)
 	}
 
-	if !testNil(t, ef.Former) {
+	if ef.Former != nil {
 		t.Errorf("ef.Former must be nil.")
 	}
 }
