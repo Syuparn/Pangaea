@@ -652,6 +652,16 @@ func (il *IterLiteral) String() string {
 	return out.String()
 }
 
+type DiamondLiteral struct {
+	Token string
+	Src   *Source
+}
+
+func (dl *DiamondLiteral) isExpr()              {}
+func (dl *DiamondLiteral) TokenLiteral() string { return dl.Token }
+func (dl *DiamondLiteral) Source() *Source      { return dl.Src }
+func (dl *DiamondLiteral) String() string       { return "<>" }
+
 type ObjLiteral struct {
 	Token         string
 	Pairs         []*Pair

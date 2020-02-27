@@ -3885,6 +3885,15 @@ func TestIterLiteralBodies(t *testing.T) {
 	}
 }
 
+func TestDiamondLiteral(t *testing.T) {
+	input := `<>`
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+	if _, ok := expr.(*ast.DiamondLiteral); !ok {
+		t.Fatalf("f is not *ast.DiamondLiteral. got=%T", expr)
+	}
+}
+
 func TestRangeLiteral(t *testing.T) {
 	// NOTE: rangeLiteral should be wrapped with parens
 	// to refrain from ambiguity
