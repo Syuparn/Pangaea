@@ -381,7 +381,9 @@ intLiteral
 floatLiteral
 	: FLOAT
 	{
-		n, _ := strconv.ParseFloat($1.Literal, 64)
+		// remove separator "_"s
+		floatStr := strings.Replace($1.Literal, "_", "", -1)
+		n, _ := strconv.ParseFloat(floatStr, 64)
 		$$ = &ast.FloatLiteral{
 			Token: $1.Literal,
 			Value: n,
@@ -2092,7 +2094,7 @@ func tokenTypes() []simplexer.TokenType{
 	return []simplexer.TokenType{
 		t(KWARG_IDENT, fmt.Sprintf(`\\(%s|_+(%s)?)`, ident, ident)),
 		t(ARG_IDENT, `\\(0|[1-9][0-9]*)?`),
-		t(FLOAT, `[0-9]*\.[0-9]+`),
+		t(FLOAT, `([0-9][0-9_]*[0-9]|[0-9]*)\.([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(INT, `([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
