@@ -2108,7 +2108,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(KWARG_IDENT, fmt.Sprintf(`\\(%s|_+(%s)?)`, ident, ident)),
 		t(ARG_IDENT, `\\(0|[1-9][0-9]*)?`),
 		t(FLOAT, `([0-9][0-9_]*[0-9]|[0-9]*)\.([0-9][0-9_]*[0-9]|[0-9]+)`),
-		t(HEX_INT, `0x([0-9a-fA-F][0-9a-fA-F_]*[0-9a-fA-F]|[0-9a-fA-F]+)`),
+		t(HEX_INT, `0[xX]([0-9a-fA-F][0-9a-fA-F_]*[0-9a-fA-F]|[0-9a-fA-F]+)`),
 		t(INT, `([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
