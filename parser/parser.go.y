@@ -40,7 +40,8 @@ import (
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
 %type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr ifExpr
-%type<expr> literal funcLiteral arrLiteral objLiteral mapLiteral strLiteral symLiteral
+%type<expr> literal funcLiteral iterLiteral arrLiteral objLiteral mapLiteral
+%type<expr> strLiteral symLiteral
 %type<expr> rangeLiteral bareRange
 %type<kwargPair> kwargPair
 %type<pair> pair
@@ -53,7 +54,8 @@ import (
 %type<recvAndChain> recvAndChain
 %type<formerStrPiece> formerStrPiece
 %type<token> opMethod breakLine
-%type<token> lBrace lParen lBracket comma mapLBrace methodLBrace
+%type<token> comma
+%type<token> lBrace lParen lBracket mapLBrace methodLBrace lIter methodLIter
 
 %token<token> INT SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
 %token<token> HEAD_STR_PIECE MID_STR_PIECE TAIL_STR_PIECE
@@ -64,7 +66,7 @@ import (
 %token<token> ADD_CHAIN MAIN_CHAIN MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT ARG_IDENT KWARG_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
-%token<token> MAP_LBRACE METHOD_LBRACE
+%token<token> MAP_LBRACE METHOD_LBRACE LITER RITER METHOD_LITER
 %token<token> RET SEMICOLON
 %token<token> ASSIGN COMPOUND_ASSIGN RIGHT_ASSIGN
 %token<token> IF ELSE
@@ -263,6 +265,11 @@ literal
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> funcLiteral"
+	}
+	| iterLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> iterLiteral"
 	}
 	| arrLiteral
 	{
@@ -1192,6 +1199,96 @@ funcLiteral
 		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace funcParams stmts RBRACE"
 	}
 
+iterLiteral
+	: lIter RITER
+	{
+		$$ = &ast.IterLiteral{
+			Token: $1.Literal,
+			Args: []*ast.Ident{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: []ast.Stmt{},
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "IterLiteral -> lIter stmts RITER"
+	}
+	| lIter funcParams RITER
+	{
+		$$ = &ast.IterLiteral{
+			Token: $1.Literal,
+			Args: $2.Args,
+			Kwargs: $2.Kwargs,
+			Body: []ast.Stmt{},
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "IterLiteral -> lIter funcParams RITER"
+	}
+	| lIter stmts RITER
+	{
+		$$ = &ast.IterLiteral{
+			Token: $1.Literal,
+			Args: []*ast.Ident{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "IterLiteral -> lIter stmts RITER"
+	}
+	| lIter funcParams stmts RITER
+	{
+		$$ = &ast.IterLiteral{
+			Token: $1.Literal,
+			Args: $2.Args,
+			Kwargs: $2.Kwargs,
+			Body: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "IterLiteral -> lIter funcParams stmts RITER"
+	}
+	| methodLIter RITER
+	{
+		$$ = &ast.IterLiteral{
+			Token: $1.Literal,
+			Args: ast.SelfIdentParamList(yylex.(*Lexer).Source).Args,
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: []ast.Stmt{},
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter RITER"
+	}
+	| methodLIter funcParams RITER
+	{
+		$$ = &ast.IterLiteral{
+			Token: $1.Literal,
+			Args: $2.PrependSelf(yylex.(*Lexer).Source).Args,
+			Kwargs: $2.Kwargs,
+			Body: []ast.Stmt{},
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter funcParams RITER"
+	}
+	| methodLIter stmts RITER
+	{
+		$$ = &ast.IterLiteral{
+			Token: $1.Literal,
+			Args: ast.SelfIdentParamList(yylex.(*Lexer).Source).Args,
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter stmts RITER"
+	}
+	| methodLIter funcParams stmts RITER
+	{
+		$$ = &ast.IterLiteral{
+			Token: $1.Literal,
+			Args: $2.PrependSelf(yylex.(*Lexer).Source).Args,
+			Kwargs: $2.Kwargs,
+			Body: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter funcParams stmts RITER"
+	}
+
 funcParams
 	: VERT VERT
 	{
@@ -1713,6 +1810,26 @@ methodLBrace
 		yylex.(*Lexer).curRule = "mapLBrace -> METHOD_LBRACE RET"
 	}
 
+lIter
+	: LITER
+	{
+		$$ = $1
+	}
+	| LITER RET
+	{
+		$$ = $1
+	}
+
+methodLIter
+	: METHOD_LITER
+	{
+		$$ = $1
+	}
+	| METHOD_LITER RET
+	{
+		$$ = $1
+	}
+
 breakLine
 	: SEMICOLON
 	{
@@ -1895,6 +2012,9 @@ func tokenTypes() []simplexer.TokenType{
 		t(BIT_NOT, methodOps["bitNot"]),
 		t(IADD, methodOps["iAdd"]),
 		t(ISUB, methodOps["iSub"]),
+		t(METHOD_LITER, `m<\{`),
+		t(LITER, `<\{`),
+		t(RITER, `\}>`),
 		t(MAP_LBRACE, `%\{`),
 		t(METHOD_LBRACE, `m\{`),
 		t(LPAREN, `\(`),
