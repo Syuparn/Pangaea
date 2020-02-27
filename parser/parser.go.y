@@ -38,7 +38,7 @@ import (
 
 %type<program> program
 %type<stmts> stmts
-%type<stmt> stmt exprStmt jumpStmt
+%type<stmt> stmt exprStmt jumpStmt jumpIfStmt
 %type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr ifExpr
 %type<expr> literal
 %type<expr> funcLiteral iterLiteral diamondLiteral
@@ -76,6 +76,8 @@ import (
 
 %left IF
 %left ELSE
+%left JUMP
+%left JUMPIF
 %left RIGHT_ASSIGN
 %right ASSIGN COMPOUND_ASSIGN
 %left OR
@@ -149,6 +151,11 @@ stmt
 		$$ = $1
 		yylex.(*Lexer).curRule = "stmt -> jumpStmt"
 	}
+	| jumpIfStmt
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "stmt -> jumpIfStmt"
+	}
 
 exprStmt
 	: expr
@@ -161,8 +168,18 @@ exprStmt
 		yylex.(*Lexer).curRule = "exprStmt -> expr"
 	}
 
+jumpIfStmt
+	: jumpStmt IF expr %prec JUMPIF
+	{
+		$$ = &ast.JumpIfStmt{
+			JumpStmt: $1.(*ast.JumpStmt),
+			Cond: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+
 jumpStmt
-	: RETURN expr
+	: RETURN expr %prec JUMP
 	{
 		$$ = &ast.JumpStmt{
 			Token: $1.Literal,
@@ -171,7 +188,7 @@ jumpStmt
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| RAISE expr
+	| RAISE expr %prec JUMP
 	{
 		$$ = &ast.JumpStmt{
 			Token: $1.Literal,
@@ -180,7 +197,7 @@ jumpStmt
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| YIELD expr
+	| YIELD expr %prec JUMP
 	{
 		$$ = &ast.JumpStmt{
 			Token: $1.Literal,
