@@ -676,6 +676,25 @@ indexExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
+	| embeddedStr arrLiteral %prec INDEXING
+	{
+		atIdent := &ast.Ident{
+			Token: "at",
+			Value: "at",
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: false,
+			IdentAttr: ast.NormalIdent,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: $1.TokenLiteral(),
+			Chain: ast.MakeChain("", ".", nil),
+			Receiver: $1,
+			Prop: atIdent,
+			Args: []ast.Expr{$2},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
 	| ident arrLiteral %prec INDEXING
 	{
 		atIdent := &ast.Ident{
