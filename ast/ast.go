@@ -811,6 +811,17 @@ func (il *IntLiteral) TokenLiteral() string { return il.Token }
 func (il *IntLiteral) Source() *Source      { return il.Src }
 func (il *IntLiteral) String() string       { return il.Token }
 
+type FloatLiteral struct {
+	Token string
+	Value float64
+	Src   *Source
+}
+
+func (fl *FloatLiteral) isExpr()              {}
+func (fl *FloatLiteral) TokenLiteral() string { return fl.Token }
+func (fl *FloatLiteral) Source() *Source      { return fl.Src }
+func (fl *FloatLiteral) String() string       { return fl.Token }
+
 // for error message
 type Source struct {
 	Line         string
