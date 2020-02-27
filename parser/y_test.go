@@ -3462,8 +3462,8 @@ func TestIntLiteralExpr(t *testing.T) {
 
 func TestFloatLiteralExpr(t *testing.T) {
 	tests := []struct {
-		input    string
-		expected float64
+		input string
+		val   float64
 	}{
 		// NOTE: minus is recognized as prefix
 		{`5.0`, 5.0},
@@ -3478,7 +3478,7 @@ func TestFloatLiteralExpr(t *testing.T) {
 		program := testParse(t, tt.input)
 		expr := extractExprStmt(t, program)
 
-		testFloatLiteral(t, expr, tt.expected)
+		testFloatLiteral(t, expr, tt.val, tt.input)
 	}
 }
 
@@ -4731,7 +4731,8 @@ func testIntLiteral(t *testing.T, ex ast.Expr, expected int64) bool {
 	return true
 }
 
-func testFloatLiteral(t *testing.T, ex ast.Expr, expected float64) bool {
+func testFloatLiteral(t *testing.T, ex ast.Expr,
+	expectedVal float64, expectedTok string) bool {
 	fl, ok := ex.(*ast.FloatLiteral)
 
 	if !ok {
@@ -4739,13 +4740,13 @@ func testFloatLiteral(t *testing.T, ex ast.Expr, expected float64) bool {
 		return false
 	}
 
-	if fl.Value != expected {
-		t.Errorf("fl.Value not %f. got=%f", expected, fl.Value)
+	if fl.Value != expectedVal {
+		t.Errorf("fl.Value not %f. got=%f", expectedVal, fl.Value)
 		return false
 	}
 
-	if fl.TokenLiteral() != fmt.Sprintf("%f", expected) {
-		t.Errorf("il.TokenLiteral() not %f. got=%s", expected,
+	if fl.TokenLiteral() != expectedTok {
+		t.Errorf("il.TokenLiteral() not %s. got=%s", expectedTok,
 			fl.TokenLiteral())
 		return false
 	}
