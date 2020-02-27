@@ -3593,6 +3593,193 @@ func TestFuncLiteralBodies(t *testing.T) {
 	}
 }
 
+func TestIterLiteralArgs(t *testing.T) {
+	tests := []struct {
+		input   string
+		args    []string
+		kwargs  map[string]interface{}
+		printed string
+	}{
+		{
+			`<{}>`,
+			[]string{},
+			map[string]interface{}{},
+			`<{|| }>`,
+		},
+		{
+			`<{||}>`,
+			[]string{},
+			map[string]interface{}{},
+			`<{|| }>`,
+		},
+		{
+			`<{|| a}>`,
+			[]string{},
+			map[string]interface{}{},
+			`<{|| a}>`,
+		},
+		{
+			`<{|a| 1}>`,
+			[]string{"a"},
+			map[string]interface{}{},
+			`<{|a| 1}>`,
+		},
+		{
+			`<{1}>`,
+			[]string{},
+			map[string]interface{}{},
+			`<{|| 1}>`,
+		},
+		{
+			`<{|a, foo| 1}>`,
+			[]string{"a", "foo"},
+			map[string]interface{}{},
+			`<{|a, foo| 1}>`,
+		},
+		{
+			`<{|val: 1| val}>`,
+			[]string{},
+			map[string]interface{}{"val": 1},
+			`<{|val: 1| val}>`,
+		},
+		{
+			`<{|a, val: 1| val}>`,
+			[]string{"a"},
+			map[string]interface{}{"val": 1},
+			`<{|a, val: 1| val}>`,
+		},
+		{
+			`<{|val: 1, a| val}>`,
+			[]string{"a"},
+			map[string]interface{}{"val": 1},
+			`<{|a, val: 1| val}>`,
+		},
+		{
+			`<{|a, b, c: 1, d: 2| val}>`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`<{|a, b, c: 1, d: 2| val}>`,
+		},
+		{
+			`<{|a, b, c: 1, d: 2| val}>`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`<{|a, b, c: 1, d: 2| val}>`,
+		},
+		{
+			`<{|a, b, d: 2, c: 1| val}>`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`<{|a, b, c: 1, d: 2| val}>`,
+		},
+		{
+			`<{|a, c: 1, b, d: 2| val}>`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`<{|a, b, c: 1, d: 2| val}>`,
+		},
+		{
+			`<{|d: 2, c: 1, a, b| val}>`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`<{|a, b, c: 1, d: 2| val}>`,
+		},
+		{
+			`<{|d: 2, a, c: 1, b| val}>`,
+			[]string{"a", "b"},
+			map[string]interface{}{"c": 1, "d": 2},
+			`<{|a, b, c: 1, d: 2| val}>`,
+		},
+		{
+			`m<{}>`,
+			[]string{"self"},
+			map[string]interface{}{},
+			`<{|self| }>`,
+		},
+		{
+			`m<{val}>`,
+			[]string{"self"},
+			map[string]interface{}{},
+			`<{|self| val}>`,
+		},
+		{
+			`m<{||}>`,
+			[]string{"self"},
+			map[string]interface{}{},
+			`<{|self| }>`,
+		},
+		{
+			`m<{|a|}>`,
+			[]string{"self", "a"},
+			map[string]interface{}{},
+			`<{|self, a| }>`,
+		},
+		{
+			`m<{|opt: 1|}>`,
+			[]string{"self"},
+			map[string]interface{}{"opt": 1},
+			`<{|self, opt: 1| }>`,
+		},
+		{
+			`m<{|opt: 1| val}>`,
+			[]string{"self"},
+			map[string]interface{}{"opt": 1},
+			`<{|self, opt: 1| val}>`,
+		},
+		{
+			`m<{|opt: 1, a|}>`,
+			[]string{"self", "a"},
+			map[string]interface{}{"opt": 1},
+			`<{|self, a, opt: 1| }>`,
+		},
+		{
+			`m<{|b: 1, a, c: 2|}>`,
+			[]string{"self", "a"},
+			map[string]interface{}{"b": 1, "c": 2},
+			`<{|self, a, b: 1, c: 2| }>`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := extractExprStmt(t, program)
+
+		f, ok := expr.(*ast.IterLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.IterLiteral. got=%T", expr)
+		}
+
+		if len(f.Args) != len(tt.args) {
+			t.Fatalf("wrong arity of args, expected=%d, got=%d in\n%s",
+				len(tt.args), len(f.Args), tt.input)
+		}
+
+		if len(f.Kwargs) != len(tt.kwargs) {
+			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
+				len(tt.kwargs), len(f.Kwargs))
+		}
+
+		for i, expArg := range tt.args {
+			testIdentifier(t, f.Args[i], expArg)
+		}
+
+		for ident, val := range f.Kwargs {
+			name := ident.Token
+			exp, ok := tt.kwargs[name]
+			if ok {
+				testLiteralExpr(t, val, exp)
+			} else {
+				t.Errorf("unexpected kwarg %s found.", name)
+			}
+		}
+
+		if f.String() != tt.printed {
+			t.Errorf("wrong output.expected=\n%s,\ngot=\n%s",
+				tt.printed, f.String())
+		}
+	}
+}
+
 func TestRangeLiteral(t *testing.T) {
 	// NOTE: rangeLiteral should be wrapped with parens
 	// to refrain from ambiguity
