@@ -40,7 +40,9 @@ import (
 %type<stmts> stmts
 %type<stmt> stmt exprStmt
 %type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr ifExpr
-%type<expr> literal funcLiteral iterLiteral arrLiteral objLiteral mapLiteral
+%type<expr> literal
+%type<expr> funcLiteral iterLiteral diamondLiteral
+%type<expr> arrLiteral objLiteral mapLiteral
 %type<expr> strLiteral symLiteral
 %type<expr> rangeLiteral bareRange
 %type<kwargPair> kwargPair
@@ -66,7 +68,7 @@ import (
 %token<token> ADD_CHAIN MAIN_CHAIN MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT ARG_IDENT KWARG_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
-%token<token> MAP_LBRACE METHOD_LBRACE LITER RITER METHOD_LITER
+%token<token> MAP_LBRACE METHOD_LBRACE LITER RITER METHOD_LITER DIAMOND
 %token<token> RET SEMICOLON
 %token<token> ASSIGN COMPOUND_ASSIGN RIGHT_ASSIGN
 %token<token> IF ELSE
@@ -270,6 +272,11 @@ literal
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> iterLiteral"
+	}
+	| diamondLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> diamondLiteral"
 	}
 	| arrLiteral
 	{
@@ -1289,6 +1296,15 @@ iterLiteral
 		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter funcParams stmts RITER"
 	}
 
+diamondLiteral
+	: DIAMOND
+	{
+		$$ = &ast.DiamondLiteral{
+			Token: $1.Literal,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+
 funcParams
 	: VERT VERT
 	{
@@ -2012,6 +2028,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(BIT_NOT, methodOps["bitNot"]),
 		t(IADD, methodOps["iAdd"]),
 		t(ISUB, methodOps["iSub"]),
+		t(DIAMOND, `<>`),
 		t(METHOD_LITER, `m<\{`),
 		t(LITER, `<\{`),
 		t(RITER, `\}>`),
