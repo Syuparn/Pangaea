@@ -3460,6 +3460,29 @@ func TestIntLiteralExpr(t *testing.T) {
 	}
 }
 
+func TestSeparatedIntLiteral(t *testing.T) {
+	tests := []struct {
+		input string
+		val   int64
+	}{
+		{`1_000`, 1000},
+		{`1_000_000`, 1000000},
+		{`1_9800`, 19800},
+		{`1_23_45_678`, 12345678},
+		{`1_0_0_0`, 1000},
+		{`1__0`, 10},
+		{`1_________________0`, 10},
+		{`1_2__3____4`, 1234},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := extractExprStmt(t, program)
+
+		testFormattedIntLiteral(t, expr, tt.val, tt.input)
+	}
+}
+
 func TestFloatLiteralExpr(t *testing.T) {
 	tests := []struct {
 		input string
@@ -4724,6 +4747,29 @@ func testIntLiteral(t *testing.T, ex ast.Expr, expected int64) bool {
 
 	if il.TokenLiteral() != fmt.Sprintf("%d", expected) {
 		t.Errorf("il.TokenLiteral() not %d. got=%s", expected,
+			il.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testFormattedIntLiteral(t *testing.T, ex ast.Expr,
+	expectedVal int64, expectedTok string) bool {
+	il, ok := ex.(*ast.IntLiteral)
+
+	if !ok {
+		t.Errorf("il not *ast.IntLiteral. got=%T", ex)
+		return false
+	}
+
+	if il.Value != expectedVal {
+		t.Errorf("il.Value not %d. got=%d", expectedVal, il.Value)
+		return false
+	}
+
+	if il.TokenLiteral() != expectedTok {
+		t.Errorf("il.TokenLiteral() not %s. got=%s", expectedTok,
 			il.TokenLiteral())
 		return false
 	}
