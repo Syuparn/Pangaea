@@ -8,6 +8,7 @@ package parser
 import (
 	"../ast"
 	"fmt"
+	"math"
 	"reflect"
 	"strings"
 	"testing"
@@ -3530,7 +3531,7 @@ func TestFloatLiteralExpr(t *testing.T) {
 		{`1.3e-2`, 0.013},
 		{`1_1.3_2e-2`, 0.1132},
 		{`1_1.3_2E-2`, 0.1132},
-		{`100000000e-8`, 1.0},
+		{`100000000.0e-8`, 1.0},
 	}
 
 	for _, tt := range tests {
@@ -4822,7 +4823,7 @@ func testFloatLiteral(t *testing.T, ex ast.Expr,
 		return false
 	}
 
-	if fl.Value != expectedVal {
+	if math.Abs(fl.Value-expectedVal) > 1e-15 {
 		t.Errorf("fl.Value not %f. got=%f", expectedVal, fl.Value)
 		return false
 	}
