@@ -156,6 +156,7 @@ exprStmt
 		$$ = &ast.ExprStmt{
 			Token: "(exprStmt)",
 			Expr: $1,
+			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "exprStmt -> expr"
 	}
