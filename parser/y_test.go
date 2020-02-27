@@ -8,6 +8,7 @@ package parser
 import (
 	"../ast"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -4552,7 +4553,10 @@ func testSymbol(t *testing.T, expr ast.Expr, expected string) bool {
 }
 
 func testNil(t *testing.T, val interface{}) bool {
-	if val != nil {
+	// NOTE: if nil has type information, nil comparison may be false!
+	// (nil pointer in ast has type such as ast.Expr)
+	// to deal with the problem, IsNil() check is also necessary
+	if (val != nil) && !reflect.ValueOf(val).IsNil() {
 		t.Errorf("type of value is not nil. got=%T", val)
 		return false
 	}
