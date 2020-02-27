@@ -68,6 +68,14 @@ const (
 	YieldJump
 )
 
+func jumpString(j JumpType) string {
+	return map[JumpType]string{
+		ReturnJump: "return",
+		RaiseJump:  "raise",
+		YieldJump:  "yield",
+	}[j]
+}
+
 type JumpStmt struct {
 	Token    string
 	Val      Expr
@@ -78,12 +86,34 @@ type JumpStmt struct {
 func (js *JumpStmt) isStmt()              {}
 func (js *JumpStmt) TokenLiteral() string { return js.Token }
 func (js *JumpStmt) Source() *Source      { return js.Src }
-
 func (js *JumpStmt) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(jumpString(js.JumpType) + " ")
+
 	if js.Val != nil {
-		return js.Val.String()
+		out.WriteString(js.Val.String())
 	}
-	return ""
+
+	return out.String()
+}
+
+type JumpIfStmt struct {
+	Token    string
+	JumpStmt *JumpStmt
+	Cond     Expr
+	Src      *Source
+}
+
+func (js *JumpIfStmt) isStmt()              {}
+func (js *JumpIfStmt) TokenLiteral() string { return js.Token }
+func (js *JumpIfStmt) Source() *Source      { return js.Src }
+func (js *JumpIfStmt) String() string {
+	var out bytes.Buffer
+	out.WriteString(js.JumpStmt.String())
+	out.WriteString(" if ")
+	out.WriteString(js.Cond.String())
+	return out.String()
 }
 
 type IdentAttr int

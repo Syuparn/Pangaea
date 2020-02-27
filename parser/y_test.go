@@ -47,6 +47,43 @@ func TestJumpStmt(t *testing.T) {
 	}
 }
 
+func TestJumpIfStmt(t *testing.T) {
+	tests := []struct {
+		input    string
+		val      int
+		jumpType ast.JumpType
+		cond     int
+	}{
+		{`return 1 if 10`, 1, ast.ReturnJump, 10},
+		{`raise 2 if 20`, 2, ast.RaiseJump, 20},
+		{`yield 3 if 30`, 3, ast.YieldJump, 30},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		if len(program.Stmts) != 1 {
+			t.Fatalf("there must be 1 stmt. got=%d", len(program.Stmts))
+		}
+
+		stmt := program.Stmts[0]
+		ji, ok := stmt.(*ast.JumpIfStmt)
+		if !ok {
+			t.Fatalf("stmt is not *ast.JumpIfStmt. got=%T", stmt)
+		}
+
+		testLiteralExpr(t, ji.Cond, tt.cond)
+
+		js := ji.JumpStmt
+
+		if js.JumpType != tt.jumpType {
+			t.Errorf("JumpType is wrong. expected=%T, got=%T",
+				tt.jumpType, js.JumpType)
+		}
+
+		testLiteralExpr(t, js.Val, tt.val)
+	}
+}
+
 func TestInfixExpr(t *testing.T) {
 	tests := []struct {
 		input string
