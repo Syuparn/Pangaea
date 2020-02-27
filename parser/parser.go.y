@@ -60,7 +60,7 @@ import (
 %type<token> comma
 %type<token> lBrace lParen lBracket mapLBrace methodLBrace lIter methodLIter
 
-%token<token> INT FLOAT
+%token<token> INT FLOAT HEX_INT
 %token<token> SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
 %token<token> HEAD_STR_PIECE MID_STR_PIECE TAIL_STR_PIECE
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
@@ -371,6 +371,19 @@ intLiteral
 		// remove separator "_"s
 		intStr := strings.Replace($1.Literal, "_", "", -1)
 		n, _ := strconv.ParseInt(intStr, 10, 64)
+		$$ = &ast.IntLiteral{
+			Token: $1.Literal,
+			Value: n,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| HEX_INT
+	{
+		// remove separator "_"s
+		lit := strings.Replace($1.Literal, "_", "", -1)
+		// remove prefix "0x"
+		intStr := lit[2:]
+		n, _ := strconv.ParseInt(intStr, 16, 64)
 		$$ = &ast.IntLiteral{
 			Token: $1.Literal,
 			Value: n,
@@ -2095,6 +2108,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(KWARG_IDENT, fmt.Sprintf(`\\(%s|_+(%s)?)`, ident, ident)),
 		t(ARG_IDENT, `\\(0|[1-9][0-9]*)?`),
 		t(FLOAT, `([0-9][0-9_]*[0-9]|[0-9]*)\.([0-9][0-9_]*[0-9]|[0-9]+)`),
+		t(HEX_INT, `0x([0-9a-fA-F][0-9a-fA-F_]*[0-9a-fA-F]|[0-9a-fA-F]+)`),
 		t(INT, `([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
