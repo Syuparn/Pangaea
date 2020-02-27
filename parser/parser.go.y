@@ -41,6 +41,7 @@ import (
 %type<stmt> stmt exprStmt jumpStmt jumpIfStmt
 %type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr ifExpr
 %type<expr> literal
+%type<expr> intLiteral floatLiteral
 %type<expr> funcLiteral iterLiteral diamondLiteral
 %type<expr> arrLiteral objLiteral mapLiteral
 %type<expr> strLiteral symLiteral
@@ -59,7 +60,8 @@ import (
 %type<token> comma
 %type<token> lBrace lParen lBracket mapLBrace methodLBrace lIter methodLIter
 
-%token<token> INT SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
+%token<token> INT FLOAT
+%token<token> SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
 %token<token> HEAD_STR_PIECE MID_STR_PIECE TAIL_STR_PIECE
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
 %token<token> SPACESHIP EQ NEQ LT LE GT GE
@@ -307,15 +309,15 @@ ident
 	}
 
 literal
-	: INT
+	: intLiteral
 	{
-		n, _ := strconv.ParseInt($1.Literal, 10, 64)
-		$$ = &ast.IntLiteral{
-			Token: $1.Literal,
-			Value: n,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "literal -> INT"
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> intLiteral"
+	}
+	| floatLiteral
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "literal -> floatLiteral"
 	}
 	| funcLiteral
 	{
@@ -361,6 +363,28 @@ literal
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "literal -> rangeLiteral"
+	}
+
+intLiteral
+	: INT
+	{
+		n, _ := strconv.ParseInt($1.Literal, 10, 64)
+		$$ = &ast.IntLiteral{
+			Token: $1.Literal,
+			Value: n,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+
+floatLiteral
+	: FLOAT
+	{
+		n, _ := strconv.ParseFloat($1.Literal, 64)
+		$$ = &ast.FloatLiteral{
+			Token: $1.Literal,
+			Value: n,
+			Src: yylex.(*Lexer).Source,
+		}
 	}
 
 ifExpr
@@ -2066,7 +2090,8 @@ func tokenTypes() []simplexer.TokenType{
 	return []simplexer.TokenType{
 		t(KWARG_IDENT, fmt.Sprintf(`\\(%s|_+(%s)?)`, ident, ident)),
 		t(ARG_IDENT, `\\(0|[1-9][0-9]*)?`),
-		t(INT, `[0-9]+(\.[0-9]+)?`),
+		t(FLOAT, `[0-9]*\.[0-9]+`),
+		t(INT, `[0-9]+`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
 		t(HEAD_STR_PIECE, `"[^\"\n\r#]*#\{`),
