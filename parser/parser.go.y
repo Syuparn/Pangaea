@@ -61,7 +61,7 @@ import (
 %type<token> comma
 %type<token> lBrace lParen lBracket mapLBrace methodLBrace lIter methodLIter
 
-%token<token> INT FLOAT HEX_INT BIN_INT OCT_INT EXP_FLOAT
+%token<token> INT FLOAT HEX_INT BIN_INT OCT_INT EXP_FLOAT EXP_INT
 %token<token> SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
 %token<token> HEAD_STR_PIECE MID_STR_PIECE TAIL_STR_PIECE
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
@@ -414,6 +414,22 @@ intLiteral
 		$$ = &ast.IntLiteral{
 			Token: $1.Literal,
 			Value: n,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| EXP_INT
+	{
+		// remove separator "_"s
+		lit := strings.Replace($1.Literal, "_", "", -1)
+		// NOTE: ToLower is nesessary (to split by both e and E)
+		toks := strings.Split(strings.ToLower(lit), "e")
+		// NOTE: cast float to deal with minus exp (i.e. `100e-2 == 1`)
+		val, _ := strconv.ParseFloat(toks[0], 64)
+		// NOTE: cannot use ParseInt (math.Pow requires float)
+		exp, _ := strconv.ParseFloat(toks[1], 64)
+		$$ = &ast.IntLiteral{
+			Token: $1.Literal,
+			Value: int64(val * math.Pow(10, exp)),
 			Src: yylex.(*Lexer).Source,
 		}
 	}
@@ -2153,6 +2169,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(HEX_INT, `0[xX]([0-9a-fA-F][0-9a-fA-F_]*[0-9a-fA-F]|[0-9a-fA-F]+)`),
 		t(OCT_INT, `0[oO]([0-7][0-7_]*[0-7]|[0-7]+)`),
 		t(BIN_INT, `0[bB]([01][01_]*[01]|[01]+)`),
+		t(EXP_INT, `([0-9][0-9_]*[0-9]|[0-9]+)[eE]-?[0-9]+`),
 		t(INT, `([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
