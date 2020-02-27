@@ -38,7 +38,7 @@ import (
 
 %type<program> program
 %type<stmts> stmts
-%type<stmt> stmt exprStmt
+%type<stmt> stmt exprStmt jumpStmt
 %type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr ifExpr
 %type<expr> literal
 %type<expr> funcLiteral iterLiteral diamondLiteral
@@ -72,6 +72,7 @@ import (
 %token<token> RET SEMICOLON
 %token<token> ASSIGN COMPOUND_ASSIGN RIGHT_ASSIGN
 %token<token> IF ELSE
+%token<token> RETURN RAISE YIELD
 
 %left IF
 %left ELSE
@@ -143,6 +144,11 @@ stmt
 		$$ = $1
 		yylex.(*Lexer).curRule = "stmt -> exprStmt"
 	}
+	| jumpStmt
+	{
+		$$ = $1
+		yylex.(*Lexer).curRule = "stmt -> jumpStmt"
+	}
 
 exprStmt
 	: expr
@@ -153,6 +159,36 @@ exprStmt
 		}
 		yylex.(*Lexer).curRule = "exprStmt -> expr"
 	}
+
+jumpStmt
+	: RETURN expr
+	{
+		$$ = &ast.JumpStmt{
+			Token: $1.Literal,
+			Val: $2,
+			JumpType: ast.ReturnJump,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| RAISE expr
+	{
+		$$ = &ast.JumpStmt{
+			Token: $1.Literal,
+			Val: $2,
+			JumpType: ast.RaiseJump,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| YIELD expr
+	{
+		$$ = &ast.JumpStmt{
+			Token: $1.Literal,
+			Val: $2,
+			JumpType: ast.YieldJump,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+
 
 expr
 	: literal
@@ -2076,6 +2112,9 @@ func tokenTypes() []simplexer.TokenType{
 		t(MAIN_CHAIN, `[\.@$]`),
 		t(IF, `if`),
 		t(ELSE, `else`),
+		t(RETURN, `return`),
+		t(YIELD, `yield`),
+		t(RAISE, `raise`),
 		t(IDENT, ident),
 		t(PRIVATE_IDENT, fmt.Sprintf(`_+(%s)?`, ident)),
 	}
