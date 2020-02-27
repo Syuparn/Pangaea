@@ -15,6 +15,38 @@ import (
 
 // CAUTION: Capitalize test function names!
 
+func TestJumpStmt(t *testing.T) {
+	tests := []struct {
+		input    string
+		val      int
+		jumpType ast.JumpType
+	}{
+		{`return 1`, 1, ast.ReturnJump},
+		{`raise 2`, 2, ast.RaiseJump},
+		{`yield 3`, 3, ast.YieldJump},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		if len(program.Stmts) != 1 {
+			t.Fatalf("there must be 1 stmt. got=%d", len(program.Stmts))
+		}
+
+		stmt := program.Stmts[0]
+		js, ok := stmt.(*ast.JumpStmt)
+		if !ok {
+			t.Fatalf("wrong type. expected=*ast.JumpStmt, got=%T", stmt)
+		}
+
+		if js.JumpType != tt.jumpType {
+			t.Errorf("JumpType is wrong. expected=%T, got=%T",
+				tt.jumpType, js.JumpType)
+		}
+
+		testLiteralExpr(t, js.Val, tt.val)
+	}
+}
+
 func TestInfixExpr(t *testing.T) {
 	tests := []struct {
 		input string

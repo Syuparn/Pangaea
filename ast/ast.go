@@ -60,6 +60,32 @@ func (es *ExprStmt) String() string {
 	return ""
 }
 
+type JumpType int
+
+const (
+	ReturnJump JumpType = iota
+	RaiseJump
+	YieldJump
+)
+
+type JumpStmt struct {
+	Token    string
+	Val      Expr
+	JumpType JumpType
+	Src      *Source
+}
+
+func (js *JumpStmt) isStmt()              {}
+func (js *JumpStmt) TokenLiteral() string { return js.Token }
+func (js *JumpStmt) Source() *Source      { return js.Src }
+
+func (js *JumpStmt) String() string {
+	if js.Val != nil {
+		return js.Val.String()
+	}
+	return ""
+}
+
 type IdentAttr int
 
 const (
