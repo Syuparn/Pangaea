@@ -2757,6 +2757,35 @@ func TestIndexExprRecv(t *testing.T) {
 	if len(ce.Args) != 0 {
 		t.Errorf("arity of ce must be 0. got=%d", len(ce.Args))
 	}
+
+	input6 := `"one#{1*2}three"[0]`
+	recv6, ok := parseIndexRecv(input6)
+	if !ok {
+		t.Fatalf("recv6 test failed")
+	}
+	es, ok := recv6.(*ast.EmbeddedStr)
+	if !ok {
+		t.Fatalf("recv5 is not *ast.EmbeddedStr. got=%T", recv6)
+	}
+
+	if es.Latter != "three" {
+		t.Errorf("es.Latter is wrong. expected=`%s`, got=%s",
+			"three", es.Latter)
+	}
+
+	ef := es.Former
+	if !testInfixOperator(t, ef.Expr, 1, "*", 2) {
+		t.Errorf("ef.Expr is wrong.")
+	}
+
+	if ef.Str != "one" {
+		t.Errorf("ef.Str is wrong. expected=`%s`, got=%s",
+			"one", ef.Str)
+	}
+
+	if !testNil(t, ef.Former) {
+		t.Errorf("ef.Former must be nil.")
+	}
 }
 
 func TestIndexExprArg(t *testing.T) {
