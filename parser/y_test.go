@@ -84,6 +84,61 @@ func TestJumpIfStmt(t *testing.T) {
 	}
 }
 
+func TestJumpIfPrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`return 1`,
+			`return 1`,
+		},
+		{
+			`return 1 + 1`,
+			`return (1 + 1)`,
+		},
+		{
+			`return a := 2`,
+			`return (a := 2)`,
+		},
+		{
+			`return a if b`,
+			`return a if b`,
+		},
+		{
+			`return (a if b)`,
+			`return (a if b)`,
+		},
+		// `return a if b else c` raises parseerror`
+		{
+			`return (a if b else c)`,
+			`return (a if b else c)`,
+		},
+		{
+			`return a if b if c`,
+			`return a if (b if c)`,
+		},
+		{
+			`return a if b if c else d`,
+			`return a if (b if c else d)`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		if len(program.Stmts) != 1 {
+			t.Fatalf("there must be 1 stmt. got=%d", len(program.Stmts))
+		}
+		stmt := program.Stmts[0]
+		output := stmt.String()
+
+		if output != tt.expected {
+			t.Errorf("wrong precedence. expected=`\n%s\n`. got=`\n%s\n`",
+				tt.expected, output)
+		}
+	}
+}
+
 func TestInfixExpr(t *testing.T) {
 	tests := []struct {
 		input string
