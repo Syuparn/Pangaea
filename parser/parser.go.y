@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -60,7 +61,7 @@ import (
 %type<token> comma
 %type<token> lBrace lParen lBracket mapLBrace methodLBrace lIter methodLIter
 
-%token<token> INT FLOAT HEX_INT BIN_INT OCT_INT
+%token<token> INT FLOAT HEX_INT BIN_INT OCT_INT EXP_FLOAT
 %token<token> SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
 %token<token> HEAD_STR_PIECE MID_STR_PIECE TAIL_STR_PIECE
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
@@ -429,6 +430,20 @@ floatLiteral
 			Src: yylex.(*Lexer).Source,
 		}
 	}
+	| EXP_FLOAT
+	{
+		// remove separator "_"s
+		lit := strings.Replace($1.Literal, "_", "", -1)
+		// NOTE: ToLower is nesessary (to split by both e and E)
+		toks := strings.Split(strings.ToLower(lit), "e")
+		val, _ := strconv.ParseFloat(toks[0], 64)
+		exp, _ := strconv.ParseFloat(toks[1], 64)
+		$$ = &ast.FloatLiteral{
+			Token: $1.Literal,
+			Value: float64(val * math.Pow(10, exp)),
+			Src: yylex.(*Lexer).Source,
+		}
+	} 
 
 ifExpr
 	: expr IF expr
@@ -2133,6 +2148,7 @@ func tokenTypes() []simplexer.TokenType{
 	return []simplexer.TokenType{
 		t(KWARG_IDENT, fmt.Sprintf(`\\(%s|_+(%s)?)`, ident, ident)),
 		t(ARG_IDENT, `\\(0|[1-9][0-9]*)?`),
+		t(EXP_FLOAT, `([0-9][0-9_]*[0-9]|[0-9]*)\.([0-9][0-9_]*[0-9]|[0-9]+)[eE]-?[0-9]+`),
 		t(FLOAT, `([0-9][0-9_]*[0-9]|[0-9]*)\.([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(HEX_INT, `0[xX]([0-9a-fA-F][0-9a-fA-F_]*[0-9a-fA-F]|[0-9a-fA-F]+)`),
 		t(OCT_INT, `0[oO]([0-7][0-7_]*[0-7]|[0-7]+)`),
