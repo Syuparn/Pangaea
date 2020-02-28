@@ -4359,6 +4359,59 @@ func TestRangeLiteralPrecedence(t *testing.T) {
 		[]interface{}{1, []interface{}{2, "+", 3}, 4})
 }
 
+func TestBareRangePrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`[1:2+3]`,
+			`[(1:(2 + 3):)]`,
+		},
+		{
+			`[1+2:3]`,
+			`[((1 + 2):3:)]`,
+		},
+		{
+			`[::3+3]`,
+			`[(::(3 + 3))]`,
+		},
+		{
+			`[1*2:3*4==5:a:=7]`,
+			`[((1 * 2):((3 * 4) == 5):(a := 7))]`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := extractExprStmt(t, program)
+		ae, ok := expr.(*ast.ArrLiteral)
+
+		if !ok {
+			t.Fatalf("expr is not *ast.ArrLiteral. got=%T (in `\n%s\n`)",
+				expr, tt.input)
+		}
+
+		if len(ae.Elems) != 1 {
+			t.Fatalf("elem must be 1. got=%d (in `\n%s\n`)",
+				len(ae.Elems), tt.input)
+		}
+
+		elem := ae.Elems[0]
+
+		if _, ok := elem.(*ast.RangeLiteral); !ok {
+			t.Fatalf("elem is not *ast.RangeLiteral. got=%T (in `\n%s\n`)",
+				elem, tt.input)
+		}
+
+		output := expr.String()
+		if output != tt.expected {
+			t.Errorf("wrong precedence. expected=`\n%s\n`, got=`\n%s\n`",
+				tt.expected, output)
+		}
+	}
+}
+
 func TestIfExpr(t *testing.T) {
 	input := `1 if foo`
 	program := testParse(t, input)
