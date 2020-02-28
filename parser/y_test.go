@@ -4350,6 +4350,13 @@ func TestRangeLiteralPrecedence(t *testing.T) {
 	testRange(t, expr,
 		[]string{"Int", "Infix", "Int"},
 		[]interface{}{1, []interface{}{2, "+", 3}, 4})
+
+	input2 := `(1:2+3:4)`
+	program2 := testParse(t, input2)
+	expr2 := extractExprStmt(t, program2)
+	testRange(t, expr2,
+		[]string{"Int", "Infix", "Int"},
+		[]interface{}{1, []interface{}{2, "+", 3}, 4})
 }
 
 func TestIfExpr(t *testing.T) {
