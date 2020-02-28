@@ -4682,6 +4682,24 @@ func TestUnmatchedParenParseErr(t *testing.T) {
 	}
 }
 
+func TestImcompleteEmbeddedStrParseErr(t *testing.T) {
+	tests := []string{
+		`"a#{1+2}c`,
+		`"a#{1+2}c#{2+4}d`,
+		`"a#{}"`,
+		`"a#{1}b#{}"`,
+		`}aa"`,
+		`"aa#{`,
+		`}a#{`,
+		`"a#{1}b`,
+		`"a#{1+}"`,
+	}
+
+	for _, tt := range tests {
+		testParseErrorOccurred(t, tt)
+	}
+}
+
 func testChainContext(t *testing.T, ce ast.CallExpr, expContext string,
 	expArg interface{}) bool {
 	if ce.ChainToken() != expContext {
