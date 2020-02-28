@@ -10,7 +10,7 @@ A programming language for one-liner method chain lovers! (Under construction...
 - [simplexer](github.com/macrat/simplexer)
 
 # Plans for language features
-(These are not implemented yet...)
+(there are only lexer and parser yet...)
 
 ## One-way!
 This language is tuned for a one-liner method chain!
