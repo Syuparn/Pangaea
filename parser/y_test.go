@@ -4627,6 +4627,61 @@ func TestComment(t *testing.T) {
 	}
 }
 
+func TestUnmatchedParenParseErr(t *testing.T) {
+	tests := []string{
+		`(`,
+		`)`,
+		`[`,
+		`]`,
+		`<{`,
+		`}>`,
+		`m{`,
+		`m<{`,
+		`%{`,
+		"`",
+		`"`,
+		`{||`,
+		`( a`,
+		`a )`,
+		`[ a`,
+		`a ]`,
+		`<{ a`,
+		`a }>`,
+		`m{ a`,
+		`m<{ a`,
+		`%{ a`,
+		"`a",
+		`"a`,
+		`{|a|`,
+		`{||a`,
+		`a(`,
+		`)a`,
+		`a[`,
+		`]a`,
+		`a <{`,
+		`}> a`,
+		`a m{`,
+		`a m<{`,
+		`a %{`,
+		`a.foo(`,
+		`a.foo)`,
+		`a.foo(1`,
+		`{'a: 1`,
+		`[2,3,4`,
+		`[2,3,4,`,
+		`{
+			a: 2`,
+		`[
+			1`,
+		`{|a|
+			a`,
+	}
+
+	for _, tt := range tests {
+		testParseErrorOccurred(t, tt)
+	}
+}
+
 func testChainContext(t *testing.T, ce ast.CallExpr, expContext string,
 	expArg interface{}) bool {
 	if ce.ChainToken() != expContext {
@@ -4975,4 +5030,13 @@ func testParse(t *testing.T, input string) *ast.Program {
 	}
 
 	return ast
+}
+
+func testParseErrorOccurred(t *testing.T, input string) {
+	ast, err := Parse(strings.NewReader(input))
+	succeeded := err == nil
+	if succeeded {
+		t.Fatalf("expected parse error did not occur in"+
+			"`\n%s\n` (result: `\n%s\n`)", input, ast.String())
+	}
 }
