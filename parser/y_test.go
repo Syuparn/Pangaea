@@ -4715,6 +4715,41 @@ func TestInvalidSym(t *testing.T) {
 	}
 }
 
+func TestInvalidNum(t *testing.T) {
+	tests := []string{
+		`1a`,
+		`1A`,
+		`0b012`,
+		`0B012`,
+		`0b1A`,
+		`0B1A`,
+		`0o09`,
+		`0O09`,
+		`0o1A`,
+		`0O1A`,
+		`123_`,
+		`12_3_`,
+		`12_3__`,
+		`_123`,
+		`_1_23`,
+		`__1_23`,
+		`123_.45`,
+		`123.45_`,
+		`123._45`,
+		`_123.45`,
+		`_12_3.4_5`,
+		`33.3.3`,
+		`123e1.3`,
+		`123E1.3`,
+		`12.3e1.3`,
+		`12.3E1.3`,
+	}
+
+	for _, tt := range tests {
+		testParseErrorOccurred(t, tt)
+	}
+}
+
 func testChainContext(t *testing.T, ce ast.CallExpr, expContext string,
 	expArg interface{}) bool {
 	if ce.ChainToken() != expContext {
