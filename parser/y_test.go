@@ -4700,6 +4700,21 @@ func TestImcompleteEmbeddedStrParseErr(t *testing.T) {
 	}
 }
 
+func TestInvalidSym(t *testing.T) {
+	tests := []string{
+		`'1`,
+		`'12345`,
+		`'123a`,
+		`' `,
+		`'.a`,
+		`'\1`,
+	}
+
+	for _, tt := range tests {
+		testParseErrorOccurred(t, tt)
+	}
+}
+
 func testChainContext(t *testing.T, ce ast.CallExpr, expContext string,
 	expArg interface{}) bool {
 	if ce.ChainToken() != expContext {
