@@ -3519,6 +3519,8 @@ func TestFloatLiteralExpr(t *testing.T) {
 		val   float64
 	}{
 		// NOTE: minus is recognized as prefix
+		// NOTE: abbreviation such as `1.` is invalid
+		// (it conflicts to scalar chain)
 		{`5.0`, 5.0},
 		{`100.0`, 100.0},
 		{`0.123`, 0.123},
