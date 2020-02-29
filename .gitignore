@@ -1,3 +1,7 @@
 # files generated from yacc
 parser/y.go
 parser/y.output
+# windows binary
+pangaea.exe
+# linux/mac binary
+pangaea
