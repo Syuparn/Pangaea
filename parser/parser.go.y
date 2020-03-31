@@ -41,7 +41,7 @@ import (
 %type<stmts> stmts
 %type<stmt> stmt exprStmt jumpStmt jumpIfStmt
 %type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr ifExpr
-%type<expr> literal
+%type<expr> literal unitExpr
 %type<expr> intLiteral floatLiteral
 %type<expr> funcLiteral iterLiteral diamondLiteral
 %type<expr> arrLiteral objLiteral mapLiteral
@@ -212,10 +212,10 @@ jumpStmt
 
 
 expr
-	: literal
+	: unitExpr
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "expr -> literal"
+		yylex.(*Lexer).curRule = "expr -> unitExpr"
 	}
 	| infixExpr
 	{
@@ -232,35 +232,36 @@ expr
 		$$ = $1
 		yylex.(*Lexer).curRule = "expr -> assignExpr"
 	}
-	| callExpr
-	{
-		$$ = $1
-		yylex.(*Lexer).curRule = "expr -> callExpr"
-	}
-	| embeddedStr
-	{
-		$$ = $1
-		yylex.(*Lexer).curRule = "expr -> embeddedStr"
-	}
-	| ident
-	{
-		$$ = $1
-		yylex.(*Lexer).curRule = "expr -> ident"
-	}
-	| indexExpr
-	{
-		$$ = $1
-		yylex.(*Lexer).curRule = "expr -> indexExpr"
-	}
-	| LPAREN expr RPAREN %prec GROUPING
-	{
-		$$ = $2
-		yylex.(*Lexer).curRule = "expr -> indexExpr"
-	}
 	| ifExpr
 	{
 		$$ = $1
 		yylex.(*Lexer).curRule = "expr -> ifExpr"
+	}
+
+unitExpr
+	: literal
+	{
+		$$ = $1
+	}
+	| embeddedStr
+	{
+		$$ = $1
+	}
+	| callExpr
+	{
+		$$ = $1
+	}
+	| indexExpr
+	{
+		$$ = $1
+	}
+	| LPAREN expr RPAREN %prec GROUPING
+	{
+		$$ = $2
+	}
+	| ident
+	{
+		$$ = $1
 	}
 
 ident
@@ -809,7 +810,7 @@ assignExpr
 	}
 
 indexExpr
-	: literal arrLiteral %prec INDEXING
+	: unitExpr arrLiteral %prec INDEXING
 	{
 		atIdent := &ast.Ident{
 			Token: "at",
@@ -824,101 +825,6 @@ indexExpr
 			Receiver: $1,
 			Prop: atIdent,
 			Args: []ast.Expr{$2},
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Src: yylex.(*Lexer).Source,
-		}
-	}
-	| embeddedStr arrLiteral %prec INDEXING
-	{
-		atIdent := &ast.Ident{
-			Token: "at",
-			Value: "at",
-			Src: yylex.(*Lexer).Source,
-			IsPrivate: false,
-			IdentAttr: ast.NormalIdent,
-		}
-		$$ = &ast.PropCallExpr{
-			Token: $1.TokenLiteral(),
-			Chain: ast.MakeChain("", ".", nil),
-			Receiver: $1,
-			Prop: atIdent,
-			Args: []ast.Expr{$2},
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Src: yylex.(*Lexer).Source,
-		}
-	}
-	| ident arrLiteral %prec INDEXING
-	{
-		atIdent := &ast.Ident{
-			Token: "at",
-			Value: "at",
-			Src: yylex.(*Lexer).Source,
-			IsPrivate: false,
-			IdentAttr: ast.NormalIdent,
-		}
-		$$ = &ast.PropCallExpr{
-			Token: $1.TokenLiteral(),
-			Chain: ast.MakeChain("", ".", nil),
-			Receiver: $1,
-			Prop: atIdent,
-			Args: []ast.Expr{$2},
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Src: yylex.(*Lexer).Source,
-		}
-	}
-	| callExpr arrLiteral %prec INDEXING
-	{
-		atIdent := &ast.Ident{
-			Token: "at",
-			Value: "at",
-			Src: yylex.(*Lexer).Source,
-			IsPrivate: false,
-			IdentAttr: ast.NormalIdent,
-		}
-		$$ = &ast.PropCallExpr{
-			Token: $1.TokenLiteral(),
-			Chain: ast.MakeChain("", ".", nil),
-			Receiver: $1,
-			Prop: atIdent,
-			Args: []ast.Expr{$2},
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Src: yylex.(*Lexer).Source,
-		}
-	}
-	| indexExpr arrLiteral %prec INDEXING
-	{
-		atIdent := &ast.Ident{
-			Token: "at",
-			Value: "at",
-			Src: yylex.(*Lexer).Source,
-			IsPrivate: false,
-			IdentAttr: ast.NormalIdent,
-		}
-		$$ = &ast.PropCallExpr{
-			Token: $1.TokenLiteral(),
-			Chain: ast.MakeChain("", ".", nil),
-			Receiver: $1,
-			Prop: atIdent,
-			Args: []ast.Expr{$2},
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Src: yylex.(*Lexer).Source,
-		}
-	}
-	| LPAREN expr RPAREN arrLiteral
-	{
-		atIdent := &ast.Ident{
-			Token: "at",
-			Value: "at",
-			Src: yylex.(*Lexer).Source,
-			IsPrivate: false,
-			IdentAttr: ast.NormalIdent,
-		}
-		$$ = &ast.PropCallExpr{
-			Token: $2.TokenLiteral(),
-			Chain: ast.MakeChain("", ".", nil),
-			Receiver: $2,
-			Prop: atIdent,
-			Args: []ast.Expr{$4},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Src: yylex.(*Lexer).Source,
 		}
