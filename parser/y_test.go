@@ -3734,6 +3734,127 @@ func TestFuncLiteralArgs(t *testing.T) {
 	}
 }
 
+func TestFuncLiteralArgsWithValues(t *testing.T) {
+	tests := []struct {
+		input   string
+		args    []interface{}
+		kwargs  map[string]interface{}
+		printed string
+	}{
+		{
+			`{|1|}`,
+			[]interface{}{1},
+			map[string]interface{}{},
+			`{|1| }`,
+		},
+		{
+			`{|1, a|}`,
+			[]interface{}{1, "a"},
+			map[string]interface{}{},
+			`{|1, a| }`,
+		},
+		{
+			`{|a, 1|}`,
+			[]interface{}{"a", 1},
+			map[string]interface{}{},
+			`{|a, 1| }`,
+		},
+		{
+			`m{|1|}`,
+			[]interface{}{"self", 1},
+			map[string]interface{}{},
+			`{|self, 1| }`,
+		},
+		{
+			`m{|1, a|}`,
+			[]interface{}{"self", 1, "a"},
+			map[string]interface{}{},
+			`{|self, 1, a| }`,
+		},
+		{
+			`m{|a, 1|}`,
+			[]interface{}{"self", "a", 1},
+			map[string]interface{}{},
+			`{|self, a, 1| }`,
+		},
+		{
+			`m{|a, 2, b, 10|}`,
+			[]interface{}{"self", "a", 2, "b", 10},
+			map[string]interface{}{},
+			`{|self, a, 2, b, 10| }`,
+		},
+		{
+			`{|a: 2, 10|}`,
+			[]interface{}{10},
+			map[string]interface{}{"a": 2},
+			`{|10, a: 2| }`,
+		},
+		{
+			`{|10, a: 2|}`,
+			[]interface{}{10},
+			map[string]interface{}{"a": 2},
+			`{|10, a: 2| }`,
+		},
+		{
+			`m{|a: 2, 10|}`,
+			[]interface{}{"self", 10},
+			map[string]interface{}{"a": 2},
+			`{|self, 10, a: 2| }`,
+		},
+		{
+			`m{|10, a: 2|}`,
+			[]interface{}{"self", 10},
+			map[string]interface{}{"a": 2},
+			`{|self, 10, a: 2| }`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := extractExprStmt(t, program)
+
+		f, ok := expr.(*ast.FuncLiteral)
+		if !ok {
+			t.Fatalf("f is not *ast.FuncLiteral. got=%T", expr)
+		}
+
+		if len(f.Args) != len(tt.args) {
+			t.Fatalf("wrong arity of args, expected=%d, got=%d in\n%s",
+				len(tt.args), len(f.Args), tt.input)
+		}
+
+		if len(f.Kwargs) != len(tt.kwargs) {
+			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
+				len(tt.kwargs), len(f.Kwargs))
+		}
+
+		for i, expArg := range tt.args {
+			switch exp := expArg.(type) {
+			case string:
+				testIdentifier(t, f.Args[i], exp)
+			case int64:
+				testIntLiteral(t, f.Args[i], exp)
+			}
+
+		}
+
+		for ident, val := range f.Kwargs {
+			name := ident.Token
+			exp, ok := tt.kwargs[name]
+			if ok {
+				testLiteralExpr(t, val, exp)
+			} else {
+				t.Errorf("unexpected kwarg %s found.", name)
+			}
+		}
+
+		if f.String() != tt.printed {
+			t.Errorf("wrong output.expected=\n%s,\ngot=\n%s",
+				tt.printed, f.String())
+		}
+	}
+}
+
 func TestFuncLiteralBody(t *testing.T) {
 	tests := []struct {
 		input    string
