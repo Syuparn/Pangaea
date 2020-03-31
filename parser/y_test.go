@@ -3855,6 +3855,39 @@ func TestFuncLiteralArgsWithValues(t *testing.T) {
 	}
 }
 
+func TestFuncLiteralRangeArg(t *testing.T) {
+	input := `{|(a:b), c:d|}`
+
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+
+	f, ok := expr.(*ast.FuncLiteral)
+	if !ok {
+		t.Fatalf("f is not *ast.FuncLiteral. got=%T", expr)
+	}
+
+	if len(f.Args) != 1 {
+		t.Fatalf("wrong arity of args, expected=%d, got=%d in\n%s",
+			1, len(f.Args), input)
+	}
+
+	if len(f.Kwargs) != 1 {
+		t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
+			1, len(f.Kwargs))
+	}
+
+	ran, ok := f.Args[0].(*ast.RangeLiteral)
+	if !ok {
+		t.Errorf("Args[0] is not *ast.RangeLiteral. found=%v", f.Args[0])
+	}
+	testRange(t, ran, []string{"Ident", "Ident", ""}, []interface{}{"a", "b", nil})
+
+	for key, val := range f.Kwargs {
+		testIdentifier(t, key, "c")
+		testIdentifier(t, val, "d")
+	}
+}
+
 func TestFuncLiteralBody(t *testing.T) {
 	tests := []struct {
 		input    string
