@@ -26,7 +26,6 @@ import (
 	ident *ast.Ident
 	expr  ast.Expr
 	argList *ast.ArgList
-	paramList *ast.ParamList
 	exprList []ast.Expr
 	pair *ast.Pair
 	pairList []*ast.Pair
@@ -51,8 +50,7 @@ import (
 %type<kwargPair> kwargPair
 %type<pair> pair
 %type<pairList> pairList
-%type<argList> argList callArgs
-%type<paramList> paramList funcParams
+%type<argList> argList callArgs funcParams
 %type<exprList> exprList kwargExpansionList
 %type<ident> ident
 %type<chain> chain
@@ -1221,7 +1219,7 @@ funcLiteral
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
-			Args: []*ast.Ident{},
+			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Body: $2,
 			Src: yylex.(*Lexer).Source,
@@ -1243,7 +1241,7 @@ funcLiteral
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
-			Args: ast.SelfIdentParamList(yylex.(*Lexer).Source).Args,
+			Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Body: []ast.Stmt{},
 			Src: yylex.(*Lexer).Source,
@@ -1265,7 +1263,7 @@ funcLiteral
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
-			Args: ast.SelfIdentParamList(yylex.(*Lexer).Source).Args,
+			Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Body: $2,
 			Src: yylex.(*Lexer).Source,
@@ -1289,7 +1287,7 @@ iterLiteral
 	{
 		$$ = &ast.IterLiteral{
 			Token: $1.Literal,
-			Args: []*ast.Ident{},
+			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Body: []ast.Stmt{},
 			Src: yylex.(*Lexer).Source,
@@ -1311,7 +1309,7 @@ iterLiteral
 	{
 		$$ = &ast.IterLiteral{
 			Token: $1.Literal,
-			Args: []*ast.Ident{},
+			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Body: $2,
 			Src: yylex.(*Lexer).Source,
@@ -1333,7 +1331,7 @@ iterLiteral
 	{
 		$$ = &ast.IterLiteral{
 			Token: $1.Literal,
-			Args: ast.SelfIdentParamList(yylex.(*Lexer).Source).Args,
+			Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Body: []ast.Stmt{},
 			Src: yylex.(*Lexer).Source,
@@ -1355,7 +1353,7 @@ iterLiteral
 	{
 		$$ = &ast.IterLiteral{
 			Token: $1.Literal,
-			Args: ast.SelfIdentParamList(yylex.(*Lexer).Source).Args,
+			Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
 			Kwargs: map[*ast.Ident]ast.Expr{},
 			Body: $2,
 			Src: yylex.(*Lexer).Source,
@@ -1386,47 +1384,40 @@ diamondLiteral
 funcParams
 	: VERT VERT
 	{
-		$$ = &ast.ParamList{
-			Args: []*ast.Ident{},
+		$$ = &ast.ArgList{
+			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 		}
-		yylex.(*Lexer).curRule = "funcParams -> VERT VERT"
 	}
 	| OR
 	{
-		$$ = &ast.ParamList{
-			Args: []*ast.Ident{},
+		$$ = &ast.ArgList{
+			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 		}
-		yylex.(*Lexer).curRule = "funcParams -> OR"
 	}
-	| VERT paramList VERT
+	| VERT argList VERT
 	{
 		$$ = $2
-		yylex.(*Lexer).curRule = "funcParams -> VERT paramList VERT"
 	}
-	| VERT paramList RET VERT
+	| VERT argList RET VERT
 	{
 		$$ = $2
-		yylex.(*Lexer).curRule = "funcParams -> VERT paramList RET VERT"
 	}
 	|  VERT VERT RET
 	{
-		$$ = &ast.ParamList{
-			Args: []*ast.Ident{},
+		$$ = &ast.ArgList{
+			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
 		}
-		yylex.(*Lexer).curRule = "funcParams -> VERT VERT RET"
 	}
-	| VERT paramList VERT RET
+	| VERT argList VERT RET
 	{
 		$$ = $2
-		yylex.(*Lexer).curRule = "funcParams -> VERT paramList VERT RET"
 	}
-	| VERT paramList RET VERT RET
+	| VERT argList RET VERT RET
 	{
 		$$ = $2
-		yylex.(*Lexer).curRule = "funcParams -> VERT paramList RET VERT RET"
 	}
 
 callExpr
@@ -1785,28 +1776,6 @@ listElem
 	| bareRange
 	{
 		$$ = $1
-	}
-
-paramList
-	: paramList comma ident
-	{
-		$$ = $1.AppendArg($3)
-		yylex.(*Lexer).curRule = "paramList -> paramList comma ident"
-	}
-	| paramList comma kwargPair
-	{
-		$$ = $1.AppendKwarg($3.Key, $3.Val)
-		yylex.(*Lexer).curRule = "paramList -> paramList comma pair"
-	}
-	| ident
-	{
-		$$ = ast.IdentToParamList($1)
-		yylex.(*Lexer).curRule = "paramList -> ident"
-	}
-	| kwargPair
-	{
-		$$ = ast.KwargPairToParamList($1)
-		yylex.(*Lexer).curRule = "paramList -> pair"
 	}
 
 pairList

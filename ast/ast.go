@@ -348,58 +348,11 @@ func sortedPairStrings(pairs map[*Ident]Expr) []string {
 	return sortedStrings
 }
 
-func SelfIdentParamList(src *Source) *ParamList {
-	selfIdent := &Ident{
-		Token:     "self",
-		Value:     "self",
-		Src:       src,
-		IsPrivate: false,
-	}
-
-	return &ParamList{
-		Args:   []*Ident{selfIdent},
+func SelfIdentArgList(src *Source) *ArgList {
+	return &ArgList{
+		Args:   []Expr{selfIdent(src)},
 		Kwargs: map[*Ident]Expr{},
 	}
-}
-
-func IdentToParamList(i *Ident) *ParamList {
-	return &ParamList{
-		Args:   []*Ident{i},
-		Kwargs: map[*Ident]Expr{},
-	}
-}
-
-func KwargPairToParamList(pair *KwargPair) *ParamList {
-	return &ParamList{
-		Args:   []*Ident{},
-		Kwargs: map[*Ident]Expr{pair.Key: pair.Val},
-	}
-}
-
-type ParamList struct {
-	Args   []*Ident
-	Kwargs map[*Ident]Expr
-}
-
-func (pl *ParamList) PrependSelf(src *Source) *ParamList {
-	selfIdent := &Ident{
-		Token:     "self",
-		Value:     "self",
-		Src:       src,
-		IsPrivate: false,
-	}
-	pl.Args = append([]*Ident{selfIdent}, pl.Args...)
-	return pl
-}
-
-func (pl *ParamList) AppendArg(arg *Ident) *ParamList {
-	pl.Args = append(pl.Args, arg)
-	return pl
-}
-
-func (pl *ParamList) AppendKwarg(key *Ident, arg Expr) *ParamList {
-	pl.Kwargs[key] = arg
-	return pl
 }
 
 func ExprToArgList(e Expr) *ArgList {
@@ -441,6 +394,20 @@ func (al *ArgList) AppendArg(arg Expr) *ArgList {
 func (al *ArgList) AppendKwarg(key *Ident, arg Expr) *ArgList {
 	al.Kwargs[key] = arg
 	return al
+}
+
+func (al *ArgList) PrependSelf(src *Source) *ArgList {
+	al.Args = append([]Expr{selfIdent(src)}, al.Args...)
+	return al
+}
+
+func selfIdent(src *Source) *Ident {
+	return &Ident{
+		Token:     "self",
+		Value:     "self",
+		Src:       src,
+		IsPrivate: false,
+	}
 }
 
 type PrefixExpr struct {
@@ -626,7 +593,7 @@ func (ie *IfExpr) String() string {
 
 type FuncLiteral struct {
 	Token  string
-	Args   []*Ident
+	Args   []Expr
 	Kwargs map[*Ident]Expr
 	Body   []Stmt
 	Src    *Source
@@ -668,7 +635,7 @@ func (fl *FuncLiteral) String() string {
 
 type IterLiteral struct {
 	Token  string
-	Args   []*Ident
+	Args   []Expr
 	Kwargs map[*Ident]Expr
 	Body   []Stmt
 	Src    *Source
