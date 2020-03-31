@@ -592,11 +592,9 @@ func (ie *IfExpr) String() string {
 }
 
 type FuncLiteral struct {
-	Token  string
-	Args   []Expr
-	Kwargs map[*Ident]Expr
-	Body   []Stmt
-	Src    *Source
+	FuncComponent
+	Token string
+	Src   *Source
 }
 
 func (fl *FuncLiteral) isExpr()              {}
@@ -634,11 +632,9 @@ func (fl *FuncLiteral) String() string {
 }
 
 type IterLiteral struct {
-	Token  string
-	Args   []Expr
-	Kwargs map[*Ident]Expr
-	Body   []Stmt
-	Src    *Source
+	FuncComponent
+	Token string
+	Src   *Source
 }
 
 func (il *IterLiteral) isExpr()              {}
@@ -673,6 +669,18 @@ func (il *IterLiteral) String() string {
 	out.WriteString("}>")
 
 	return out.String()
+}
+
+type FuncComponent struct {
+	Args   []Expr
+	Kwargs map[*Ident]Expr
+	Body   []Stmt
+	Src    *Source
+}
+
+func (fc *FuncComponent) PrependSelf(src *Source) *FuncComponent {
+	fc.Args = append([]Expr{selfIdent(src)}, fc.Args...)
+	return fc
 }
 
 type DiamondLiteral struct {

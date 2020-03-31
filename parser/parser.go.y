@@ -25,6 +25,7 @@ import (
     chain *ast.Chain
 	ident *ast.Ident
 	expr  ast.Expr
+	funcComponent ast.FuncComponent
 	argList *ast.ArgList
 	exprList []ast.Expr
 	pair *ast.Pair
@@ -47,6 +48,7 @@ import (
 %type<expr> strLiteral symLiteral
 %type<expr> rangeLiteral bareRange
 %type<expr> listElem
+%type<funcComponent> funcComponent
 %type<kwargPair> kwargPair
 %type<pair> pair
 %type<pairList> pairList
@@ -1204,82 +1206,34 @@ formerStrPiece
 	}
 
 funcLiteral
-	: lBrace funcParams RBRACE
+	: lBrace funcComponent RBRACE
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
-			Args: $2.Args,
-			Kwargs: $2.Kwargs,
-			Body: []ast.Stmt{},
+			FuncComponent: $2,
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "funcLiteral -> lBrace funcParams RBRACE"
-	}
-	| lBrace stmts RBRACE
-	{
-		$$ = &ast.FuncLiteral{
-			Token: $1.Literal,
-			Args: []ast.Expr{},
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Body: $2,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "funcLiteral -> lBrace stmts RBRACE"
-	}
-	| lBrace funcParams stmts RBRACE
-	{
-		$$ = &ast.FuncLiteral{
-			Token: $1.Literal,
-			Args: $2.Args,
-			Kwargs: $2.Kwargs,
-			Body: $3,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "funcLiteral -> lBrace funcParams stmts RBRACE"
 	}
 	| methodLBrace RBRACE
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
-			Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Body: []ast.Stmt{},
 			Src: yylex.(*Lexer).Source,
+			FuncComponent: ast.FuncComponent{
+				Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
+				Kwargs: map[*ast.Ident]ast.Expr{},
+				Body: []ast.Stmt{},
+				Src: yylex.(*Lexer).Source,
+			},
 		}
-		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace RBRACE"
 	}
-	| methodLBrace funcParams RBRACE
+	| methodLBrace funcComponent RBRACE
 	{
 		$$ = &ast.FuncLiteral{
 			Token: $1.Literal,
-			Args: $2.PrependSelf(yylex.(*Lexer).Source).Args,
-			Kwargs: $2.Kwargs,
-			Body: []ast.Stmt{},
+			FuncComponent: *$2.PrependSelf(yylex.(*Lexer).Source),
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace funcParams RBRACE"
-	}
-	| methodLBrace stmts RBRACE
-	{
-		$$ = &ast.FuncLiteral{
-			Token: $1.Literal,
-			Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Body: $2,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace stmts RBRACE"
-	}
-	| methodLBrace funcParams stmts RBRACE
-	{
-		$$ = &ast.FuncLiteral{
-			Token: $1.Literal,
-			Args: $2.PrependSelf(yylex.(*Lexer).Source).Args,
-			Kwargs: $2.Kwargs,
-			Body: $3,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "funcLiteral -> methodLBrace funcParams stmts RBRACE"
 	}
 
 iterLiteral
@@ -1287,90 +1241,74 @@ iterLiteral
 	{
 		$$ = &ast.IterLiteral{
 			Token: $1.Literal,
-			Args: []ast.Expr{},
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Body: []ast.Stmt{},
 			Src: yylex.(*Lexer).Source,
+			FuncComponent: ast.FuncComponent{
+				Args: []ast.Expr{},
+				Kwargs: map[*ast.Ident]ast.Expr{},
+				Body: []ast.Stmt{},
+				Src: yylex.(*Lexer).Source,
+			},
 		}
-		yylex.(*Lexer).curRule = "IterLiteral -> lIter stmts RITER"
 	}
-	| lIter funcParams RITER
+	| lIter funcComponent RITER
 	{
 		$$ = &ast.IterLiteral{
 			Token: $1.Literal,
-			Args: $2.Args,
-			Kwargs: $2.Kwargs,
-			Body: []ast.Stmt{},
 			Src: yylex.(*Lexer).Source,
+			FuncComponent: $2,
 		}
-		yylex.(*Lexer).curRule = "IterLiteral -> lIter funcParams RITER"
-	}
-	| lIter stmts RITER
-	{
-		$$ = &ast.IterLiteral{
-			Token: $1.Literal,
-			Args: []ast.Expr{},
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Body: $2,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "IterLiteral -> lIter stmts RITER"
-	}
-	| lIter funcParams stmts RITER
-	{
-		$$ = &ast.IterLiteral{
-			Token: $1.Literal,
-			Args: $2.Args,
-			Kwargs: $2.Kwargs,
-			Body: $3,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "IterLiteral -> lIter funcParams stmts RITER"
 	}
 	| methodLIter RITER
 	{
 		$$ = &ast.IterLiteral{
 			Token: $1.Literal,
-			Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
-			Kwargs: map[*ast.Ident]ast.Expr{},
-			Body: []ast.Stmt{},
 			Src: yylex.(*Lexer).Source,
+			FuncComponent: ast.FuncComponent{
+				Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
+				Kwargs: map[*ast.Ident]ast.Expr{},
+				Body: []ast.Stmt{},
+				Src: yylex.(*Lexer).Source,
+			},
 		}
-		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter RITER"
 	}
-	| methodLIter funcParams RITER
+	| methodLIter funcComponent RITER
 	{
 		$$ = &ast.IterLiteral{
 			Token: $1.Literal,
-			Args: $2.PrependSelf(yylex.(*Lexer).Source).Args,
-			Kwargs: $2.Kwargs,
+			Src: yylex.(*Lexer).Source,
+			FuncComponent: *$2.PrependSelf(yylex.(*Lexer).Source),
+		}
+	}
+
+funcComponent
+	: funcParams
+	{
+		$$ = ast.FuncComponent{
+			Args: $1.Args,
+			Kwargs: $1.Kwargs,
 			Body: []ast.Stmt{},
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter funcParams RITER"
 	}
-	| methodLIter stmts RITER
+	| stmts
 	{
-		$$ = &ast.IterLiteral{
-			Token: $1.Literal,
-			Args: ast.SelfIdentArgList(yylex.(*Lexer).Source).Args,
+		$$ = ast.FuncComponent{
+			Args: []ast.Expr{},
 			Kwargs: map[*ast.Ident]ast.Expr{},
+			Body: $1,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| funcParams stmts
+	{
+		$$ = ast.FuncComponent{
+			Args: $1.Args,
+			Kwargs: $1.Kwargs,
 			Body: $2,
 			Src: yylex.(*Lexer).Source,
 		}
-		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter stmts RITER"
 	}
-	| methodLIter funcParams stmts RITER
-	{
-		$$ = &ast.IterLiteral{
-			Token: $1.Literal,
-			Args: $2.PrependSelf(yylex.(*Lexer).Source).Args,
-			Kwargs: $2.Kwargs,
-			Body: $3,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "IterLiteral -> methodLIter funcParams stmts RITER"
-	}
+
 
 diamondLiteral
 	: DIAMOND
