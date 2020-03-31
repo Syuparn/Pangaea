@@ -4180,6 +4180,54 @@ func TestIterLiteralArgs(t *testing.T) {
 	}
 }
 
+func TestFuncLiteralCall(t *testing.T) {
+	// syntax sugar of `{||}.call(1)`
+	input := `{||}(1)`
+
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+	callExpr, ok := expr.(*ast.PropCallExpr)
+	if !ok {
+		t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+	}
+
+	if _, ok := callExpr.Receiver.(*ast.FuncLiteral); !ok {
+		t.Fatalf("recv is not *ast.FuncLiteral. got=%T", callExpr)
+	}
+
+	testIdentifier(t, callExpr.Prop, "call")
+	testChainContext(t, callExpr, ".", nil)
+
+	if len(callExpr.Args) != 1 {
+		t.Fatalf("arity must be 1. got=%d", len(callExpr.Args))
+	}
+
+	testIntLiteral(t, callExpr.Args[0], 1)
+}
+
+func TestIdentCall(t *testing.T) {
+	// syntax sugar of `a.call(1)`
+	input := `a(1)`
+
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+	callExpr, ok := expr.(*ast.PropCallExpr)
+	if !ok {
+		t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+	}
+
+	testIdentifier(t, callExpr.Receiver, "a")
+
+	testIdentifier(t, callExpr.Prop, "call")
+	testChainContext(t, callExpr, ".", nil)
+
+	if len(callExpr.Args) != 1 {
+		t.Fatalf("arity must be 1. got=%d", len(callExpr.Args))
+	}
+
+	testIntLiteral(t, callExpr.Args[0], 1)
+}
+
 func TestIterLiteralBody(t *testing.T) {
 	tests := []struct {
 		input    string
