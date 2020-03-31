@@ -47,6 +47,7 @@ import (
 %type<expr> arrLiteral objLiteral mapLiteral
 %type<expr> strLiteral symLiteral
 %type<expr> rangeLiteral bareRange
+%type<expr> listElem
 %type<kwargPair> kwargPair
 %type<pair> pair
 %type<pairList> pairList
@@ -1744,25 +1745,14 @@ chain
 	}
 
 exprList
-	: exprList comma expr
+	: exprList comma listElem
 	{
 		$$ = append($1, $3)
-		yylex.(*Lexer).curRule = "exprList -> exprList comma expr"
 	}
-	| expr
+	| listElem
 	{
 		$$ = []ast.Expr{$1}
 		yylex.(*Lexer).curRule = "exprList -> expr"
-	}
-	| exprList comma bareRange
-	{
-		$$ = append($1, $3)
-		yylex.(*Lexer).curRule = "exprList -> exprList comma expr"
-	}
-	| bareRange
-	{
-		$$ = []ast.Expr{$1}
-		yylex.(*Lexer).curRule = "exprList -> bareRange"
 	}
 
 argList
@@ -1785,6 +1775,16 @@ argList
 	{
 		$$ = ast.KwargPairToArgList($1)
 		yylex.(*Lexer).curRule = "argList -> pair"
+	}
+
+listElem
+	: expr
+	{
+		$$ = $1
+	}
+	| bareRange
+	{
+		$$ = $1
 	}
 
 paramList
