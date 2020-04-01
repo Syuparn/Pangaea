@@ -1467,6 +1467,44 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
+	| ident callArgs
+	{
+		callIdent := &ast.Ident{
+			Token: "call",
+			Value: "call",
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: false,
+			IdentAttr: ast.NormalIdent,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: ast.MakeChain("", ".", nil),
+			Receiver: $1,
+			Prop: callIdent,
+			Args: $2.Args,
+			Kwargs: $2.Kwargs,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| funcLiteral callArgs
+	{
+		callIdent := &ast.Ident{
+			Token: "call",
+			Value: "call",
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: false,
+			IdentAttr: ast.NormalIdent,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: ast.MakeChain("", ".", nil),
+			Receiver: $1,
+			Prop: callIdent,
+			Args: $2.Args,
+			Kwargs: $2.Kwargs,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
 
 recvAndChain
 	: expr chain
