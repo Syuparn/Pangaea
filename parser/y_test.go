@@ -4180,6 +4180,113 @@ func TestIterLiteralArgs(t *testing.T) {
 	}
 }
 
+func TestMatchLiteral(t *testing.T) {
+	input := `
+	%{
+	  |foo, bar: 1| body0
+	  |bar: 2, foo| body1;
+	  |2|
+	  body2
+	  ||
+	  body31
+      return body32
+	}
+	`
+
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+
+	m, ok := expr.(*ast.MatchLiteral)
+	if !ok {
+		t.Fatalf("f is not *ast.MatchLiteral. got=%T", expr)
+	}
+
+	if len(m.Patterns) != 4 {
+		t.Fatalf("wrong length of patterns, expected=%d, got=%d",
+			len(m.Patterns), 4)
+	}
+
+	checkArity := func(pat *ast.FuncComponent, id int,
+		expectedArgArity int, expectedKwargArity int) {
+		if len(pat.Args) != expectedArgArity {
+			t.Fatalf("wrong arity of args, expected=%d, got=%d (in [%d])",
+				expectedArgArity, len(pat.Args), id)
+		}
+		if len(pat.Kwargs) != expectedKwargArity {
+			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d (in [%d])",
+				expectedKwargArity, len(pat.Kwargs), id)
+		}
+	}
+
+	checkArity(m.Patterns[0], 0, 1, 1)
+	checkArity(m.Patterns[1], 0, 1, 1)
+	checkArity(m.Patterns[2], 0, 1, 0)
+	checkArity(m.Patterns[3], 0, 0, 0)
+
+	checkBodyLen := func(pat *ast.FuncComponent, id int, expected int) {
+		if len(pat.Body) != expected {
+			t.Fatalf("wrong length of body, expected=%d, got=%d (in [%d])",
+				expected, len(pat.Body), id)
+		}
+	}
+
+	checkBodyLen(m.Patterns[0], 0, 1)
+	checkBodyLen(m.Patterns[1], 0, 1)
+	checkBodyLen(m.Patterns[2], 0, 1)
+	checkBodyLen(m.Patterns[3], 0, 3)
+
+	testKwargs := func(pat *ast.FuncComponent, key string, expected int64) {
+		for ident, val := range pat.Kwargs {
+			name := ident.Token
+			if name == key {
+				testIntLiteral(t, val, expected)
+			} else {
+				t.Errorf("unexpected kwarg %s found.", name)
+			}
+		}
+	}
+
+	testIdentExprStmt := func(stmt ast.Stmt, expected string) {
+		es, ok := stmt.(*ast.ExprStmt)
+		if !ok {
+			t.Fatalf("stmt is not *ast.ExprStmt. got=%T", stmt)
+		}
+		testIdentifier(t, es.Expr, expected)
+	}
+
+	// Patterns[0]
+	p0 := m.Patterns[0]
+	testIdentifier(t, p0.Args[0], "foo")
+	testKwargs(p0, "bar", 1)
+	testIdentExprStmt(p0.Body[0], "body0")
+
+	// Patterns[1]
+	p1 := m.Patterns[1]
+	testIdentifier(t, p1.Args[0], "foo")
+	testKwargs(p1, "bar", 2)
+	testIdentExprStmt(p1.Body[0], "body1")
+
+	// Patterns[2]
+	p2 := m.Patterns[2]
+	testIntLiteral(t, p2.Args[0], 2)
+	testIdentExprStmt(p1.Body[0], "body2")
+
+	// Patterns[3]
+	p3 := m.Patterns[3]
+	testIdentExprStmt(p3.Body[0], "body31")
+	ret, ok := p3.Body[1].(*ast.JumpStmt)
+	if !ok {
+		t.Fatalf("p3.Body[1] is not *ast.JumpStmt. got=%T", p3.Body[1])
+	}
+
+	if ret.JumpType != ast.ReturnJump {
+		t.Fatalf("ret.JumpType must be ast.ReturnJump. got=%T", ret.JumpType)
+	}
+	testIdentifier(t, ret.Val, "body32")
+}
+
+// TODO: TestMethodMatchLiteral()
+
 func TestFuncLiteralCall(t *testing.T) {
 	// syntax sugar of `{||}.call(1)`
 	input := `{||}(1)`

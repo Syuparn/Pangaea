@@ -671,6 +671,27 @@ func (il *IterLiteral) String() string {
 	return out.String()
 }
 
+type MatchLiteral struct {
+	Token    string
+	Patterns []*FuncComponent
+	Src      *Source
+}
+
+func (ml *MatchLiteral) isExpr()              {}
+func (ml *MatchLiteral) TokenLiteral() string { return ml.Token }
+func (ml *MatchLiteral) Source() *Source      { return ml.Src }
+func (ml *MatchLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("%{")
+
+	for _, pat := range ml.Patterns {
+		out.WriteString(pat.String())
+	}
+
+	out.WriteString("}")
+	return out.String()
+}
+
 type FuncComponent struct {
 	Args   []Expr
 	Kwargs map[*Ident]Expr
@@ -681,6 +702,33 @@ type FuncComponent struct {
 func (fc *FuncComponent) PrependSelf(src *Source) *FuncComponent {
 	fc.Args = append([]Expr{selfIdent(src)}, fc.Args...)
 	return fc
+}
+
+func (fc *FuncComponent) String() string {
+	var out bytes.Buffer
+
+	args := []string{}
+	for _, a := range fc.Args {
+		args = append(args, a.String())
+	}
+	args = append(args, sortedPairStrings(fc.Kwargs)...)
+
+	out.WriteString("|" + strings.Join(args, ", ") + "| ")
+
+	bodies := []string{}
+	for _, stmt := range fc.Body {
+		bodies = append(bodies, stmt.String())
+	}
+
+	switch len(bodies) {
+	case 0:
+		// nothing
+	case 1:
+		out.WriteString(bodies[0])
+	default:
+		out.WriteString("\n" + strings.Join(bodies, "\n") + "\n")
+	}
+	return out.String()
 }
 
 type DiamondLiteral struct {
