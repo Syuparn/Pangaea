@@ -4183,10 +4183,11 @@ func TestIterLiteralArgs(t *testing.T) {
 func TestMatchLiteral(t *testing.T) {
 	input := `
 	%{
-	  |foo, bar: 1| body0
-	  |bar: 2, foo| body1;
+	  |foo, bar: 1| body0,
+	  |bar: 2, foo| body1;,
 	  |2|
 	  body2
+	  ,
 	  ||
 	  body31
       return body32
