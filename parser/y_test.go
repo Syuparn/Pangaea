@@ -4289,7 +4289,7 @@ func TestMatchLiteral(t *testing.T) {
 	// NOTE: cannot indent (otherwise contained in string)
 	output := `%{
 |foo, bar: 1| body0,
-|bar: 2, foo| body1,
+|foo, bar: 2| body1,
 |2| body2,
 ||
 body31
