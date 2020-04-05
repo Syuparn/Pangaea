@@ -1830,7 +1830,11 @@ pair
 	: expr COLON expr
 	{
 		$$ = &ast.Pair{Key: $1, Val: $3}
-		yylex.(*Lexer).curRule = "pair -> ident COLON expr"
+	}
+	| CARET ident COLON expr
+	{
+		pinned := &ast.PinnedIdent{*$2}
+		$$ = &ast.Pair{Key: pinned, Val: $4}
 	}
 
 lBrace
