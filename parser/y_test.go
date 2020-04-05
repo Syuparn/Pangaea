@@ -4285,6 +4285,21 @@ func TestMatchLiteral(t *testing.T) {
 		t.Fatalf("ret.JumpType must be ast.ReturnJump. got=%T", ret.JumpType)
 	}
 	testIdentifier(t, ret.Val, "body33")
+
+	// NOTE: cannot indent (otherwise contained in string)
+	output := `%{
+|foo, bar: 1| body0,
+|bar: 2, foo| body1,
+|2| body2,
+||
+body31
+body32
+return body33
+}`
+	if m.String() != output {
+		t.Errorf("m.String() is wrong. expected=```\n%s\n```, got=```\n%s\n```",
+			output, m.String())
+	}
 }
 
 // TODO: TestMethodMatchLiteral()
