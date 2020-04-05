@@ -137,6 +137,10 @@ func (i *Ident) TokenLiteral() string { return i.Token }
 func (i *Ident) String() string       { return i.Value }
 func (i *Ident) Source() *Source      { return i.Src }
 
+type PinnedIdent struct {
+	Ident
+}
+
 type CallExpr interface {
 	ChainToken() string
 	ChainArg() Expr

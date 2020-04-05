@@ -797,6 +797,22 @@ func TestObjString(t *testing.T) {
 			}`,
 			`{'a: 1, **foo, **bar}`,
 		},
+		{
+			`{^a: 1, b: 2}`,
+			`{^a: 1, b: 2}`,
+		},
+		{
+			`{a: 1, ^b: 2}`,
+			`{a: 1, ^b: 2}`,
+		},
+		{
+			`{^a: 1, ^b: 2}`,
+			`{^a: 1, ^b: 2}`,
+		},
+		{
+			`{^a: 1, ^b: 2, **foo}`,
+			`{^a: 1, ^b: 2, **foo}`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -811,6 +827,36 @@ func TestObjString(t *testing.T) {
 			t.Errorf("wrong string. expected=`\n%s\n`, got=`\n%s\n`",
 				tt.expected, obj.String())
 		}
+	}
+}
+
+func TestObjPinnedKey(t *testing.T) {
+	input := `{^foo: 1}`
+
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+	obj, ok := expr.(*ast.ObjLiteral)
+	if !ok {
+		t.Fatalf("expr is not *ast.ObjLiteral.got=%T", expr)
+	}
+
+	if len(obj.Pairs) != 1 {
+		t.Fatalf("wrong number of elements. expected=%d, got=%d.",
+			1, len(obj.Pairs))
+	}
+
+	pinned, ok := obj.Pairs[0].Key.(*ast.PinnedIdent)
+	if !ok {
+		t.Fatalf("obj.Pairs[0].Key is not *ast.PinnedIdent, got=%T",
+			obj.Pairs[0].Key)
+	}
+
+	testIdentifier(t, pinned, "foo")
+	testIntLiteral(t, obj.Pairs[0].Val, 1)
+
+	if len(obj.EmbeddedExprs) != 0 {
+		t.Fatalf("wrong number of embedded. expected=%d, got=%d.",
+			0, len(obj.EmbeddedExprs))
 	}
 }
 
