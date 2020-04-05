@@ -4188,9 +4188,9 @@ func TestMatchLiteral(t *testing.T) {
 	  |2|
 	  body2
 	  ,
-	  ||
-	  body31
-      return body32
+	  || body31
+	  body32
+      return body33
 	}
 	`
 
@@ -4220,9 +4220,9 @@ func TestMatchLiteral(t *testing.T) {
 	}
 
 	checkArity(m.Patterns[0], 0, 1, 1)
-	checkArity(m.Patterns[1], 0, 1, 1)
-	checkArity(m.Patterns[2], 0, 1, 0)
-	checkArity(m.Patterns[3], 0, 0, 0)
+	checkArity(m.Patterns[1], 1, 1, 1)
+	checkArity(m.Patterns[2], 2, 1, 0)
+	checkArity(m.Patterns[3], 3, 0, 0)
 
 	checkBodyLen := func(pat *ast.FuncComponent, id int, expected int) {
 		if len(pat.Body) != expected {
@@ -4232,9 +4232,9 @@ func TestMatchLiteral(t *testing.T) {
 	}
 
 	checkBodyLen(m.Patterns[0], 0, 1)
-	checkBodyLen(m.Patterns[1], 0, 1)
-	checkBodyLen(m.Patterns[2], 0, 1)
-	checkBodyLen(m.Patterns[3], 0, 3)
+	checkBodyLen(m.Patterns[1], 1, 1)
+	checkBodyLen(m.Patterns[2], 2, 1)
+	checkBodyLen(m.Patterns[3], 3, 3)
 
 	testKwargs := func(pat *ast.FuncComponent, key string, expected int64) {
 		for ident, val := range pat.Kwargs {
@@ -4270,20 +4270,21 @@ func TestMatchLiteral(t *testing.T) {
 	// Patterns[2]
 	p2 := m.Patterns[2]
 	testIntLiteral(t, p2.Args[0], 2)
-	testIdentExprStmt(p1.Body[0], "body2")
+	testIdentExprStmt(p2.Body[0], "body2")
 
 	// Patterns[3]
 	p3 := m.Patterns[3]
 	testIdentExprStmt(p3.Body[0], "body31")
-	ret, ok := p3.Body[1].(*ast.JumpStmt)
+	testIdentExprStmt(p3.Body[1], "body32")
+	ret, ok := p3.Body[2].(*ast.JumpStmt)
 	if !ok {
-		t.Fatalf("p3.Body[1] is not *ast.JumpStmt. got=%T", p3.Body[1])
+		t.Fatalf("p3.Body[2] is not *ast.JumpStmt. got=%T", p3.Body[1])
 	}
 
 	if ret.JumpType != ast.ReturnJump {
 		t.Fatalf("ret.JumpType must be ast.ReturnJump. got=%T", ret.JumpType)
 	}
-	testIdentifier(t, ret.Val, "body32")
+	testIdentifier(t, ret.Val, "body33")
 }
 
 // TODO: TestMethodMatchLiteral()
