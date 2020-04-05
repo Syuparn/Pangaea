@@ -141,6 +141,10 @@ type PinnedIdent struct {
 	Ident
 }
 
+func (pi *PinnedIdent) String() string {
+	return "^" + pi.Ident.String()
+}
+
 type CallExpr interface {
 	ChainToken() string
 	ChainArg() Expr
