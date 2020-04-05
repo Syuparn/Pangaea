@@ -26,6 +26,7 @@ import (
 	ident *ast.Ident
 	expr  ast.Expr
 	funcComponent ast.FuncComponent
+	funcComponentList []*ast.FuncComponent
 	argList *ast.ArgList
 	exprList []ast.Expr
 	pair *ast.Pair
@@ -43,12 +44,13 @@ import (
 %type<expr> expr infixExpr prefixExpr assignExpr callExpr embeddedStr indexExpr ifExpr
 %type<expr> literal unitExpr
 %type<expr> intLiteral floatLiteral
-%type<expr> funcLiteral iterLiteral diamondLiteral
+%type<expr> funcLiteral iterLiteral matchLiteral diamondLiteral
 %type<expr> arrLiteral objLiteral mapLiteral
 %type<expr> strLiteral symLiteral
 %type<expr> rangeLiteral bareRange
 %type<expr> listElem
-%type<funcComponent> funcComponent
+%type<funcComponent> funcComponent formalFuncComponent
+%type<funcComponentList> funcComponentList
 %type<kwargPair> kwargPair
 %type<pair> pair
 %type<pairList> pairList
@@ -315,57 +317,50 @@ literal
 	: intLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> intLiteral"
 	}
 	| floatLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> floatLiteral"
 	}
 	| funcLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> funcLiteral"
+	}
+	| matchLiteral
+	{
+		$$ = $1
 	}
 	| iterLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> iterLiteral"
 	}
 	| diamondLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> diamondLiteral"
 	}
 	| arrLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> arrLiteral"
 	}
 	| objLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> objLiteral"
 	}
 	| mapLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> mapLiteral"
 	}
 	| strLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> strLiteral"
 	}
 	| symLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> symLiteral"
 	}
 	| rangeLiteral
 	{
 		$$ = $1
-		yylex.(*Lexer).curRule = "literal -> rangeLiteral"
 	}
 
 intLiteral
@@ -1280,6 +1275,31 @@ iterLiteral
 		}
 	}
 
+matchLiteral
+	: mapLBrace funcComponentList RBRACE
+	{
+		$$ = &ast.MatchLiteral{
+			Token: $1.Literal,
+			Patterns: $2,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+
+funcComponentList
+	: funcComponentList comma formalFuncComponent
+	{
+		// NOTE: assigning is nesessary because $3 is passed by reference
+		// which means address of $3 is the last match of funcComponentList
+		// (same as for loop)
+		comp := $3
+		$$ = append($1, &comp)
+	}
+	| formalFuncComponent
+	{
+		comp := $1
+		$$ = []*ast.FuncComponent{&comp}
+	}
+
 funcComponent
 	: funcParams
 	{
@@ -1299,7 +1319,13 @@ funcComponent
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| funcParams stmts
+	| formalFuncComponent
+	{
+		$$ = $1
+	}
+
+formalFuncComponent
+	: funcParams stmts
 	{
 		$$ = ast.FuncComponent{
 			Args: $1.Args,
@@ -1308,7 +1334,6 @@ funcComponent
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-
 
 diamondLiteral
 	: DIAMOND
@@ -1343,6 +1368,13 @@ funcParams
 		$$ = $2
 	}
 	|  VERT VERT RET
+	{
+		$$ = &ast.ArgList{
+			Args: []ast.Expr{},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+		}
+	}
+	|  OR RET
 	{
 		$$ = &ast.ArgList{
 			Args: []ast.Expr{},
