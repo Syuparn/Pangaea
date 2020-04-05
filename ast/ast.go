@@ -640,9 +640,11 @@ func (ml *MatchLiteral) String() string {
 	var out bytes.Buffer
 	out.WriteString("%{\n")
 
+	patterns := []string{}
 	for _, pat := range ml.Patterns {
-		out.WriteString(pat.String() + "\n")
+		patterns = append(patterns, pat.String())
 	}
+	out.WriteString(strings.Join(patterns, ",\n"))
 
 	out.WriteString("}")
 	return out.String()
@@ -669,7 +671,7 @@ func (fc *FuncComponent) String() string {
 	}
 	args = append(args, sortedPairStrings(fc.Kwargs)...)
 
-	out.WriteString("|" + strings.Join(args, ", ") + "| ")
+	out.WriteString("|" + strings.Join(args, ", ") + "|")
 
 	bodies := []string{}
 	for _, stmt := range fc.Body {
@@ -678,9 +680,11 @@ func (fc *FuncComponent) String() string {
 
 	switch len(bodies) {
 	case 0:
-		// nothing
+		// prepend space to break args and body(empty)
+		out.WriteString(" ")
 	case 1:
-		out.WriteString(bodies[0])
+		// prepend space to break args and body
+		out.WriteString(" " + bodies[0])
 	default:
 		out.WriteString("\n" + strings.Join(bodies, "\n") + "\n")
 	}
