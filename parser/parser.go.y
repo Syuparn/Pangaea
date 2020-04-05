@@ -62,7 +62,7 @@ import (
 %type<formerStrPiece> formerStrPiece
 %type<token> opMethod breakLine
 %type<token> comma
-%type<token> lBrace lParen lBracket mapLBrace methodLBrace lIter methodLIter
+%type<token> lBrace lParen lBracket mapLBrace methodMapLBrace methodLBrace lIter methodLIter
 
 %token<token> INT FLOAT HEX_INT BIN_INT OCT_INT EXP_FLOAT EXP_INT
 %token<token> SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
@@ -74,7 +74,7 @@ import (
 %token<token> ADD_CHAIN MAIN_CHAIN MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %token<token> IDENT PRIVATE_IDENT ARG_IDENT KWARG_IDENT
 %token<token> LPAREN RPAREN COMMA COLON LBRACE RBRACE VERT LBRACKET RBRACKET CARET
-%token<token> MAP_LBRACE METHOD_LBRACE LITER RITER METHOD_LITER DIAMOND
+%token<token> MAP_LBRACE METHOD_MAP_LBRACE METHOD_LBRACE LITER RITER METHOD_LITER DIAMOND
 %token<token> RET SEMICOLON
 %token<token> ASSIGN COMPOUND_ASSIGN RIGHT_ASSIGN
 %token<token> IF ELSE
@@ -1284,6 +1284,19 @@ matchLiteral
 			Src: yylex.(*Lexer).Source,
 		}
 	}
+	| methodMapLBrace funcComponentList RBRACE
+	{
+		patterns := []*ast.FuncComponent{}
+		for _, p := range $2 {
+			patterns = append(patterns, p.PrependSelf(yylex.(*Lexer).Source))
+		}
+
+		$$ = &ast.MatchLiteral{
+			Token: $1.Literal,
+			Patterns: patterns,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
 
 funcComponentList
 	: funcComponentList comma formalFuncComponent
@@ -1856,6 +1869,16 @@ lBracket
 		yylex.(*Lexer).curRule = "lBracket -> LBRACKET RET"
 	}
 
+methodMapLBrace
+	: METHOD_MAP_LBRACE
+	{
+		$$ = $1
+	}
+	| METHOD_MAP_LBRACE RET
+	{
+		$$ = $1
+	}
+
 mapLBrace
 	: MAP_LBRACE
 	{
@@ -2092,6 +2115,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(METHOD_LITER, `m<\{`),
 		t(LITER, `<\{`),
 		t(RITER, `\}>`),
+		t(METHOD_MAP_LBRACE, `m%\{`),
 		t(MAP_LBRACE, `%\{`),
 		t(METHOD_LBRACE, `m\{`),
 		t(LPAREN, `\(`),
