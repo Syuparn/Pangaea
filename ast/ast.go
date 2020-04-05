@@ -682,10 +682,11 @@ func (ml *MatchLiteral) TokenLiteral() string { return ml.Token }
 func (ml *MatchLiteral) Source() *Source      { return ml.Src }
 func (ml *MatchLiteral) String() string {
 	var out bytes.Buffer
-	out.WriteString("%{")
+	// NOTE: use %% instead of % to avoid encoding
+	out.WriteString("%%{\n")
 
 	for _, pat := range ml.Patterns {
-		out.WriteString(pat.String())
+		out.WriteString(pat.String() + "\n")
 	}
 
 	out.WriteString("}")
