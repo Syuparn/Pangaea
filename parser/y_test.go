@@ -851,7 +851,7 @@ func TestObjPinnedKey(t *testing.T) {
 			obj.Pairs[0].Key)
 	}
 
-	testIdentifier(t, pinned, "foo")
+	testIdentifier(t, &pinned.Ident, "foo")
 	testIntLiteral(t, obj.Pairs[0].Val, 1)
 
 	if len(obj.EmbeddedExprs) != 0 {
