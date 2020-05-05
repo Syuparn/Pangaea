@@ -18,11 +18,10 @@ func (f *PanFunc) Type() PanObjType {
 
 func (f *PanFunc) Inspect() string {
 	var out bytes.Buffer
-
-	out.WriteString("{")
+	out.WriteString(openParen(f.FuncType))
 	// delegate to FuncWrapper
 	out.WriteString(f.FuncWrapper.String())
-	out.WriteString("}")
+	out.WriteString(closeParen(f.FuncType))
 
 	return out.String()
 }
@@ -37,6 +36,20 @@ const (
 	FUNC_FUNC FuncType = iota
 	ITER_FUNC
 )
+
+func openParen(t FuncType) string {
+	if t == FUNC_FUNC {
+		return "{"
+	}
+	return "<{"
+}
+
+func closeParen(t FuncType) string {
+	if t == FUNC_FUNC {
+		return "}"
+	}
+	return "}>"
+}
 
 // NOTE: keep loose coupling to ast.FuncComponent and PanFunc
 type FuncWrapper interface {
