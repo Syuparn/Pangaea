@@ -1,9 +1,13 @@
 package object
 
+import (
+	"fmt"
+)
+
 const INT_TYPE = "INT_TYPE"
 
 type PanInt struct {
-	value int64
+	Value int64
 }
 
 func (i *PanInt) Type() PanObjType {
@@ -11,5 +15,5 @@ func (i *PanInt) Type() PanObjType {
 }
 
 func (i *PanInt) Inspect() string {
-	return ""
+	return fmt.Sprintf("%d", i.Value)
 }
