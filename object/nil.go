@@ -15,3 +15,7 @@ func (n *PanNil) Inspect() string {
 func (n *PanNil) Proto() PanObject {
 	return builtInNilObj
 }
+
+func (n *PanNil) Hash() HashKey {
+	return HashKey{}
+}

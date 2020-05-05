@@ -35,7 +35,33 @@ func TestNilProto(t *testing.T) {
 	}
 }
 
+func TestNilHash(t *testing.T) {
+	tests := []struct {
+		obj      PanNil
+		expected int
+	}{
+		{PanNil{}, 0},
+	}
+
+	for _, tt := range tests {
+		h := tt.obj.Hash()
+
+		if h.Type != NIL_TYPE {
+			t.Fatalf("hash type must be NIL_TYPE. got=%s", h.Type)
+		}
+
+		if h.Value != uint64(tt.expected) {
+			t.Errorf("wrong hash key: got=%d, expected=%d",
+				h.Value, uint64(tt.expected))
+		}
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testNilIsPanObject() {
 	var _ PanObject = &PanNil{}
+}
+
+func testNilIsScalarObject() {
+	var _ PanScalar = &PanNil{}
 }
