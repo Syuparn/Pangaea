@@ -32,5 +32,9 @@ func (s *PanStr) SymHash() SymHash {
 	}
 	h := fnv.New64a()
 	h.Write([]byte(s.Value))
-	return SymHash(h.Sum64())
+	symHash := h.Sum64()
+
+	symHashTable[s.Value] = symHash
+
+	return symHash
 }
