@@ -6,7 +6,7 @@ import (
 
 func TestArrType(t *testing.T) {
 	obj := PanArr{}
-	if obj.Type() != BOOL_TYPE {
+	if obj.Type() != ARR_TYPE {
 		t.Fatalf("wrong type: expected=%s, got=%s", ARR_TYPE, obj.Type())
 	}
 }
