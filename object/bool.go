@@ -23,5 +23,12 @@ func (b *PanBool) Proto() PanObject {
 }
 
 func (b *PanBool) Hash() HashKey {
-	return HashKey{}
+	var v uint64
+	if b.Value {
+		v = 1
+	} else {
+		v = 0
+	}
+
+	return HashKey{BOOL_TYPE, v}
 }
