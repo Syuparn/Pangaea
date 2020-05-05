@@ -23,5 +23,5 @@ func (i *PanInt) Proto() PanObject {
 }
 
 func (i *PanInt) Hash() HashKey {
-	return HashKey{}
+	return HashKey{INT_TYPE, uint64(i.Value)}
 }
