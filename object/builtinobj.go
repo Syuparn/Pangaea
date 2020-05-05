@@ -8,3 +8,4 @@ var builtInFloatObj = &PanObj{}
 var builtInBoolObj = &PanObj{}
 var builtInNilObj = &PanObj{}
 var builtInStrObj = &PanObj{}
+var builtInArrObj = &PanObj{}
