@@ -25,7 +25,8 @@ func TestFuncInspect(t *testing.T) {
 		expected string
 	}{
 		// AstFuncWrapper delegates to FuncComponent.String(), which works same as below
-		{PanFunc{&MockFuncWrapper{"|a| a + 1"}}, "{|a| a + 1}"},
+		{PanFunc{&MockFuncWrapper{"|a| a + 1"}, FUNC_FUNC}, "{|a| a + 1}"},
+		{PanFunc{&MockFuncWrapper{"|a| a + 1"}, ITER_FUNC}, "<{|a| a + 1}>"},
 	}
 
 	for _, tt := range tests {
@@ -37,7 +38,7 @@ func TestFuncInspect(t *testing.T) {
 }
 
 func TestFuncProto(t *testing.T) {
-	f := PanFunc{&MockFuncWrapper{"|foo| foo"}}
+	f := PanFunc{&MockFuncWrapper{"|foo| foo"}, FUNC_FUNC}
 	if f.Proto() != builtInFuncObj {
 		t.Fatalf("Proto is not BuiltinFuncObj. got=%T (%+v)",
 			f.Proto(), f.Proto())
@@ -46,5 +47,5 @@ func TestFuncProto(t *testing.T) {
 
 // checked by compiler (this function works nothing)
 func testFuncIsPanObject() {
-	var _ PanObject = &PanFunc{&MockFuncWrapper{"|foo| foo"}}
+	var _ PanObject = &PanFunc{&MockFuncWrapper{"|foo| foo"}, FUNC_FUNC}
 }

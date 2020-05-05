@@ -9,6 +9,7 @@ const FUNC_TYPE = "FUNC_TYPE"
 
 type PanFunc struct {
 	FuncWrapper
+	FuncType FuncType
 }
 
 func (f *PanFunc) Type() PanObjType {
@@ -29,6 +30,13 @@ func (f *PanFunc) Inspect() string {
 func (f *PanFunc) Proto() PanObject {
 	return builtInFuncObj
 }
+
+type FuncType int
+
+const (
+	FUNC_FUNC FuncType = iota
+	ITER_FUNC
+)
 
 // NOTE: keep loose coupling to ast.FuncComponent and PanFunc
 type FuncWrapper interface {
