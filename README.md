@@ -18,7 +18,7 @@ You don't have to go back to beginning of line!
 
 ```
 "Hello, world!".puts # Hello, world!
-1:5.to_a.sum.puts # 15
+(1:5).to_a.sum.puts # 15
 ```
 
 Looks similar to other language though?
@@ -45,7 +45,7 @@ This can be used as "map" or "filter" in other languages.
 ```
 [1, 2, 3]@{|i| i * 2}.puts # [2, 4, 6]
 ["foo", "var", "hoge"]@capital.puts # ["Foo", "Var", "Hoge"]
-1:10@{|i| i if i.even?}.puts # [2, 4, 6, 8]
+(1:10)@{|i| i if i.even?}.puts # [2, 4, 6, 8]
 ```
 
 ### Reduce Chain
@@ -81,9 +81,9 @@ This chain returns receiver instead if returned value is `nil`
 (it "thoughtfully" repairs failed call).
 
 ```
-1:16~@{|i| [`fizz][i%3] + [`buzz][i%5]}.puts # [1, 2, `fizz, 4, `buzz, ..., `fizzbuzz]
+(1:16)~@{|i| [`fizz][i%3] + [`buzz][i%5]}.puts # [1, 2, `fizz, 4, `buzz, ..., `fizzbuzz]
 
-3:20~$([2]){|acc, n| [*acc, n] if acc.all? {|p| n % p}}.puts # [2, 3, 5, ..., 19]
+(3:20)~$([2]){|acc, n| [*acc, n] if acc.all? {|p| n % p}}.puts # [2, 3, 5, ..., 19]
 
 # (Of course there is also an embedded prime function)
 20@filter(prime?).puts # [2, 3, 5, ..., 19]
@@ -94,6 +94,6 @@ This chain keeps returned `nil` value ("strictly" returns the calclation result)
 This is useful only in list context, which removes returned `nil`.
 
 ```
-1:10@{|i| i if i.even?}.puts # [2, 4, 6, 8]
-1:10=@{|i| i if i.even?}.puts # [nil, 2, nil, 4, nil, 6, nil, 8, nil]
+(1:10)@{|i| i if i.even?}.puts # [2, 4, 6, 8]
+(1:10)=@{|i| i if i.even?}.puts # [nil, 2, nil, 4, nil, 6, nil, 8, nil]
 ```
