@@ -6,3 +6,4 @@ package object
 var builtInIntObj = &PanObj{}
 var builtInFloatObj = &PanObj{}
 var builtInBoolObj = &PanObj{}
+var builtInNilObj = &PanObj{}
