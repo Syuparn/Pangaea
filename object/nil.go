@@ -1,7 +1,5 @@
 package object
 
-import ()
-
 const NIL_TYPE = "NIL_TYPE"
 
 type PanNil struct{}
@@ -11,9 +9,9 @@ func (n *PanNil) Type() PanObjType {
 }
 
 func (n *PanNil) Inspect() string {
-	return ""
+	return "nil"
 }
 
 func (n *PanNil) Proto() PanObject {
-	return n
+	return builtInNilObj
 }
