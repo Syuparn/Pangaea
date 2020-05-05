@@ -10,7 +10,10 @@ package object
 var symHashTable = make(map[string]SymHash)
 
 // for only symbols to call props (lighter than HashKey)
-type SymHash uint64
+// NOTE: do not change declaration to
+// `type SymHash uint64` otherwise
+// you have to write explicit type conversion between SymHash and uint64
+type SymHash = uint64
 
 type HashKey struct {
 	// to distinguish different type values with same hash

@@ -38,7 +38,39 @@ func TestStrProto(t *testing.T) {
 	}
 }
 
+func TestStrHash(t *testing.T) {
+	tests := []struct {
+		obj      PanStr
+		expected string
+	}{
+		{PanStr{"hello"}, "hello"},
+		{PanStr{"a i u e o"}, "a i u e o"},
+		{PanStr{""}, ""},
+		{PanStr{"longlonglonglonglonglong"}, "longlonglonglonglonglong"},
+	}
+
+	for _, tt := range tests {
+		// register symbol
+		_ = tt.obj.SymHash()
+
+		h := tt.obj.Hash()
+
+		if h.Type != STR_TYPE {
+			t.Fatalf("hash type must be STR_TYPE. got=%s", h.Type)
+		}
+
+		if h.Value != symHashTable[tt.expected] {
+			t.Errorf("wrong hash key: got=%d, expected=%d",
+				h.Value, symHashTable[tt.expected])
+		}
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testStrIsPanObject() {
 	var _ PanObject = &PanStr{"FOO"}
+}
+
+func testStrIsPanScalar() {
+	var _ PanScalar = &PanStr{"ABC"}
 }
