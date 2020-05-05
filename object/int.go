@@ -9,3 +9,7 @@ type PanInt struct {
 func (i *PanInt) Type() PanObjType {
 	return INT_TYPE
 }
+
+func (i *PanInt) Inspect() string {
+	return ""
+}
