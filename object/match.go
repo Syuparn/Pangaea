@@ -9,7 +9,7 @@ type PanMatch struct {
 }
 
 func (m *PanMatch) Type() PanObjType {
-	return ""
+	return MATCH_TYPE
 }
 
 func (m *PanMatch) Inspect() string {
@@ -18,10 +18,11 @@ func (m *PanMatch) Inspect() string {
 }
 
 func (m *PanMatch) Proto() PanObject {
-	return m
+	return builtInMatchObj
 }
 
 // NOTE: keep loose coupling to ast.MatchLiteral and PanMatch
+// ast.MatchLiteral implements MatchWrapper
 type MatchWrapper interface {
 	String() string
 }
