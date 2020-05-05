@@ -20,6 +20,18 @@ func TestRangeInspect(t *testing.T) {
 			PanRange{&PanNil{}, &PanNil{}, &PanNil{}},
 			"(nil:nil:nil)",
 		},
+		{
+			PanRange{&PanInt{1}, &PanInt{2}, &PanInt{3}},
+			"(1:2:3)",
+		},
+		{
+			PanRange{&PanNil{}, &PanInt{20}, &PanInt{-1}},
+			"(nil:20:-1)",
+		},
+		{
+			PanRange{&PanStr{"a"}, &PanStr{"z"}, &PanInt{-1}},
+			`("a":"z":-1)`,
+		},
 	}
 
 	for _, tt := range tests {
