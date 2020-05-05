@@ -1,6 +1,6 @@
 package object
 
-type PanObjType int
+type PanObjType string
 
 type PanObject interface {
 	Type() PanObjType
