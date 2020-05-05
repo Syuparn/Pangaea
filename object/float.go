@@ -21,3 +21,7 @@ func (f *PanFloat) Inspect() string {
 func (f *PanFloat) Proto() PanObject {
 	return builtInFloatObj
 }
+
+func (f *PanFloat) Hash() HashKey {
+	return HashKey{}
+}

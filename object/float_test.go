@@ -1,6 +1,7 @@
 package object
 
 import (
+	"math"
 	"testing"
 )
 
@@ -38,7 +39,37 @@ func TestFloatProto(t *testing.T) {
 	}
 }
 
+func TestFloatHash(t *testing.T) {
+	tests := []struct {
+		obj      PanFloat
+		expected uint64
+	}{
+		// Float64bits convert float64 to uint64 with same bit pattern
+		{PanFloat{12.3}, math.Float64bits(12.3)},
+		{PanFloat{-2.6}, math.Float64bits(-2.6)},
+		{PanFloat{1234567890123.45}, math.Float64bits(1234567890123.45)},
+		{PanFloat{0.0}, math.Float64bits(0.0)},
+	}
+
+	for _, tt := range tests {
+		h := tt.obj.Hash()
+
+		if h.Type != FLOAT_TYPE {
+			t.Fatalf("hash type must be FLOAT_TYPE. got=%s", h.Type)
+		}
+
+		if h.Value != tt.expected {
+			t.Errorf("wrong hash key: got=%d, expected=%d",
+				h.Value, tt.expected)
+		}
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testFloatIsPanObject() {
 	var _ PanObject = &PanFloat{1.5}
+}
+
+func testFloatIsPanScalar() {
+	var _ PanScalar = &PanFloat{1.5}
 }
