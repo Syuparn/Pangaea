@@ -16,10 +16,10 @@ func TestStrInspect(t *testing.T) {
 		obj      PanStr
 		expected string
 	}{
-		{PanStr{"hello"}, "hello"},
-		{PanStr{"_foo"}, "_foo"},
-		{PanStr{"a i u e o"}, "a i u e o"},
-		{PanStr{`\a`}, `\a`},
+		{PanStr{"hello"}, `"hello"`},
+		{PanStr{"_foo"}, `"_foo"`},
+		{PanStr{"a i u e o"}, `"a i u e o"`},
+		{PanStr{`\a`}, `"\a"`},
 	}
 
 	for _, tt := range tests {
