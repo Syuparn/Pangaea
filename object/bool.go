@@ -1,6 +1,8 @@
 package object
 
-import ()
+import (
+	"fmt"
+)
 
 const BOOL_TYPE = "BOOL_TYPE"
 
@@ -13,9 +15,9 @@ func (b *PanBool) Type() PanObjType {
 }
 
 func (b *PanBool) Inspect() string {
-	return ""
+	return fmt.Sprintf("%t", b.Value)
 }
 
 func (b *PanBool) Proto() PanObject {
-	return b
+	return builtInBoolObj
 }
