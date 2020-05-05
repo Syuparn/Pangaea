@@ -37,3 +37,8 @@ func TestIntProto(t *testing.T) {
 			i.Proto(), i.Proto())
 	}
 }
+
+// checked by compiler (this function works nothing)
+func testIntIsPanObject() {
+	var _ PanObject = &PanInt{10}
+}
