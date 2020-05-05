@@ -21,3 +21,7 @@ func (i *PanInt) Inspect() string {
 func (i *PanInt) Proto() PanObject {
 	return builtInIntObj
 }
+
+func (i *PanInt) Hash() HashKey {
+	return HashKey{}
+}

@@ -38,7 +38,35 @@ func TestIntProto(t *testing.T) {
 	}
 }
 
+func TestIntHash(t *testing.T) {
+	tests := []struct {
+		obj      PanInt
+		expected int
+	}{
+		{PanInt{10}, 10},
+		{PanInt{-2}, -2},
+		{PanInt{12345678901}, 12345678901},
+	}
+
+	for _, tt := range tests {
+		h := tt.obj.Hash()
+
+		if h.Type != INT_TYPE {
+			t.Fatalf("hash type must be INT_TYPE. got=%s", h.Type)
+		}
+
+		if h.Value != uint64(tt.expected) {
+			t.Errorf("wrong hash key: got=%d, expected=%d",
+				h.Value, uint64(tt.expected))
+		}
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testIntIsPanObject() {
 	var _ PanObject = &PanInt{10}
+}
+
+func testIntIsPanScalar() {
+	var _ PanScalar = &PanInt{10}
 }
