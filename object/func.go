@@ -12,7 +12,7 @@ type PanFunc struct {
 }
 
 func (f *PanFunc) Type() PanObjType {
-	return ""
+	return FUNC_TYPE
 }
 
 func (f *PanFunc) Inspect() string {
@@ -27,7 +27,7 @@ func (f *PanFunc) Inspect() string {
 }
 
 func (f *PanFunc) Proto() PanObject {
-	return f
+	return builtInFuncObj
 }
 
 // NOTE: keep loose coupling to ast.FuncComponent and PanFunc
