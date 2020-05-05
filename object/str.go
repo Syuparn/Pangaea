@@ -15,7 +15,7 @@ func (s *PanStr) Type() PanObjType {
 }
 
 func (s *PanStr) Inspect() string {
-	return s.Value
+	return `"` + s.Value + `"`
 }
 
 func (s *PanStr) Proto() PanObject {
