@@ -1,7 +1,6 @@
 package object
 
 import (
-	"../ast"
 	"bytes"
 )
 
@@ -52,11 +51,7 @@ func closeParen(t FuncType) string {
 }
 
 // NOTE: keep loose coupling to ast.FuncComponent and PanFunc
+// ast.FuncComponent implements FuncWrapper
 type FuncWrapper interface {
 	String() string
-}
-
-// implement FuncWrapper (FuncComponent has String() method)
-type AstFuncWrapper struct {
-	ast.FuncComponent
 }
