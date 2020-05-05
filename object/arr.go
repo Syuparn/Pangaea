@@ -1,6 +1,9 @@
 package object
 
-import ()
+import (
+	"bytes"
+	"strings"
+)
 
 const ARR_TYPE = "ARR_TYPE"
 
@@ -9,13 +12,22 @@ type PanArr struct {
 }
 
 func (a *PanArr) Type() PanObjType {
-	return ""
+	return ARR_TYPE
 }
 
 func (a *PanArr) Inspect() string {
-	return ""
+	var out bytes.Buffer
+	elems := []string{}
+	for _, e := range a.Elems {
+		elems = append(elems, e.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elems, ", "))
+	out.WriteString("]")
+	return out.String()
 }
 
 func (a *PanArr) Proto() PanObject {
-	return a
+	return builtInArrObj
 }
