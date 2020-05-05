@@ -17,3 +17,7 @@ func (i *PanInt) Type() PanObjType {
 func (i *PanInt) Inspect() string {
 	return fmt.Sprintf("%d", i.Value)
 }
+
+func (i *PanInt) Proto() PanObject {
+	return builtInIntObj
+}

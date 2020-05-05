@@ -29,3 +29,11 @@ func TestIntInspect(t *testing.T) {
 		}
 	}
 }
+
+func TestIntProto(t *testing.T) {
+	i := PanInt{10}
+	if i.Proto() != builtInIntObj {
+		t.Fatalf("Proto of int is not BuiltinIntObj. got=%T (%+v)",
+			i.Proto(), i.Proto())
+	}
+}
