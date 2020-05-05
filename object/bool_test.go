@@ -37,6 +37,6 @@ func TestBoolProto(t *testing.T) {
 }
 
 // checked by compiler (this function works nothing)
-//func testIntIsPanObject() {
-//	var _ PanObject = &PanInt{10}
-//}
+func testBoolIsPanObject() {
+	var _ PanObject = &PanBool{true}
+}
