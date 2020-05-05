@@ -15,5 +15,5 @@ func (s *PanStr) Inspect() string {
 }
 
 func (s *PanStr) Proto() PanObject {
-	return s
+	return builtInStrObj
 }
