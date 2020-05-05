@@ -2,6 +2,7 @@ package object
 
 import (
 	"fmt"
+	"math"
 )
 
 const FLOAT_TYPE = "FLOAT_TYPE"
@@ -23,5 +24,6 @@ func (f *PanFloat) Proto() PanObject {
 }
 
 func (f *PanFloat) Hash() HashKey {
-	return HashKey{}
+	// Float64bits convert float64 to uint64 with same bit pattern
+	return HashKey{FLOAT_TYPE, math.Float64bits(f.Value)}
 }
