@@ -21,3 +21,7 @@ func (b *PanBool) Inspect() string {
 func (b *PanBool) Proto() PanObject {
 	return builtInBoolObj
 }
+
+func (b *PanBool) Hash() HashKey {
+	return HashKey{}
+}

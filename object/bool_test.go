@@ -36,7 +36,34 @@ func TestBoolProto(t *testing.T) {
 	}
 }
 
+func TestBoolHash(t *testing.T) {
+	tests := []struct {
+		obj      PanBool
+		expected int
+	}{
+		{PanBool{true}, 1},
+		{PanBool{false}, 0},
+	}
+
+	for _, tt := range tests {
+		h := tt.obj.Hash()
+
+		if h.Type != BOOL_TYPE {
+			t.Fatalf("hash type must be BOOL_TYPE. got=%s", h.Type)
+		}
+
+		if h.Value != uint64(tt.expected) {
+			t.Errorf("wrong hash key: got=%d, expected=%d",
+				h.Value, uint64(tt.expected))
+		}
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testBoolIsPanObject() {
 	var _ PanObject = &PanBool{true}
+}
+
+func testBoolIsPanScalar() {
+	var _ PanScalar = &PanBool{false}
 }
