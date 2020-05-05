@@ -16,10 +16,10 @@ func TestFloatInspect(t *testing.T) {
 		obj      PanFloat
 		expected string
 	}{
-		{PanFloat{1.5}, "1.5"},
-		{PanFloat{0.2}, "0.2"},
-		{PanFloat{-4.33}, "-4.33"},
-		{PanFloat{123.45}, "123.45"},
+		{PanFloat{1.5}, "1.500000"},
+		{PanFloat{0.2}, "0.200000"},
+		{PanFloat{-4.33}, "-4.330000"},
+		{PanFloat{123.45}, "123.450000"},
 	}
 
 	for _, tt := range tests {
