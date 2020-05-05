@@ -17,5 +17,5 @@ func (n *PanNil) Proto() PanObject {
 }
 
 func (n *PanNil) Hash() HashKey {
-	return HashKey{}
+	return HashKey{NIL_TYPE, 0}
 }
