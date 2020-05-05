@@ -39,6 +39,6 @@ func TestFloatProto(t *testing.T) {
 }
 
 // checked by compiler (this function works nothing)
-//func testFloatIsPanObject() {
-//	var _ PanObject = &PanFloat{1.5}
-//}
+func testFloatIsPanObject() {
+	var _ PanObject = &PanFloat{1.5}
+}
