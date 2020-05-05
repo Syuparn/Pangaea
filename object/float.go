@@ -1,7 +1,7 @@
 package object
 
 import (
-//"fmt"
+	"fmt"
 )
 
 const FLOAT_TYPE = "FLOAT_TYPE"
@@ -15,7 +15,7 @@ func (f *PanFloat) Type() PanObjType {
 }
 
 func (f *PanFloat) Inspect() string {
-	return ""
+	return fmt.Sprintf("%.6f", f.Value)
 }
 
 func (f *PanFloat) Proto() PanObject {
