@@ -5,6 +5,7 @@ package object
 // package object and package builtin circular reference
 var builtInIntObj = &PanObj{}
 var builtInFloatObj = &PanObj{}
+var builtInNumObj = &PanObj{}
 var builtInBoolObj = &PanObj{}
 var builtInNilObj = &PanObj{}
 var builtInStrObj = &PanObj{}
@@ -13,3 +14,4 @@ var builtInRangeObj = &PanObj{}
 var builtInFuncObj = &PanObj{}
 var builtInMatchObj = &PanObj{}
 var builtInObjObj = &PanObj{}
+var builtInBaseObj = &PanObj{}

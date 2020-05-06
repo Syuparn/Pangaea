@@ -64,11 +64,24 @@ func TestObjInspect(t *testing.T) {
 }
 
 func TestObjProto(t *testing.T) {
-	m := PanObj{}
-	if m.Proto() != builtInObjObj {
-		t.Fatalf("Proto is not BuiltinObjObj. got=%T (%+v)",
-			m.Proto(), m.Proto())
+	tests := []struct {
+		obj          *PanObj
+		expected     PanObject
+		expectedName string
+	}{
+		{&PanObj{}, builtInObjObj, "builtInObjObj"},
+		{builtInIntObj, builtInNumObj, "builtInNumObj"},
+		{builtInFloatObj, builtInNumObj, "builtInNumObj"},
+		{builtInObjObj, builtInBaseObj, "builtInBaseObj"},
 	}
+
+	for _, tt := range tests {
+		if tt.obj.Proto() != tt.expected {
+			t.Fatalf("Proto is not %s. got=%T (%+v)",
+				tt.expectedName, tt.obj.Proto(), tt.obj.Proto())
+		}
+	}
+
 }
 
 // checked by compiler (this function works nothing)
