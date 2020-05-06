@@ -3,15 +3,15 @@ package object
 // initialize built-in objects like Int, Arr, Str...
 // NOTE: Props are inserted in package eval not to make
 // package object and package builtin circular reference
-var builtInIntObj = &PanObj{}
-var builtInFloatObj = &PanObj{}
-var builtInNumObj = &PanObj{}
-var builtInBoolObj = &PanObj{}
-var builtInNilObj = &PanObj{}
-var builtInStrObj = &PanObj{}
-var builtInArrObj = &PanObj{}
-var builtInRangeObj = &PanObj{}
-var builtInFuncObj = &PanObj{}
-var builtInMatchObj = &PanObj{}
-var builtInObjObj = &PanObj{}
-var builtInBaseObj = &PanObj{}
+var builtInIntObj = &PanObj{&map[SymHash]Pair{}, builtInNumObj}
+var builtInFloatObj = &PanObj{&map[SymHash]Pair{}, builtInNumObj}
+var builtInNumObj = &PanObj{&map[SymHash]Pair{}, builtInObjObj}
+var builtInBoolObj = &PanObj{&map[SymHash]Pair{}, builtInObjObj}
+var builtInNilObj = &PanObj{&map[SymHash]Pair{}, builtInObjObj}
+var builtInStrObj = &PanObj{&map[SymHash]Pair{}, builtInObjObj}
+var builtInArrObj = &PanObj{&map[SymHash]Pair{}, builtInObjObj}
+var builtInRangeObj = &PanObj{&map[SymHash]Pair{}, builtInObjObj}
+var builtInFuncObj = &PanObj{&map[SymHash]Pair{}, builtInObjObj}
+var builtInMatchObj = &PanObj{&map[SymHash]Pair{}, builtInObjObj}
+var builtInObjObj = &PanObj{&map[SymHash]Pair{}, builtInBaseObj}
+var builtInBaseObj = &PanObj{&map[SymHash]Pair{}, nil}
