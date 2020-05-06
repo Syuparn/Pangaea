@@ -2,6 +2,7 @@ package object
 
 import (
 	"bytes"
+	"strings"
 )
 
 const MAP_TYPE = "MAP_TYPE"
@@ -28,6 +29,16 @@ func (m *PanMap) Inspect() string {
 	// NOTE: sort by key order otherwise output changes randomly
 	// depending on inner map structure
 	out.WriteString(sortedPairsString(pairs))
+
+	ps := []string{}
+	for _, p := range *m.NonHashablePairs {
+		ps = append(ps, p.Key.Inspect()+": "+p.Value.Inspect())
+	}
+	if len(ps) > 0 && len(pairs) > 0 {
+		out.WriteString(", ")
+	}
+	out.WriteString(strings.Join(ps, ", "))
+
 	out.WriteString("}")
 
 	return out.String()
