@@ -7,7 +7,8 @@ import (
 const MAP_TYPE = "MAP_TYPE"
 
 type PanMap struct {
-	Pairs *map[HashKey]Pair
+	Pairs            *map[HashKey]Pair
+	NonHashablePairs *[]Pair
 }
 
 func (m *PanMap) Type() PanObjType {
