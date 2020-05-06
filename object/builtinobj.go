@@ -17,3 +17,4 @@ var BuiltInFuncObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInMatchObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInObjObj = &PanObj{&map[SymHash]Pair{}, BuiltInBaseObj}
 var BuiltInBaseObj = &PanObj{&map[SymHash]Pair{}, nil}
+var BuiltInMapObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
