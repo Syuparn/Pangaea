@@ -25,21 +25,21 @@ func TestObjInspect(t *testing.T) {
 			PanObj{&map[SymHash]Pair{
 				(&PanStr{"a"}).SymHash(): Pair{&PanStr{"a"}, &PanInt{1}},
 			}},
-			`{a: 1}`,
+			`{"a": 1}`,
 		},
 		{
 			PanObj{&map[SymHash]Pair{
 				(&PanStr{"a"}).SymHash():  Pair{&PanStr{"a"}, &PanStr{"A"}},
 				(&PanStr{"_b"}).SymHash(): Pair{&PanStr{"_b"}, &PanStr{"B"}},
 			}},
-			`{_b: "B", a: "A"}`,
+			`{"_b": "B", "a": "A"}`,
 		},
 		{
 			PanObj{&map[SymHash]Pair{
 				(&PanStr{"foo?"}).SymHash(): Pair{&PanStr{"foo?"}, &PanBool{true}},
 				(&PanStr{"b"}).SymHash():    Pair{&PanStr{"b"}, &PanStr{"B"}},
 			}},
-			`{b: "B", foo?: true}`,
+			`{"b": "B", "foo?": true}`,
 		},
 		{
 			PanObj{&map[SymHash]Pair{
@@ -51,7 +51,7 @@ func TestObjInspect(t *testing.T) {
 					}},
 				},
 			}},
-			`{b: {c: "C"}, foo?: true}`,
+			`{"b": {"c": "C"}, "foo?": true}`,
 		},
 	}
 
