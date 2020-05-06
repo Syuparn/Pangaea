@@ -29,5 +29,5 @@ func (a *PanArr) Inspect() string {
 }
 
 func (a *PanArr) Proto() PanObject {
-	return builtInArrObj
+	return BuiltInArrObj
 }

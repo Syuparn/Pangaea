@@ -18,7 +18,7 @@ func (m *PanMatch) Inspect() string {
 }
 
 func (m *PanMatch) Proto() PanObject {
-	return builtInMatchObj
+	return BuiltInMatchObj
 }
 
 // NOTE: keep loose coupling to ast.MatchLiteral and PanMatch

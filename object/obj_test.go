@@ -70,10 +70,10 @@ func TestObjProto(t *testing.T) {
 		expected     PanObject
 		expectedName string
 	}{
-		{PanObjInstancePtr(&map[SymHash]Pair{}), builtInObjObj, "builtInObjObj"},
-		{builtInIntObj, builtInNumObj, "builtInNumObj"},
-		{builtInFloatObj, builtInNumObj, "builtInNumObj"},
-		{builtInObjObj, builtInBaseObj, "builtInBaseObj"},
+		{PanObjInstancePtr(&map[SymHash]Pair{}), BuiltInObjObj, "BuiltInObjObj"},
+		{BuiltInIntObj, BuiltInNumObj, "BuiltInNumObj"},
+		{BuiltInFloatObj, BuiltInNumObj, "BuiltInNumObj"},
+		{BuiltInObjObj, BuiltInBaseObj, "BuiltInBaseObj"},
 	}
 
 	for _, tt := range tests {

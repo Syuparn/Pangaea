@@ -31,5 +31,5 @@ func (r *PanRange) Inspect() string {
 }
 
 func (r *PanRange) Proto() PanObject {
-	return builtInRangeObj
+	return BuiltInRangeObj
 }

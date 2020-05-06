@@ -30,8 +30,8 @@ func TestBoolInspect(t *testing.T) {
 
 func TestBoolProto(t *testing.T) {
 	b := PanBool{true}
-	if b.Proto() != builtInBoolObj {
-		t.Fatalf("Proto is not BuiltinBoolObj. got=%T (%+v)",
+	if b.Proto() != BuiltInBoolObj {
+		t.Fatalf("Proto is not BuiltInBoolObj. got=%T (%+v)",
 			b.Proto(), b.Proto())
 	}
 }

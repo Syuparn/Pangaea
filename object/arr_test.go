@@ -52,8 +52,8 @@ func TestArrInspect(t *testing.T) {
 
 func TestArrProto(t *testing.T) {
 	a := PanArr{}
-	if a.Proto() != builtInArrObj {
-		t.Fatalf("Proto is not BuiltinArrObj. got=%T (%+v)",
+	if a.Proto() != BuiltInArrObj {
+		t.Fatalf("Proto is not BuiltInArrObj. got=%T (%+v)",
 			a.Proto(), a.Proto())
 	}
 }

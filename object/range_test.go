@@ -44,8 +44,8 @@ func TestRangeInspect(t *testing.T) {
 
 func TestRangeProto(t *testing.T) {
 	r := PanRange{}
-	if r.Proto() != builtInRangeObj {
-		t.Fatalf("Proto is not BuiltinRangeObj. got=%T (%+v)",
+	if r.Proto() != BuiltInRangeObj {
+		t.Fatalf("Proto is not BuiltInRangeObj. got=%T (%+v)",
 			r.Proto(), r.Proto())
 	}
 }

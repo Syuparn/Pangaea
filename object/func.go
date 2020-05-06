@@ -26,7 +26,7 @@ func (f *PanFunc) Inspect() string {
 }
 
 func (f *PanFunc) Proto() PanObject {
-	return builtInFuncObj
+	return BuiltInFuncObj
 }
 
 type FuncType int

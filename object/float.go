@@ -20,7 +20,7 @@ func (f *PanFloat) Inspect() string {
 }
 
 func (f *PanFloat) Proto() PanObject {
-	return builtInFloatObj
+	return BuiltInFloatObj
 }
 
 func (f *PanFloat) Hash() HashKey {

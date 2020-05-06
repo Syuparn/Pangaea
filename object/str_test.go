@@ -32,8 +32,8 @@ func TestStrInspect(t *testing.T) {
 
 func TestStrProto(t *testing.T) {
 	s := PanStr{"foo"}
-	if s.Proto() != builtInStrObj {
-		t.Fatalf("Proto is not BuiltinStrObj. got=%T (%+v)",
+	if s.Proto() != BuiltInStrObj {
+		t.Fatalf("Proto is not BuiltInStrObj. got=%T (%+v)",
 			s.Proto(), s.Proto())
 	}
 }

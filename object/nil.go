@@ -13,7 +13,7 @@ func (n *PanNil) Inspect() string {
 }
 
 func (n *PanNil) Proto() PanObject {
-	return builtInNilObj
+	return BuiltInNilObj
 }
 
 func (n *PanNil) Hash() HashKey {

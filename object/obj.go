@@ -7,7 +7,7 @@ import (
 const OBJ_TYPE = "OBJ_TYPE"
 
 func PanObjInstance(pairs *map[SymHash]Pair) PanObj {
-	return PanObj{pairs, builtInObjObj}
+	return PanObj{pairs, BuiltInObjObj}
 }
 
 // NOTE: for making new PanObj instance pointer

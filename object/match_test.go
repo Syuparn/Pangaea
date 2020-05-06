@@ -38,8 +38,8 @@ func TestMatchInspect(t *testing.T) {
 
 func TestMatchProto(t *testing.T) {
 	m := PanMatch{&MockMatchWrapper{"%{}"}}
-	if m.Proto() != builtInMatchObj {
-		t.Fatalf("Proto is not BuiltinMatchObj. got=%T (%+v)",
+	if m.Proto() != BuiltInMatchObj {
+		t.Fatalf("Proto is not BuiltInMatchObj. got=%T (%+v)",
 			m.Proto(), m.Proto())
 	}
 }

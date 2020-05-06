@@ -29,8 +29,8 @@ func TestNilInspect(t *testing.T) {
 
 func TestNilProto(t *testing.T) {
 	n := PanNil{}
-	if n.Proto() != builtInNilObj {
-		t.Fatalf("Proto is not BuiltinNilObj. got=%T (%+v)",
+	if n.Proto() != BuiltInNilObj {
+		t.Fatalf("Proto is not BuiltInNilObj. got=%T (%+v)",
 			n.Proto(), n.Proto())
 	}
 }

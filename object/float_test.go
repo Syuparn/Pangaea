@@ -33,8 +33,8 @@ func TestFloatInspect(t *testing.T) {
 
 func TestFloatProto(t *testing.T) {
 	i := PanFloat{1.4}
-	if i.Proto() != builtInFloatObj {
-		t.Fatalf("Proto of float is not BuiltinFloatObj. got=%T (%+v)",
+	if i.Proto() != BuiltInFloatObj {
+		t.Fatalf("Proto of float is not BuiltInFloatObj. got=%T (%+v)",
 			i.Proto(), i.Proto())
 	}
 }

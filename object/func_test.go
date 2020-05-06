@@ -39,8 +39,8 @@ func TestFuncInspect(t *testing.T) {
 
 func TestFuncProto(t *testing.T) {
 	f := PanFunc{&MockFuncWrapper{"|foo| foo"}, FUNC_FUNC}
-	if f.Proto() != builtInFuncObj {
-		t.Fatalf("Proto is not BuiltinFuncObj. got=%T (%+v)",
+	if f.Proto() != BuiltInFuncObj {
+		t.Fatalf("Proto is not BuiltInFuncObj. got=%T (%+v)",
 			f.Proto(), f.Proto())
 	}
 }
