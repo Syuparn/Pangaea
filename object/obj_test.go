@@ -16,6 +16,7 @@ func TestObjInspect(t *testing.T) {
 		obj      PanObj
 		expected string
 	}{
+		// keys are sorted so that Inspect() always returns same output
 		{
 			PanObj{&map[SymHash]Pair{}},
 			`{}`,
@@ -29,16 +30,16 @@ func TestObjInspect(t *testing.T) {
 		{
 			PanObj{&map[SymHash]Pair{
 				(&PanStr{"a"}).SymHash():  Pair{&PanStr{"a"}, &PanStr{"A"}},
-				(&PanStr{"_b"}).SymHash(): Pair{&PanStr{"b"}, &PanStr{"B"}},
+				(&PanStr{"_b"}).SymHash(): Pair{&PanStr{"_b"}, &PanStr{"B"}},
 			}},
-			`{a: "A", _b: "B"}`,
+			`{_b: "B", a: "A"}`,
 		},
 		{
 			PanObj{&map[SymHash]Pair{
 				(&PanStr{"foo?"}).SymHash(): Pair{&PanStr{"foo?"}, &PanBool{true}},
 				(&PanStr{"b"}).SymHash():    Pair{&PanStr{"b"}, &PanStr{"B"}},
 			}},
-			`{foo?: true, b: "B"}`,
+			`{b: "B", foo?: true}`,
 		},
 		{
 			PanObj{&map[SymHash]Pair{
@@ -50,7 +51,7 @@ func TestObjInspect(t *testing.T) {
 					}},
 				},
 			}},
-			`{foo?: true, b: {c: "C"}}`,
+			`{b: {c: "C"}, foo?: true}`,
 		},
 	}
 
