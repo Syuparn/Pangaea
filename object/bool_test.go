@@ -29,11 +29,22 @@ func TestBoolInspect(t *testing.T) {
 }
 
 func TestBoolProto(t *testing.T) {
-	b := PanBool{true}
-	if b.Proto() != BuiltInBoolObj {
-		t.Fatalf("Proto is not BuiltInBoolObj. got=%T (%+v)",
-			b.Proto(), b.Proto())
+	tests := []struct {
+		obj          PanBool
+		expected     PanObject
+		expectedName string
+	}{
+		{PanBool{true}, BuiltInOneInt, "BuiltInOneInt"},
+		{PanBool{false}, BuiltInZeroInt, "BuiltInZeroInt"},
 	}
+
+	for _, tt := range tests {
+		if tt.obj.Proto() != tt.expected {
+			t.Fatalf("Proto is not %s. got=%T (%+v)",
+				tt.expectedName, tt.obj.Proto(), tt.obj.Proto())
+		}
+	}
+
 }
 
 func TestBoolHash(t *testing.T) {
