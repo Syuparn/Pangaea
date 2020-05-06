@@ -2,7 +2,6 @@ package object
 
 import (
 	"bytes"
-	"strings"
 )
 
 const OBJ_TYPE = "OBJ_TYPE"
@@ -17,20 +16,17 @@ func (o *PanObj) Type() PanObjType {
 
 func (o *PanObj) Inspect() string {
 	var out bytes.Buffer
-	elems := []string{}
+	pairs := []Pair{}
 
 	// NOTE: refer map because range cannot treat map pointer
 	for _, p := range *o.Pairs {
-		// NOTE: unwrap double quotation
-		keyStr := p.Key.Inspect()
-		keyStr = keyStr[1 : len(keyStr)-1]
-
-		elemStr := keyStr + ": " + p.Value.Inspect()
-		elems = append(elems, elemStr)
+		pairs = append(pairs, p)
 	}
 
 	out.WriteString("{")
-	out.WriteString(strings.Join(elems, ", "))
+	// NOTE: sort by key order otherwise output changes randomly
+	// depending on inner map structure
+	out.WriteString(sortedPairsString(pairs))
 	out.WriteString("}")
 
 	return out.String()
