@@ -4,8 +4,10 @@ import (
 //"fmt"
 )
 
+const OBJ_TYPE = "OBJ_TYPE"
+
 type PanObj struct {
-	Props []PanObj
+	Pairs *map[SymHash]Pair
 }
 
 func (o *PanObj) Type() PanObjType {

@@ -12,3 +12,4 @@ var builtInArrObj = &PanObj{}
 var builtInRangeObj = &PanObj{}
 var builtInFuncObj = &PanObj{}
 var builtInMatchObj = &PanObj{}
+var builtInObjObj = &PanObj{}
