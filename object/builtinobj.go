@@ -6,7 +6,6 @@ package object
 var BuiltInIntObj = &PanObj{&map[SymHash]Pair{}, BuiltInNumObj}
 var BuiltInFloatObj = &PanObj{&map[SymHash]Pair{}, BuiltInNumObj}
 var BuiltInNumObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
-var BuiltInBoolObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInNilObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInStrObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInArrObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
