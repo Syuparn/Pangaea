@@ -6,8 +6,20 @@ import (
 
 const OBJ_TYPE = "OBJ_TYPE"
 
+func PanObjInstance(pairs *map[SymHash]Pair) PanObj {
+	return PanObj{pairs, builtInObjObj}
+}
+
+// NOTE: for making new PanObj instance pointer
+// because `&(NewPanObjInstance(...))` is syntax error
+func PanObjInstancePtr(pairs *map[SymHash]Pair) PanObject {
+	i := PanObjInstance(pairs)
+	return &i
+}
+
 type PanObj struct {
 	Pairs *map[SymHash]Pair
+	proto PanObject
 }
 
 func (o *PanObj) Type() PanObjType {
@@ -33,5 +45,5 @@ func (o *PanObj) Inspect() string {
 }
 
 func (o *PanObj) Proto() PanObject {
-	return builtInObjObj
+	return o.proto
 }

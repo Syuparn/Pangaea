@@ -18,39 +18,40 @@ func TestObjInspect(t *testing.T) {
 	}{
 		// keys are sorted so that Inspect() always returns same output
 		{
-			PanObj{&map[SymHash]Pair{}},
+			PanObjInstance(&map[SymHash]Pair{}),
 			`{}`,
 		},
 		{
-			PanObj{&map[SymHash]Pair{
+			PanObjInstance(&map[SymHash]Pair{
 				(&PanStr{"a"}).SymHash(): Pair{&PanStr{"a"}, &PanInt{1}},
-			}},
+			}),
 			`{"a": 1}`,
 		},
 		{
-			PanObj{&map[SymHash]Pair{
+			PanObjInstance(&map[SymHash]Pair{
 				(&PanStr{"a"}).SymHash():  Pair{&PanStr{"a"}, &PanStr{"A"}},
 				(&PanStr{"_b"}).SymHash(): Pair{&PanStr{"_b"}, &PanStr{"B"}},
-			}},
+			}),
 			`{"_b": "B", "a": "A"}`,
 		},
 		{
-			PanObj{&map[SymHash]Pair{
+			PanObjInstance(&map[SymHash]Pair{
 				(&PanStr{"foo?"}).SymHash(): Pair{&PanStr{"foo?"}, &PanBool{true}},
 				(&PanStr{"b"}).SymHash():    Pair{&PanStr{"b"}, &PanStr{"B"}},
-			}},
+			}),
 			`{"b": "B", "foo?": true}`,
 		},
 		{
-			PanObj{&map[SymHash]Pair{
+			PanObjInstance(&map[SymHash]Pair{
 				(&PanStr{"foo?"}).SymHash(): Pair{&PanStr{"foo?"}, &PanBool{true}},
 				(&PanStr{"b"}).SymHash(): Pair{
 					&PanStr{"b"},
-					&PanObj{&map[SymHash]Pair{
+					// NOTE: `&(NewPanObjInstance(...))` is syntax error
+					PanObjInstancePtr(&map[SymHash]Pair{
 						(&PanStr{"c"}).SymHash(): Pair{&PanStr{"c"}, &PanStr{"C"}},
-					}},
+					}),
 				},
-			}},
+			}),
 			`{"b": {"c": "C"}, "foo?": true}`,
 		},
 	}
@@ -65,11 +66,11 @@ func TestObjInspect(t *testing.T) {
 
 func TestObjProto(t *testing.T) {
 	tests := []struct {
-		obj          *PanObj
+		obj          PanObject
 		expected     PanObject
 		expectedName string
 	}{
-		{&PanObj{}, builtInObjObj, "builtInObjObj"},
+		{PanObjInstancePtr(&map[SymHash]Pair{}), builtInObjObj, "builtInObjObj"},
 		{builtInIntObj, builtInNumObj, "builtInNumObj"},
 		{builtInFloatObj, builtInNumObj, "builtInNumObj"},
 		{builtInObjObj, builtInBaseObj, "builtInBaseObj"},
