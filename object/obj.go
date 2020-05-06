@@ -1,7 +1,8 @@
 package object
 
 import (
-//"fmt"
+	"bytes"
+	"strings"
 )
 
 const OBJ_TYPE = "OBJ_TYPE"
@@ -11,13 +12,30 @@ type PanObj struct {
 }
 
 func (o *PanObj) Type() PanObjType {
-	return ""
+	return OBJ_TYPE
 }
 
 func (o *PanObj) Inspect() string {
-	return ""
+	var out bytes.Buffer
+	elems := []string{}
+
+	// NOTE: refer map because range cannot treat map pointer
+	for _, p := range *o.Pairs {
+		// NOTE: unwrap double quotation
+		keyStr := p.Key.Inspect()
+		keyStr = keyStr[1 : len(keyStr)-1]
+
+		elemStr := keyStr + ": " + p.Value.Inspect()
+		elems = append(elems, elemStr)
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(elems, ", "))
+	out.WriteString("}")
+
+	return out.String()
 }
 
 func (o *PanObj) Proto() PanObject {
-	return o
+	return builtInObjObj
 }
