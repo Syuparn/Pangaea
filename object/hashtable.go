@@ -41,6 +41,6 @@ func GetSymHash(str string) SymHash {
 	return symHash
 }
 
-func SymHash2Str(h SymHash) PanObject {
-	return BuiltInZeroInt
+func SymHash2Str(h SymHash) (PanObject, bool) {
+	return BuiltInZeroInt, true
 }

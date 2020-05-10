@@ -35,8 +35,17 @@ func TestSymHash2Str(t *testing.T) {
 	str := "foo"
 	hash := GetSymHash(str)
 
-	strObj1 := SymHash2Str(hash)
-	strObj2 := SymHash2Str(hash)
+	strObj1, ok := SymHash2Str(hash)
+
+	if !ok {
+		t.Fatalf("strObj1 must be returned")
+	}
+
+	strObj2, ok := SymHash2Str(hash)
+
+	if !ok {
+		t.Fatalf("strObj1 must be returned")
+	}
 
 	if strObj1 != strObj2 {
 		t.Errorf("strObj1 and strObj2 must be same. strObj1=%v, strObj2=%v",
