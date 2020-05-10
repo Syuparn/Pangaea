@@ -19,6 +19,9 @@ var symHashTable = make(map[string]SymHash)
 // you have to write explicit type conversion between SymHash and uint64
 type SymHash = uint64
 
+// to store PanStr related to SymHash
+var StrTable = make(map[SymHash]*PanStr)
+
 type HashKey struct {
 	// to distinguish different type values with same hash
 	Type  PanObjType
@@ -36,4 +39,8 @@ func GetSymHash(str string) SymHash {
 	symHashTable[str] = symHash
 
 	return symHash
+}
+
+func SymHash2Str(h SymHash) PanObject {
+	return BuiltInZeroInt
 }
