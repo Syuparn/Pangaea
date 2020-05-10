@@ -48,3 +48,22 @@ func TestEnclosedEnv(t *testing.T) {
 			outer, inner.Outer())
 	}
 }
+
+func TestGetInOuter(t *testing.T) {
+	outer := NewEnv()
+	inner := NewEnclosedEnv(outer)
+
+	obj := &PanInt{100}
+	outer.Set(GetSymHash("myInt"), obj)
+
+	found, ok := inner.Get(GetSymHash("myInt"))
+
+	if !ok {
+		t.Fatalf("element myInt must be found.")
+	}
+
+	if found != obj {
+		t.Errorf("wrong value. expected=%s, got=%s",
+			obj.Inspect(), found.Inspect())
+	}
+}
