@@ -9,6 +9,7 @@ const FUNC_TYPE = "FUNC_TYPE"
 type PanFunc struct {
 	FuncWrapper
 	FuncType FuncType
+	Env      *Env
 }
 
 func (f *PanFunc) Type() PanObjType {
