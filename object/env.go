@@ -7,11 +7,17 @@ package object
 
 func NewEnv() *Env {
 	s := make(map[SymHash]PanObject)
-	return &Env{s}
+	return &Env{s, nil}
+}
+
+func NewEnclosedEnv(e *Env) *Env {
+	s := make(map[SymHash]PanObject)
+	return &Env{s, e}
 }
 
 type Env struct {
 	Store map[SymHash]PanObject
+	outer *Env
 }
 
 func (e *Env) Get(h SymHash) (PanObject, bool) {
@@ -37,4 +43,8 @@ func (e *Env) Items() PanObject {
 	}
 
 	return PanObjInstancePtr(&pairs)
+}
+
+func (e *Env) Outer() *Env {
+	return e.outer
 }

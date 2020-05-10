@@ -39,3 +39,12 @@ func TestEnvGetAndSet(t *testing.T) {
 			`{"myInt": 100}`, env.Items().Inspect())
 	}
 }
+
+func TestEnclosedEnv(t *testing.T) {
+	outer := NewEnv()
+	inner := NewEnclosedEnv(outer)
+	if inner.Outer() != outer {
+		t.Fatalf("Outer() must be Env outer. expected=%v, got=%v",
+			outer, inner.Outer())
+	}
+}
