@@ -22,6 +22,12 @@ type Env struct {
 
 func (e *Env) Get(h SymHash) (PanObject, bool) {
 	obj, ok := e.Store[h]
+
+	// if not found, search outer scope
+	if !ok && e.outer != nil {
+		obj, ok = e.outer.Get(h)
+	}
+
 	return obj, ok
 }
 
