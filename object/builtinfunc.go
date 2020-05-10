@@ -9,13 +9,13 @@ type PanBuiltIn struct {
 }
 
 func (b *PanBuiltIn) Type() PanObjType {
-	return ""
+	return BUILTIN_TYPE
 }
 
 func (b *PanBuiltIn) Inspect() string {
-	return ""
+	return "{|| [builtin]}"
 }
 
 func (b *PanBuiltIn) Proto() PanObject {
-	return b
+	return BuiltInFuncObj
 }
