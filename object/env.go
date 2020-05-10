@@ -15,13 +15,26 @@ type Env struct {
 }
 
 func (e *Env) Get(h SymHash) (PanObject, bool) {
-	return BuiltInObjObj, true
+	obj, ok := e.Store[h]
+	return obj, ok
 }
 
 func (e *Env) Set(h SymHash, obj PanObject) {
-	return
+	e.Store[h] = obj
 }
 
 func (e *Env) Items() PanObject {
-	return BuiltInZeroInt
+	pairs := make(map[SymHash]Pair)
+	for h, obj := range e.Store {
+		strObj, ok := SymHash2Str(h)
+
+		if !ok {
+			panic("Failed to fetch PanStr by SymHash2Str().\n" +
+				"StrTable may be broken.")
+		}
+
+		pairs[h] = Pair{strObj, obj}
+	}
+
+	return PanObjInstancePtr(&pairs)
 }
