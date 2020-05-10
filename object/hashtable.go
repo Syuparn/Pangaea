@@ -38,9 +38,14 @@ func GetSymHash(str string) SymHash {
 
 	symHashTable[str] = symHash
 
+	// set PanStr object corresponding to created hash
+	// to generate PanStr from SymHash
+	StrTable[symHash] = &PanStr{str}
+
 	return symHash
 }
 
 func SymHash2Str(h SymHash) (PanObject, bool) {
-	return BuiltInZeroInt, true
+	strObj, ok := StrTable[h]
+	return strObj, ok
 }

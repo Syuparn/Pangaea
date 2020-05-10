@@ -57,8 +57,8 @@ func TestSymHash2Str(t *testing.T) {
 			strObj1.Type())
 	}
 
-	if strObj1.Inspect() != str {
-		t.Errorf("wrong output. expected=%v, got=%v",
+	if strObj1.Inspect() != `"`+str+`"` {
+		t.Errorf(`wrong output. expected="%v", got=%v`,
 			str, strObj1.Inspect())
 	}
 }
@@ -79,8 +79,8 @@ func TestStrTable(t *testing.T) {
 			found.Type())
 	}
 
-	if found.Inspect() != str {
-		t.Errorf("wrong output. expected=%v, got=%v",
+	if found.Inspect() != `"`+str+`"` {
+		t.Errorf(`wrong output. expected="%v", got=%v`,
 			str, found.Inspect())
 	}
 }
