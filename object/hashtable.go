@@ -5,6 +5,10 @@
 
 package object
 
+import (
+	"hash/fnv"
+)
+
 // NOTE: hash key map works 2~8 times fast as string key map
 // (SHA-1 key is rejected because it is slower than string key)
 var symHashTable = make(map[string]SymHash)
@@ -19,4 +23,17 @@ type HashKey struct {
 	// to distinguish different type values with same hash
 	Type  PanObjType
 	Value uint64
+}
+
+func GetSymHash(str string) SymHash {
+	if symHash, ok := symHashTable[str]; ok {
+		return symHash
+	}
+	h := fnv.New64a()
+	h.Write([]byte(str))
+	symHash := h.Sum64()
+
+	symHashTable[str] = symHash
+
+	return symHash
 }
