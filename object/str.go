@@ -1,9 +1,5 @@
 package object
 
-import (
-	"hash/fnv"
-)
-
 const STR_TYPE = "STR_TYPE"
 
 type PanStr struct {
@@ -27,14 +23,5 @@ func (s *PanStr) Hash() HashKey {
 }
 
 func (s *PanStr) SymHash() SymHash {
-	if symHash, ok := symHashTable[s.Value]; ok {
-		return symHash
-	}
-	h := fnv.New64a()
-	h.Write([]byte(s.Value))
-	symHash := h.Sum64()
-
-	symHashTable[s.Value] = symHash
-
-	return symHash
+	return GetSymHash(s.Value)
 }
