@@ -1,4 +1,7 @@
 # Pangaea programming language
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+![](https://github.com/Syuparn/Pangaea/workflows/GoTest/badge.svg?branch=master)
+
 A programming language for one-liner method chain lovers! (Under construction...)
 
 # Requirements
