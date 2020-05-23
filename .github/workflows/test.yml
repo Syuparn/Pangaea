@@ -19,7 +19,7 @@ jobs:
 
     - name: Get dependencies
       run: |
-        go get -v -t -d golang.org/x/tools/cmd/goyacc
+        go get -v -t golang.org/x/tools/cmd/goyacc
         go get -v -t -d github.com/macrat/simplexer
 
     - name: Build
