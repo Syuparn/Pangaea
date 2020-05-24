@@ -4,6 +4,25 @@
 
 A programming language for one-liner method chain lovers! (Under construction...)
 
+# Run
+
+```bash:
+# 1. Install dependencies
+$ go get golang.org/x/tools/cmd/goyacc
+$ go get github.com/macrat/simplexer
+
+# 2. Build
+$ make
+
+# 3. Run
+# (Linux, Mac)
+$ ./pangaea
+# (Windows)
+$ ./pangaea.exe
+
+# 4. Enjoy!
+```
+
 # Requirements
 ## Host language
 - Golang
