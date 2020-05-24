@@ -289,15 +289,17 @@ func TestPrefixPrecedence(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`-3+1`, `((-3) + 1)`},
-		{`-(3+1)`, `(-(3 + 1))`},
-		{`!3-1`, `((!3) - 1)`},
-		{`-3*1`, `((-3) * 1)`},
-		{`-3**1`, `((-3) ** 1)`},
-		{`--1`, `(-(-1))`},
-		{`+-1`, `(+(-1))`},
-		{`-1+-1`, `((-1) + (-1))`},
-		{`-1---1`, `((-1) - (-(-1)))`},
+		// NOTE: Use ident for prefix test because "-<int>" and "-<float>" are
+		// parsed to literal
+		{`-a+b`, `((-a) + b)`},
+		{`-(a+b)`, `(-(a + b))`},
+		{`!a-b`, `((!a) - b)`},
+		{`-a*b`, `((-a) * b)`},
+		{`-a**b`, `((-a) ** b)`},
+		{`--a`, `(-(-a))`},
+		{`+-a`, `(+(-a))`},
+		{`-a+-b`, `((-a) + (-b))`},
+		{`-a---b`, `((-a) - (-(-b)))`},
 	}
 
 	for _, tt := range tests {
@@ -316,9 +318,11 @@ func TestChainPrecedence(t *testing.T) {
 		input    string
 		expected string
 	}{
+		// NOTE: You cannot use int in the test below because
+		// "-<int>" is parsed to IntLiteral
 		{
-			`-3.even?`,
-			`(-3).even?()`,
+			`-a.even?`,
+			`(-a).even?()`,
 		},
 		{
 			`2.p ** 3.q`,
@@ -3207,9 +3211,11 @@ func TestAssignPrecedence(t *testing.T) {
 			`foo := bar := hoge := 1 && 2 + 3`,
 			`(foo := (bar := (hoge := (1 && (2 + 3)))))`,
 		},
+		// NOTE: Use form "-(ident)" for prefix test because
+		// -(int) is treated as literal
 		{
-			`foo := -3`,
-			`(foo := (-3))`,
+			`foo := -a`,
+			`(foo := (-a))`,
 		},
 	}
 
@@ -3323,8 +3329,8 @@ func TestCompoundAssignPrec(t *testing.T) {
 			`(foo := (foo + (bar := (hoge := (1 && (2 + 3))))))`,
 		},
 		{
-			`foo += -3`,
-			`(foo := (foo + (-3)))`,
+			`foo += -a`,
+			`(foo := (foo + (-a)))`,
 		},
 		{
 			`foo := bar += baz`,
@@ -3425,8 +3431,8 @@ func TestRightAssignPrecedence(t *testing.T) {
 			`(foo := (bar := (hoge := (1 && (2 + 3)))))`,
 		},
 		{
-			`-3 => foo`,
-			`(foo := (-3))`,
+			`-a => foo`,
+			`(foo := (-a))`,
 		},
 	}
 
@@ -3497,7 +3503,6 @@ func TestIntLiteralExpr(t *testing.T) {
 		{`100`, 100},
 		{`0`, 0},
 		{`-3`, -3},
-		{`-0`, 0},
 	}
 
 	for _, tt := range tests {
