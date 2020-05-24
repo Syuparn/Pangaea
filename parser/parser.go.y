@@ -728,13 +728,23 @@ prefixExpr
 	}
 	| MINUS expr %prec UNARY_OP
 	{
-		$$ = &ast.PrefixExpr{
-			Token: $1.Literal,
-			Operator: $1.Literal,
-			Right: $2,
-			Src: yylex.(*Lexer).Source,
-		}
-		yylex.(*Lexer).curRule = "prefixExpr -> MINUS expr"
+		// HACK: convert -(number) to literal
+		// TOFIX: deal with this process in lexer
+		switch r := $2.(type) {
+			case *ast.FloatLiteral:
+			$$ = &ast.FloatLiteral{
+				Token: "-" + r.Token,
+				Value: -r.Value,
+				Src: yylex.(*Lexer).Source,
+			}
+			default:
+			$$ = &ast.PrefixExpr{
+				Token: $1.Literal,
+				Operator: $1.Literal,
+				Right: $2,
+				Src: yylex.(*Lexer).Source,
+			}
+		}		
 	}
 	| STAR expr %prec UNARY_OP
 	{
