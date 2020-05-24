@@ -266,14 +266,15 @@ func TestPrefixExpression(t *testing.T) {
 		op    string
 		right interface{}
 	}{
-		{`+5`, "+", 5},
-		{`-10`, "-", 10},
-		{`!1`, "!", 1},
-		{`*1`, "*", 1}, // arr expansion
+		{`+abc`, "+", "abc"},
+		// NOTE: "-(number)"is treated as number literal (NOT PREFIX EXPR)!
+		{`-abc`, "-", "abc"},
+		{`!abc`, "!", "abc"},
+		{`*abc`, "*", "abc"}, // arr expansion
 		// NOTE: bitwise not is "/~" (not "~") otherwise
 		// conflict occurs in `~.a`
 		// ("~" of ".a" or thoughtful scalar chain of prop "a"?)
-		{`/~100`, "/~", 100},
+		{`/~abc`, "/~", "abc"},
 	}
 
 	for _, tt := range tests {
@@ -288,15 +289,17 @@ func TestPrefixPrecedence(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`-3+1`, `((-3) + 1)`},
-		{`-(3+1)`, `(-(3 + 1))`},
-		{`!3-1`, `((!3) - 1)`},
-		{`-3*1`, `((-3) * 1)`},
-		{`-3**1`, `((-3) ** 1)`},
-		{`--1`, `(-(-1))`},
-		{`+-1`, `(+(-1))`},
-		{`-1+-1`, `((-1) + (-1))`},
-		{`-1---1`, `((-1) - (-(-1)))`},
+		// NOTE: Use ident for prefix test because "-<int>" and "-<float>" are
+		// parsed to literal
+		{`-a+b`, `((-a) + b)`},
+		{`-(a+b)`, `(-(a + b))`},
+		{`!a-b`, `((!a) - b)`},
+		{`-a*b`, `((-a) * b)`},
+		{`-a**b`, `((-a) ** b)`},
+		{`--a`, `(-(-a))`},
+		{`+-a`, `(+(-a))`},
+		{`-a+-b`, `((-a) + (-b))`},
+		{`-a---b`, `((-a) - (-(-b)))`},
 	}
 
 	for _, tt := range tests {
@@ -315,9 +318,11 @@ func TestChainPrecedence(t *testing.T) {
 		input    string
 		expected string
 	}{
+		// NOTE: You cannot use int in the test below because
+		// "-<int>" is parsed to IntLiteral
 		{
-			`-3.even?`,
-			`(-3).even?()`,
+			`-a.even?`,
+			`(-a).even?()`,
 		},
 		{
 			`2.p ** 3.q`,
@@ -3206,9 +3211,11 @@ func TestAssignPrecedence(t *testing.T) {
 			`foo := bar := hoge := 1 && 2 + 3`,
 			`(foo := (bar := (hoge := (1 && (2 + 3)))))`,
 		},
+		// NOTE: Use form "-(ident)" for prefix test because
+		// -(int) is treated as literal
 		{
-			`foo := -3`,
-			`(foo := (-3))`,
+			`foo := -a`,
+			`(foo := (-a))`,
 		},
 	}
 
@@ -3322,8 +3329,8 @@ func TestCompoundAssignPrec(t *testing.T) {
 			`(foo := (foo + (bar := (hoge := (1 && (2 + 3))))))`,
 		},
 		{
-			`foo += -3`,
-			`(foo := (foo + (-3)))`,
+			`foo += -a`,
+			`(foo := (foo + (-a)))`,
 		},
 		{
 			`foo := bar += baz`,
@@ -3424,8 +3431,8 @@ func TestRightAssignPrecedence(t *testing.T) {
 			`(foo := (bar := (hoge := (1 && (2 + 3)))))`,
 		},
 		{
-			`-3 => foo`,
-			`(foo := (-3))`,
+			`-a => foo`,
+			`(foo := (-a))`,
 		},
 	}
 
@@ -3492,9 +3499,10 @@ func TestIntLiteralExpr(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		// NOTE: minus is recognized as prefix
 		{`5`, 5},
 		{`100`, 100},
+		{`0`, 0},
+		{`-3`, -3},
 	}
 
 	for _, tt := range tests {
@@ -3520,8 +3528,11 @@ func TestSeparatedIntLiteral(t *testing.T) {
 		{`1__0`, 10},
 		{`1_________________0`, 10},
 		{`1_2__3____4`, 1234},
+		{`-1_0_0_0`, -1000},
+		{`-1_________________0`, -10},
 		{`0`, 0},
 		{`0000`, 0},
+		{`-0000`, 0},
 		{`0000111`, 111},
 		{`0xFF`, 255},
 		{`0XFF`, 255},
@@ -3544,11 +3555,16 @@ func TestSeparatedIntLiteral(t *testing.T) {
 		{`0o37`, 31},
 		{`0O10_00`, 512},
 		{`0o1_0__0___0`, 512},
+		{`-0xff`, -255},
+		{`-0o10`, -8},
+		{`-0b10`, -2},
 		{`1e3`, 1000},
 		{`12e10`, 120000000000},
 		{`100e-2`, 1},
 		{`1_0_0e-2`, 1},
 		{`1e-3`, 0},
+		{`-1e3`, -1000},
+		{`-100e-2`, -1},
 	}
 
 	for _, tt := range tests {
@@ -3564,7 +3580,6 @@ func TestFloatLiteralExpr(t *testing.T) {
 		input string
 		val   float64
 	}{
-		// NOTE: minus is recognized as prefix
 		// NOTE: abbreviation such as `1.` is invalid
 		// (it conflicts to scalar chain)
 		{`5.0`, 5.0},
@@ -3588,6 +3603,12 @@ func TestFloatLiteralExpr(t *testing.T) {
 		{`1_1.3_2e-2`, 0.1132},
 		{`1_1.3_2E-2`, 0.1132},
 		{`100000000.0e-8`, 1.0},
+		// minus
+		{`-5.0`, -5.0},
+		{`-5_0.0`, -50.0},
+		{`-0.1`, -0.1},
+		{`-.1`, -0.1},
+		{`-1.3e-2`, -0.013},
 	}
 
 	for _, tt := range tests {
@@ -5402,10 +5423,8 @@ func testLiteralExpr(t *testing.T, exp ast.Expr, expected interface{}) bool {
 		return testIntLiteral(t, exp, int64(v))
 	case int64:
 		return testIntLiteral(t, exp, v)
-		//case string:
-		//	return testIdentifier(t, exp, v)
-		//case bool:
-		//	return testBoolean(t, exp, v)
+	case string:
+		return testIdentifier(t, exp, v)
 	}
 	t.Errorf("type of exp not expected. got=%T", exp)
 	return false

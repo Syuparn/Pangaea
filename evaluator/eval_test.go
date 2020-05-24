@@ -29,8 +29,14 @@ func TestEvalIntLiteral(t *testing.T) {
 		{`0b10`, 2},
 		{`1e3`, 1000},
 		{`1_0`, 10},
-		// NOTE: minus values are prefix expressions (not literals)
-		// because parser treats "-" as prefix
+		// minus values
+		{"-5", -5},
+		{"-0", 0},
+		{`-0x10`, -16},
+		{`-0o10`, -8},
+		{`-0b10`, -2},
+		{`-1e3`, -1000},
+		{`-1_0`, -10},
 	}
 
 	for _, tt := range tests {
