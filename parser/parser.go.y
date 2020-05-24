@@ -731,6 +731,12 @@ prefixExpr
 		// HACK: convert -(number) to literal
 		// TOFIX: deal with this process in lexer
 		switch r := $2.(type) {
+			case *ast.IntLiteral:
+			$$ = &ast.IntLiteral{
+				Token: "-" + r.Token,
+				Value: -r.Value,
+				Src: yylex.(*Lexer).Source,
+			}
 			case *ast.FloatLiteral:
 			$$ = &ast.FloatLiteral{
 				Token: "-" + r.Token,
