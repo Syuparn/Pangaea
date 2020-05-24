@@ -3565,7 +3565,6 @@ func TestFloatLiteralExpr(t *testing.T) {
 		input string
 		val   float64
 	}{
-		// NOTE: minus is recognized as prefix
 		// NOTE: abbreviation such as `1.` is invalid
 		// (it conflicts to scalar chain)
 		{`5.0`, 5.0},
@@ -3589,6 +3588,12 @@ func TestFloatLiteralExpr(t *testing.T) {
 		{`1_1.3_2e-2`, 0.1132},
 		{`1_1.3_2E-2`, 0.1132},
 		{`100000000.0e-8`, 1.0},
+		// minus
+		{`-5.0`, -5.0},
+		{`-5_0.0`, -50.0},
+		{`-0.1`, -0.1},
+		{`-.1`, -0.1},
+		{`-1.3e-2`, -0.013},
 	}
 
 	for _, tt := range tests {
