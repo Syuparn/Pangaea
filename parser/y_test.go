@@ -266,14 +266,15 @@ func TestPrefixExpression(t *testing.T) {
 		op    string
 		right interface{}
 	}{
-		{`+5`, "+", 5},
-		{`-10`, "-", 10},
-		{`!1`, "!", 1},
-		{`*1`, "*", 1}, // arr expansion
+		{`+abc`, "+", "abc"},
+		// NOTE: "-(number)"is treated as number literal (NOT PREFIX EXPR)!
+		{`-abc`, "-", "abc"},
+		{`!abc`, "!", "abc"},
+		{`*abc`, "*", "abc"}, // arr expansion
 		// NOTE: bitwise not is "/~" (not "~") otherwise
 		// conflict occurs in `~.a`
 		// ("~" of ".a" or thoughtful scalar chain of prop "a"?)
-		{`/~100`, "/~", 100},
+		{`/~abc`, "/~", "abc"},
 	}
 
 	for _, tt := range tests {
@@ -5402,10 +5403,8 @@ func testLiteralExpr(t *testing.T, exp ast.Expr, expected interface{}) bool {
 		return testIntLiteral(t, exp, int64(v))
 	case int64:
 		return testIntLiteral(t, exp, v)
-		//case string:
-		//	return testIdentifier(t, exp, v)
-		//case bool:
-		//	return testBoolean(t, exp, v)
+	case string:
+		return testIdentifier(t, exp, v)
 	}
 	t.Errorf("type of exp not expected. got=%T", exp)
 	return false
