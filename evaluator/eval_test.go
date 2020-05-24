@@ -21,6 +21,14 @@ func TestEvalIntLiteral(t *testing.T) {
 	}{
 		{"5", 5},
 		{"12345", 12345},
+		{"1", 1},
+		{"0", 0},
+		// special forms
+		{`0x10`, 16},
+		{`0o10`, 8},
+		{`0b10`, 2},
+		{`1e3`, 1000},
+		{`1_0`, 10},
 		// NOTE: minus values are prefix expressions (not literals)
 		// because parser treats "-" as prefix
 	}
