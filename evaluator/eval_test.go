@@ -160,7 +160,7 @@ func TestEvalRangeLiteral(t *testing.T) {
 			toPanRange(nil, nil, "step"),
 		},
 		{
-			`(:'stop:)`,
+			`(:'stop)`,
 			toPanRange(nil, "stop", nil),
 		},
 		{
@@ -168,7 +168,7 @@ func TestEvalRangeLiteral(t *testing.T) {
 			toPanRange(nil, "stop", "step"),
 		},
 		{
-			`('start::)`,
+			`('start:)`,
 			toPanRange("start", nil, nil),
 		},
 		{
@@ -176,7 +176,7 @@ func TestEvalRangeLiteral(t *testing.T) {
 			toPanRange("start", nil, "step"),
 		},
 		{
-			`('start:'stop:)`,
+			`('start:'stop)`,
 			toPanRange("start", "stop", nil),
 		},
 		{
@@ -185,7 +185,7 @@ func TestEvalRangeLiteral(t *testing.T) {
 		},
 		// multiple types
 		{
-			`(3:s:false)`,
+			`(3:"s":false)`,
 			&object.PanRange{
 				Start: &object.PanInt{Value: 3},
 				Stop:  &object.PanStr{Value: "s"},
@@ -215,6 +215,10 @@ func toPanRange(start, stop, step interface{}) *object.PanRange {
 }
 
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
 	if actual.Type() != object.INT_TYPE {
 		t.Fatalf("Type must be INT_TYPE. got=%s", actual.Type())
 		return
@@ -232,6 +236,10 @@ func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) 
 }
 
 func testPanFloat(t *testing.T, actual object.PanObject, expected *object.PanFloat) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
 	if actual.Type() != object.FLOAT_TYPE {
 		t.Fatalf("Type must be FLOAT_TYPE. got=%s", actual.Type())
 		return
@@ -249,6 +257,10 @@ func testPanFloat(t *testing.T, actual object.PanObject, expected *object.PanFlo
 }
 
 func testPanStr(t *testing.T, actual object.PanObject, expected *object.PanStr) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
 	if actual.Type() != object.STR_TYPE {
 		t.Fatalf("Type must be STR_TYPE. got=%s", actual.Type())
 		return
@@ -266,6 +278,10 @@ func testPanStr(t *testing.T, actual object.PanObject, expected *object.PanStr) 
 }
 
 func testPanBool(t *testing.T, actual object.PanObject, expected *object.PanBool) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
 	if actual.Type() != object.BOOL_TYPE {
 		t.Fatalf("Type must be BOOL_TYPE. got=%s", actual.Type())
 		return
@@ -283,6 +299,10 @@ func testPanBool(t *testing.T, actual object.PanObject, expected *object.PanBool
 }
 
 func testPanNil(t *testing.T, actual object.PanObject, expected *object.PanNil) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
 	if actual.Type() != object.NIL_TYPE {
 		t.Fatalf("Type must be NIL_TYPE. got=%s", actual.Type())
 		return
@@ -296,6 +316,10 @@ func testPanNil(t *testing.T, actual object.PanObject, expected *object.PanNil) 
 }
 
 func testPanRange(t *testing.T, actual object.PanObject, expected *object.PanRange) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
 	if actual.Type() != object.RANGE_TYPE {
 		t.Fatalf("Type must be RANGE_TYPE. got=%s", actual.Type())
 		return
