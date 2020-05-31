@@ -20,3 +20,7 @@ var BuiltInMapObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 
 var BuiltInOneInt = &PanInt{1}
 var BuiltInZeroInt = &PanInt{0}
+
+var BuiltInTrue = &PanBool{true}
+var BuiltInFalse = &PanBool{false}
+var BuiltInNil = &PanNil{}
