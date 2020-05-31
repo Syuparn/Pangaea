@@ -125,8 +125,10 @@ func TestEvalBoolLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
+		// check if cached objects (BuiltIn**) are used
 		if actual != tt.expected {
-			t.Errorf("wrong output. expected=%v, got=%v", tt.expected, actual)
+			t.Errorf("wrong output. expected=%v(%p), got=%v(%p)",
+				tt.expected, tt.expected, actual, actual)
 		}
 		testPanBool(t, actual, tt.expected.(*object.PanBool))
 	}
