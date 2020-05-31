@@ -95,6 +95,24 @@ func TestEvalStrLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalBoolLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{`true`, object.BuiltInTrue},
+		{`false`, object.BuiltInFalse},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		if actual != tt.expected {
+			t.Errorf("wrong output. expected=%v, got=%v", tt.expected, actual)
+		}
+		testPanBool(t, actual, tt.expected.(*object.PanBool))
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual.Type() != object.INT_TYPE {
 		t.Fatalf("Type must be INT_TYPE. got=%s", actual.Type())
@@ -143,6 +161,23 @@ func testPanStr(t *testing.T, actual object.PanObject, expected *object.PanStr) 
 
 	if strObj.Value != expected.Value {
 		t.Errorf("wrong value. expected=%s, got=%s", expected.Value, strObj.Value)
+	}
+}
+
+func testPanBool(t *testing.T, actual object.PanObject, expected *object.PanBool) {
+	if actual.Type() != object.BOOL_TYPE {
+		t.Fatalf("Type must be BOOL_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	boolObj, ok := actual.(*object.PanBool)
+	if !ok {
+		t.Fatalf("actual must be *object.PanBool. got=%T (%v)", actual, actual)
+		return
+	}
+
+	if boolObj.Value != expected.Value {
+		t.Errorf("wrong value. expected=%t, got=%t", expected.Value, boolObj.Value)
 	}
 }
 
