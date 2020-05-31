@@ -113,6 +113,13 @@ func TestEvalBoolLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalNilLiteral(t *testing.T) {
+	actual := testEval(t, "nil")
+	if actual != object.BuiltInNil {
+		t.Errorf("wrong output. expected=object.BuiltInNil, got=%v", actual)
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual.Type() != object.INT_TYPE {
 		t.Fatalf("Type must be INT_TYPE. got=%s", actual.Type())
