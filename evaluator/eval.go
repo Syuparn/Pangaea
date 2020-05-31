@@ -22,6 +22,8 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 		return &object.PanStr{Value: node.Value}
 	case *ast.SymLiteral:
 		return &object.PanStr{Value: node.Value}
+	case *ast.Ident:
+		return evalIdent(node, env)
 	}
 
 	return nil
