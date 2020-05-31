@@ -141,6 +141,69 @@ func TestEvalNilLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalRangeLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanRange
+	}{
+		// NOTE: parser error occurs in `(::)`
+		{
+			`(::'step)`,
+			toPanRange(nil, nil, "step"),
+		},
+		{
+			`(:'stop:)`,
+			toPanRange(nil, "stop", nil),
+		},
+		{
+			`(:'stop:'step)`,
+			toPanRange(nil, "stop", "step"),
+		},
+		{
+			`('start::)`,
+			toPanRange("start", nil, nil),
+		},
+		{
+			`('start::'step)`,
+			toPanRange("start", nil, "step"),
+		},
+		{
+			`('start:'stop:)`,
+			toPanRange("start", "stop", nil),
+		},
+		{
+			`('start:'stop:'step)`,
+			toPanRange("start", "stop", "step"),
+		},
+		// multiple types
+		{
+			`(3:s:false)`,
+			&object.PanRange{
+				Start: &object.PanInt{Value: 3},
+				Stop:  &object.PanStr{Value: "s"},
+				Step:  object.BuiltInFalse,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanRange(t, actual, tt.expected)
+	}
+}
+
+func toPanRange(start, stop, step interface{}) *object.PanRange {
+	obj := func(o interface{}) object.PanObject {
+		switch o := o.(type) {
+		case string:
+			return &object.PanStr{Value: o}
+		default:
+			return object.BuiltInNil
+		}
+	}
+	return &object.PanRange{Start: obj(start), Stop: obj(stop), Step: obj(step)}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual.Type() != object.INT_TYPE {
 		t.Fatalf("Type must be INT_TYPE. got=%s", actual.Type())
@@ -206,6 +269,56 @@ func testPanBool(t *testing.T, actual object.PanObject, expected *object.PanBool
 
 	if boolObj.Value != expected.Value {
 		t.Errorf("wrong value. expected=%t, got=%t", expected.Value, boolObj.Value)
+	}
+}
+
+func testPanNil(t *testing.T, actual object.PanObject, expected *object.PanNil) {
+	if actual.Type() != object.NIL_TYPE {
+		t.Fatalf("Type must be NIL_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	_, ok := actual.(*object.PanNil)
+	if !ok {
+		t.Fatalf("actual must be *object.PanNil. got=%T (%v)", actual, actual)
+		return
+	}
+}
+
+func testPanRange(t *testing.T, actual object.PanObject, expected *object.PanRange) {
+	if actual.Type() != object.RANGE_TYPE {
+		t.Fatalf("Type must be RANGE_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	obj, ok := actual.(*object.PanRange)
+	if !ok {
+		t.Fatalf("actual must be *object.PanRange. got=%T (%v)", actual, actual)
+		return
+	}
+
+	testValue(t, obj.Start, expected.Start)
+	testValue(t, obj.Stop, expected.Stop)
+	testValue(t, obj.Step, expected.Step)
+}
+
+func testValue(t *testing.T, actual object.PanObject, expected object.PanObject) {
+	// switch to test_XX functions by expected type
+	switch expected := expected.(type) {
+	case *object.PanInt:
+		testPanInt(t, actual, expected)
+	case *object.PanFloat:
+		testPanFloat(t, actual, expected)
+	case *object.PanStr:
+		testPanStr(t, actual, expected)
+	case *object.PanBool:
+		testPanBool(t, actual, expected)
+	case *object.PanNil:
+		testPanNil(t, actual, expected)
+	case *object.PanRange:
+		testPanRange(t, actual, expected)
+	default:
+		t.Fatalf("type of expected %T cannot be handled by testValue()", expected)
 	}
 }
 
