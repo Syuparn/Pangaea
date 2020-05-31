@@ -70,6 +70,22 @@ func TestBoolHash(t *testing.T) {
 	}
 }
 
+func TestBuiltInBools(t *testing.T) {
+	tests := []struct {
+		obj      *PanBool
+		expected bool
+	}{
+		{BuiltInTrue, true},
+		{BuiltInFalse, false},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Value != tt.expected {
+			t.Errorf("wrong value. got=%t, expected=%t", tt.obj.Value, tt.expected)
+		}
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testBoolIsPanObject() {
 	var _ PanObject = &PanBool{true}
