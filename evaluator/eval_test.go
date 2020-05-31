@@ -46,6 +46,25 @@ func TestEvalIntLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalZeroAndOneToBuiltIn(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanInt
+	}{
+		{"1", object.BuiltInOneInt},
+		{"0", object.BuiltInZeroInt},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		// check if cached objects (BuiltIn**Int) are used
+		if actual != tt.expected {
+			t.Errorf("wrong output. expected=%v(%p), got=%v(%p)",
+				tt.expected, tt.expected, actual, actual)
+		}
+	}
+}
+
 func TestEvalFloatLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
