@@ -72,6 +72,29 @@ func TestEvalFloatLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalStrLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`"a"`, "a"},
+		{"`a`", "a"},
+		{`"Hello, world!"`, "Hello, world!"},
+		// symbol is also evaluated to PanStr
+		{`'sym`, "sym"},
+		{`'_hidden`, "_hidden"},
+		{`'even?`, "even?"},
+		{`'rand!`, "rand!"},
+		{`'+`, "+"},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		expected := &object.PanStr{Value: tt.expected}
+		testPanStr(t, actual, expected)
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual.Type() != object.INT_TYPE {
 		t.Fatalf("Type must be INT_TYPE. got=%s", actual.Type())
@@ -103,6 +126,23 @@ func testPanFloat(t *testing.T, actual object.PanObject, expected *object.PanFlo
 
 	if floatObj.Value != expected.Value {
 		t.Errorf("wrong value. expected=%f, got=%f", expected.Value, floatObj.Value)
+	}
+}
+
+func testPanStr(t *testing.T, actual object.PanObject, expected *object.PanStr) {
+	if actual.Type() != object.STR_TYPE {
+		t.Fatalf("Type must be STR_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	strObj, ok := actual.(*object.PanStr)
+	if !ok {
+		t.Fatalf("actual must be *object.PanStr. got=%T (%v)", actual, actual)
+		return
+	}
+
+	if strObj.Value != expected.Value {
+		t.Errorf("wrong value. expected=%s, got=%s", expected.Value, strObj.Value)
 	}
 }
 
