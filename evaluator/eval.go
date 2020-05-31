@@ -18,6 +18,8 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 		return &object.PanInt{Value: node.Value}
 	case *ast.FloatLiteral:
 		return &object.PanFloat{Value: node.Value}
+	case *ast.StrLiteral:
+		return &object.PanStr{Value: node.Value}
 	}
 
 	return nil
