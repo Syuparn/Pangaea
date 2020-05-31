@@ -146,6 +146,14 @@ func TestEvalRangeLiteral(t *testing.T) {
 		input    string
 		expected *object.PanRange
 	}{
+		{
+			`(1:2:3)`,
+			toPanRange(1, 2, 3),
+		},
+		{
+			`('a:'z:1)`,
+			toPanRange("a", "z", 1),
+		},
 		// NOTE: parser error occurs in `(::)`
 		{
 			`(::'step)`,
@@ -197,6 +205,8 @@ func toPanRange(start, stop, step interface{}) *object.PanRange {
 		switch o := o.(type) {
 		case string:
 			return &object.PanStr{Value: o}
+		case int:
+			return &object.PanInt{Value: int64(o)}
 		default:
 			return object.BuiltInNil
 		}
