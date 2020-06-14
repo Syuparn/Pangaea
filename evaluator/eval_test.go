@@ -200,6 +200,76 @@ func TestEvalRangeLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalArrLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanArr
+	}{
+		{
+			`[]`,
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
+		{
+			`[1]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 1},
+			}},
+		},
+		{
+			`[2, 3]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 2},
+				&object.PanInt{Value: 3},
+			}},
+		},
+		// arr can contain different type elements
+		{
+			`["a", 4]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "a"},
+				&object.PanInt{Value: 4},
+			}},
+		},
+		// nested
+		{
+			`[[10]]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					&object.PanInt{Value: 10},
+				}},
+			}},
+		},
+		// embedded
+		{
+			`[*[1]]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 1},
+			}},
+		},
+		{
+			`[*[1], 2]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 1},
+				&object.PanInt{Value: 2},
+			}},
+		},
+		{
+			`[1, *[2, 3], 4]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 1},
+				&object.PanInt{Value: 2},
+				&object.PanInt{Value: 3},
+				&object.PanInt{Value: 4},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanArr(t, actual, tt.expected)
+	}
+}
+
 func toPanRange(start, stop, step interface{}) *object.PanRange {
 	obj := func(o interface{}) object.PanObject {
 		switch o := o.(type) {
@@ -336,6 +406,32 @@ func testPanRange(t *testing.T, actual object.PanObject, expected *object.PanRan
 	testValue(t, obj.Step, expected.Step)
 }
 
+func testPanArr(t *testing.T, actual object.PanObject, expected *object.PanArr) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
+	if actual.Type() != object.ARR_TYPE {
+		t.Fatalf("Type must be ARR_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	obj, ok := actual.(*object.PanArr)
+	if !ok {
+		t.Fatalf("actual must be *object.PanArr. got=%T (%v)", actual, actual)
+		return
+	}
+
+	if len(obj.Elems) != len(expected.Elems) {
+		t.Fatalf("length must be %d. got=%d", len(expected.Elems), len(obj.Elems))
+		return
+	}
+
+	for i, act := range obj.Elems {
+		testValue(t, act, expected.Elems[i])
+	}
+}
+
 func testValue(t *testing.T, actual object.PanObject, expected object.PanObject) {
 	// switch to test_XX functions by expected type
 	switch expected := expected.(type) {
@@ -351,6 +447,8 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 		testPanNil(t, actual, expected)
 	case *object.PanRange:
 		testPanRange(t, actual, expected)
+	case *object.PanArr:
+		testPanArr(t, actual, expected)
 	default:
 		t.Fatalf("type of expected %T cannot be handled by testValue()", expected)
 	}
