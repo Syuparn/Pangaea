@@ -200,6 +200,20 @@ func TestEvalRangeLiteral(t *testing.T) {
 	}
 }
 
+func toPanRange(start, stop, step interface{}) *object.PanRange {
+	obj := func(o interface{}) object.PanObject {
+		switch o := o.(type) {
+		case string:
+			return &object.PanStr{Value: o}
+		case int:
+			return &object.PanInt{Value: int64(o)}
+		default:
+			return object.BuiltInNil
+		}
+	}
+	return &object.PanRange{Start: obj(start), Stop: obj(stop), Step: obj(step)}
+}
+
 func TestEvalArrLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -270,18 +284,127 @@ func TestEvalArrLiteral(t *testing.T) {
 	}
 }
 
-func toPanRange(start, stop, step interface{}) *object.PanRange {
-	obj := func(o interface{}) object.PanObject {
-		switch o := o.(type) {
-		case string:
-			return &object.PanStr{Value: o}
-		case int:
-			return &object.PanInt{Value: int64(o)}
-		default:
-			return object.BuiltInNil
-		}
+func TestEvalObjLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanObj
+	}{
+		{
+			`{}`,
+			toPanObj([]object.Pair{}),
+		},
+		{
+			`{a: 1}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 1},
+				},
+			}),
+		},
+		{
+			`{a: 1, b: 2}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 1},
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "b"},
+					Value: &object.PanInt{Value: 2},
+				},
+			}),
+		},
+		// dangling keys are ignored (in this example, `a: 3` is ignored)
+		{
+			`{a: 1, b: 2, a: 3}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 1},
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "b"},
+					Value: &object.PanInt{Value: 2},
+				},
+			}),
+		},
+		// Obj can contain multiple types
+		{
+			`{a: 1, b: "B"}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 1},
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "b"},
+					Value: &object.PanStr{Value: "B"},
+				},
+			}),
+		},
+		// nested
+		{
+			`{a: {b: 10}}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key: &object.PanStr{Value: "a"},
+					Value: toPanObj([]object.Pair{
+						object.Pair{
+							Key:   &object.PanStr{Value: "b"},
+							Value: &object.PanInt{Value: 10},
+						},
+					}),
+				},
+			}),
+		},
+		// embedded
+		// NOTE: embedded elems must be after normal pairs (`{**a, b: 2}` is syntax error)
+		{
+			`{a: 1, **{b: 2}}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 1},
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "b"},
+					Value: &object.PanInt{Value: 2},
+				},
+			}),
+		},
+		{
+			`{**{a: 1}, **{b: 2}}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 1},
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "b"},
+					Value: &object.PanInt{Value: 2},
+				},
+			}),
+		},
 	}
-	return &object.PanRange{Start: obj(start), Stop: obj(stop), Step: obj(step)}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanObj(t, actual, tt.expected)
+	}
+}
+
+func toPanObj(pairs []object.Pair) *object.PanObj {
+	pairMap := map[object.SymHash]object.Pair{}
+
+	for _, pair := range pairs {
+		panStr, _ := pair.Key.(*object.PanStr)
+		symHash := object.GetSymHash(panStr.Value)
+		pairMap[symHash] = pair
+	}
+
+	obj := object.PanObjInstance(&pairMap)
+	return &obj
 }
 
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
@@ -432,6 +555,45 @@ func testPanArr(t *testing.T, actual object.PanObject, expected *object.PanArr) 
 	}
 }
 
+func testPanObj(t *testing.T, actual object.PanObject, expected *object.PanObj) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
+	if actual.Type() != object.OBJ_TYPE {
+		t.Fatalf("Type must be OBJ_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	obj, ok := actual.(*object.PanObj)
+	if !ok {
+		t.Fatalf("actual must be *object.PanObj. got=%T (%v)", actual, actual)
+		return
+	}
+
+	if len(*obj.Pairs) != len(*expected.Pairs) {
+		t.Fatalf("length must be %d (%v). got=%d (%v)",
+			len(*expected.Pairs), *expected.Pairs, len(*obj.Pairs), *obj.Pairs)
+		return
+	}
+
+	if obj.Proto() != expected.Proto() {
+		t.Errorf("Proto must be same. expected=%v(%T), got=%v(%T)",
+			expected.Proto(), expected.Proto(), obj.Proto(), obj.Proto())
+	}
+
+	for key, pair := range *expected.Pairs {
+		actPair, ok := (*obj.Pairs)[key]
+		if !ok {
+			t.Errorf("key %v(%T) not found", pair.Key, pair.Key)
+			continue
+		}
+
+		testValue(t, actPair.Key, pair.Key)
+		testValue(t, actPair.Value, pair.Value)
+	}
+}
+
 func testValue(t *testing.T, actual object.PanObject, expected object.PanObject) {
 	// switch to test_XX functions by expected type
 	switch expected := expected.(type) {
@@ -449,6 +611,8 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 		testPanRange(t, actual, expected)
 	case *object.PanArr:
 		testPanArr(t, actual, expected)
+	case *object.PanObj:
+		testPanObj(t, actual, expected)
 	default:
 		t.Fatalf("type of expected %T cannot be handled by testValue()", expected)
 	}
