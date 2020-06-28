@@ -407,6 +407,211 @@ func toPanObj(pairs []object.Pair) *object.PanObj {
 	return &obj
 }
 
+func TestEvalMapLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanMap
+	}{
+		{
+			`%{}`,
+			toPanMap([]object.Pair{}, []object.Pair{}),
+		},
+		{
+			`%{'a: 1}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: &object.PanInt{Value: 1},
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+		// map can contain keys other than str
+		{
+			`%{'a: 1, 2: 3, true: 5}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: &object.PanInt{Value: 1},
+					},
+					object.Pair{
+						Key:   &object.PanInt{Value: 2},
+						Value: &object.PanInt{Value: 3},
+					},
+					object.Pair{
+						Key:   object.BuiltInTrue,
+						Value: &object.PanInt{Value: 5},
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+		// dangling keys are ignored (in this example, `a: 3` is ignored)
+		{
+			`%{'a: 1, 'b: 2, 'a: 3}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: &object.PanInt{Value: 1},
+					},
+					object.Pair{
+						Key:   &object.PanStr{Value: "b"},
+						Value: &object.PanInt{Value: 2},
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+		// Obj can contain multiple types
+		{
+			`%{"a": 1, "b": "B"}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: &object.PanInt{Value: 1},
+					},
+					object.Pair{
+						Key:   &object.PanStr{Value: "b"},
+						Value: &object.PanStr{Value: "B"},
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+		// nested
+		{
+			`%{'a: %{'b: 10}}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key: &object.PanStr{Value: "a"},
+						Value: toPanMap(
+							[]object.Pair{
+								object.Pair{
+									Key:   &object.PanStr{Value: "b"},
+									Value: &object.PanInt{Value: 10},
+								},
+							},
+							[]object.Pair{},
+						),
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+		// embedded
+		// NOTE: embedded elems must be after normal pairs
+		// (`%{**a, b: 2}` is syntax error)
+		{
+			`%{'a: 1, **%{'b: 2}}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: &object.PanInt{Value: 1},
+					},
+					object.Pair{
+						Key:   &object.PanStr{Value: "b"},
+						Value: &object.PanInt{Value: 2},
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+		{
+			`%{**%{'a: 1}, **%{'b: 2}}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: &object.PanInt{Value: 1},
+					},
+					object.Pair{
+						Key:   &object.PanStr{Value: "b"},
+						Value: &object.PanInt{Value: 2},
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+		// obj can be embedded to map (but map cannot be embedded to obj)
+		{
+			`%{**%{'a: 1}, **{b: 2}}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: &object.PanInt{Value: 1},
+					},
+					object.Pair{
+						Key:   &object.PanStr{Value: "b"},
+						Value: &object.PanInt{Value: 2},
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+		// map can contain non-scalar keys
+		{
+			`%{'a: 1, [1, 2]: 3, %{4: 5}: 6}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: &object.PanInt{Value: 1},
+					},
+				},
+				[]object.Pair{
+					object.Pair{
+						Key: &object.PanArr{Elems: []object.PanObject{
+							&object.PanInt{Value: 1},
+							&object.PanInt{Value: 2},
+						}},
+						Value: &object.PanInt{Value: 3},
+					},
+					object.Pair{
+						Key: toPanMap(
+							[]object.Pair{
+								object.Pair{
+									Key:   &object.PanInt{Value: 4},
+									Value: &object.PanInt{Value: 5},
+								},
+							},
+							[]object.Pair{},
+						),
+						Value: &object.PanInt{Value: 6},
+					},
+				},
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanMap(t, actual, tt.expected)
+	}
+}
+
+func toPanMap(pairs []object.Pair, nonHashablePairs []object.Pair) *object.PanMap {
+	pairMap := map[object.HashKey]object.Pair{}
+
+	for _, pair := range pairs {
+		panScalar, _ := pair.Key.(object.PanScalar)
+		hash := panScalar.Hash()
+		pairMap[hash] = pair
+	}
+
+	return &object.PanMap{
+		Pairs:            &pairMap,
+		NonHashablePairs: &nonHashablePairs,
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
@@ -594,6 +799,41 @@ func testPanObj(t *testing.T, actual object.PanObject, expected *object.PanObj) 
 	}
 }
 
+func testPanMap(t *testing.T, actual object.PanObject, expected *object.PanMap) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
+	if actual.Type() != object.MAP_TYPE {
+		t.Fatalf("Type must be MAP_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	obj, ok := actual.(*object.PanMap)
+	if !ok {
+		t.Fatalf("actual must be *object.PanMap. got=%T (%v)", actual, actual)
+		return
+	}
+
+	if len(*obj.Pairs) != len(*expected.Pairs) {
+		t.Fatalf("length must be %d (%s). got=%d (%s)",
+			len(*expected.Pairs), expected.Inspect(),
+			len(*obj.Pairs), obj.Inspect())
+		return
+	}
+
+	for key, pair := range *expected.Pairs {
+		actPair, ok := (*obj.Pairs)[key]
+		if !ok {
+			t.Errorf("key %v(%T) not found", pair.Key, pair.Key)
+			continue
+		}
+
+		testValue(t, actPair.Key, pair.Key)
+		testValue(t, actPair.Value, pair.Value)
+	}
+}
+
 func testValue(t *testing.T, actual object.PanObject, expected object.PanObject) {
 	// switch to test_XX functions by expected type
 	switch expected := expected.(type) {
@@ -613,6 +853,8 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 		testPanArr(t, actual, expected)
 	case *object.PanObj:
 		testPanObj(t, actual, expected)
+	case *object.PanMap:
+		testPanMap(t, actual, expected)
 	default:
 		t.Fatalf("type of expected %T cannot be handled by testValue()", expected)
 	}

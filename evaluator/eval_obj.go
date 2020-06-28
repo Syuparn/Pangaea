@@ -8,7 +8,7 @@ import (
 func evalObj(node *ast.ObjLiteral, env *object.Env) object.PanObject {
 	pairMap := map[object.SymHash]object.Pair{}
 	for _, pairNode := range node.Pairs {
-		pair := evalPair(pairNode, env)
+		pair := evalObjPair(pairNode, env)
 
 		// TODO: raise error if key is not PanStr
 		panStr, _ := pair.Key.(*object.PanStr)

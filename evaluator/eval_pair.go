@@ -5,7 +5,7 @@ import (
 	"../object"
 )
 
-func evalPair(node *ast.Pair, env *object.Env) object.Pair {
+func evalObjPair(node *ast.Pair, env *object.Env) object.Pair {
 	v := Eval(node.Val, env)
 
 	if ident, ok := node.Key.(*ast.Ident); ok {
@@ -15,5 +15,11 @@ func evalPair(node *ast.Pair, env *object.Env) object.Pair {
 	}
 
 	k := Eval(node.Key, env)
+	return object.Pair{Key: k, Value: v}
+}
+
+func evalMapPair(node *ast.Pair, env *object.Env) object.Pair {
+	k := Eval(node.Key, env)
+	v := Eval(node.Val, env)
 	return object.Pair{Key: k, Value: v}
 }
