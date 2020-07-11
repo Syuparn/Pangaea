@@ -712,6 +712,113 @@ func toPanFunc(
 	}
 }
 
+func TestEvalAssign(t *testing.T) {
+	tests := []struct {
+		input       string
+		expected    object.PanObject
+		expectedEnv *object.PanObj
+	}{
+		{
+			`a := 'A`,
+			&object.PanStr{Value: "A"},
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanStr{Value: "A"},
+				},
+			}),
+		},
+		{
+			`'A => a`,
+			&object.PanStr{Value: "A"},
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanStr{Value: "A"},
+				},
+			}),
+		},
+		{
+			`a := 'A; a`,
+			&object.PanStr{Value: "A"},
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanStr{Value: "A"},
+				},
+			}),
+		},
+		{
+			`a := 5; b := 10; [a, b]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 5},
+				&object.PanInt{Value: 10},
+			}},
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 5},
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "b"},
+					Value: &object.PanInt{Value: 10},
+				},
+			}),
+		},
+		{
+			`a := b := 2; [a, b]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 2},
+				&object.PanInt{Value: 2},
+			}},
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 2},
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "b"},
+					Value: &object.PanInt{Value: 2},
+				},
+			}),
+		},
+		{
+			`"hi" => a; a`,
+			&object.PanStr{Value: "hi"},
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanStr{Value: "hi"},
+				},
+			}),
+		},
+		{
+			`3 => c => d; [c, d]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 3},
+				&object.PanInt{Value: 3},
+			}},
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "c"},
+					Value: &object.PanInt{Value: 3},
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "d"},
+					Value: &object.PanInt{Value: 3},
+				},
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		env := object.NewEnv()
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+		testValue(t, env.Items(), tt.expectedEnv)
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)

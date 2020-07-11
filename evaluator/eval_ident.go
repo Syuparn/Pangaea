@@ -15,6 +15,13 @@ func evalIdent(ident *ast.Ident, env *object.Env) object.PanObject {
 	case "nil":
 		return object.BuiltInNil
 	}
-	// TODO: return error object
-	return nil
+
+	val, ok := env.Get(object.GetSymHash(ident.Value))
+
+	if !ok {
+		// TODO: error handling if var was not found
+		return nil
+	}
+
+	return val
 }
