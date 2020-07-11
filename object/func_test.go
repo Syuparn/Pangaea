@@ -1,6 +1,7 @@
 package object
 
 import (
+	"../ast"
 	"testing"
 )
 
@@ -17,6 +18,22 @@ type MockFuncWrapper struct {
 
 func (m *MockFuncWrapper) String() string {
 	return m.str
+}
+
+func (m *MockFuncWrapper) Args() *PanArr {
+	// return empty arr
+	return &PanArr{}
+}
+
+func (m *MockFuncWrapper) Kwargs() *PanObj {
+	// return empty obj
+	obj, _ := PanObjInstancePtr(&map[SymHash]Pair{}).(*PanObj)
+	return obj
+}
+
+func (m *MockFuncWrapper) Body() *[]ast.Stmt {
+	// return empty stmt
+	return &[]ast.Stmt{}
 }
 
 func TestFuncInspect(t *testing.T) {

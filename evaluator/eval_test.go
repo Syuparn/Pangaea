@@ -612,6 +612,106 @@ func toPanMap(pairs []object.Pair, nonHashablePairs []object.Pair) *object.PanMa
 	}
 }
 
+func TestEvalFuncLiteral(t *testing.T) {
+	outerEnv := object.NewEnv()
+
+	tests := []struct {
+		input    string
+		expected *object.PanFunc
+	}{
+		{
+			`{||}`,
+			toPanFunc(
+				[]string{},
+				[]object.Pair{},
+				`|| `,
+				outerEnv,
+			),
+		},
+		{
+			`{|a|}`,
+			toPanFunc(
+				[]string{"a"},
+				[]object.Pair{},
+				`|a| `,
+				outerEnv,
+			),
+		},
+		{
+			`{|a, b|}`,
+			toPanFunc(
+				[]string{"a", "b"},
+				[]object.Pair{},
+				`|a, b| `,
+				outerEnv,
+			),
+		},
+		{
+			`{|a, b, c:10|}`,
+			toPanFunc(
+				[]string{"a", "b"},
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "c"},
+						Value: &object.PanInt{Value: 10},
+					},
+				},
+				`|a, b, c: 10| `,
+				outerEnv,
+			),
+		},
+		{
+			`{|a, b, c: 10, d:'e|}`,
+			toPanFunc(
+				[]string{"a", "b"},
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "c"},
+						Value: &object.PanInt{Value: 10},
+					},
+					object.Pair{
+						Key:   &object.PanStr{Value: "d"},
+						Value: &object.PanStr{Value: "e"},
+					},
+				},
+				`|a, b, c: 10, d: 'e| `,
+				outerEnv,
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEvalInEnv(t, tt.input, outerEnv)
+		testPanFunc(t, actual, tt.expected)
+	}
+}
+
+func toPanFunc(
+	args []string,
+	kwargs []object.Pair,
+	str string,
+	env *object.Env,
+) *object.PanFunc {
+	argArr := []object.PanObject{}
+	for _, arg := range args {
+		argArr = append(argArr, &object.PanStr{Value: arg})
+	}
+
+	funcWrapper := &FuncWrapperImpl{
+		codeStr: str,
+		args:    &object.PanArr{Elems: argArr},
+		kwargs:  toPanObj(kwargs),
+		// empty stmt (body is not tested)
+		body: &[]ast.Stmt{},
+	}
+
+	return &object.PanFunc{
+		FuncWrapper: funcWrapper,
+		FuncType:    object.FUNC_FUNC,
+		Env:         object.NewEnclosedEnv(env),
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
@@ -834,6 +934,51 @@ func testPanMap(t *testing.T, actual object.PanObject, expected *object.PanMap) 
 	}
 }
 
+func testPanFunc(t *testing.T, actual object.PanObject, expected *object.PanFunc) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
+	if actual.Type() != object.FUNC_TYPE {
+		t.Fatalf("Type must be FUNC_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	obj, ok := actual.(*object.PanFunc)
+	if !ok {
+		t.Fatalf("actual must be *object.PanFunc. got=%T (%v)", actual, actual)
+		return
+	}
+
+	testEnv(t, *obj.Env, *expected.Env)
+	testFuncComponent(t, obj.FuncWrapper, expected.FuncWrapper)
+}
+
+func testFuncComponent(
+	t *testing.T,
+	actual object.FuncWrapper,
+	expected object.FuncWrapper,
+) {
+	if actual.String() != expected.String() {
+		t.Errorf("String() must be `%s`. got=`%s`",
+			expected.String(), actual.String())
+	}
+
+	testValue(t, actual.Args(), expected.Args())
+	testValue(t, actual.Kwargs(), expected.Kwargs())
+}
+
+func testEnv(t *testing.T, actual object.Env, expected object.Env) {
+	if actual.Outer() != expected.Outer() {
+		t.Fatalf("Outer is wrong. expected=%v(%p), got=%v(%p)",
+			expected.Outer(), expected.Outer(),
+			actual.Outer(), actual.Outer())
+	}
+
+	// compare vars in env
+	testValue(t, actual.Items(), expected.Items())
+}
+
 func testValue(t *testing.T, actual object.PanObject, expected object.PanObject) {
 	// switch to test_XX functions by expected type
 	switch expected := expected.(type) {
@@ -861,8 +1006,12 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 }
 
 func testEval(t *testing.T, input string) object.PanObject {
+	return testEvalInEnv(t, input, object.NewEnv())
+}
+
+func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject {
 	node := testParse(t, input)
-	panObject := Eval(node, object.NewEnv())
+	panObject := Eval(node, env)
 	if panObject == nil {
 		t.Fatalf("Eval() returned nothing (input=`%s`)", input)
 	}

@@ -30,6 +30,8 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 		return evalObj(node, env)
 	case *ast.MapLiteral:
 		return evalMap(node, env)
+	case *ast.FuncLiteral:
+		return evalFunc(node, env)
 	case *ast.Ident:
 		return evalIdent(node, env)
 	}
