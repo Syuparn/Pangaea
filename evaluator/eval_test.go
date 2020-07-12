@@ -712,6 +712,106 @@ func toPanFunc(
 	}
 }
 
+func TestEvalIterLiteral(t *testing.T) {
+	outerEnv := object.NewEnv()
+
+	tests := []struct {
+		input    string
+		expected *object.PanFunc
+	}{
+		{
+			`<{||}>`,
+			toPanIter(
+				[]string{},
+				[]object.Pair{},
+				`|| `,
+				outerEnv,
+			),
+		},
+		{
+			`<{|a|}>`,
+			toPanIter(
+				[]string{"a"},
+				[]object.Pair{},
+				`|a| `,
+				outerEnv,
+			),
+		},
+		{
+			`<{|a, b|}>`,
+			toPanIter(
+				[]string{"a", "b"},
+				[]object.Pair{},
+				`|a, b| `,
+				outerEnv,
+			),
+		},
+		{
+			`<{|a, b, c:10|}>`,
+			toPanIter(
+				[]string{"a", "b"},
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "c"},
+						Value: &object.PanInt{Value: 10},
+					},
+				},
+				`|a, b, c: 10| `,
+				outerEnv,
+			),
+		},
+		{
+			`<{|a, b, c: 10, d:'e|}>`,
+			toPanIter(
+				[]string{"a", "b"},
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "c"},
+						Value: &object.PanInt{Value: 10},
+					},
+					object.Pair{
+						Key:   &object.PanStr{Value: "d"},
+						Value: &object.PanStr{Value: "e"},
+					},
+				},
+				`|a, b, c: 10, d: 'e| `,
+				outerEnv,
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEvalInEnv(t, tt.input, outerEnv)
+		testPanFunc(t, actual, tt.expected)
+	}
+}
+
+func toPanIter(
+	args []string,
+	kwargs []object.Pair,
+	str string,
+	env *object.Env,
+) *object.PanFunc {
+	argArr := []object.PanObject{}
+	for _, arg := range args {
+		argArr = append(argArr, &object.PanStr{Value: arg})
+	}
+
+	funcWrapper := &FuncWrapperImpl{
+		codeStr: str,
+		args:    &object.PanArr{Elems: argArr},
+		kwargs:  toPanObj(kwargs),
+		// empty stmt (body is not tested)
+		body: &[]ast.Stmt{},
+	}
+
+	return &object.PanFunc{
+		FuncWrapper: funcWrapper,
+		FuncType:    object.ITER_FUNC,
+		Env:         object.NewEnclosedEnv(env),
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string
@@ -1055,6 +1155,11 @@ func testPanFunc(t *testing.T, actual object.PanObject, expected *object.PanFunc
 	if !ok {
 		t.Fatalf("actual must be *object.PanFunc. got=%T (%v)", actual, actual)
 		return
+	}
+
+	if obj.FuncType != expected.FuncType {
+		t.Errorf("FuncType must be %d. got=%d",
+			expected.FuncType, obj.FuncType)
 	}
 
 	testEnv(t, *obj.Env, *expected.Env)
