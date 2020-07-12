@@ -9,11 +9,21 @@ func evalArr(node *ast.ArrLiteral, env *object.Env) object.PanObject {
 	elems := []object.PanObject{}
 	for _, elemNode := range node.Elems {
 		// ok if elem is expansion like `[*a]`
-		unpackedElems, ok := unpackArrExpansion(elemNode, env)
+		unpackedElems, err, ok := unpackArrExpansion(elemNode, env)
 		if ok {
+			if err != nil {
+				return appendStackTrace(err, elemNode.Source())
+			}
+
 			elems = append(elems, unpackedElems...)
 		} else {
-			elems = append(elems, Eval(elemNode, env))
+			elem := Eval(elemNode, env)
+
+			if err, ok := elem.(*object.PanErr); ok {
+				return appendStackTrace(err, elemNode.Source())
+			}
+
+			elems = append(elems, elem)
 		}
 	}
 	return &object.PanArr{Elems: elems}

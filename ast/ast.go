@@ -826,5 +826,6 @@ type Position struct {
 }
 
 func (p *Position) String() string {
-	return fmt.Sprintf("line: %d, col: %d", p.Line, p.Column)
+	// NOTE: add 1 otherwise first element is shown as 0
+	return fmt.Sprintf("line: %d, col: %d", p.Line+1, p.Column+1)
 }

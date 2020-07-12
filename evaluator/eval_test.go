@@ -394,6 +394,27 @@ func TestEvalObjLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalObjLiteralInvalidKey(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanErr
+	}{
+		{
+			`{1: 2}`,
+			object.NewTypeErr("cannot use `1` as Obj key."),
+		},
+		{
+			`{a: 1, 2: 3}`,
+			object.NewTypeErr("cannot use `2` as Obj key."),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanErr(t, actual, tt.expected)
+	}
+}
+
 func toPanObj(pairs []object.Pair) *object.PanObj {
 	pairMap := map[object.SymHash]object.Pair{}
 
@@ -609,6 +630,35 @@ func toPanMap(pairs []object.Pair, nonHashablePairs []object.Pair) *object.PanMa
 	return &object.PanMap{
 		Pairs:            &pairMap,
 		NonHashablePairs: &nonHashablePairs,
+	}
+}
+
+func TestEvalUnpackingErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanErr
+	}{
+		{
+			`*[1]`,
+			object.NewSyntaxErr("cannot use `*` unpacking outside of Arr."),
+		},
+		{
+			`[*1]`,
+			object.NewTypeErr("cannot use `*` unpacking for `1`"),
+		},
+		{
+			`{a: 1, **[2]}`,
+			object.NewTypeErr("cannot use `**` unpacking for `[2]`"),
+		},
+		{
+			`%{'a: 1, **[3]}`,
+			object.NewTypeErr("cannot use `**` unpacking for `[3]`"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanErr(t, actual, tt.expected)
 	}
 }
 
@@ -919,6 +969,64 @@ func TestEvalAssign(t *testing.T) {
 	}
 }
 
+func TestNameErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanErr
+	}{
+		{
+			`a`,
+			object.NewNameErr("name `a` is not defined."),
+		},
+		// multiple lines
+		{
+			`1; two; 3`,
+			object.NewNameErr("name `two` is not defined."),
+		},
+		// in arr
+		{
+			`[A]`,
+			object.NewNameErr("name `A` is not defined."),
+		},
+		// in arr expansion
+		{
+			`[*ae]`,
+			object.NewNameErr("name `ae` is not defined."),
+		},
+		// in obj
+		{
+			`{key: o}`,
+			object.NewNameErr("name `o` is not defined."),
+		},
+		// in obj expansion
+		{
+			`{**oe}`,
+			object.NewNameErr("name `oe` is not defined."),
+		},
+		// in map key
+		{
+			`%{key: 1}`,
+			object.NewNameErr("name `key` is not defined."),
+		},
+		// in map val
+		{
+			`%{1: val}`,
+			object.NewNameErr("name `val` is not defined."),
+		},
+		// in map expansion
+		{
+			`%{**me}`,
+			object.NewNameErr("name `me` is not defined."),
+		},
+		// TODO: err in func/iter call
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanErr(t, actual, tt.expected)
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
@@ -1191,6 +1299,38 @@ func testEnv(t *testing.T, actual object.Env, expected object.Env) {
 	testValue(t, actual.Items(), expected.Items())
 }
 
+func testPanErr(t *testing.T, actual object.PanObject, expected *object.PanErr) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
+	if actual.Type() != object.ERR_TYPE {
+		t.Fatalf("Type must be ERR_TYPE. got=%s", actual.Type())
+		return
+	}
+
+	e, ok := actual.(*object.PanErr)
+	if !ok {
+		t.Fatalf("actual must be *object.PanErr. got=%T (%v)", actual, actual)
+		return
+	}
+
+	if e.ErrType != expected.ErrType {
+		t.Errorf("ErrType must be %s. got=%s", expected.ErrType, e.ErrType)
+	}
+
+	if e.Inspect() != expected.Inspect() {
+		t.Errorf("wrong msg. expected=`\n%s\n`. got=`\n%s\n`",
+			expected.Inspect(), e.Inspect())
+	}
+
+	if e.Proto() != expected.Proto() {
+		t.Errorf("proto must be %v(%s). got=%v(%s)",
+			expected.Proto(), expected.Proto().Inspect(),
+			e.Proto(), e.Proto().Inspect())
+	}
+}
+
 func testValue(t *testing.T, actual object.PanObject, expected object.PanObject) {
 	// switch to test_XX functions by expected type
 	switch expected := expected.(type) {
@@ -1212,6 +1352,8 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 		testPanObj(t, actual, expected)
 	case *object.PanMap:
 		testPanMap(t, actual, expected)
+	case *object.PanErr:
+		testPanErr(t, actual, expected)
 	default:
 		t.Fatalf("type of expected %T cannot be handled by testValue()", expected)
 	}

@@ -24,3 +24,15 @@ var BuiltInZeroInt = &PanInt{0}
 var BuiltInTrue = &PanBool{true}
 var BuiltInFalse = &PanBool{false}
 var BuiltInNil = &PanNil{}
+
+// error hierarchy
+var BuiltInErrObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
+
+var BuiltInAssertionErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
+var BuiltInNameErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
+var BuiltInNoPropErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
+var BuiltInNotImplementedErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
+var BuiltInSyntaxErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
+var BuiltInTypeErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
+var BuiltInValueErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
+var BuiltInZeroDivisionErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
