@@ -11,6 +11,10 @@ func evalProgram(p *ast.Program, env *object.Env) object.PanObject {
 
 	for _, stmt := range p.Stmts {
 		val = Eval(stmt, env)
+
+		if err, ok := val.(*object.PanErr); ok {
+			return appendStackTrace(err, stmt.Source())
+		}
 	}
 
 	return val

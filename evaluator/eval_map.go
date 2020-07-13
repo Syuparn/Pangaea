@@ -3,6 +3,7 @@ package evaluator
 import (
 	"../ast"
 	"../object"
+	"fmt"
 )
 
 func evalMap(node *ast.MapLiteral, env *object.Env) object.PanObject {
@@ -11,7 +12,11 @@ func evalMap(node *ast.MapLiteral, env *object.Env) object.PanObject {
 	nonHashablePairs := []object.Pair{}
 
 	for _, pairNode := range node.Pairs {
-		pair := evalMapPair(pairNode, env)
+		pair, err := evalMapPair(pairNode, env)
+
+		if err != nil {
+			return appendStackTrace(err, node.Source())
+		}
 
 		if s, ok := pair.Key.(object.PanScalar); ok {
 			// NOTE: ignore duplicated keys (`%{'a: 1, 'a: 2}` is same as `%{'a: 1}`)
@@ -24,7 +29,11 @@ func evalMap(node *ast.MapLiteral, env *object.Env) object.PanObject {
 	}
 
 	// unpack objExpansion elements (like `**a`)
-	appendEmbeddedElems(node, env, pairMap, nonHashablePairs)
+	panErr := appendEmbeddedElems(node, env, pairMap, nonHashablePairs)
+
+	if panErr != nil {
+		return appendStackTrace(panErr, node.Source())
+	}
 
 	return &object.PanMap{
 		Pairs:            &pairMap,
@@ -37,9 +46,13 @@ func appendEmbeddedElems(
 	env *object.Env,
 	pairMap map[object.HashKey]object.Pair,
 	nonHashablePairs []object.Pair,
-) {
+) *object.PanErr {
 	for _, expElem := range node.EmbeddedExprs {
 		evaluated := Eval(expElem, env)
+
+		if err, ok := evaluated.(*object.PanErr); ok {
+			return appendStackTrace(err, expElem.Source())
+		}
 
 		switch e := evaluated.(type) {
 		case *object.PanMap:
@@ -57,8 +70,12 @@ func appendEmbeddedElems(
 			}
 
 		default:
-			// TODO: error handling if evaluated is not *PanObj or *PanMap
-			return
+			err := object.NewTypeErr(
+				fmt.Sprintf("cannot use `**` unpacking for `%s`",
+					evaluated.Inspect()))
+			return appendStackTrace(err, expElem.Source())
 		}
 	}
+
+	return nil
 }

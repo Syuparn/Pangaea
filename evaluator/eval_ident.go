@@ -3,6 +3,7 @@ package evaluator
 import (
 	"../ast"
 	"../object"
+	"fmt"
 )
 
 func evalIdent(ident *ast.Ident, env *object.Env) object.PanObject {
@@ -19,8 +20,9 @@ func evalIdent(ident *ast.Ident, env *object.Env) object.PanObject {
 	val, ok := env.Get(object.GetSymHash(ident.Value))
 
 	if !ok {
-		// TODO: error handling if var was not found
-		return nil
+		err := object.NewNameErr(
+			fmt.Sprintf("name `%s` is not defined.", ident.String()))
+		return appendStackTrace(err, ident.Source())
 	}
 
 	return val
