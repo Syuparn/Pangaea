@@ -969,6 +969,27 @@ func TestEvalAssign(t *testing.T) {
 	}
 }
 
+func TestEvalPropChain(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{a: 5, b: 10}.a`,
+			&object.PanInt{Value: 5},
+		},
+		{
+			`{a: 5, b: 10}.b`,
+			&object.PanInt{Value: 10},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestNameErr(t *testing.T) {
 	tests := []struct {
 		input    string
