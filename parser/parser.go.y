@@ -2100,8 +2100,6 @@ func tokenTypes() []simplexer.TokenType{
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
 		t(HEAD_STR_PIECE, `"[^\"\n\r#]*#\{`),
-		t(MID_STR_PIECE, `\}[^\"\n\r#]*#\{`),
-		t(TAIL_STR_PIECE, `\}[^\"\n\r#]*"`),
 		t(DOUBLEQUOTE_STR, `"[^\"\n\r]*"`),
 		// NOTE: lexer deals with multiline chain
 		// (if parser does, shift/reduce conflict occurs)
@@ -2169,6 +2167,18 @@ func tokenTypes() []simplexer.TokenType{
 	}
 }
 
+func embeddedStrTokenTypes() []simplexer.TokenType {
+	t := simplexer.NewRegexpTokenType
+
+	// only used when parsing embeddedStr
+	// (otherwise, func call like `{|x| x}("a")` is wrongly lexed to
+	// TAIL_STR_PIECE)
+	return []simplexer.TokenType{
+		t(MID_STR_PIECE, `\}[^\"\n\r#]*#\{`),
+		t(TAIL_STR_PIECE, `\}[^\"\n\r#]*"`),
+	}
+}
+
 func NewLexer(reader io.Reader) *Lexer {
 	l := simplexer.NewLexer(reader)
 	l.TokenTypes = tokenTypes()
@@ -2190,6 +2200,16 @@ func (l *Lexer) Lex(lval *yySymType) int {
 
 	if token == nil {
 		return -1
+	}
+
+	if token.Type.GetID() == HEAD_STR_PIECE {
+		// start embeddedStr lexing mode
+		l.prependEmbeddedStrTokenTypes()
+	}
+
+	if token.Type.GetID() == TAIL_STR_PIECE {
+		// finish embeddedStr lexing mode
+		l.removeEmbeddedStrTokenTypes()
 	}
 
 	lval.token = token
@@ -2241,4 +2261,14 @@ func (l *Lexer) convertSourceInfo(token *simplexer.Token) *ast.Source {
 		Pos: pos,
 		TokenLiteral: token.Literal,
 	}
+}
+
+func (l *Lexer) prependEmbeddedStrTokenTypes() {
+	// additional tokentypes must prepend (not append) to other ones,
+	// otherwise shorter token types (like `}` or `#`) are detected.
+	l.lexer.TokenTypes = append(embeddedStrTokenTypes(), l.lexer.TokenTypes...)
+}
+
+func (l *Lexer) removeEmbeddedStrTokenTypes() {
+	l.lexer.TokenTypes = tokenTypes()
 }

@@ -22,5 +22,7 @@ func evalKwargs(kwargs map[*ast.Ident]ast.Expr, env *object.Env) *object.PanObj 
 	}
 
 	obj, _ := (object.PanObjInstancePtr(&pairMap)).(*object.PanObj)
+	// TODO: error handling
+
 	return obj
 }

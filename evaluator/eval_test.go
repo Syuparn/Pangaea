@@ -10,9 +10,17 @@ import (
 	"../object"
 	"../parser"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	// setup for name resolution
+	InjectBuiltInProps()
+	ret := m.Run()
+	os.Exit(ret)
+}
 
 func TestEvalIntLiteral(t *testing.T) {
 	tests := []struct {
@@ -759,6 +767,59 @@ func toPanFunc(
 		FuncWrapper: funcWrapper,
 		FuncType:    object.FUNC_FUNC,
 		Env:         object.NewEnclosedEnv(env),
+	}
+}
+
+func TestEvalFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{10}()`,
+			&object.PanInt{Value: 10},
+		},
+		{
+			`{|x| x}(5)`,
+			&object.PanInt{Value: 5},
+		},
+		{
+			`{|x, y| [x, y]}("x", "y")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "x"},
+				&object.PanStr{Value: "y"},
+			}},
+		},
+		{
+			`{|foo, bar: "bar", baz| [foo, bar, baz]}("FOO", "BAZ")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "FOO"},
+				&object.PanStr{Value: "bar"},
+				&object.PanStr{Value: "BAZ"},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalEmptyFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{||}()`,
+			object.BuiltInNil,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
 	}
 }
 
