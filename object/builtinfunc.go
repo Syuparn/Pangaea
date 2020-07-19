@@ -1,6 +1,6 @@
 package object
 
-type BuiltInFunc func(env *Env, args ...PanObject) PanObject
+type BuiltInFunc func(env *Env, kwargs *PanObj, args ...PanObject) PanObject
 
 const BUILTIN_TYPE = "BUILTIN_TYPE"
 

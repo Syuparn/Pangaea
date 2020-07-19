@@ -10,9 +10,17 @@ import (
 	"../object"
 	"../parser"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	// setup for name resolution
+	InjectBuiltInProps()
+	ret := m.Run()
+	os.Exit(ret)
+}
 
 func TestEvalIntLiteral(t *testing.T) {
 	tests := []struct {
@@ -762,6 +770,118 @@ func toPanFunc(
 	}
 }
 
+func TestEvalFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{10}()`,
+			&object.PanInt{Value: 10},
+		},
+		{
+			`{|x| x}(5)`,
+			&object.PanInt{Value: 5},
+		},
+		{
+			`{|x, y| [x, y]}("x", "y")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "x"},
+				&object.PanStr{Value: "y"},
+			}},
+		},
+		{
+			`{|foo, bar: "bar", baz| [foo, bar, baz]}("FOO", "BAZ")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "FOO"},
+				&object.PanStr{Value: "bar"},
+				&object.PanStr{Value: "BAZ"},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalEmptyFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{||}()`,
+			object.BuiltInNil,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalMultiLineFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|a, b| a; b}(1, 2)`,
+			&object.PanInt{Value: 2},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalBuiltInFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`f := {||}['at]; f({a: 10}, ['a])`,
+			&object.PanInt{Value: 10},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalBuiltInFuncInvalidArgErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanErr
+	}{
+		{
+			`{call: {|x| x}['call]}.call(1)`,
+			object.NewTypeErr("`{\"call\": {|| [builtin]}}` is not callable."),
+		},
+		{
+			`f := {||}['at]; f()`,
+			object.NewTypeErr("Obj#at requires at least 2 args"),
+		},
+		{
+			`f := {||}['at]; f(1)`,
+			object.NewTypeErr("Obj#at requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanErr(t, actual, tt.expected)
+	}
+}
+
 func TestEvalIterLiteral(t *testing.T) {
 	outerEnv := object.NewEnv()
 
@@ -969,6 +1089,81 @@ func TestEvalAssign(t *testing.T) {
 	}
 }
 
+func TestEvalPropChain(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{a: 5, b: 10}.a`,
+			&object.PanInt{Value: 5},
+		},
+		{
+			`{a: 5, b: 10}.b`,
+			&object.PanInt{Value: 10},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalObjAt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{a: 5, b: 10}['a]`,
+			&object.PanInt{Value: 5},
+		},
+		// if key is insufficient, return nil
+		{
+			`{a: 5, b: 10}[]`,
+			object.BuiltInNil,
+		},
+		// if key is not found, return nil
+		{
+			`{a: 5, b: 10}['c]`,
+			object.BuiltInNil,
+		},
+		// trace prototype chain
+		{
+			`{a: 5, b: 10}['at]`,
+			(*object.BuiltInObjObj.Pairs)[object.GetSymHash("at")].Value,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalNoPropErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanErr
+	}{
+		{
+			`{a: 1}.b`,
+			object.NewNoPropErr("property `b` is not defined."),
+		},
+		// case sensitive
+		{
+			`{A: 1}.a`,
+			object.NewNoPropErr("property `a` is not defined."),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanErr(t, actual, tt.expected)
+	}
+}
+
 func TestNameErr(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1018,7 +1213,22 @@ func TestNameErr(t *testing.T) {
 			`%{**me}`,
 			object.NewNameErr("name `me` is not defined."),
 		},
-		// TODO: err in func/iter call
+		// in func call
+		{
+			`{|a| fc}(1)`,
+			object.NewNameErr("name `fc` is not defined."),
+		},
+		// in arg of func call
+		{
+			`{|a| 10}(afc)`,
+			object.NewNameErr("name `afc` is not defined."),
+		},
+		// in kwarg of func call
+		{
+			`{|a: 1| 10}(a: kwfc)`,
+			object.NewNameErr("name `kwfc` is not defined."),
+		},
+		// TODO: err in iter call
 	}
 
 	for _, tt := range tests {
@@ -1288,6 +1498,26 @@ func testFuncComponent(
 	testValue(t, actual.Kwargs(), expected.Kwargs())
 }
 
+func testPanBulitIn(t *testing.T, actual object.PanObject, expected *object.PanBuiltIn) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
+	if actual.Type() != object.BUILTIN_TYPE {
+		t.Fatalf("Type must be BUILTIN_TYPE(`%s`). got=%s(`%s`)",
+			expected.Inspect(), actual.Type(), actual.Inspect())
+		return
+	}
+
+	f := actual.(*object.PanBuiltIn)
+	actualPtr := fmt.Sprintf("%p", f.Fn)
+	expectedPtr := fmt.Sprintf("%p", expected.Fn)
+
+	if actualPtr != expectedPtr {
+		t.Errorf("Fn must be %s. got=%s", expectedPtr, actualPtr)
+	}
+}
+
 func testEnv(t *testing.T, actual object.Env, expected object.Env) {
 	if actual.Outer() != expected.Outer() {
 		t.Fatalf("Outer is wrong. expected=%v(%p), got=%v(%p)",
@@ -1305,7 +1535,8 @@ func testPanErr(t *testing.T, actual object.PanObject, expected *object.PanErr) 
 	}
 
 	if actual.Type() != object.ERR_TYPE {
-		t.Fatalf("Type must be ERR_TYPE. got=%s", actual.Type())
+		t.Fatalf("Type must be ERR_TYPE(`%s`). got=%s(`%s`)",
+			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
 
@@ -1354,6 +1585,10 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 		testPanMap(t, actual, expected)
 	case *object.PanErr:
 		testPanErr(t, actual, expected)
+	case *object.PanFunc:
+		testPanFunc(t, actual, expected)
+	case *object.PanBuiltIn:
+		testPanBulitIn(t, actual, expected)
 	default:
 		t.Fatalf("type of expected %T cannot be handled by testValue()", expected)
 	}
