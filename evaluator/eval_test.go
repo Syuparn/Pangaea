@@ -823,6 +823,23 @@ func TestEvalEmptyFuncCall(t *testing.T) {
 	}
 }
 
+func TestEvalMultiLineFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|a, b| a; b}(1, 2)`,
+			&object.PanInt{Value: 2},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalIterLiteral(t *testing.T) {
 	outerEnv := object.NewEnv()
 
@@ -1051,6 +1068,28 @@ func TestEvalPropChain(t *testing.T) {
 	}
 }
 
+func TestEvalNoPropErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanErr
+	}{
+		{
+			`{a: 1}.b`,
+			object.NewNoPropErr("property `b` is not defined."),
+		},
+		// case sensitive
+		{
+			`{A: 1}.a`,
+			object.NewNoPropErr("property `a` is not defined."),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanErr(t, actual, tt.expected)
+	}
+}
+
 func TestNameErr(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1100,7 +1139,22 @@ func TestNameErr(t *testing.T) {
 			`%{**me}`,
 			object.NewNameErr("name `me` is not defined."),
 		},
-		// TODO: err in func/iter call
+		// in func call
+		{
+			`{|a| fc}(1)`,
+			object.NewNameErr("name `fc` is not defined."),
+		},
+		// in arg of func call
+		{
+			`{|a| 10}(afc)`,
+			object.NewNameErr("name `afc` is not defined."),
+		},
+		// in kwarg of func call
+		{
+			`{|a: 1| 10}(a: kwfc)`,
+			object.NewNameErr("name `kwfc` is not defined."),
+		},
+		// TODO: err in iter call
 	}
 
 	for _, tt := range tests {

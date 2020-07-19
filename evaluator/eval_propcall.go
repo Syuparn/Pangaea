@@ -3,6 +3,7 @@ package evaluator
 import (
 	"../ast"
 	"../object"
+	"fmt"
 )
 
 func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
@@ -17,8 +18,9 @@ func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
 	prop, ok := callProp(recv, propHash)
 
 	if !ok {
-		// TODO: error handling
-		panic("prop not found: " + propStr)
+		err := object.NewNoPropErr(
+			fmt.Sprintf("property `%s` is not defined.", propStr))
+		return appendStackTrace(err, node.Source())
 	}
 
 	switch prop := prop.(type) {
@@ -43,7 +45,11 @@ func evalBuiltInFuncMethodCall(
 		return appendStackTrace(err, node.Source())
 	}
 
-	kwargs := evalKwargs(node.Kwargs, env)
+	kwargs, err := evalKwargs(node.Kwargs, env)
+
+	if err != nil {
+		return appendStackTrace(err, node.Source())
+	}
 
 	// prepend recv to args
 	args = append([]object.PanObject{recv}, args...)
@@ -63,7 +69,12 @@ func evalFuncMethodCall(
 		return appendStackTrace(err, node.Source())
 	}
 
-	kwargs := evalKwargs(node.Kwargs, env)
+	kwargs, err := evalKwargs(node.Kwargs, env)
+
+	if err != nil {
+		return appendStackTrace(err, node.Source())
+	}
+
 	// prepend recv to args
 	args = append([]object.PanObject{recv}, args...)
 

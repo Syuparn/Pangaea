@@ -5,11 +5,18 @@ import (
 	"../object"
 )
 
-func evalKwargs(kwargs map[*ast.Ident]ast.Expr, env *object.Env) *object.PanObj {
+func evalKwargs(
+	kwargs map[*ast.Ident]ast.Expr,
+	env *object.Env,
+) (*object.PanObj, *object.PanErr) {
 	pairMap := map[object.SymHash]object.Pair{}
 
 	for k, v := range kwargs {
 		val := Eval(v, env)
+
+		if err, ok := val.(*object.PanErr); ok {
+			return nil, err
+		}
 
 		paramName := k.String()
 		param := &object.PanStr{Value: paramName}
@@ -22,7 +29,6 @@ func evalKwargs(kwargs map[*ast.Ident]ast.Expr, env *object.Env) *object.PanObj 
 	}
 
 	obj, _ := (object.PanObjInstancePtr(&pairMap)).(*object.PanObj)
-	// TODO: error handling
 
-	return obj
+	return obj, nil
 }

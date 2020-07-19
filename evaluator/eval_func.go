@@ -20,13 +20,18 @@ func evalCallable(
 		if ident, ok := argNode.(*ast.Ident); ok {
 			arg = &object.PanStr{Value: ident.String()}
 		} else {
+			// TODO: error handling for pattern match exprs
 			arg = Eval(argNode, env)
 		}
 
 		args = append(args, arg)
 	}
 
-	kwargs := evalKwargs(component.Kwargs, env)
+	kwargs, err := evalKwargs(component.Kwargs, env)
+
+	if err != nil {
+		return err
+	}
 
 	wrapper := &FuncWrapperImpl{
 		codeStr: component.String(),
