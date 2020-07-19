@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"../object"
+	"fmt"
 )
 
 // used for Func#call
@@ -10,16 +11,33 @@ func evalFuncCall(
 	kwargs *object.PanObj,
 	args ...object.PanObject,
 ) object.PanObject {
-	self := args[0]
-	f, ok := self.(*object.PanFunc)
-	if !ok {
-		// TODO: error handling
-		panic("1st arg is not PanFunc")
+	if len(args) < 1 {
+		return object.NewTypeErr("Func#call requires at least 1 arg")
 	}
 
+	self := args[0]
 	// unshift args to ignore func itself
 	args = args[1:]
 
+	// TODO: handle PanBuiltIn
+	switch f := self.(type) {
+	case *object.PanFunc:
+		return evalPanFuncCall(f, env, kwargs, args...)
+	case *object.PanBuiltIn:
+		return f.Fn(env, kwargs, args...)
+	default:
+		err := object.NewTypeErr(
+			fmt.Sprintf("`%s` is not callable.", self.Inspect()))
+		return err
+	}
+}
+
+func evalPanFuncCall(
+	f *object.PanFunc,
+	env *object.Env,
+	kwargs *object.PanObj,
+	args ...object.PanObject,
+) object.PanObject {
 	assignArgsToEnv(f.Env, f.Args().Elems, f.Kwargs(), args, kwargs)
 	retVal := evalStmts(*f.Body(), f.Env)
 

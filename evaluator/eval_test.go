@@ -840,6 +840,48 @@ func TestEvalMultiLineFuncCall(t *testing.T) {
 	}
 }
 
+func TestEvalBuiltInFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`f := {||}['at]; f({a: 10}, ['a])`,
+			&object.PanInt{Value: 10},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalBuiltInFuncInvalidArgErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanErr
+	}{
+		{
+			`{call: {|x| x}['call]}.call(1)`,
+			object.NewTypeErr("`{\"call\": {|| [builtin]}}` is not callable."),
+		},
+		{
+			`f := {||}['at]; f()`,
+			object.NewTypeErr("Obj#at requires at least 2 args"),
+		},
+		{
+			`f := {||}['at]; f(1)`,
+			object.NewTypeErr("Obj#at requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanErr(t, actual, tt.expected)
+	}
+}
+
 func TestEvalIterLiteral(t *testing.T) {
 	outerEnv := object.NewEnv()
 
@@ -1059,6 +1101,38 @@ func TestEvalPropChain(t *testing.T) {
 		{
 			`{a: 5, b: 10}.b`,
 			&object.PanInt{Value: 10},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalObjAt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{a: 5, b: 10}['a]`,
+			&object.PanInt{Value: 5},
+		},
+		// if key is insufficient, return nil
+		{
+			`{a: 5, b: 10}[]`,
+			object.BuiltInNil,
+		},
+		// if key is not found, return nil
+		{
+			`{a: 5, b: 10}['c]`,
+			object.BuiltInNil,
+		},
+		// trace prototype chain
+		{
+			`{a: 5, b: 10}['at]`,
+			(*object.BuiltInObjObj.Pairs)[object.GetSymHash("at")].Value,
 		},
 	}
 
@@ -1424,6 +1498,26 @@ func testFuncComponent(
 	testValue(t, actual.Kwargs(), expected.Kwargs())
 }
 
+func testPanBulitIn(t *testing.T, actual object.PanObject, expected *object.PanBuiltIn) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
+	if actual.Type() != object.BUILTIN_TYPE {
+		t.Fatalf("Type must be BUILTIN_TYPE(`%s`). got=%s(`%s`)",
+			expected.Inspect(), actual.Type(), actual.Inspect())
+		return
+	}
+
+	f := actual.(*object.PanBuiltIn)
+	actualPtr := fmt.Sprintf("%p", f.Fn)
+	expectedPtr := fmt.Sprintf("%p", expected.Fn)
+
+	if actualPtr != expectedPtr {
+		t.Errorf("Fn must be %s. got=%s", expectedPtr, actualPtr)
+	}
+}
+
 func testEnv(t *testing.T, actual object.Env, expected object.Env) {
 	if actual.Outer() != expected.Outer() {
 		t.Fatalf("Outer is wrong. expected=%v(%p), got=%v(%p)",
@@ -1441,7 +1535,8 @@ func testPanErr(t *testing.T, actual object.PanObject, expected *object.PanErr) 
 	}
 
 	if actual.Type() != object.ERR_TYPE {
-		t.Fatalf("Type must be ERR_TYPE. got=%s", actual.Type())
+		t.Fatalf("Type must be ERR_TYPE(`%s`). got=%s(`%s`)",
+			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
 
@@ -1490,6 +1585,10 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 		testPanMap(t, actual, expected)
 	case *object.PanErr:
 		testPanErr(t, actual, expected)
+	case *object.PanFunc:
+		testPanFunc(t, actual, expected)
+	case *object.PanBuiltIn:
+		testPanBulitIn(t, actual, expected)
 	default:
 		t.Fatalf("type of expected %T cannot be handled by testValue()", expected)
 	}
