@@ -6,6 +6,8 @@
 package repl
 
 import (
+	"../evaluator"
+	"../object"
 	"../parser"
 	"bufio"
 	"fmt"
@@ -16,6 +18,34 @@ import (
 const PROMPT = "> "
 
 func Start(in io.Reader, out io.Writer) {
+	scanner := bufio.NewScanner(in)
+
+	for {
+		fmt.Printf(PROMPT)
+		ok := scanner.Scan()
+		if !ok {
+			return
+		}
+		// temporally convert to string to parse each line
+		line := scanner.Text()
+
+		program, err := parser.Parse(strings.NewReader(line))
+
+		if err != nil {
+			io.WriteString(out, err.Error())
+			continue
+		}
+
+		// necessary to setup built-in object props
+		evaluator.InjectBuiltInProps()
+
+		evaluated := evaluator.Eval(program, object.NewEnv())
+
+		io.WriteString(out, evaluated.Inspect()+"\n")
+	}
+}
+
+func StartParsing(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
 	for {
