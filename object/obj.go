@@ -17,6 +17,11 @@ func PanObjInstancePtr(pairs *map[SymHash]Pair) PanObject {
 	return &i
 }
 
+func EmptyPanObjPtr() *PanObj {
+	i := PanObjInstance(&map[SymHash]Pair{})
+	return &i
+}
+
 type PanObj struct {
 	Pairs *map[SymHash]Pair
 	proto PanObject

@@ -540,12 +540,13 @@ func TestEvalBuiltInCallProp(t *testing.T) {
 			`{}.callProp({a: {|| 2}}, 'a)`,
 			&object.PanInt{Value: 2},
 		},
+		// NOTE: first arg (`self`) is reciever itself! (`{a: m{|x| x}}`)
 		{
-			`{}.callProp({a: {|x| x}}, 'a, 3)`,
+			`{}.callProp({a: m{|x| x}}, 'a, 3)`,
 			&object.PanInt{Value: 3},
 		},
 		{
-			`{}.callProp({a: {|x, y, z: 1| [x, y, z]}}, 'a, 4, 5, z: 6)`,
+			`{}.callProp({a: m{|x, y, z: 1| [x, y, z]}}, 'a, 4, 5, z: 6)`,
 			&object.PanArr{Elems: []object.PanObject{
 				&object.PanInt{Value: 4},
 				&object.PanInt{Value: 5},
@@ -1322,6 +1323,51 @@ func TestEvalNoPropErr(t *testing.T) {
 	}
 }
 
+func TestEvalMapAt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`%{'a: 5, 'b: 10}['a]`,
+			&object.PanInt{Value: 5},
+		},
+		// if key is insufficient, return nil
+		{
+			`%{'a: 5, 'b: 10}[]`,
+			object.BuiltInNil,
+		},
+		// if key is not found, return nil
+		{
+			`%{'a: 5, 'b: 10}['c]`,
+			object.BuiltInNil,
+		},
+		// trace prototype chain
+		{
+			`%{'a: 5, 'b: 10}['at]`,
+			(*object.BuiltInMapObj.Pairs)[object.GetSymHash("at")].Value,
+		},
+		// index other than str can also be used
+		{
+			`%{1: "one"}[1]`,
+			&object.PanStr{Value: "one"},
+		},
+		{
+			`%{nil: "nil"}[nil]`,
+			&object.PanStr{Value: "nil"},
+		},
+		{
+			`%{[10]: "tenArr"}[[10]]`,
+			&object.PanStr{Value: "tenArr"},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestNameErr(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1401,7 +1447,8 @@ func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) 
 	}
 
 	if actual.Type() != object.INT_TYPE {
-		t.Fatalf("Type must be INT_TYPE. got=%s", actual.Type())
+		t.Fatalf("Type must be INT_TYPE(%s). got=%s(%s)",
+			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
 
@@ -1443,7 +1490,8 @@ func testPanStr(t *testing.T, actual object.PanObject, expected *object.PanStr) 
 	}
 
 	if actual.Type() != object.STR_TYPE {
-		t.Fatalf("Type must be STR_TYPE. got=%s", actual.Type())
+		t.Fatalf("Type must be STR_TYPE(%s). got=%s(%s)",
+			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
 
