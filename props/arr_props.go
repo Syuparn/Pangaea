@@ -4,9 +4,9 @@ import (
 	"../object"
 )
 
-func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
+func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
-		"at": propContainer["Obj_at"],
+		"at": propContainer["Arr_at"],
 	}
 }

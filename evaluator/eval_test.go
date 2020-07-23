@@ -292,6 +292,51 @@ func TestEvalArrLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalArrAt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[5, 10][0]`,
+			&object.PanInt{Value: 5},
+		},
+		// if key is insufficient, return nil
+		{
+			`[5, 10][]`,
+			object.BuiltInNil,
+		},
+		// if index is out of range, return nil
+		{
+			`[1, 2][100]`,
+			object.BuiltInNil,
+		},
+		// if non-int value is passed, call parent's at method
+		{
+			`[1]['at]`,
+			(*object.BuiltInArrObj.Pairs)[object.GetSymHash("at")].Value,
+		},
+		// minus index
+		{
+			`[1, 2, 3][-1]`,
+			&object.PanInt{Value: 3},
+		},
+		{
+			`[1, 2, 3][-3]`,
+			&object.PanInt{Value: 1},
+		},
+		{
+			`[1, 2, 3][-4]`,
+			object.BuiltInNil,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalObjLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
