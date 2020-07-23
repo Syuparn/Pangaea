@@ -777,6 +777,22 @@ func TestEvalMapLiteral(t *testing.T) {
 				},
 			),
 		},
+		// non-hashable dangling keys are also ignored ([1,2]: 4 is ignored)
+		{
+			`%{[1, 2]: 3, [1, 2]: 4}`,
+			toPanMap(
+				[]object.Pair{},
+				[]object.Pair{
+					object.Pair{
+						Key: &object.PanArr{Elems: []object.PanObject{
+							&object.PanInt{Value: 1},
+							&object.PanInt{Value: 2},
+						}},
+						Value: &object.PanInt{Value: 3},
+					},
+				},
+			),
+		},
 	}
 
 	for _, tt := range tests {
@@ -1660,6 +1676,19 @@ func testPanMap(t *testing.T, actual object.PanObject, expected *object.PanMap) 
 			continue
 		}
 
+		testValue(t, actPair.Key, pair.Key)
+		testValue(t, actPair.Value, pair.Value)
+	}
+
+	if len(*obj.NonHashablePairs) != len(*expected.NonHashablePairs) {
+		t.Fatalf("nonHashablePair length must be %d (%s). got=%d (%s)",
+			len(*expected.Pairs), expected.Inspect(),
+			len(*obj.Pairs), obj.Inspect())
+		return
+	}
+
+	for i, pair := range *expected.NonHashablePairs {
+		actPair := (*obj.NonHashablePairs)[i]
 		testValue(t, actPair.Key, pair.Key)
 		testValue(t, actPair.Value, pair.Value)
 	}
