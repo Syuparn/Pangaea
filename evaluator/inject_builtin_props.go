@@ -28,7 +28,8 @@ func injectProps(
 
 var propContainer = map[string]object.PanObject{
 	// name format: "ObjName_propName"
-	"Arr_at":    &object.PanBuiltIn{Fn: findElemInArr},
-	"Func_call": &object.PanBuiltIn{Fn: evalFuncCall},
-	"Obj_at":    &object.PanBuiltIn{Fn: findElemInObj},
+	"Arr_at":       &object.PanBuiltIn{Fn: findElemInArr},
+	"Func_call":    &object.PanBuiltIn{Fn: evalFuncCall},
+	"Obj_at":       &object.PanBuiltIn{Fn: findElemInObj},
+	"Obj_callProp": &object.PanBuiltIn{Fn: builtInCallProp},
 }

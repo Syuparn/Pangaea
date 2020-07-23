@@ -447,6 +447,41 @@ func TestEvalObjLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalBuiltInCallProp(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// non-callable
+		{
+			`{}.callProp({a: 1}, 'a)`,
+			&object.PanInt{Value: 1},
+		},
+		// callable
+		{
+			`{}.callProp({a: {|| 2}}, 'a)`,
+			&object.PanInt{Value: 2},
+		},
+		{
+			`{}.callProp({a: {|x| x}}, 'a, 3)`,
+			&object.PanInt{Value: 3},
+		},
+		{
+			`{}.callProp({a: {|x, y, z: 1| [x, y, z]}}, 'a, 4, 5, z: 6)`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 4},
+				&object.PanInt{Value: 5},
+				&object.PanInt{Value: 6},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalObjLiteralInvalidKey(t *testing.T) {
 	tests := []struct {
 		input    string
