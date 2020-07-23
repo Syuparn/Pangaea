@@ -19,7 +19,6 @@ func evalFuncCall(
 	// unshift args to ignore func itself
 	args = args[1:]
 
-	// TODO: handle PanBuiltIn
 	switch f := self.(type) {
 	case *object.PanFunc:
 		return evalPanFuncCall(f, env, kwargs, args...)

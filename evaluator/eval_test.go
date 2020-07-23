@@ -292,6 +292,129 @@ func TestEvalArrLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalArrAt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[5, 10][0]`,
+			&object.PanInt{Value: 5},
+		},
+		// if key is insufficient, return nil
+		{
+			`[5, 10][]`,
+			object.BuiltInNil,
+		},
+		// if index is out of range, return nil
+		{
+			`[1, 2][100]`,
+			object.BuiltInNil,
+		},
+		// if non-int value is passed, call parent's at method
+		{
+			`[1]['at]`,
+			(*object.BuiltInArrObj.Pairs)[object.GetSymHash("at")].Value,
+		},
+		// minus index
+		{
+			`[1, 2, 3][-1]`,
+			&object.PanInt{Value: 3},
+		},
+		{
+			`[1, 2, 3][-3]`,
+			&object.PanInt{Value: 1},
+		},
+		{
+			`[1, 2, 3][-4]`,
+			object.BuiltInNil,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalArrAtWithRange(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[0, 1, 2][0:1]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 0},
+			}},
+		},
+		{
+			`[0, 1, 2][0:]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 0},
+				&object.PanInt{Value: 1},
+				&object.PanInt{Value: 2},
+			}},
+		},
+		{
+			`[0, 1, 2][:2]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 0},
+				&object.PanInt{Value: 1},
+			}},
+		},
+		{
+			`[0, 1, 2][::-1]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 2},
+				&object.PanInt{Value: 1},
+				&object.PanInt{Value: 0},
+			}},
+		},
+		{
+			`[0, 1, 2][1::-1]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 1},
+				&object.PanInt{Value: 0},
+			}},
+		},
+		{
+			`[0, 1, 2, 3, 4][:2:-1]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 4},
+				&object.PanInt{Value: 3},
+			}},
+		},
+		{
+			`[0, 1, 2, 3, 4, 5][1::2]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 1},
+				&object.PanInt{Value: 3},
+				&object.PanInt{Value: 5},
+			}},
+		},
+		{
+			`[0, 1, 2, 3, 4][:3:2]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 0},
+				&object.PanInt{Value: 2},
+			}},
+		},
+		{
+			`[0, 1, 2, 3, 4, 5][1:5:2]`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 1},
+				&object.PanInt{Value: 3},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalObjLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -399,6 +522,41 @@ func TestEvalObjLiteral(t *testing.T) {
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
 		testPanObj(t, actual, tt.expected)
+	}
+}
+
+func TestEvalBuiltInCallProp(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// non-callable
+		{
+			`{}.callProp({a: 1}, 'a)`,
+			&object.PanInt{Value: 1},
+		},
+		// callable
+		{
+			`{}.callProp({a: {|| 2}}, 'a)`,
+			&object.PanInt{Value: 2},
+		},
+		{
+			`{}.callProp({a: {|x| x}}, 'a, 3)`,
+			&object.PanInt{Value: 3},
+		},
+		{
+			`{}.callProp({a: {|x, y, z: 1| [x, y, z]}}, 'a, 4, 5, z: 6)`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 4},
+				&object.PanInt{Value: 5},
+				&object.PanInt{Value: 6},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
 	}
 }
 
