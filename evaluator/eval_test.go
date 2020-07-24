@@ -1281,6 +1281,63 @@ func TestEvalAssignShadowingConsts(t *testing.T) {
 	}
 }
 
+func TestEvalProto(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Obj.proto`,
+			object.BuiltInBaseObj,
+		},
+		{
+			`[].proto`,
+			object.BuiltInArrObj,
+		},
+		{
+			`1.0.proto`,
+			object.BuiltInFloatObj,
+		},
+		{
+			`{||}.proto`,
+			object.BuiltInFuncObj,
+		},
+		{
+			`1.proto`,
+			object.BuiltInIntObj,
+		},
+		{
+			`%{}.proto`,
+			object.BuiltInMapObj,
+		},
+		{
+			`nil.proto`,
+			object.BuiltInNilObj,
+		},
+		{
+			`{}.proto`,
+			object.BuiltInObjObj,
+		},
+		{
+			`'a.proto`,
+			object.BuiltInStrObj,
+		},
+		{
+			`true.proto`,
+			object.BuiltInOneInt,
+		},
+		{
+			`false.proto`,
+			object.BuiltInZeroInt,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalPropChain(t *testing.T) {
 	tests := []struct {
 		input    string

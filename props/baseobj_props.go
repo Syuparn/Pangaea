@@ -29,6 +29,21 @@ func BaseObjProps(propContainer map[string]object.PanObject) map[string]object.P
 			},
 		),
 		"at": propContainer["BaseObj_at"],
+		"proto": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("proto requires at least 1 arg")
+				}
+
+				proto := args[0].Proto()
+				if proto == nil {
+					return object.BuiltInNil
+				}
+				return proto
+			},
+		),
 	}
 }
 
