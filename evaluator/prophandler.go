@@ -24,11 +24,14 @@ func builtInCallProp(
 		return object.BuiltInNil
 	}
 
+	// (recv, args_for_call...)
+	argsToPass := append([]object.PanObject{obj}, args[3:]...)
+
 	switch f := ret.(type) {
 	case *object.PanFunc:
-		return evalPanFuncCall(f, env, kwargs, args[3:]...)
+		return evalPanFuncCall(f, env, kwargs, argsToPass...)
 	case *object.PanBuiltIn:
-		return f.Fn(env, kwargs, args[3:]...)
+		return f.Fn(env, kwargs, argsToPass...)
 	default:
 		// not callable
 		return ret

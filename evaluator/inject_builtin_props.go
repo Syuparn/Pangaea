@@ -10,6 +10,8 @@ import (
 func InjectBuiltInProps() {
 	injectProps(object.BuiltInArrObj, props.ArrProps)
 	injectProps(object.BuiltInFuncObj, props.FuncProps)
+	injectProps(object.BuiltInIntObj, props.IntProps)
+	injectProps(object.BuiltInMapObj, props.MapProps)
 	injectProps(object.BuiltInObjObj, props.ObjProps)
 }
 
@@ -30,6 +32,7 @@ var propContainer = map[string]object.PanObject{
 	// name format: "ObjName_propName"
 	"Arr_at":       &object.PanBuiltIn{Fn: findElemInArr},
 	"Func_call":    &object.PanBuiltIn{Fn: evalFuncCall},
+	"Map_at":       &object.PanBuiltIn{Fn: findElemInMap},
 	"Obj_at":       &object.PanBuiltIn{Fn: findElemInObj},
 	"Obj_callProp": &object.PanBuiltIn{Fn: builtInCallProp},
 }

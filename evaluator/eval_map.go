@@ -24,7 +24,9 @@ func evalMap(node *ast.MapLiteral, env *object.Env) object.PanObject {
 				pairMap[s.Hash()] = pair
 			}
 		} else {
-			nonHashablePairs = append(nonHashablePairs, pair)
+			if !existsNonHashableKey(env, nonHashablePairs, pair) {
+				nonHashablePairs = append(nonHashablePairs, pair)
+			}
 		}
 	}
 
@@ -78,4 +80,22 @@ func appendEmbeddedElems(
 	}
 
 	return nil
+}
+
+func existsNonHashableKey(
+	env *object.Env,
+	nonHashablePairs []object.Pair,
+	newPair object.Pair,
+) bool {
+	eqSym := &object.PanStr{Value: "=="}
+
+	for _, pair := range nonHashablePairs {
+		// use == method for each pair comparison
+		ret := builtInCallProp(env, object.EmptyPanObjPtr(),
+			object.EmptyPanObjPtr(), newPair.Key, eqSym, pair.Key)
+		if ret == object.BuiltInTrue {
+			return true
+		}
+	}
+	return false
 }

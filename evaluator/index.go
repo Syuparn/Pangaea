@@ -51,17 +51,17 @@ func findElemInArr(
 	// TODO: duck typing for keys (allow child of arr)
 	self, ok := args[0].(*object.PanArr)
 	if !ok {
-		return findElemInObj(env, kwargs, args...)
+		return object.BuiltInNil
 	}
 
 	// TODO: duck typing for keys (allow child of arr)
 	indexArr, ok := args[1].(*object.PanArr)
 	if !ok {
-		return findElemInObj(env, kwargs, args...)
+		return object.BuiltInNil
 	}
 
 	if len(indexArr.Elems) < 1 {
-		return findElemInObj(env, kwargs, args...)
+		return object.BuiltInNil
 	}
 
 	switch index := indexArr.Elems[0].(type) {
@@ -163,4 +163,62 @@ func fixRange(r *object.PanRange, length int64, step int64) (int64, int64) {
 	}
 
 	return start, stop
+}
+
+func findElemInMap(
+	env *object.Env,
+	kwargs *object.PanObj,
+	args ...object.PanObject,
+) object.PanObject {
+	// NOTE: if index is not found, Obj#at is called
+
+	if len(args) < 2 {
+		return object.NewTypeErr("Obj#at requires at least 2 args")
+	}
+
+	// TODO: duck typing for keys (allow child of map)
+	self, ok := args[0].(*object.PanMap)
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	// TODO: duck typing for keys (allow child of arr)
+	indexArr, ok := args[1].(*object.PanArr)
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	if len(indexArr.Elems) < 1 {
+		return object.BuiltInNil
+	}
+
+	index := indexArr.Elems[0]
+	hashableIndex, ok := index.(object.PanScalar)
+
+	if ok {
+		pair, ok := (*self.Pairs)[hashableIndex.Hash()]
+		if !ok {
+			return findElemInObj(env, kwargs, args...)
+		}
+		return pair.Value
+	}
+
+	for _, pair := range *self.NonHashablePairs {
+		// find key by == method
+		eqSym := &object.PanStr{Value: "=="}
+
+		// equivalent to src `key == index`
+		ret := builtInCallProp(env, object.EmptyPanObjPtr(),
+			object.EmptyPanObjPtr(), index, eqSym, pair.Key)
+
+		if ret.Type() == object.ERR_TYPE {
+			return ret
+		}
+
+		if ret == object.BuiltInTrue {
+			return pair.Value
+		}
+	}
+
+	return object.BuiltInNil
 }
