@@ -19,6 +19,7 @@ const PROMPT = "> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnv()
 
 	for {
 		fmt.Printf(PROMPT)
@@ -39,7 +40,7 @@ func Start(in io.Reader, out io.Writer) {
 		// necessary to setup built-in object props
 		evaluator.InjectBuiltInProps()
 
-		evaluated := evaluator.Eval(program, object.NewEnv())
+		evaluated := evaluator.Eval(program, env)
 
 		io.WriteString(out, evaluated.Inspect()+"\n")
 	}
