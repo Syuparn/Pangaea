@@ -15,6 +15,11 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
+				// necessary for Nil itself! (guarantee `Nil == Nil`)
+				if args[0] == object.BuiltInNilObj && args[1] == object.BuiltInNilObj {
+					return object.BuiltInTrue
+				}
+
 				if _, ok := traceProtoOf(args[0], isNil); !ok {
 					return object.BuiltInFalse
 				}

@@ -1281,6 +1281,124 @@ func TestEvalAssignShadowingConsts(t *testing.T) {
 	}
 }
 
+func TestEvalProto(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Obj.proto`,
+			object.BuiltInBaseObj,
+		},
+		{
+			`[].proto`,
+			object.BuiltInArrObj,
+		},
+		{
+			`1.0.proto`,
+			object.BuiltInFloatObj,
+		},
+		{
+			`{||}.proto`,
+			object.BuiltInFuncObj,
+		},
+		{
+			`1.proto`,
+			object.BuiltInIntObj,
+		},
+		{
+			`%{}.proto`,
+			object.BuiltInMapObj,
+		},
+		{
+			`nil.proto`,
+			object.BuiltInNilObj,
+		},
+		{
+			`{}.proto`,
+			object.BuiltInObjObj,
+		},
+		{
+			`'a.proto`,
+			object.BuiltInStrObj,
+		},
+		{
+			`true.proto`,
+			object.BuiltInOneInt,
+		},
+		{
+			`false.proto`,
+			object.BuiltInZeroInt,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalBearProto(t *testing.T) {
+	tests := []struct {
+		input string
+	}{
+		{`obj := {a: 1};  obj.bear({x: 2}).proto == obj`},
+		{`arr := [1, 2];  arr.bear({x: 2}).proto == arr`},
+		{`num := 2;       num.bear({x: 2}).proto == num`},
+		{`map := %{1: 2}; map.bear({x: 2}).proto == map`},
+	}
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, object.BuiltInTrue)
+	}
+}
+
+func TestEvalBearErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.bear(1)`,
+			object.NewTypeErr("BaseObj#bear requires obj literal src"),
+		},
+		{
+			`f := {}['bear]; f()`,
+			object.NewTypeErr("BaseObj#bear requires at least 1 arg"),
+		},
+	}
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalBearContents(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Obj.bear({a: 1})`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: &object.PanInt{Value: 1},
+				},
+			}),
+		},
+		// if no arg, use empty obj
+		{
+			`Obj.bear`,
+			toPanObj([]object.Pair{}),
+		},
+	}
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalPropChain(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1681,6 +1799,10 @@ func TestEvalInfixIntEq(t *testing.T) {
 			`0 == false`,
 			object.BuiltInTrue,
 		},
+		{
+			`2.bear == 2`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1706,7 +1828,11 @@ func TestEvalInfixFloatEq(t *testing.T) {
 			`1.0 == 'a`,
 			object.BuiltInFalse,
 		},
-		// TODO: check ansestor
+		// ancestors are also comparable
+		{
+			`1.0.bear == 1.0`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1728,7 +1854,11 @@ func TestEvalInfixNilEq(t *testing.T) {
 			`nil == 'nil`,
 			object.BuiltInFalse,
 		},
-		// TODO: check ansestor
+		// ancestors are also comparable
+		{
+			`nil.bear == nil`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1808,6 +1938,11 @@ func TestEvalInfixArrEq(t *testing.T) {
 			`[1, [2, 3]] == [1, [2, 4]]`,
 			object.BuiltInFalse,
 		},
+		// ancestors are also comparable
+		{
+			`[2].bear == [2]`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1850,7 +1985,11 @@ func TestEvalInfixRangeEq(t *testing.T) {
 			`(1:2) == (1:2:nil)`,
 			object.BuiltInTrue,
 		},
-		// TODO: check ansestor
+		// ancestors are also comparable
+		{
+			`(1:2).bear == (1:2)`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1897,7 +2036,11 @@ func TestEvalInfixFuncEq(t *testing.T) {
 			`,
 			object.BuiltInFalse,
 		},
-		// TODO: check ansestor
+		// ancestors are also comparable
+		{
+			`{|x| x}.bear == {|x| x}`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1953,8 +2096,17 @@ func TestEvalInfixObjEq(t *testing.T) {
 			`BaseObj == BaseObj`,
 			object.BuiltInTrue,
 		},
-		// TODO: check ansestor
+		// check ansestor
 		// NOTE: == comparison is nothing to do with proto hierarchy!
+		// ancestors are also comparable
+		{
+			`{}.bear({a: 1}) == {a: 1}`,
+			object.BuiltInTrue,
+		},
+		{
+			`{a: 1}.bear({b: 2}) == {a: 1}`,
+			object.BuiltInFalse,
+		},
 	}
 
 	for _, tt := range tests {
@@ -2034,6 +2186,11 @@ func TestEvalInfixMapEq(t *testing.T) {
 			`%{'a: 0, [1]: 1} == %{'a: 0, [1]: 1}`,
 			object.BuiltInTrue,
 		},
+		// ancestors are also comparable
+		{
+			`%{'a: 0}.bear == %{'a: 0}`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -2055,6 +2212,59 @@ func TestEvalInfixBuiltInFuncEq(t *testing.T) {
 		{
 			`BaseObj['==] == BaseObj['at]`,
 			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixConstsEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Arr == Arr`,
+			object.BuiltInTrue,
+		},
+		{
+			`BaseObj == BaseObj`,
+			object.BuiltInTrue,
+		},
+		{
+			`Float == Float`,
+			object.BuiltInTrue,
+		},
+		{
+			`Func == Func`,
+			object.BuiltInTrue,
+		},
+		{
+			`Int == Int`,
+			object.BuiltInTrue,
+		},
+		{
+			`Map == Map`,
+			object.BuiltInTrue,
+		},
+		{
+			`Nil == Nil`,
+			object.BuiltInTrue,
+		},
+		{
+			`Obj == Obj`,
+			object.BuiltInTrue,
+		},
+		{
+			`Range == Range`,
+			object.BuiltInTrue,
+		},
+		{
+			`Str == Str`,
+			object.BuiltInTrue,
 		},
 	}
 

@@ -16,6 +16,11 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
+				// necessary for Float itself! (guarantee `Float == Float`)
+				if args[0] == object.BuiltInFloatObj && args[1] == object.BuiltInFloatObj {
+					return object.BuiltInTrue
+				}
+
 				self, ok := traceProtoOf(args[0], isFloat)
 				if !ok {
 					return object.BuiltInFalse

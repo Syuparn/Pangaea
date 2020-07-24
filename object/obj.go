@@ -22,6 +22,12 @@ func EmptyPanObjPtr() *PanObj {
 	return &i
 }
 
+func ChildPanObjPtr(proto PanObject, src *PanObj) *PanObj {
+	// share pairs with src because objects are immutable
+	i := PanObj{Pairs: src.Pairs, proto: proto}
+	return &i
+}
+
 type PanObj struct {
 	Pairs *map[SymHash]Pair
 	proto PanObject
