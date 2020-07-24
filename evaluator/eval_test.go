@@ -1264,6 +1264,23 @@ func TestEvalAssign(t *testing.T) {
 	}
 }
 
+func TestEvalAssignShadowingConsts(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`true := 100; true`,
+			&object.PanInt{Value: 100},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalPropChain(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -2428,7 +2445,7 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 }
 
 func testEval(t *testing.T, input string) object.PanObject {
-	return testEvalInEnv(t, input, object.NewEnv())
+	return testEvalInEnv(t, input, object.NewEnvWithConsts())
 }
 
 func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject {

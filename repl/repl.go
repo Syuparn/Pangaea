@@ -19,7 +19,7 @@ const PROMPT = "> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnv()
+	env := object.NewEnvWithConsts()
 
 	for {
 		fmt.Printf(PROMPT)
