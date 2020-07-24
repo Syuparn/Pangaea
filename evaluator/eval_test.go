@@ -1350,7 +1350,7 @@ func TestEvalObjAt(t *testing.T) {
 		// trace prototype chain
 		{
 			`{a: 5, b: 10}['at]`,
-			(*object.BuiltInObjObj.Pairs)[object.GetSymHash("at")].Value,
+			(*object.BuiltInBaseObj.Pairs)[object.GetSymHash("at")].Value,
 		},
 	}
 
@@ -1625,6 +1625,419 @@ func TestEvalInfix(t *testing.T) {
 		{
 			`1 + 1`,
 			&object.PanInt{Value: 2},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 == 10`,
+			object.BuiltInTrue,
+		},
+		{
+			`10 == 5`,
+			object.BuiltInFalse,
+		},
+		{
+			`1 == 1.0`,
+			object.BuiltInFalse,
+		},
+		{
+			`1 == "1"`,
+			object.BuiltInFalse,
+		},
+		// ancestor of int is also comparable
+		{
+			`1 == true`,
+			object.BuiltInTrue,
+		},
+		{
+			`0 == false`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.0 == 1.0`,
+			object.BuiltInTrue,
+		},
+		{
+			`1.0 == 1.1`,
+			object.BuiltInFalse,
+		},
+		{
+			`1.0 == 'a`,
+			object.BuiltInFalse,
+		},
+		// TODO: check ansestor
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixNilEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`nil == nil`,
+			object.BuiltInTrue,
+		},
+		{
+			`nil == 'nil`,
+			object.BuiltInFalse,
+		},
+		// TODO: check ansestor
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixStrEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`'a == 'a`,
+			object.BuiltInTrue,
+		},
+		{
+			`'a == "a"`,
+			object.BuiltInTrue,
+		},
+		{
+			`'a == 'b`,
+			object.BuiltInFalse,
+		},
+		{
+			`'a == 'A`,
+			object.BuiltInFalse,
+		},
+		{
+			`'a == 1`,
+			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixArrEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// true if all elements are equivalent
+		{
+			`[] == []`,
+			object.BuiltInTrue,
+		},
+		{
+			`[1, "a"] == [1, "a"]`,
+			object.BuiltInTrue,
+		},
+		{
+			`[] == 'a`,
+			object.BuiltInFalse,
+		},
+		{
+			`[1, 2] == [1]`,
+			object.BuiltInFalse,
+		},
+		{
+			`[1, 2] == [1, 2, 3]`,
+			object.BuiltInFalse,
+		},
+		{
+			`[1, 2] == [1, "2"]`,
+			object.BuiltInFalse,
+		},
+		{
+			`[1, [2, 3]] == [1, [2, 3]]`,
+			object.BuiltInTrue,
+		},
+		{
+			`[1, [2, 3]] == [1, [2, 4]]`,
+			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixRangeEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// true if all of start, stop, step are same
+		{
+			`(1:2) == (1:2)`,
+			object.BuiltInTrue,
+		},
+		{
+			`(1:2) == (1:3)`,
+			object.BuiltInFalse,
+		},
+		{
+			`(1:2:-1) == (1:2:-1)`,
+			object.BuiltInTrue,
+		},
+		{
+			`(1:2:-1) == (0:2:-1)`,
+			object.BuiltInFalse,
+		},
+		{
+			`(1:2:-1) == (1:3:-1)`,
+			object.BuiltInFalse,
+		},
+		{
+			`(1:2:-1) == (1:2:-2)`,
+			object.BuiltInFalse,
+		},
+		{
+			`(1:2) == (1:2:nil)`,
+			object.BuiltInTrue,
+		},
+		// TODO: check ansestor
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFuncEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// true only if Inspect() is same
+		{
+			`f := {|x| x}; f == f`,
+			object.BuiltInTrue,
+		},
+		{
+			`{|x| x} == {|x| x}`,
+			object.BuiltInTrue,
+		},
+		{
+			`{|x| x} == 1`,
+			object.BuiltInFalse,
+		},
+		{
+			`{|x| x} == {|x| 1}`,
+			object.BuiltInFalse,
+		},
+		{
+			`
+			{|x|
+				x
+			} == {|x| x}
+			`,
+			object.BuiltInTrue,
+		},
+		// even though funcs always return the same value, they seems to be different
+		// if src is different
+		{
+			`
+			{|x| 1; x} == {|x| x}
+			`,
+			object.BuiltInFalse,
+		},
+		// TODO: check ansestor
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixObjEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// true if all pairs are same
+		{
+			`{} == {}`,
+			object.BuiltInTrue,
+		},
+		{
+			`{} == "a"`,
+			object.BuiltInFalse,
+		},
+		{
+			`{a: 1, b: 2} == {a: 1, b: 2}`,
+			object.BuiltInTrue,
+		},
+		{
+			`{a: 1, b: 2} == {b: 2, a: 1}`,
+			object.BuiltInTrue,
+		},
+		{
+			`{a: 1, b: 2} == {a: 1, b: 1}`,
+			object.BuiltInFalse,
+		},
+		{
+			`{a: 1, b: 2, c: 3} == {a: 1, b: 2}`,
+			object.BuiltInFalse,
+		},
+		{
+			`{a: 1, b: 2} == {a: 1}`,
+			object.BuiltInFalse,
+		},
+		{
+			`{a: 1, b: {c: 3}} == {a: 1, b: {c: 3}}`,
+			object.BuiltInTrue,
+		},
+		{
+			`{a: 1, b: {c: 3}} == {a: 1, b: {c: 4}}`,
+			object.BuiltInFalse,
+		},
+		// `==` is defined in BaseObj
+		{
+			`BaseObj == BaseObj`,
+			object.BuiltInTrue,
+		},
+		// TODO: check ansestor
+		// NOTE: == comparison is nothing to do with proto hierarchy!
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixMapEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// true if all pairs are same
+		{
+			`%{} == %{}`,
+			object.BuiltInTrue,
+		},
+		{
+			`%{} == "a"`,
+			object.BuiltInFalse,
+		},
+		{
+			`%{} == {}`,
+			object.BuiltInFalse,
+		},
+		{
+			`%{0: 1, nil: 2} == %{0: 1, nil: 2}`,
+			object.BuiltInTrue,
+		},
+		{
+			`%{0: 1, nil: 2} == %{nil: 2, 0: 1}`,
+			object.BuiltInTrue,
+		},
+		{
+			`%{0: 1, nil: 2} == %{0: 1, nil: 3}`,
+			object.BuiltInFalse,
+		},
+		{
+			`%{0: 1, nil: 2, 'extra: 3} == %{0: 1, nil: 2}`,
+			object.BuiltInFalse,
+		},
+		{
+			`%{0: 1, 2: %{3: 4}} == %{0: 1, 2: %{3: 4}}`,
+			object.BuiltInTrue,
+		},
+		{
+			`%{0: 1, 2: %{3: 4}} == %{0: 1, 2: %{3: 5}}`,
+			object.BuiltInFalse,
+		},
+		// map with non-hashable keys
+		{
+			`%{[1]: 1, [2]: 2} == %{[1]: 1, [2]: 2}`,
+			object.BuiltInTrue,
+		},
+		{
+			`%{[1]: 1, [2]: 2} == %{[2]: 2, [1]: 1}`,
+			object.BuiltInTrue,
+		},
+		{
+			`%{[1]: 1, [2]: 2} == %{[1]: 1, [2]: 3}`,
+			object.BuiltInFalse,
+		},
+		{
+			`%{[1]: 1, [2]: 2} == %{[2]: 3, [1]: 1}`,
+			object.BuiltInFalse,
+		},
+		{
+			`%{[1]: 1, [2]: 2, [3]: 3} == %{[1]: 1, [2]: 2}`,
+			object.BuiltInFalse,
+		},
+		{
+			`%{[1]: 1, [2]: 2} == %{[1]: 1}`,
+			object.BuiltInFalse,
+		},
+		{
+			`%{'a: 0, [1]: 1} == %{'a: 0, [1]: 1}`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixBuiltInFuncEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// true if pointers are same
+		{
+			`BaseObj['==] == BaseObj['==]`,
+			object.BuiltInTrue,
+		},
+		{
+			`BaseObj['==] == BaseObj['at]`,
+			object.BuiltInFalse,
 		},
 	}
 

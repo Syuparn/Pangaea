@@ -4,6 +4,8 @@ import (
 	"../object"
 )
 
+var eqSym = &object.PanStr{Value: "=="}
+
 func traceProtoOf(
 	obj object.PanObject,
 	cond func(object.PanObject) bool,
@@ -14,4 +16,36 @@ func traceProtoOf(
 		}
 	}
 	return nil, false
+}
+
+func isArr(o object.PanObject) bool {
+	return o.Type() == object.ARR_TYPE
+}
+
+func isBuiltInFunc(o object.PanObject) bool {
+	return o.Type() == object.BUILTIN_TYPE
+}
+
+func isFloat(o object.PanObject) bool {
+	return o.Type() == object.FLOAT_TYPE
+}
+
+func isFunc(o object.PanObject) bool {
+	return o.Type() == object.FUNC_TYPE
+}
+
+func isInt(o object.PanObject) bool {
+	return o.Type() == object.INT_TYPE
+}
+
+func isMap(o object.PanObject) bool {
+	return o.Type() == object.MAP_TYPE
+}
+
+func isNil(o object.PanObject) bool {
+	return o.Type() == object.NIL_TYPE
+}
+
+func isRange(o object.PanObject) bool {
+	return o.Type() == object.RANGE_TYPE
 }

@@ -4,49 +4,54 @@ import (
 	"../object"
 )
 
-func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
+func BaseObjProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
 		"==": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
+				// NOTE: BaseObj#== comparison is NOTHING TO DO WITH proto hierarchy!
 				if len(args) < 2 {
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
-				self, ok := traceProtoOf(args[0], isArr)
+				self, ok := args[0].(*object.PanObj)
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isArr)
+				other, ok := args[1].(*object.PanObj)
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				return compArrs(self.(*object.PanArr), other.(*object.PanArr),
-					propContainer, env)
+				return compObjs(self, other, propContainer, env)
 			},
 		),
-		"at": propContainer["Arr_at"],
+		"at": propContainer["BaseObj_at"],
 	}
 }
 
-func compArrs(
-	a1 *object.PanArr,
-	a2 *object.PanArr,
+func compObjs(
+	o1 *object.PanObj,
+	o2 *object.PanObj,
 	propContainer map[string]object.PanObject,
 	env *object.Env,
 ) object.PanObject {
-	if len(a1.Elems) != len(a2.Elems) {
+	if len(*o1.Pairs) != len(*o2.Pairs) {
 		return object.BuiltInFalse
 	}
 
-	for i, e := range a1.Elems {
+	for sym, pair1 := range *o1.Pairs {
+		pair2, ok := (*o2.Pairs)[sym]
+		if !ok {
+			return object.BuiltInFalse
+		}
+
 		// == comparison for both elements
 		res := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
 			env, object.EmptyPanObjPtr(),
-			object.EmptyPanObjPtr(), e, eqSym, a2.Elems[i],
+			object.EmptyPanObjPtr(), pair1.Value, eqSym, pair2.Value,
 		)
 		if res == object.BuiltInFalse {
 			return object.BuiltInFalse
