@@ -25,3 +25,14 @@ func (i *PanInt) Proto() PanObject {
 func (i *PanInt) Hash() HashKey {
 	return HashKey{INT_TYPE, uint64(i.Value)}
 }
+
+func NewPanInt(i int64) *PanInt {
+	switch i {
+	case 0:
+		return BuiltInZeroInt
+	case 1:
+		return BuiltInOneInt
+	default:
+		return &PanInt{Value: i}
+	}
+}

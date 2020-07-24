@@ -2,6 +2,7 @@ package props
 
 import (
 	"../object"
+	"fmt"
 )
 
 func IntProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
@@ -32,6 +33,33 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInTrue
 				}
 				return object.BuiltInFalse
+			},
+		),
+		"+": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("+ requires at least 2 args")
+				}
+
+				isInt := func(o object.PanObject) bool {
+					return o.Type() == object.INT_TYPE
+				}
+
+				self, ok := traceProtoOf(args[0], isInt)
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as int", self.Inspect()))
+				}
+				other, ok := traceProtoOf(args[1], isInt)
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as int", other.Inspect()))
+				}
+
+				res := self.(*object.PanInt).Value + other.(*object.PanInt).Value
+				return object.NewPanInt(res)
 			},
 		),
 	}
