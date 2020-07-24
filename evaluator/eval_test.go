@@ -1277,6 +1277,49 @@ func TestEvalPropChain(t *testing.T) {
 			`{a: 5, b: 10}.b`,
 			&object.PanInt{Value: 10},
 		},
+		// call method
+		{
+			`{a: {|| 2}}.a`,
+			&object.PanInt{Value: 2},
+		},
+		{
+			`{a: m{|x| x}}.a(3)`,
+			&object.PanInt{Value: 3},
+		},
+		{
+			`{a: m{|x, y| [x, y]}}.a("one", "two")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "one"},
+				&object.PanStr{Value: "two"},
+			}},
+		},
+		{
+			`{a: m{|x, y: "y"| [x, y]}}.a("x")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "x"},
+				&object.PanStr{Value: "y"},
+			}},
+		},
+		{
+			`{a: m{|x, y: "y"| [x, y]}}.a("x", y: "Y")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "x"},
+				&object.PanStr{Value: "Y"},
+			}},
+		},
+		// if args are insufficient, they are padded by nil
+		{
+			`{a: m{|x, y| [x, y]}}.a("X")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "X"},
+				object.BuiltInNil,
+			}},
+		},
+		// if too many args are passed, they are just ignored
+		{
+			`{a: m{|x| x}}.a("arg", "needless", "extra", "args")`,
+			&object.PanStr{Value: "arg"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -1561,6 +1604,27 @@ func TestEvalConsts(t *testing.T) {
 		{
 			`_`,
 			object.NewNotImplementedErr("Not implemented"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfix(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 == 1`,
+			object.BuiltInTrue,
+		},
+		{
+			`1 + 1`,
+			&object.PanInt{Value: 2},
 		},
 	}
 

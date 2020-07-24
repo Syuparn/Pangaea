@@ -52,7 +52,7 @@ func evalBuiltInFuncMethodCall(
 	}
 
 	// prepend recv to args
-	args = append([]object.PanObject{recv}, args...)
+	args = append([]object.PanObject{f, recv}, args...)
 
 	return f.Fn(env, kwargs, args...)
 }
@@ -76,7 +76,7 @@ func evalFuncMethodCall(
 	}
 
 	// prepend recv to args
-	args = append([]object.PanObject{recv}, args...)
+	args = append([]object.PanObject{f, recv}, args...)
 
 	return evalFuncCall(env, kwargs, args...)
 }

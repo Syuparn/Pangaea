@@ -79,7 +79,7 @@ func assignArgsToEnv(
 }
 
 func paddedArgs(args []object.PanObject, params []object.PanObject) []object.PanObject {
-	lackedArityNum := len(args) - len(params)
+	lackedArityNum := len(params) - len(args)
 
 	if lackedArityNum <= 0 {
 		// if arity is sufficient, do nothing
