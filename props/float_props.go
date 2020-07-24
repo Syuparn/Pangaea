@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func IntProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
+func FloatProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
 		"==": f(
@@ -16,16 +16,16 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
-				self, ok := traceProtoOf(args[0], isInt)
+				self, ok := traceProtoOf(args[0], isFloat)
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isInt)
+				other, ok := traceProtoOf(args[1], isFloat)
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				if self.(*object.PanInt).Value == other.(*object.PanInt).Value {
+				if self.(*object.PanFloat).Value == other.(*object.PanFloat).Value {
 					return object.BuiltInTrue
 				}
 				return object.BuiltInFalse
@@ -39,19 +39,19 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("+ requires at least 2 args")
 				}
 
-				self, ok := traceProtoOf(args[0], isInt)
+				self, ok := traceProtoOf(args[0], isFloat)
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as int", self.Inspect()))
 				}
-				other, ok := traceProtoOf(args[1], isInt)
+				other, ok := traceProtoOf(args[1], isFloat)
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as int", args[1].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as int", other.Inspect()))
 				}
 
-				res := self.(*object.PanInt).Value + other.(*object.PanInt).Value
-				return object.NewPanInt(res)
+				res := self.(*object.PanFloat).Value + other.(*object.PanFloat).Value
+				return &object.PanFloat{Value: res}
 			},
 		),
 	}

@@ -4,7 +4,7 @@ import (
 	"../object"
 )
 
-func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
+func RangeProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
 		"==": f(
@@ -15,38 +15,41 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
-				self, ok := traceProtoOf(args[0], isArr)
+				self, ok := traceProtoOf(args[0], isRange)
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isArr)
+				other, ok := traceProtoOf(args[1], isRange)
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				return compArrs(self.(*object.PanArr), other.(*object.PanArr),
-					propContainer, env)
+				return compRanges(
+					self.(*object.PanRange), other.(*object.PanRange), propContainer, env)
 			},
 		),
-		"at": propContainer["Arr_at"],
 	}
 }
 
-func compArrs(
-	a1 *object.PanArr,
-	a2 *object.PanArr,
+func compRanges(
+	r1 *object.PanRange,
+	r2 *object.PanRange,
 	propContainer map[string]object.PanObject,
 	env *object.Env,
 ) object.PanObject {
-	if len(a1.Elems) != len(a2.Elems) {
-		return object.BuiltInFalse
+	vals := []struct {
+		v1 object.PanObject
+		v2 object.PanObject
+	}{
+		{r1.Start, r2.Start},
+		{r1.Stop, r2.Stop},
+		{r1.Step, r2.Step},
 	}
-
-	for i, e := range a1.Elems {
-		// == comparison for both elements
+	for _, val := range vals {
+		// == comparison
 		res := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
 			env, object.EmptyPanObjPtr(),
-			object.EmptyPanObjPtr(), e, eqSym, a2.Elems[i],
+			object.EmptyPanObjPtr(), val.v1, eqSym, val.v2,
 		)
 		if res == object.BuiltInFalse {
 			return object.BuiltInFalse
