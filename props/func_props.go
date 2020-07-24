@@ -16,6 +16,11 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
+				// necessary for Func itself! (guarantee `Func == Func`)
+				if args[0] == object.BuiltInFuncObj && args[1] == object.BuiltInFuncObj {
+					return object.BuiltInTrue
+				}
+
 				// func comparison
 				fn, ok := traceProtoOf(args[0], isFunc)
 				if ok {

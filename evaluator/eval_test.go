@@ -2121,6 +2121,59 @@ func TestEvalInfixBuiltInFuncEq(t *testing.T) {
 	}
 }
 
+func TestEvalInfixConstsEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Arr == Arr`,
+			object.BuiltInTrue,
+		},
+		{
+			`BaseObj == BaseObj`,
+			object.BuiltInTrue,
+		},
+		{
+			`Float == Float`,
+			object.BuiltInTrue,
+		},
+		{
+			`Func == Func`,
+			object.BuiltInTrue,
+		},
+		{
+			`Int == Int`,
+			object.BuiltInTrue,
+		},
+		{
+			`Map == Map`,
+			object.BuiltInTrue,
+		},
+		{
+			`Nil == Nil`,
+			object.BuiltInTrue,
+		},
+		{
+			`Obj == Obj`,
+			object.BuiltInTrue,
+		},
+		{
+			`Range == Range`,
+			object.BuiltInTrue,
+		},
+		{
+			`Str == Str`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)

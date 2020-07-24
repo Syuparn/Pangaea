@@ -15,6 +15,11 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
+				// necessary for Str itself! (guarantee `Str == Str`)
+				if args[0] == object.BuiltInStrObj && args[1] == object.BuiltInStrObj {
+					return object.BuiltInTrue
+				}
+
 				self, ok := args[0].(*object.PanStr)
 				if !ok {
 					return object.BuiltInFalse

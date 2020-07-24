@@ -15,6 +15,11 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
+				// necessary for Arr itself! (guarantee `Arr == Arr`)
+				if args[0] == object.BuiltInArrObj && args[1] == object.BuiltInArrObj {
+					return object.BuiltInTrue
+				}
+
 				self, ok := traceProtoOf(args[0], isArr)
 				if !ok {
 					return object.BuiltInFalse
