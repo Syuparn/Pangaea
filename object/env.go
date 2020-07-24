@@ -15,6 +15,37 @@ func NewEnclosedEnv(e *Env) *Env {
 	return &Env{s, e}
 }
 
+func NewEnvWithConsts() *Env {
+	env := NewEnv()
+	env.Set(GetSymHash("Int"), BuiltInIntObj)
+	env.Set(GetSymHash("Float"), BuiltInFloatObj)
+	env.Set(GetSymHash("Num"), BuiltInNumObj)
+	env.Set(GetSymHash("Nil"), BuiltInNilObj)
+	env.Set(GetSymHash("Str"), BuiltInStrObj)
+	env.Set(GetSymHash("Arr"), BuiltInArrObj)
+	env.Set(GetSymHash("Range"), BuiltInRangeObj)
+	env.Set(GetSymHash("Func"), BuiltInFuncObj)
+	env.Set(GetSymHash("Match"), BuiltInMatchObj)
+	env.Set(GetSymHash("Obj"), BuiltInObjObj)
+	env.Set(GetSymHash("BaseObj"), BuiltInBaseObj)
+	env.Set(GetSymHash("Map"), BuiltInMapObj)
+	env.Set(GetSymHash("true"), BuiltInTrue)
+	env.Set(GetSymHash("false"), BuiltInFalse)
+	env.Set(GetSymHash("nil"), BuiltInNil)
+	env.Set(GetSymHash("Err"), BuiltInErrObj)
+	env.Set(GetSymHash("AssertionErr"), BuiltInAssertionErr)
+	env.Set(GetSymHash("NameErr"), BuiltInNameErr)
+	env.Set(GetSymHash("NoPropErr"), BuiltInNoPropErr)
+	env.Set(GetSymHash("NotImplementedErr"), BuiltInNotImplementedErr)
+	env.Set(GetSymHash("SyntaxErr"), BuiltInSyntaxErr)
+	env.Set(GetSymHash("TypeErr"), BuiltInTypeErr)
+	env.Set(GetSymHash("ValueErr"), BuiltInValueErr)
+	env.Set(GetSymHash("ZeroDivisionErr"), BuiltInZeroDivisionErr)
+	env.Set(GetSymHash("_"), NewNotImplementedErr("Not implemented"))
+
+	return env
+}
+
 type Env struct {
 	Store map[SymHash]PanObject
 	outer *Env
