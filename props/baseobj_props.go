@@ -29,6 +29,28 @@ func BaseObjProps(propContainer map[string]object.PanObject) map[string]object.P
 			},
 		),
 		"at": propContainer["BaseObj_at"],
+		"bear": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("BaseObj#bear requires at least 1 arg")
+				}
+				proto := args[0]
+
+				if len(args) < 2 {
+					// default src
+					src := object.EmptyPanObjPtr()
+					return object.ChildPanObjPtr(proto, src)
+				}
+
+				src, ok := args[1].(*object.PanObj)
+				if !ok {
+					return object.NewTypeErr("BaseObj#bear requires obj literal src")
+				}
+				return object.ChildPanObjPtr(proto, src)
+			},
+		),
 		"proto": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

@@ -46,6 +46,10 @@ func isNil(o object.PanObject) bool {
 	return o.Type() == object.NIL_TYPE
 }
 
+func isObj(o object.PanObject) bool {
+	return o.Type() == object.OBJ_TYPE
+}
+
 func isRange(o object.PanObject) bool {
 	return o.Type() == object.RANGE_TYPE
 }
