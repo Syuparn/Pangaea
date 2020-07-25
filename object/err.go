@@ -65,6 +65,14 @@ func NewNotImplementedErr(msg string) *PanErr {
 	}
 }
 
+func NewStopIterErr(msg string) *PanErr {
+	return &PanErr{
+		ErrType: STOP_ITER_ERR,
+		Msg:     msg,
+		proto:   BuiltInStopIterErr,
+	}
+}
+
 func NewSyntaxErr(msg string) *PanErr {
 	return &PanErr{
 		ErrType: SYNTAX_ERR,
@@ -105,6 +113,7 @@ const (
 	NAME_ERR          = "NameErr"
 	NO_PROP_ERR       = "NoPropErr"
 	NOT_IMPLEMENT_ERR = "NotImplementedErr"
+	STOP_ITER_ERR     = "StopIterErr"
 	SYNTAX_ERR        = "SyntaxErr"
 	TYPE_ERR          = "TypeErr"
 	VALUE_ERR         = "ValueErr"

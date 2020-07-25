@@ -1282,6 +1282,30 @@ func TestEvalYield(t *testing.T) {
 	}
 }
 
+func TestEvalYieldStopped(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`it := <{|a| yield a if a == 1; recur(a+1)}>.new(1)
+			it.next`,
+			object.NewPanInt(1),
+		},
+		{
+			`it := <{|a| yield a if a == 1; recur(a+1)}>.new(1)
+			it.next
+			it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string
@@ -2100,6 +2124,10 @@ func TestEvalConsts(t *testing.T) {
 		{
 			`NotImplementedErr`,
 			object.BuiltInNotImplementedErr,
+		},
+		{
+			`StopIterErr`,
+			object.BuiltInStopIterErr,
 		},
 		{
 			`SyntaxErr`,

@@ -42,6 +42,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("NameErr"), BuiltInNameErr)
 	env.Set(GetSymHash("NoPropErr"), BuiltInNoPropErr)
 	env.Set(GetSymHash("NotImplementedErr"), BuiltInNotImplementedErr)
+	env.Set(GetSymHash("StopIterErr"), BuiltInStopIterErr)
 	env.Set(GetSymHash("SyntaxErr"), BuiltInSyntaxErr)
 	env.Set(GetSymHash("TypeErr"), BuiltInTypeErr)
 	env.Set(GetSymHash("ValueErr"), BuiltInValueErr)
