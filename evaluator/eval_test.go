@@ -9,6 +9,7 @@ import (
 	"../ast"
 	"../object"
 	"../parser"
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -1394,6 +1395,254 @@ func TestEvalBearContents(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStringify(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[1].S`,
+			&object.PanStr{Value: "[1]"},
+		},
+		// unnecessary zeros are omitted
+		{
+			`1.0.S`,
+			&object.PanStr{Value: "1.0"},
+		},
+		{
+			`{|x| x}.S`,
+			&object.PanStr{Value: "{|x| x}"},
+		},
+		{
+			`10.S`,
+			&object.PanStr{Value: "10"},
+		},
+		{
+			`%{'a: 1}.S`,
+			&object.PanStr{Value: `%{"a": 1}`},
+		},
+		{
+			`nil.S`,
+			&object.PanStr{Value: `nil`},
+		},
+		{
+			`{a: 1}.S`,
+			&object.PanStr{Value: `{"a": 1}`},
+		},
+		{
+			`(1:2).S`,
+			&object.PanStr{Value: "(1:2:nil)"},
+		},
+		// str is not quoted
+		{
+			`'a.S`,
+			&object.PanStr{Value: "a"},
+		},
+		{
+			`true.S`,
+			&object.PanStr{Value: "true"},
+		},
+		{
+			`false.S`,
+			&object.PanStr{Value: "false"},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalRepr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[1].repr`,
+			&object.PanStr{Value: "[1]"},
+		},
+		// precise value is shown
+		{
+			`1.0.repr`,
+			&object.PanStr{Value: "1.000000"},
+		},
+		{
+			`{|x| x}.repr`,
+			&object.PanStr{Value: "{|x| x}"},
+		},
+		{
+			`10.repr`,
+			&object.PanStr{Value: "10"},
+		},
+		{
+			`%{'a: 1}.repr`,
+			&object.PanStr{Value: `%{"a": 1}`},
+		},
+		{
+			`nil.repr`,
+			&object.PanStr{Value: `nil`},
+		},
+		{
+			`{a: 1}.repr`,
+			&object.PanStr{Value: `{"a": 1}`},
+		},
+		{
+			`(1:2).repr`,
+			&object.PanStr{Value: "(1:2:nil)"},
+		},
+		// str is quoted
+		{
+			`'a.repr`,
+			&object.PanStr{Value: `"a"`},
+		},
+		{
+			`true.S`,
+			&object.PanStr{Value: "true"},
+		},
+		{
+			`false.S`,
+			&object.PanStr{Value: "false"},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalPrint(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		// print obj.S results
+		{
+			`[1].p`,
+			"[1]\n",
+		},
+		{
+			`1.0.p`,
+			"1.0\n",
+		},
+		{
+			`{|x| x}.p`,
+			"{|x| x}\n",
+		},
+		{
+			`10.p`,
+			"10\n",
+		},
+		{
+			`%{'a: 1}.p`,
+			"%{\"a\": 1}\n",
+		},
+		{
+			`nil.p`,
+			"nil\n",
+		},
+		{
+			`{a: 1}.p`,
+			"{\"a\": 1}\n",
+		},
+		{
+			`(1:2).p`,
+			"(1:2:nil)\n",
+		},
+		// str is not quoted
+		{
+			`'a.p`,
+			"a\n",
+		},
+		{
+			`true.p`,
+			"true\n",
+		},
+		{
+			`false.p`,
+			"false\n",
+		},
+	}
+
+	for _, tt := range tests {
+		writer := &bytes.Buffer{}
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(os.Stdin, writer)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		// p returns nil
+		testValue(t, actual, object.BuiltInNil)
+
+		// check output
+		output := writer.String()
+		if output != tt.expected {
+			t.Errorf("wrong output. expected=`%s`, got=`%s`",
+				tt.expected, output)
+		}
+	}
+}
+
+func TestEvalPrintErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`f := {}['p]; f()`,
+			object.NewTypeErr("Obj#p requires at least 1 arg"),
+		},
+		{
+			`BaseObj.p`,
+			object.NewNoPropErr("property `p` is not defined."),
+		},
+		{
+			`IO := 1; 'a.p`,
+			object.NewTypeErr("name `IO` is not io object"),
+		},
+		{
+			`{S: 1}.p`,
+			object.NewTypeErr(`\1.S must be str`),
+		},
+	}
+
+	for _, tt := range tests {
+		writer := &bytes.Buffer{}
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(os.Stdin, writer)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+
+		// check output is empty
+		output := writer.String()
+		if output != "" {
+			t.Errorf("output must be empty. got=`%s`", output)
+		}
+	}
+}
+
+func TestEvalPrintErrIfNoIO(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.p`,
+			object.NewNameErr("name `IO` is not defined."),
+		},
+	}
+
+	for _, tt := range tests {
+		// const `IO` is not set up
 		actual := testEval(t, tt.input)
 		testValue(t, actual, tt.expected)
 	}

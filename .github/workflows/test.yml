@@ -21,6 +21,7 @@ jobs:
       run: |
         go get -v -t golang.org/x/tools/cmd/goyacc
         go get -v -t -d github.com/macrat/simplexer
+        go get -v -t -d github.com/tanaton/dtoa
 
     - name: Build
       run: make

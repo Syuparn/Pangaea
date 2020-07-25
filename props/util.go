@@ -53,3 +53,7 @@ func isObj(o object.PanObject) bool {
 func isRange(o object.PanObject) bool {
 	return o.Type() == object.RANGE_TYPE
 }
+
+func isStr(o object.PanObject) bool {
+	return o.Type() == object.STR_TYPE
+}
