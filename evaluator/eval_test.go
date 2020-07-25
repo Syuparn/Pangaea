@@ -1399,6 +1399,124 @@ func TestEvalBearContents(t *testing.T) {
 	}
 }
 
+func TestEvalStringify(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[1].S`,
+			&object.PanStr{Value: "[1]"},
+		},
+		// unnecessary zeros are omitted
+		{
+			`1.0.S`,
+			&object.PanStr{Value: "1.0"},
+		},
+		{
+			`{|x| x}.S`,
+			&object.PanStr{Value: "{|x| x}"},
+		},
+		{
+			`10.S`,
+			&object.PanStr{Value: "10"},
+		},
+		{
+			`%{'a: 1}.S`,
+			&object.PanStr{Value: `%{"a": 1}`},
+		},
+		{
+			`nil.S`,
+			&object.PanStr{Value: `nil`},
+		},
+		{
+			`{a: 1}.S`,
+			&object.PanStr{Value: `{"a": 1}`},
+		},
+		{
+			`(1:2).S`,
+			&object.PanStr{Value: "(1:2:nil)"},
+		},
+		// str is not quoted
+		{
+			`'a.S`,
+			&object.PanStr{Value: "a"},
+		},
+		{
+			`true.S`,
+			&object.PanStr{Value: "true"},
+		},
+		{
+			`false.S`,
+			&object.PanStr{Value: "false"},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalRepr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[1].repr`,
+			&object.PanStr{Value: "[1]"},
+		},
+		// precise value is shown
+		{
+			`1.0.repr`,
+			&object.PanStr{Value: "1.000000"},
+		},
+		{
+			`{|x| x}.repr`,
+			&object.PanStr{Value: "{|x| x}"},
+		},
+		{
+			`10.repr`,
+			&object.PanStr{Value: "10"},
+		},
+		{
+			`%{'a: 1}.repr`,
+			&object.PanStr{Value: `%{"a": 1}`},
+		},
+		{
+			`nil.repr`,
+			&object.PanStr{Value: `nil`},
+		},
+		{
+			`{a: 1}.repr`,
+			&object.PanStr{Value: `{"a": 1}`},
+		},
+		{
+			`(1:2).repr`,
+			&object.PanStr{Value: "(1:2:nil)"},
+		},
+		// str is quoted
+		{
+			`'a.repr`,
+			&object.PanStr{Value: `"a"`},
+		},
+		{
+			`true.S`,
+			&object.PanStr{Value: "true"},
+		},
+		{
+			`false.S`,
+			&object.PanStr{Value: "false"},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalPropChain(t *testing.T) {
 	tests := []struct {
 		input    string

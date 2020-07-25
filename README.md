@@ -30,6 +30,7 @@ $ ./pangaea.exe
 ## Packages
 - [goyacc](https://godoc.org/golang.org/x/tools/cmd/goyacc)
 - [simplexer](github.com/macrat/simplexer)
+- [dtoa](github.com/tanaton/dtoa)
 
 # Plans for language features
 (there are only lexer and parser yet...)
