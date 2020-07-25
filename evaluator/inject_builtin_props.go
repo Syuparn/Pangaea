@@ -40,6 +40,7 @@ var propContainer = map[string]object.PanObject{
 	"BaseObj_at":   &object.PanBuiltIn{Fn: findElemInObj},
 	"Func_call":    &object.PanBuiltIn{Fn: evalFuncCall},
 	"Iter_new":     &object.PanBuiltIn{Fn: iterNew},
+	"Iter_next":    &object.PanBuiltIn{Fn: iterNext},
 	"Map_at":       &object.PanBuiltIn{Fn: findElemInMap},
 	"Obj_callProp": &object.PanBuiltIn{Fn: builtInCallProp},
 }

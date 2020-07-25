@@ -33,6 +33,7 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				return compFuncs(self.(*object.PanFunc), other.(*object.PanFunc))
 			},
 		),
-		"new": propContainer["Iter_new"],
+		"new":  propContainer["Iter_new"],
+		"next": propContainer["Iter_next"],
 	}
 }

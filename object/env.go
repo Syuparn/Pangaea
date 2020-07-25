@@ -96,3 +96,9 @@ func (e *Env) InjectIO(in io.Reader, out io.Writer) {
 	ioObj := &PanIO{In: in, Out: out}
 	e.Set(GetSymHash("IO"), ioObj)
 }
+
+func (e *Env) InjectRecur(recurFunc BuiltInFunc) {
+	// define const `recur` builtInFunc, which can only be used inside iter
+	recur := &PanBuiltIn{Fn: recurFunc}
+	e.Set(GetSymHash("recur"), recur)
+}

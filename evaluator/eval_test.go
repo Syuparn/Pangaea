@@ -1121,7 +1121,7 @@ func TestEvalIterLiteral(t *testing.T) {
 					},
 				},
 				`|a, b, c: 10, d: 'e| `,
-				outerEnv,
+				object.NewEnclosedEnv(outerEnv),
 			),
 		},
 	}
@@ -1232,6 +1232,54 @@ func toEnv(pairs []object.Pair, outer *object.Env) *object.Env {
 		env.Set(sym, pair.Value)
 	}
 	return env
+}
+
+func TestEvalYield(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`<{|a| yield a}>.new(1).next`,
+			object.NewPanInt(1),
+		},
+		{
+			`<{|a| yield a}>.new('a).next`,
+			&object.PanStr{Value: "a"},
+		},
+		// recur
+		{
+			`it := <{|a| yield a; recur(a+1)}>.new(1)
+			 it.next
+			 it.next
+			 `,
+			&object.PanInt{Value: 2},
+		},
+		{
+			`it := <{|a| yield a; recur(a+1)}>.new(1)
+			 it.next
+			 it.next
+			 it.next
+			`,
+			&object.PanInt{Value: 3},
+		},
+		{
+			`it := <{|a, b| yield [a, b]; recur(a+1, b*2)}>.new(1, 2)
+			 it.next
+			 it.next
+			 it.next
+			`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanInt{Value: 3},
+				&object.PanInt{Value: 8},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
 }
 
 func TestEvalAssign(t *testing.T) {
