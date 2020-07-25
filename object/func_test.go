@@ -55,10 +55,30 @@ func TestFuncInspect(t *testing.T) {
 }
 
 func TestFuncProto(t *testing.T) {
-	f := PanFunc{&MockFuncWrapper{"|foo| foo"}, FUNC_FUNC, nil}
-	if f.Proto() != BuiltInFuncObj {
-		t.Fatalf("Proto is not BuiltInFuncObj. got=%T (%+v)",
-			f.Proto(), f.Proto())
+	tests := []struct {
+		f            PanFunc
+		expected     PanObject
+		expectedName string
+	}{
+		{
+			PanFunc{&MockFuncWrapper{"|foo| foo"}, FUNC_FUNC, nil},
+			BuiltInFuncObj,
+			"BuiltInFuncObj",
+		},
+		{
+			PanFunc{&MockFuncWrapper{"|foo| foo"}, ITER_FUNC, nil},
+			BuiltInIterObj,
+			"BuiltInIterObj",
+		},
+	}
+
+	for _, tt := range tests {
+		actual := tt.f.Proto()
+
+		if actual != tt.expected {
+			t.Fatalf("Proto is not %s. got=%T (%+v)",
+				tt.expectedName, actual, actual)
+		}
 	}
 }
 

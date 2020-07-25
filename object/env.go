@@ -29,6 +29,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("Arr"), BuiltInArrObj)
 	env.Set(GetSymHash("Range"), BuiltInRangeObj)
 	env.Set(GetSymHash("Func"), BuiltInFuncObj)
+	env.Set(GetSymHash("Iter"), BuiltInIterObj)
 	env.Set(GetSymHash("Match"), BuiltInMatchObj)
 	env.Set(GetSymHash("Obj"), BuiltInObjObj)
 	env.Set(GetSymHash("BaseObj"), BuiltInBaseObj)

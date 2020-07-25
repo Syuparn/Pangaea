@@ -11,8 +11,8 @@ var BuiltInStrObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInArrObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInRangeObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 
-// TODO: consider Proto of Iter!
 var BuiltInFuncObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
+var BuiltInIterObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInMatchObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInObjObj = &PanObj{&map[SymHash]Pair{}, BuiltInBaseObj}
 var BuiltInBaseObj = &PanObj{&map[SymHash]Pair{}, nil}

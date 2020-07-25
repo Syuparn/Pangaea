@@ -1304,6 +1304,10 @@ func TestEvalProto(t *testing.T) {
 			object.BuiltInFuncObj,
 		},
 		{
+			`<{||}>.proto`,
+			object.BuiltInIterObj,
+		},
+		{
 			`1.proto`,
 			object.BuiltInIntObj,
 		},
@@ -1920,6 +1924,10 @@ func TestEvalConsts(t *testing.T) {
 		{
 			`Func`,
 			object.BuiltInFuncObj,
+		},
+		{
+			`Iter`,
+			object.BuiltInIterObj,
 		},
 		{
 			`Match`,
