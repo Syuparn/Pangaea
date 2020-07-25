@@ -5,6 +5,10 @@
 
 package object
 
+import (
+	"io"
+)
+
 func NewEnv() *Env {
 	s := make(map[SymHash]PanObject)
 	return &Env{s, nil}
@@ -84,4 +88,10 @@ func (e *Env) Items() PanObject {
 
 func (e *Env) Outer() *Env {
 	return e.outer
+}
+
+func (e *Env) InjectIO(in io.Reader, out io.Writer) {
+	// define const `IO` containing io of args
+	ioObj := &PanIO{In: in, Out: out}
+	e.Set(GetSymHash("IO"), ioObj)
 }

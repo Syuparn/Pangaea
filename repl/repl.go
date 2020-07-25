@@ -20,6 +20,8 @@ const PROMPT = "> "
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvWithConsts()
+	// setup object `IO`
+	env.InjectIO(in, out)
 
 	for {
 		fmt.Printf(PROMPT)
