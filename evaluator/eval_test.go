@@ -9,6 +9,7 @@ import (
 	"../ast"
 	"../object"
 	"../parser"
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -1512,6 +1513,136 @@ func TestEvalRepr(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalPrint(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		// print obj.S results
+		{
+			`[1].p`,
+			"[1]",
+		},
+		{
+			`1.0.p`,
+			"1.0",
+		},
+		{
+			`{|x| x}.p`,
+			"{|x| x}",
+		},
+		{
+			`10.p`,
+			"10",
+		},
+		{
+			`%{'a: 1}.p`,
+			`%{"a": 1}`,
+		},
+		{
+			`nil.p`,
+			`nil`,
+		},
+		{
+			`{a: 1}.p`,
+			`{"a": 1}`,
+		},
+		{
+			`(1:2).p`,
+			"(1:2:nil)",
+		},
+		// str is not quoted
+		{
+			`'a.p`,
+			"a",
+		},
+		{
+			`true.p`,
+			"true",
+		},
+		{
+			`false.p`,
+			"false",
+		},
+	}
+
+	for _, tt := range tests {
+		writer := &bytes.Buffer{}
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(os.Stdin, writer)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		// p returns nil
+		testValue(t, actual, object.BuiltInNil)
+
+		// check output
+		output := writer.String()
+		if output != tt.expected {
+			t.Errorf("wrong output. expected=`%s`, got=`%s`",
+				tt.expected, output)
+		}
+	}
+}
+
+func TestEvalPrintErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`f := {}['p]; f()`,
+			object.NewTypeErr("Obj#p requires at least 1 arg"),
+		},
+		{
+			`BaseObj.p`,
+			object.NewNoPropErr("property `p` is not defined."),
+		},
+		{
+			`IO := 1; 'a.p`,
+			object.NewTypeErr("name `IO` is not io object"),
+		},
+		{
+			`{S: 1}.p`,
+			object.NewTypeErr(`\1.S must be str`),
+		},
+	}
+
+	for _, tt := range tests {
+		writer := &bytes.Buffer{}
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(os.Stdin, writer)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+
+		// check output is empty
+		output := writer.String()
+		if output != "" {
+			t.Errorf("output must be empty. got=`%s`", output)
+		}
+	}
+}
+
+func TestEvalPrintErrIfNoIO(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.p`,
+			object.NewNameErr("name `IO` is not defined."),
+		},
+	}
+
+	for _, tt := range tests {
+		// const `IO` is not set up
 		actual := testEval(t, tt.input)
 		testValue(t, actual, tt.expected)
 	}
