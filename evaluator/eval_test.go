@@ -1071,7 +1071,7 @@ func TestEvalIterLiteral(t *testing.T) {
 				[]string{},
 				[]object.Pair{},
 				`|| `,
-				outerEnv,
+				object.NewEnclosedEnv(outerEnv),
 			),
 		},
 		{
@@ -1080,7 +1080,7 @@ func TestEvalIterLiteral(t *testing.T) {
 				[]string{"a"},
 				[]object.Pair{},
 				`|a| `,
-				outerEnv,
+				object.NewEnclosedEnv(outerEnv),
 			),
 		},
 		{
@@ -1089,7 +1089,7 @@ func TestEvalIterLiteral(t *testing.T) {
 				[]string{"a", "b"},
 				[]object.Pair{},
 				`|a, b| `,
-				outerEnv,
+				object.NewEnclosedEnv(outerEnv),
 			),
 		},
 		{
@@ -1103,7 +1103,7 @@ func TestEvalIterLiteral(t *testing.T) {
 					},
 				},
 				`|a, b, c: 10| `,
-				outerEnv,
+				object.NewEnclosedEnv(outerEnv),
 			),
 		},
 		{
@@ -1154,8 +1154,84 @@ func toPanIter(
 	return &object.PanFunc{
 		FuncWrapper: funcWrapper,
 		FuncType:    object.ITER_FUNC,
-		Env:         object.NewEnclosedEnv(env),
+		Env:         env,
 	}
+}
+
+func TestEvalIterNew(t *testing.T) {
+	outerEnv := object.NewEnv()
+
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// return new Iter with args set
+		{
+			`<{|a| yield a}>.new(10)`,
+			toPanIter(
+				[]string{"a"},
+				[]object.Pair{},
+				`|a| yield a`,
+				toEnv(
+					[]object.Pair{
+						object.Pair{
+							Key:   &object.PanStr{Value: "a"},
+							Value: &object.PanInt{Value: 10},
+						},
+					},
+					outerEnv,
+				),
+			),
+		},
+		{
+			`<{|a, b, c: 'c| yield a}>.new('A, 'B, c: 'C)`,
+			toPanIter(
+				[]string{"a", "b"},
+				[]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "c"},
+						Value: &object.PanStr{Value: "c"},
+					},
+				},
+				`|a, b, c: 'c| yield a`,
+				toEnv(
+					[]object.Pair{
+						object.Pair{
+							Key:   &object.PanStr{Value: "a"},
+							Value: &object.PanStr{Value: "A"},
+						},
+						object.Pair{
+							Key:   &object.PanStr{Value: "b"},
+							Value: &object.PanStr{Value: "B"},
+						},
+						object.Pair{
+							Key:   &object.PanStr{Value: "c"},
+							Value: &object.PanStr{Value: "C"},
+						},
+					},
+					outerEnv,
+				),
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		if outerEnv.Items().Inspect() != "{}" {
+			t.Errorf("outerEnv must be empty. got=%s", outerEnv.Items().Inspect())
+		}
+
+		actual := testEvalInEnv(t, tt.input, outerEnv)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func toEnv(pairs []object.Pair, outer *object.Env) *object.Env {
+	env := object.NewEnclosedEnv(outer)
+	for _, pair := range pairs {
+		sym := object.GetSymHash(pair.Key.(*object.PanStr).Value)
+		env.Set(sym, pair.Value)
+	}
+	return env
 }
 
 func TestEvalAssign(t *testing.T) {
@@ -2504,6 +2580,10 @@ func TestEvalInfixConstsEq(t *testing.T) {
 			object.BuiltInTrue,
 		},
 		{
+			`Iter == Iter`,
+			object.BuiltInTrue,
+		},
+		{
 			`Map == Map`,
 			object.BuiltInTrue,
 		},
@@ -2837,13 +2917,20 @@ func testPanBulitIn(t *testing.T, actual object.PanObject, expected *object.PanB
 
 func testEnv(t *testing.T, actual object.Env, expected object.Env) {
 	if actual.Outer() != expected.Outer() {
-		t.Fatalf("Outer is wrong. expected=%v(%p), got=%v(%p)",
-			expected.Outer(), expected.Outer(),
-			actual.Outer(), actual.Outer())
+		t.Fatalf("Outer is wrong. expected=%s(%p), got=%s(%p)",
+			inspectEnv(expected.Outer()), expected.Outer(),
+			inspectEnv(actual.Outer()), actual.Outer())
 	}
 
 	// compare vars in env
 	testValue(t, actual.Items(), expected.Items())
+}
+
+func inspectEnv(e *object.Env) string {
+	if e == nil {
+		return "{nil}"
+	}
+	return e.Items().Inspect()
 }
 
 func testPanErr(t *testing.T, actual object.PanObject, expected *object.PanErr) {
