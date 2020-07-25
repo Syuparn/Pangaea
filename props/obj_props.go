@@ -43,6 +43,8 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				// print
 				io.WriteString(panIO.Out, str.(*object.PanStr).Value)
+				// breakline
+				io.WriteString(panIO.Out, "\n")
 
 				return object.BuiltInNil
 			},

@@ -1526,48 +1526,48 @@ func TestEvalPrint(t *testing.T) {
 		// print obj.S results
 		{
 			`[1].p`,
-			"[1]",
+			"[1]\n",
 		},
 		{
 			`1.0.p`,
-			"1.0",
+			"1.0\n",
 		},
 		{
 			`{|x| x}.p`,
-			"{|x| x}",
+			"{|x| x}\n",
 		},
 		{
 			`10.p`,
-			"10",
+			"10\n",
 		},
 		{
 			`%{'a: 1}.p`,
-			`%{"a": 1}`,
+			"%{\"a\": 1}\n",
 		},
 		{
 			`nil.p`,
-			`nil`,
+			"nil\n",
 		},
 		{
 			`{a: 1}.p`,
-			`{"a": 1}`,
+			"{\"a\": 1}\n",
 		},
 		{
 			`(1:2).p`,
-			"(1:2:nil)",
+			"(1:2:nil)\n",
 		},
 		// str is not quoted
 		{
 			`'a.p`,
-			"a",
+			"a\n",
 		},
 		{
 			`true.p`,
-			"true",
+			"true\n",
 		},
 		{
 			`false.p`,
-			"false",
+			"false\n",
 		},
 	}
 
