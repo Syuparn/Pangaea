@@ -10,6 +10,7 @@ A programming language for one-liner method chain lovers! (Under construction...
 # 1. Install dependencies
 $ go get golang.org/x/tools/cmd/goyacc
 $ go get github.com/macrat/simplexer
+$ go get github.com/tanaton/dtoa
 
 # 2. Build
 $ make
