@@ -13,6 +13,10 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 	// Stmt
 	case *ast.ExprStmt:
 		return Eval(node.Expr, env)
+	case *ast.JumpStmt:
+		return evalJumpStmt(node, env)
+	case *ast.JumpIfStmt:
+		return evalJumpIfStmt(node, env)
 	// Expr
 	case *ast.IntLiteral:
 		return evalInt(node, env)

@@ -11,8 +11,8 @@ var BuiltInStrObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInArrObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInRangeObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 
-// TODO: consider Proto of Iter!
 var BuiltInFuncObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
+var BuiltInIterObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInMatchObj = &PanObj{&map[SymHash]Pair{}, BuiltInObjObj}
 var BuiltInObjObj = &PanObj{&map[SymHash]Pair{}, BuiltInBaseObj}
 var BuiltInBaseObj = &PanObj{&map[SymHash]Pair{}, nil}
@@ -33,6 +33,7 @@ var BuiltInAssertionErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
 var BuiltInNameErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
 var BuiltInNoPropErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
 var BuiltInNotImplementedErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
+var BuiltInStopIterErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
 var BuiltInSyntaxErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
 var BuiltInTypeErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}
 var BuiltInValueErr = &PanObj{&map[SymHash]Pair{}, BuiltInErrObj}

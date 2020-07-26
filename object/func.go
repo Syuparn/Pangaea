@@ -28,6 +28,9 @@ func (f *PanFunc) Inspect() string {
 }
 
 func (f *PanFunc) Proto() PanObject {
+	if f.FuncType == ITER_FUNC {
+		return BuiltInIterObj
+	}
 	return BuiltInFuncObj
 }
 

@@ -29,6 +29,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("Arr"), BuiltInArrObj)
 	env.Set(GetSymHash("Range"), BuiltInRangeObj)
 	env.Set(GetSymHash("Func"), BuiltInFuncObj)
+	env.Set(GetSymHash("Iter"), BuiltInIterObj)
 	env.Set(GetSymHash("Match"), BuiltInMatchObj)
 	env.Set(GetSymHash("Obj"), BuiltInObjObj)
 	env.Set(GetSymHash("BaseObj"), BuiltInBaseObj)
@@ -41,6 +42,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("NameErr"), BuiltInNameErr)
 	env.Set(GetSymHash("NoPropErr"), BuiltInNoPropErr)
 	env.Set(GetSymHash("NotImplementedErr"), BuiltInNotImplementedErr)
+	env.Set(GetSymHash("StopIterErr"), BuiltInStopIterErr)
 	env.Set(GetSymHash("SyntaxErr"), BuiltInSyntaxErr)
 	env.Set(GetSymHash("TypeErr"), BuiltInTypeErr)
 	env.Set(GetSymHash("ValueErr"), BuiltInValueErr)
@@ -94,4 +96,10 @@ func (e *Env) InjectIO(in io.Reader, out io.Writer) {
 	// define const `IO` containing io of args
 	ioObj := &PanIO{In: in, Out: out}
 	e.Set(GetSymHash("IO"), ioObj)
+}
+
+func (e *Env) InjectRecur(recurFunc BuiltInFunc) {
+	// define const `recur` builtInFunc, which can only be used inside iter
+	recur := &PanBuiltIn{Fn: recurFunc}
+	e.Set(GetSymHash("recur"), recur)
 }
