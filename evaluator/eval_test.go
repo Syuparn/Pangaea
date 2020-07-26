@@ -1441,6 +1441,63 @@ func TestEvalStrIter(t *testing.T) {
 	}
 }
 
+func TestEvalListChainPropCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[1, 2]@+(1)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(2),
+				object.NewPanInt(3),
+			}},
+		},
+		{
+			`3@S`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "1"},
+				&object.PanStr{Value: "2"},
+				&object.PanStr{Value: "3"},
+			}},
+		},
+		{
+			`"日本語"@S`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "日"},
+				&object.PanStr{Value: "本"},
+				&object.PanStr{Value: "語"},
+			}},
+		},
+		// TODO: check obj/map/range
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalListChainPropCallIgnoresNil(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[{name: 'Taro}, {name: nil}, {name: 'Jiro}]@name`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "Taro"},
+				&object.PanStr{Value: "Jiro"},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string
