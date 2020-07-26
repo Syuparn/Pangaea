@@ -1328,6 +1328,37 @@ func TestEvalYieldStopped(t *testing.T) {
 	}
 }
 
+func TestEvalArrIter(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`it := ['a, 'b]._iter
+			 it.next`,
+			&object.PanStr{Value: "a"},
+		},
+		{
+			`it := ['a, 'b]._iter
+			 it.next
+			 it.next`,
+			&object.PanStr{Value: "b"},
+		},
+		{
+			`it := ['a, 'b]._iter
+			it.next
+			it.next
+			it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string

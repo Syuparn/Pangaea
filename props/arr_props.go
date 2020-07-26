@@ -33,6 +33,25 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					propContainer, env)
 			},
 		),
+		"_iter": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Arr#_iter requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isArr)
+				if !ok {
+					return object.NewTypeErr("\\1 must be arr")
+				}
+
+				return &object.PanBuiltInIter{
+					Fn:  arrIter(self.(*object.PanArr)),
+					Env: env, // not used
+				}
+			},
+		),
 		"at": propContainer["Arr_at"],
 	}
 }
@@ -58,4 +77,19 @@ func compArrs(
 		}
 	}
 	return object.BuiltInTrue
+}
+
+func arrIter(arr *object.PanArr) object.BuiltInFunc {
+	yieldIdx := 0
+
+	return func(
+		env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+	) object.PanObject {
+		if yieldIdx >= len(arr.Elems) {
+			return object.NewStopIterErr("iter stopped")
+		}
+		yielded := arr.Elems[yieldIdx]
+		yieldIdx += 1
+		return yielded
+	}
 }
