@@ -62,6 +62,25 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanInt(res)
 			},
 		),
+		"_iter": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Int#_iter requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isInt)
+				if !ok {
+					return object.NewTypeErr("\\1 must be int")
+				}
+
+				return &object.PanBuiltInIter{
+					Fn:  intIter(self.(*object.PanInt)),
+					Env: env, // not used
+				}
+			},
+		),
 	}
 }
 
@@ -84,4 +103,19 @@ func checkIntInfixArgs(
 	}
 
 	return self, other, nil
+}
+
+func intIter(i *object.PanInt) object.BuiltInFunc {
+	yieldNum := int64(1)
+
+	return func(
+		env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+	) object.PanObject {
+		if yieldNum > i.Value {
+			return object.NewStopIterErr("iter stopped")
+		}
+		yielded := object.NewPanInt(yieldNum)
+		yieldNum += 1
+		return yielded
+	}
 }
