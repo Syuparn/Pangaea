@@ -12,6 +12,72 @@ func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
 		return appendStackTrace(err, node.Source())
 	}
 
+	switch node.Chain.Main {
+	case ast.Scalar:
+		return _evalPropCall(node, env, recv)
+	case ast.List:
+		return evalListPropCall(node, env, recv)
+	default:
+		return nil
+	}
+}
+
+func evalListPropCall(
+	node *ast.PropCallExpr,
+	env *object.Env,
+	recv object.PanObject,
+) object.PanObject {
+	// get `(recv)._iter`
+	iterSym := &object.PanStr{Value: "_iter"}
+	iter := builtInCallProp(env, object.EmptyPanObjPtr(),
+		object.EmptyPanObjPtr(), recv, iterSym)
+
+	if err, ok := iter.(*object.PanErr); ok {
+		return appendStackTrace(err, node.Source())
+	}
+
+	if iter == object.BuiltInNil {
+		err := object.NewTypeErr("recv must have prop `_iter`")
+		return appendStackTrace(err, node.Source())
+	}
+
+	// call `next` prop until StopIterErr raises
+	evaluatedElems := []object.PanObject{}
+	nextSym := &object.PanStr{Value: "next"}
+	for {
+		// call `(iter).next`
+		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
+			object.EmptyPanObjPtr(), iter, nextSym)
+
+		if err, ok := nextRet.(*object.PanErr); ok {
+			if err.ErrType == object.STOP_ITER_ERR {
+				break
+			}
+			// if err is not StopIterErr, don't catch
+			return appendStackTrace(err, node.Source())
+		}
+
+		// treat next value as recv
+		evaluatedElem := _evalPropCall(node, env, nextRet)
+
+		if err, ok := evaluatedElem.(*object.PanErr); ok {
+			return appendStackTrace(err, node.Source())
+		}
+
+		// NOTE: nil is ignored
+		if evaluatedElem != object.BuiltInNil {
+			evaluatedElems = append(evaluatedElems, evaluatedElem)
+		}
+	}
+
+	return &object.PanArr{Elems: evaluatedElems}
+}
+
+func _evalPropCall(
+	node *ast.PropCallExpr,
+	env *object.Env,
+	recv object.PanObject,
+) object.PanObject {
 	propStr := node.Prop.Value
 	propHash := object.GetSymHash(propStr)
 
