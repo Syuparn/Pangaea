@@ -1390,6 +1390,57 @@ func TestEvalIntIter(t *testing.T) {
 	}
 }
 
+func TestEvalStrIter(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`it := "Hi"._iter
+			 it.next`,
+			&object.PanStr{Value: "H"},
+		},
+		{
+			`it := "Hi"._iter
+			 it.next
+			 it.next`,
+			&object.PanStr{Value: "i"},
+		},
+		{
+			`it := "Hi"._iter
+			it.next
+			it.next
+			it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+		// each iteration yields rune (not byte!)
+		{
+			`it := "日本語"._iter
+			 it.next`,
+			&object.PanStr{Value: "日"},
+		},
+		{
+			`it := "日本語"._iter
+			 it.next
+			 it.next`,
+			&object.PanStr{Value: "本"},
+		},
+		{
+			`it := "日本語"._iter
+			 it.next
+			 it.next
+			 it.next
+			 it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string
