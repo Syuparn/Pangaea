@@ -1282,6 +1282,28 @@ func TestEvalYield(t *testing.T) {
 	}
 }
 
+func TestEvalIterYieldIsIndependent(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`
+			it := <{|a| yield a; recur(a+1)}>.new(1)
+			it.next
+			it.next
+			it2 := it.new(1)
+			it2.next`,
+			object.NewPanInt(1),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalYieldStopped(t *testing.T) {
 	tests := []struct {
 		input    string
