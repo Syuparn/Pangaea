@@ -1359,6 +1359,37 @@ func TestEvalArrIter(t *testing.T) {
 	}
 }
 
+func TestEvalIntIter(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`it := 2._iter
+			 it.next`,
+			object.NewPanInt(1),
+		},
+		{
+			`it := 2._iter
+			 it.next
+			 it.next`,
+			object.NewPanInt(2),
+		},
+		{
+			`it := 2._iter
+			it.next
+			it.next
+			it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string
