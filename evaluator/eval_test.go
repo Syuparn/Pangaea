@@ -1498,6 +1498,33 @@ func TestEvalListChainPropCallIgnoresNil(t *testing.T) {
 	}
 }
 
+func TestEvalReduceChainPropCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[1, 2, 3]$(0)+`,
+			object.NewPanInt(6),
+		},
+		{
+			`[1, 2, 3]$(4)+`,
+			object.NewPanInt(10),
+		},
+		// if chainarg is not set, acc is `nil`
+		{
+			`[nil]$==`,
+			object.BuiltInTrue,
+		},
+		// TODO: check literalcall
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string
