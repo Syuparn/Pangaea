@@ -1328,6 +1328,185 @@ func TestEvalYieldStopped(t *testing.T) {
 	}
 }
 
+func TestEvalJumpStmt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|i| yield i}(1)`,
+			object.NewPanInt(1),
+		},
+		{
+			`{|i| return i}(2)`,
+			object.NewPanInt(2),
+		},
+		// TODO: raise
+	}
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalJumpIfStmt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|i| yield i if true; i * 2}(1)`,
+			object.NewPanInt(1),
+		},
+		// raise StopIterErr
+		{
+			`{|i| yield i if false; i * 2}(1)`,
+			object.NewStopIterErr("iter stopped"),
+		},
+		{
+			`{|i| return i if true; i * 2}(10)`,
+			object.NewPanInt(10),
+		},
+		{
+			`{|i| return i if false; i * 2}(10)`,
+			object.NewPanInt(20),
+		},
+		// TODO: raise
+	}
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStmtsAfterYieldAreEvaluated(t *testing.T) {
+	tests := []struct {
+		input          string
+		expected       object.PanObject
+		expectedStdOut string
+	}{
+		{
+			`{|i| yield i; "evaluated!".p}(1)`,
+			object.NewPanInt(1),
+			"evaluated!\n",
+		},
+	}
+	for _, tt := range tests {
+		writer := &bytes.Buffer{}
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(os.Stdin, writer)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+
+		// check output
+		output := writer.String()
+		if output != tt.expectedStdOut {
+			t.Errorf("wrong output. expected=`%s`, got=`%s`",
+				tt.expectedStdOut, output)
+		}
+	}
+}
+
+func TestEvalJumpStmtJumpPrecedence(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// jump precedence: last line < yield < return
+		{
+			`{|i| yield i; i * 2}(1)`,
+			object.NewPanInt(1),
+		},
+		{
+			`{|i| yield i; return i * 2}(1)`,
+			object.NewPanInt(2),
+		},
+		{
+			`{|i| return i; yield i * 2}(3)`,
+			object.NewPanInt(3),
+		},
+		{
+			`{|i| return i; i * 2}(4)`,
+			object.NewPanInt(4),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalDefer(t *testing.T) {
+	// defer is evaluated after jump (same as that in golang)
+	tests := []struct {
+		input          string
+		expected       object.PanObject
+		expectedStdOut string
+	}{
+		{
+			`{|i| defer "one".p; i}(1)`,
+			object.NewPanInt(1),
+			"one\n",
+		},
+		{
+			`{|i| defer "one".p; return i}(1)`,
+			object.NewPanInt(1),
+			"one\n",
+		},
+		{
+			`{|i| defer "one".p; yield i}(1)`,
+			object.NewPanInt(1),
+			"one\n",
+		},
+		{
+			`{|i| defer "one".p; defer "two".p; i}(1)`,
+			object.NewPanInt(1),
+			"one\ntwo\n",
+		},
+		// NOTE: only defers above last evaluated line are valid
+		{
+			`{|i| defer "one".p; return i; defer "two".p}(1)`,
+			object.NewPanInt(1),
+			"one\n",
+		},
+		{
+			`{|i| defer "one".p; yield i; defer "two".p}(1)`,
+			object.NewPanInt(1),
+			"one\ntwo\n",
+		},
+		{
+			`{|i| defer "one".p if true; i}(1)`,
+			object.NewPanInt(1),
+			"one\n",
+		},
+		{
+			`{|i| defer "one".p if false; i}(1)`,
+			object.NewPanInt(1),
+			"",
+		},
+	}
+
+	for _, tt := range tests {
+		writer := &bytes.Buffer{}
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(os.Stdin, writer)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+
+		// check output
+		output := writer.String()
+		if output != tt.expectedStdOut {
+			t.Errorf("wrong output. expected=`%s`, got=`%s`",
+				tt.expectedStdOut, output)
+		}
+	}
+}
+
 func TestEvalArrIter(t *testing.T) {
 	tests := []struct {
 		input    string

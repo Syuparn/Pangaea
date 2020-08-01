@@ -6,6 +6,11 @@ import (
 )
 
 func evalJumpStmt(node *ast.JumpStmt, env *object.Env) object.PanObject {
+	// if stmt is `defer`, not evaluate
+	if node.JumpType == ast.DeferJump {
+		return &object.DeferObj{Node: node.Val}
+	}
+
 	val := Eval(node.Val, env)
 
 	if err, ok := val.(*object.PanErr); ok {

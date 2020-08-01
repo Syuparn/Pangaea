@@ -66,6 +66,7 @@ const (
 	ReturnJump JumpType = iota
 	RaiseJump
 	YieldJump
+	DeferJump // defer is not jump stmt actually, but syntax is equivalent
 )
 
 func jumpString(j JumpType) string {
@@ -73,6 +74,7 @@ func jumpString(j JumpType) string {
 		ReturnJump: "return",
 		RaiseJump:  "raise",
 		YieldJump:  "yield",
+		DeferJump:  "defer",
 	}[j]
 }
 

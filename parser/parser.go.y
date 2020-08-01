@@ -78,7 +78,7 @@ import (
 %token<token> RET SEMICOLON
 %token<token> ASSIGN COMPOUND_ASSIGN RIGHT_ASSIGN
 %token<token> IF ELSE
-%token<token> RETURN RAISE YIELD
+%token<token> RETURN RAISE YIELD DEFER
 
 %left IF
 %left ELSE
@@ -212,7 +212,15 @@ jumpStmt
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-
+	| DEFER expr %prec JUMP
+	{
+		$$ = &ast.JumpStmt{
+			Token: $1.Literal,
+			Val: $2,
+			JumpType: ast.DeferJump,
+			Src: yylex.(*Lexer).Source,
+		}
+	}
 
 expr
 	: unitExpr
@@ -2162,6 +2170,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(RETURN, `return`),
 		t(YIELD, `yield`),
 		t(RAISE, `raise`),
+		t(DEFER, `defer`),
 		t(IDENT, ident),
 		t(PRIVATE_IDENT, fmt.Sprintf(`_+(%s)?`, ident)),
 	}
