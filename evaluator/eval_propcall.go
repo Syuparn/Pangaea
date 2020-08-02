@@ -110,7 +110,7 @@ func evalReducePropCall(
 			return appendStackTrace(err, node.Source())
 		}
 
-		prop := evalProp(node, nextRet)
+		prop := evalProp(node.Prop.Value, nextRet)
 		if err, ok := prop.(*object.PanErr); ok {
 			return appendStackTrace(err, node.Source())
 		}
@@ -155,7 +155,7 @@ func evalScalarPropCall(
 	args []object.PanObject,
 	kwargs *object.PanObj,
 ) object.PanObject {
-	prop := evalProp(node, recv)
+	prop := evalProp(node.Prop.Value, recv)
 	if err, ok := prop.(*object.PanErr); ok {
 		return appendStackTrace(err, node.Source())
 	}
@@ -168,8 +168,7 @@ func evalScalarPropCall(
 	return ret
 }
 
-func evalProp(node *ast.PropCallExpr, recv object.PanObject) object.PanObject {
-	propStr := node.Prop.Value
+func evalProp(propStr string, recv object.PanObject) object.PanObject {
 	propHash := object.GetSymHash(propStr)
 
 	prop, ok := callProp(recv, propHash)
@@ -177,7 +176,7 @@ func evalProp(node *ast.PropCallExpr, recv object.PanObject) object.PanObject {
 	if !ok {
 		err := object.NewNoPropErr(
 			fmt.Sprintf("property `%s` is not defined.", propStr))
-		return appendStackTrace(err, node.Source())
+		return err
 	}
 
 	return prop

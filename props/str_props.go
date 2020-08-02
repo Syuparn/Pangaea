@@ -2,6 +2,7 @@ package props
 
 import (
 	"../object"
+	"fmt"
 )
 
 func StrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
@@ -34,6 +35,19 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return object.BuiltInFalse
+			},
+		),
+		"+": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkStrInfixArgs(args, "+")
+				if err != nil {
+					return err
+				}
+
+				res := self.(*object.PanStr).Value + other.(*object.PanStr).Value
+				return &object.PanStr{Value: res}
 			},
 		),
 		"_iter": f(
@@ -74,6 +88,28 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			},
 		),
 	}
+}
+
+func checkStrInfixArgs(
+	args []object.PanObject,
+	propName string,
+) (object.PanObject, object.PanObject, *object.PanErr) {
+	if len(args) < 2 {
+		return nil, nil, object.NewTypeErr("== requires at least 2 args")
+	}
+
+	self, ok := args[0].(*object.PanStr)
+	if !ok {
+		return nil, nil, object.NewTypeErr(
+			fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+	}
+	other, ok := args[1].(*object.PanStr)
+	if !ok {
+		return nil, nil, object.NewTypeErr(
+			fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+	}
+
+	return self, other, nil
 }
 
 func strIter(s *object.PanStr) object.BuiltInFunc {
