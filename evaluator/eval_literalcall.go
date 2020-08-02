@@ -38,6 +38,8 @@ func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObjec
 		return evalScalarLiteralCall(node, env, f, recv)
 	case ast.List:
 		return evalListLiteralCall(node, env, f, recv)
+	case ast.Reduce:
+		return evalReduceLiteralCall(node, env, f, recv, chainArg)
 	default:
 		return nil
 	}
@@ -100,6 +102,47 @@ func evalListLiteralCall(
 	}
 
 	return &object.PanArr{Elems: evaluatedElems}
+}
+
+func evalReduceLiteralCall(
+	node *ast.LiteralCallExpr,
+	env *object.Env,
+	f *object.PanFunc,
+	recv object.PanObject,
+	chainArg object.PanObject,
+) object.PanObject {
+	iter, err := iterOf(env, recv)
+	if err != nil {
+		return appendStackTrace(err, node.Source())
+	}
+
+	// call `next` prop until StopIterErr raises
+	acc := chainArg
+	nextSym := &object.PanStr{Value: "next"}
+	for {
+		// call `(iter).next`
+		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
+			object.EmptyPanObjPtr(), iter, nextSym)
+
+		if err, ok := nextRet.(*object.PanErr); ok {
+			if err.ErrType == object.STOP_ITER_ERR {
+				break
+			}
+			// if err is not StopIterErr, don't catch
+			return appendStackTrace(err, node.Source())
+		}
+
+		// prepend iteration value to args
+		args := []object.PanObject{f, acc, nextRet}
+		// reduce each iteration values
+		ret := _evalLiteralCall(node, env, f, args)
+		if err, ok := ret.(*object.PanErr); ok {
+			return appendStackTrace(err, node.Source())
+		}
+		acc = ret
+	}
+
+	return acc
 }
 
 func _evalLiteralCall(

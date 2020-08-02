@@ -1781,7 +1781,32 @@ func TestEvalReduceChainPropCall(t *testing.T) {
 			`[nil]$==`,
 			object.BuiltInTrue,
 		},
-		// TODO: check literalcall
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalReduceChainLiteralCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[1, 2, 3]$(0){|i, j| i + j}`,
+			object.NewPanInt(6),
+		},
+		{
+			`[1, 2, 3]$(4){|i, j| i + j}`,
+			object.NewPanInt(10),
+		},
+		// if chainarg is not set, acc is `nil`
+		{
+			`[nil]${|i, j| i == j}`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
