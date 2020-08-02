@@ -2527,6 +2527,50 @@ func TestEvalMapAt(t *testing.T) {
 	}
 }
 
+func TestEvalLiteralCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`3.{|i| i * 2}`,
+			object.NewPanInt(6),
+		},
+		{
+			`[1, 2].{|i| i * 2}`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+			}},
+		},
+		// if arity is more than 1, arr is extracted to each param
+		{
+			`[1, 2].{|i, j| i + j}`,
+			object.NewPanInt(3),
+		},
+		// if args are insufficient, they are padded by nil
+		{
+			`'X.{|i, j| [i, j]}`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "X"},
+				object.BuiltInNil,
+			}},
+		},
+		// if too many args are passed, they are just ignored
+		{
+			`[2, 3, "extra"].{|x, y| x + y}`,
+			object.NewPanInt(5),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestNameErr(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -61,6 +61,35 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return &object.PanArr{Elems: elems}
 			},
 		),
+		"*": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("* requires at least 2 args")
+				}
+
+				self, ok := traceProtoOf(args[0], isArr)
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as arr", args[0].Inspect()))
+				}
+				selfElems := self.(*object.PanArr).Elems
+
+				other, ok := traceProtoOf(args[1], isInt)
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+				}
+
+				// NOTE: no need to copy each elem because they are immutable
+				elems := []object.PanObject{}
+				for i := int64(0); i < other.(*object.PanInt).Value; i++ {
+					elems = append(elems, selfElems...)
+				}
+				return &object.PanArr{Elems: elems}
+			},
+		),
 		"_iter": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
