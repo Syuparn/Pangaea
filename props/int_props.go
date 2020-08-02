@@ -40,7 +40,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkIntInfixArgs(args)
+				self, other, err := checkIntInfixArgs(args, "+")
 				if err != nil {
 					return err
 				}
@@ -53,7 +53,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkIntInfixArgs(args)
+				self, other, err := checkIntInfixArgs(args, "*")
 				if err != nil {
 					return err
 				}
@@ -104,9 +104,10 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 func checkIntInfixArgs(
 	args []object.PanObject,
+	propName string,
 ) (object.PanObject, object.PanObject, *object.PanErr) {
 	if len(args) < 2 {
-		return nil, nil, object.NewTypeErr("+ requires at least 2 args")
+		return nil, nil, object.NewTypeErr(propName + " requires at least 2 args")
 	}
 
 	self, ok := traceProtoOf(args[0], isInt)
