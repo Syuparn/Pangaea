@@ -2009,6 +2009,100 @@ func TestEvalStringify(t *testing.T) {
 	}
 }
 
+func TestEvalBoolify(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// arr
+		{
+			`[1].B`,
+			object.BuiltInTrue,
+		},
+		{
+			`[].B`,
+			object.BuiltInFalse,
+		},
+		// float
+		{
+			`1.0.B`,
+			object.BuiltInTrue,
+		},
+		{
+			`0.0.B`,
+			object.BuiltInFalse,
+		},
+		// func (always true)
+		{
+			`{|x| x}.B`,
+			object.BuiltInTrue,
+		},
+		// int
+		{
+			`10.B`,
+			object.BuiltInTrue,
+		},
+		{
+			`0.B`,
+			object.BuiltInFalse,
+		},
+		{
+			`true.B`,
+			object.BuiltInTrue,
+		},
+		{
+			`false.B`,
+			object.BuiltInFalse,
+		},
+		// map
+		{
+			`%{'a: 1}.B`,
+			object.BuiltInTrue,
+		},
+		{
+			`%{[1]: 1}.B`,
+			object.BuiltInTrue,
+		},
+		{
+			`%{}.B`,
+			object.BuiltInFalse,
+		},
+		// nil
+		{
+			`nil.B`,
+			object.BuiltInFalse,
+		},
+		// obj
+		{
+			`{a: 1}.B`,
+			object.BuiltInTrue,
+		},
+		{
+			`{}.B`,
+			object.BuiltInFalse,
+		},
+		// range (always true)
+		{
+			`(1:2).B`,
+			object.BuiltInTrue,
+		},
+		// str
+		{
+			`'a.B`,
+			object.BuiltInTrue,
+		},
+		{
+			`"".B`,
+			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalRepr(t *testing.T) {
 	tests := []struct {
 		input    string
