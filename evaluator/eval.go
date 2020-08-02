@@ -42,6 +42,8 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 		return evalIdent(node, env)
 	case *ast.AssignExpr:
 		return evalAssign(node, env)
+	case *ast.IfExpr:
+		return evalIf(node, env)
 	case *ast.PrefixExpr:
 		return evalPrefix(node, env)
 	case *ast.InfixExpr:
