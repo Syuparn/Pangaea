@@ -1379,6 +1379,35 @@ func TestEvalJumpIfStmt(t *testing.T) {
 	}
 }
 
+func TestEvalJumpIfStmtWithNonBoolCond(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// `(cond).B` is called to check cond is truthy/falsy
+		{
+			`{|i| yield i if 1; i * 2}(1)`,
+			object.NewPanInt(1),
+		},
+		{
+			`{|i| yield i if ""; i * 2}(1)`,
+			object.NewStopIterErr("iter stopped"),
+		},
+		{
+			`{|i| return i if [1,2,3]; i * 2}(10)`,
+			object.NewPanInt(10),
+		},
+		{
+			`{|i| return i if nil; i * 2}(10)`,
+			object.NewPanInt(20),
+		},
+	}
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStmtsAfterYieldAreEvaluated(t *testing.T) {
 	tests := []struct {
 		input          string

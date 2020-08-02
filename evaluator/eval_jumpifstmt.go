@@ -31,7 +31,7 @@ func evalJumpIfYield(
 	env *object.Env,
 	cond object.PanObject,
 ) object.PanObject {
-	if !isTruthy(cond) {
+	if !isTruthy(cond, env) {
 		// stop iteration
 		err := object.NewStopIterErr("iter stopped")
 		return appendStackTrace(err, node.Source())
@@ -49,7 +49,7 @@ func evalJumpIfReturn(
 	env *object.Env,
 	cond object.PanObject,
 ) object.PanObject {
-	if !isTruthy(cond) {
+	if !isTruthy(cond, env) {
 		// do nothing and keep func evaluating
 		return object.BuiltInNil
 	}
@@ -68,14 +68,21 @@ func evalJumpIfDefer(
 	env *object.Env,
 	cond object.PanObject,
 ) object.PanObject {
-	if !isTruthy(cond) {
+	if !isTruthy(cond, env) {
 		// do nothing and keep func evaluating
 		return object.BuiltInNil
 	}
 	return &object.DeferObj{Node: node.JumpStmt.Val}
 }
 
-func isTruthy(obj object.PanObject) bool {
-	// TODO: use cond.B to check truthy/falsy
-	return obj == object.BuiltInTrue
+func isTruthy(obj object.PanObject, env *object.Env) bool {
+	if b, ok := obj.(*object.PanBool); ok {
+		return b == object.BuiltInTrue
+	}
+
+	// use (obj).B to check truthy/falsy
+	bSym := &object.PanStr{Value: "B"}
+	cond := builtInCallProp(env, object.EmptyPanObjPtr(),
+		object.EmptyPanObjPtr(), obj, bSym)
+	return cond == object.BuiltInTrue
 }
