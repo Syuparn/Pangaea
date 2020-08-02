@@ -35,6 +35,25 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			},
 		),
 		"at": propContainer["Map_at"],
+		"B": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Map#B requires at least 1 arg")
+				}
+				self, ok := traceProtoOf(args[0], isMap)
+				if !ok {
+					return object.NewTypeErr(`\1 must be map`)
+				}
+
+				m, _ := self.(*object.PanMap)
+				if len(*m.Pairs) == 0 && len(*m.NonHashablePairs) == 0 {
+					return object.BuiltInFalse
+				}
+				return object.BuiltInTrue
+			},
+		),
 	}
 }
 

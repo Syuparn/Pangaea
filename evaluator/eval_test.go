@@ -2037,6 +2037,11 @@ func TestEvalBoolify(t *testing.T) {
 			`{|x| x}.B`,
 			object.BuiltInTrue,
 		},
+		// iter (always true)
+		{
+			`<{|x| x}>.B`,
+			object.BuiltInTrue,
+		},
 		// int
 		{
 			`10.B`,

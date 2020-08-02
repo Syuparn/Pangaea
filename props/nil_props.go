@@ -30,5 +30,19 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"B": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Nil#B requires at least 1 arg")
+				}
+				_, ok := traceProtoOf(args[0], isNil)
+				if !ok {
+					return object.NewTypeErr(`\1 must be nil`)
+				}
+				return object.BuiltInFalse
+			},
+		),
 	}
 }
