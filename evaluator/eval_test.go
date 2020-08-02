@@ -1733,6 +1733,44 @@ func TestEvalReduceChainPropCall(t *testing.T) {
 	}
 }
 
+func TestEvalIfExpr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 if true`,
+			object.NewPanInt(1),
+		},
+		{
+			`1 if false`,
+			object.BuiltInNil,
+		},
+		{
+			`10 if true else 5`,
+			object.NewPanInt(10),
+		},
+		{
+			`10 if false else 5`,
+			object.NewPanInt(5),
+		},
+		// cond other than bool
+		{
+			`'t if 100 else 'f`,
+			&object.PanStr{Value: "t"},
+		},
+		{
+			`'t if [] else 'f`,
+			&object.PanStr{Value: "f"},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string
