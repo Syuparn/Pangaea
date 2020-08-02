@@ -25,6 +25,7 @@ func TestJumpStmt(t *testing.T) {
 		{`return 1`, 1, ast.ReturnJump},
 		{`raise 2`, 2, ast.RaiseJump},
 		{`yield 3`, 3, ast.YieldJump},
+		{`defer 4`, 4, ast.DeferJump},
 	}
 
 	for _, tt := range tests {
@@ -58,6 +59,7 @@ func TestJumpIfStmt(t *testing.T) {
 		{`return 1 if 10`, 1, ast.ReturnJump, 10},
 		{`raise 2 if 20`, 2, ast.RaiseJump, 20},
 		{`yield 3 if 30`, 3, ast.YieldJump, 30},
+		{`defer 4 if 40`, 4, ast.DeferJump, 40},
 	}
 
 	for _, tt := range tests {

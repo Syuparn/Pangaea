@@ -81,6 +81,24 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			},
 		),
 		"at": propContainer["Arr_at"],
+		"B": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Arr#B requires at least 1 arg")
+				}
+				self, ok := traceProtoOf(args[0], isArr)
+				if !ok {
+					return object.NewTypeErr(`\1 must be arr`)
+				}
+
+				if len(self.(*object.PanArr).Elems) == 0 {
+					return object.BuiltInFalse
+				}
+				return object.BuiltInTrue
+			},
+		),
 	}
 }
 

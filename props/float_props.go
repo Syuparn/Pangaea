@@ -59,5 +59,23 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				return &object.PanFloat{Value: res}
 			},
 		),
+		"B": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Float#B requires at least 1 arg")
+				}
+				self, ok := traceProtoOf(args[0], isFloat)
+				if !ok {
+					return object.NewTypeErr(`\1 must be float`)
+				}
+
+				if self.(*object.PanFloat).Value == 0.0 {
+					return object.BuiltInFalse
+				}
+				return object.BuiltInTrue
+			},
+		),
 	}
 }

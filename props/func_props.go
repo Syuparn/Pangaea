@@ -45,6 +45,20 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 					builtIn.(*object.PanBuiltIn), other.(*object.PanBuiltIn))
 			},
 		),
+		"B": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Func#B requires at least 1 arg")
+				}
+				_, ok := traceProtoOf(args[0], isFunc)
+				if !ok {
+					return object.NewTypeErr(`\1 must be func`)
+				}
+				return object.BuiltInTrue
+			},
+		),
 		"call": propContainer["Func_call"],
 	}
 }

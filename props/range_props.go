@@ -33,6 +33,20 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					self.(*object.PanRange), other.(*object.PanRange), propContainer, env)
 			},
 		),
+		"B": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Range#B requires at least 1 arg")
+				}
+				_, ok := traceProtoOf(args[0], isRange)
+				if !ok {
+					return object.NewTypeErr(`\1 must be range`)
+				}
+				return object.BuiltInTrue
+			},
+		),
 	}
 }
 
