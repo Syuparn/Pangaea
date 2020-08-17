@@ -2658,8 +2658,20 @@ func TestEvalLonelyChain(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
+		// propcall
 		{
 			`nil&.a`,
+			object.BuiltInNil,
+		},
+		{
+			`[nil, {a: 1}]&@a`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+			}},
+		},
+		// literalcall
+		{
+			`nil&.{|x| x.a}`,
 			object.BuiltInNil,
 		},
 		{
@@ -2668,6 +2680,66 @@ func TestEvalLonelyChain(t *testing.T) {
 				object.NewPanInt(2),
 				object.NewPanInt(6),
 			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalThoughtfulChain(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// literalcall
+		{
+			`1~.{nil}`,
+			object.NewPanInt(1),
+		},
+		{
+			`['a, 'b]~@{|x| {a: 1}[x]}`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				&object.PanStr{Value: "b"},
+			}},
+		},
+		{
+			`[2, nil, 3, nil, 4]~$(1){|acc, i| acc * i}`,
+			object.NewPanInt(24),
+		},
+		// propcall
+		{
+			`{a: nil}~.a`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "a"},
+					Value: object.BuiltInNil,
+				},
+			}),
+		},
+		{
+			`[{a: 1}, {a: nil}]~@a`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				toPanObj([]object.Pair{
+					object.Pair{
+						Key:   &object.PanStr{Value: "a"},
+						Value: object.BuiltInNil,
+					},
+				}),
+			}},
+		},
+		{
+			`[2, nil, 3, nil, 4]~$(1)*`,
+			object.NewPanInt(24),
+		},
+		// avoid error
+		{
+			`{}~.a`,
+			toPanObj([]object.Pair{}),
 		},
 	}
 

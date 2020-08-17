@@ -26,17 +26,18 @@ func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
 	}
 
 	ignoresNil := node.Chain.Additional == ast.Lonely
+	recoversNil := node.Chain.Additional == ast.Thoughtful
 
 	switch node.Chain.Main {
 	case ast.Scalar:
 		return evalScalarPropCall(
-			node, env, recv, args, kwargs, ignoresNil)
+			node, env, recv, args, kwargs, ignoresNil, recoversNil)
 	case ast.List:
 		return evalListPropCall(
-			node, env, recv, args, kwargs, ignoresNil)
+			node, env, recv, args, kwargs, ignoresNil, recoversNil)
 	case ast.Reduce:
 		return evalReducePropCall(
-			node, env, recv, chainArg, args, kwargs, ignoresNil)
+			node, env, recv, chainArg, args, kwargs, ignoresNil, recoversNil)
 	default:
 		return nil
 	}
@@ -49,6 +50,7 @@ func evalListPropCall(
 	args []object.PanObject,
 	kwargs *object.PanObj,
 	ignoresNil bool,
+	recoversNil bool,
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
 	if err != nil {
@@ -63,17 +65,21 @@ func evalListPropCall(
 		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
 			object.EmptyPanObjPtr(), iter, nextSym)
 
+		if isStopIter(nextRet) {
+			break
+		}
+
 		if err, ok := nextRet.(*object.PanErr); ok {
-			if err.ErrType == object.STOP_ITER_ERR {
-				break
+			// thoughtful chain
+			if recoversNil {
+				continue
 			}
-			// if err is not StopIterErr, don't catch
 			return appendStackTrace(err, node.Source())
 		}
 
 		// treat next value as recv
 		evaluatedElem := evalScalarPropCall(
-			node, env, nextRet, args, kwargs, ignoresNil)
+			node, env, nextRet, args, kwargs, ignoresNil, recoversNil)
 
 		if err, ok := evaluatedElem.(*object.PanErr); ok {
 			return appendStackTrace(err, node.Source())
@@ -96,6 +102,7 @@ func evalReducePropCall(
 	args []object.PanObject,
 	kwargs *object.PanObj,
 	ignoresNil bool, // currently not used
+	recoversNil bool,
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
 	if err != nil {
@@ -110,16 +117,24 @@ func evalReducePropCall(
 		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
 			object.EmptyPanObjPtr(), iter, nextSym)
 
+		if isStopIter(nextRet) {
+			break
+		}
+
 		if err, ok := nextRet.(*object.PanErr); ok {
-			if err.ErrType == object.STOP_ITER_ERR {
-				break
+			// thoughtful chain
+			if recoversNil {
+				continue
 			}
-			// if err is not StopIterErr, don't catch
 			return appendStackTrace(err, node.Source())
 		}
 
 		prop := evalProp(node.Prop.Value, nextRet)
 		if err, ok := prop.(*object.PanErr); ok {
+			// thoughtful chain
+			if recoversNil {
+				continue
+			}
 			return appendStackTrace(err, node.Source())
 		}
 
@@ -127,6 +142,12 @@ func evalReducePropCall(
 		argsToPass := append([]object.PanObject{nextRet}, args...)
 		// reduce each iteration values
 		ret := evalCall(env, acc, prop, argsToPass, kwargs)
+
+		// thoughtful chain
+		if recoversNil && shouldRecover(ret) {
+			continue
+		}
+
 		if err, ok := ret.(*object.PanErr); ok {
 			return appendStackTrace(err, node.Source())
 		}
@@ -134,6 +155,17 @@ func evalReducePropCall(
 	}
 
 	return acc
+}
+
+func shouldRecover(ret object.PanObject) bool {
+	switch ret.Type() {
+	case "ERR_TYPE":
+		return true
+	case "NIL_TYPE":
+		return true
+	default:
+		return false
+	}
 }
 
 func iterOf(
@@ -163,6 +195,7 @@ func evalScalarPropCall(
 	args []object.PanObject,
 	kwargs *object.PanObj,
 	ignoresNil bool,
+	recoversNil bool,
 ) object.PanObject {
 	// lonely chain
 	if recv == object.BuiltInNil && ignoresNil {
@@ -171,10 +204,19 @@ func evalScalarPropCall(
 
 	prop := evalProp(node.Prop.Value, recv)
 	if err, ok := prop.(*object.PanErr); ok {
+		if recoversNil {
+			return recv
+		}
 		return appendStackTrace(err, node.Source())
 	}
 
 	ret := evalCall(env, recv, prop, args, kwargs)
+
+	// thoughtful chain
+	if recoversNil && shouldRecover(ret) {
+		return recv
+	}
+
 	if err, ok := ret.(*object.PanErr); ok {
 		return appendStackTrace(err, node.Source())
 	}
