@@ -123,6 +123,42 @@ func TestEvalStrLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalEmbeddedStr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"Hello, #{ "world" }!"`,
+			&object.PanStr{Value: "Hello, world!"},
+		},
+		// .S is called internal
+		{
+			`"1 + 1 = #{1 + 1}"`,
+			&object.PanStr{Value: "1 + 1 = 2"},
+		},
+		{
+			`"arr: #{ [1, 2, "3"] }"`,
+			&object.PanStr{Value: `arr: [1, 2, "3"]`},
+		},
+		// NOTE: currently obj and func literal cannot be embedded...
+		{
+			`obj := {a: 1}; "three: #{ obj.a + 2 if true }"`,
+			&object.PanStr{Value: `three: 3`},
+		},
+		// multiple embedding
+		{
+			`"a#{'bbc[1:]}d#{'eiffel[0:3:2]}g"`,
+			&object.PanStr{Value: `abcdefg`},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalBoolLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
