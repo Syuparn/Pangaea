@@ -98,6 +98,7 @@ import (
 %left MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
 %left ADD_CHAIN MAIN_CHAIN
 %left UNARY_OP
+%left CALLING
 %left GROUPING
 %left INDEXING
 
@@ -1428,7 +1429,7 @@ funcParams
 	}
 
 callExpr
-	: recvAndChain ident
+	: recvAndChain ident %prec CALLING
 	{
 		$$ = &ast.PropCallExpr{
 			Token: "(propCall)",
@@ -1440,7 +1441,7 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| recvAndChain ident callArgs
+	| recvAndChain ident callArgs %prec CALLING
 	{
 		$$ = &ast.PropCallExpr{
 			Token: "(propCall)",
@@ -1452,7 +1453,19 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| recvAndChain opMethod
+	| recvAndChain ident funcLiteral %prec CALLING
+	{
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
+			Prop: $2,
+			Args: []ast.Expr{$3},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| recvAndChain opMethod %prec CALLING
 	{
 		opIdent := &ast.Ident{
 			Token: $2.Literal,
@@ -1470,7 +1483,7 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| recvAndChain opMethod callArgs
+	| recvAndChain opMethod callArgs %prec CALLING
 	{
 		opIdent := &ast.Ident{
 			Token: $2.Literal,
@@ -1488,7 +1501,25 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| recvAndChain funcLiteral
+	| recvAndChain opMethod funcLiteral %prec CALLING
+	{
+		opIdent := &ast.Ident{
+			Token: $2.Literal,
+			Value: $2.Literal,
+			Src: yylex.(*Lexer).Source,
+			IsPrivate: true,
+		}
+		$$ = &ast.PropCallExpr{
+			Token: "(propCall)",
+			Chain: $1.Chain,
+			Receiver: $1.Recv,
+			Prop: opIdent,
+			Args: []ast.Expr{$3},
+			Kwargs: map[*ast.Ident]ast.Expr{},
+			Src: yylex.(*Lexer).Source,
+		}
+	}
+	| recvAndChain funcLiteral %prec CALLING
 	{
 		$$ = &ast.LiteralCallExpr{
 			Token: "(literalCall)",
@@ -1500,19 +1531,7 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| recvAndChain funcLiteral callArgs
-	{
-		$$ = &ast.LiteralCallExpr{
-			Token: "(literalCall)",
-			Chain: $1.Chain,
-			Receiver: $1.Recv,
-			Func: $2.(*ast.FuncLiteral),
-			Args: $3.Args,
-			Kwargs: $3.Kwargs,
-			Src: yylex.(*Lexer).Source,
-		}
-	}
-	| recvAndChain CARET ident
+	| recvAndChain CARET ident %prec CALLING
 	{
 		$$ = &ast.VarCallExpr{
 			Token: "(varCall)",
@@ -1524,7 +1543,7 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| recvAndChain CARET ident callArgs
+	| recvAndChain CARET ident callArgs %prec CALLING
 	{
 		$$ = &ast.VarCallExpr{
 			Token: "(varCall)",
@@ -1536,26 +1555,7 @@ callExpr
 			Src: yylex.(*Lexer).Source,
 		}
 	}
-	| ident callArgs
-	{
-		callIdent := &ast.Ident{
-			Token: "call",
-			Value: "call",
-			Src: yylex.(*Lexer).Source,
-			IsPrivate: false,
-			IdentAttr: ast.NormalIdent,
-		}
-		$$ = &ast.PropCallExpr{
-			Token: "(propCall)",
-			Chain: ast.MakeChain("", ".", nil),
-			Receiver: $1,
-			Prop: callIdent,
-			Args: $2.Args,
-			Kwargs: $2.Kwargs,
-			Src: yylex.(*Lexer).Source,
-		}
-	}
-	| funcLiteral callArgs
+	| unitExpr callArgs %prec CALLING
 	{
 		callIdent := &ast.Ident{
 			Token: "call",
@@ -1592,7 +1592,7 @@ recvAndChain
 	}
 
 callArgs
-	: lParen RPAREN
+	: lParen RPAREN %prec GROUPING
 	{
 		$$ = &ast.ArgList{
 			Args: []ast.Expr{},
@@ -1600,25 +1600,20 @@ callArgs
 		}
 		yylex.(*Lexer).curRule = "callArgs -> lParen RPAREN"
 	}
-	| lParen argList RPAREN
+	| lParen argList RPAREN %prec GROUPING
 	{
 		$$ = $2
 		yylex.(*Lexer).curRule = "callArgs -> lParen argList RPAREN"
 	}
-	| lParen argList RET RPAREN
+	| lParen argList RET RPAREN %prec GROUPING
 	{
 		$$ = $2
 		yylex.(*Lexer).curRule = "callArgs -> lParen argList RET RPAREN"
 	}
-	| callArgs funcLiteral
+	| callArgs funcLiteral %prec GROUPING
 	{
 		$$ = $1.AppendArg($2)
 		yylex.(*Lexer).curRule = "callArgs -> callArgs funcLiteral"
-	}
-	| funcLiteral
-	{
-		$$ = ast.ExprToArgList($1)
-		yylex.(*Lexer).curRule = "callArgs -> funcLiteral"
 	}
 
 opMethod

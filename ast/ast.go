@@ -212,15 +212,6 @@ func (lc *LiteralCallExpr) String() string {
 	out.WriteString(lc.Chain.String())
 	out.WriteString(lc.Func.String())
 
-	args := []string{}
-	for _, a := range lc.Args {
-		args = append(args, a.String())
-	}
-
-	args = append(args, sortedPairStrings(lc.Kwargs)...)
-
-	out.WriteString("(" + strings.Join(args, ", ") + ")")
-
 	return out.String()
 }
 
