@@ -2374,143 +2374,54 @@ func TestLiteralCallFunc(t *testing.T) {
 	testLiteralExpr(t, es1.Expr, 3)
 }
 
-func TestLiteralCallFuncArgs(t *testing.T) {
+func TestLiteralCallFuncAndArgs(t *testing.T) {
 	tests := []struct {
 		input   string
-		args    []interface{}
-		kwargs  map[string]interface{}
 		printed string
 	}{
 		{
-			`a.{|b| c}()`,
-			[]interface{}{},
-			map[string]interface{}{},
-			`a.{|b| c}()`,
-		},
-		{
 			`a.{|b| c}`,
-			[]interface{}{},
-			map[string]interface{}{},
+			`a.{|b| c}`,
+		},
+		// call func cannot have args
+		// (treated as propcall with recv (a.{|b| c}))
+		{
 			`a.{|b| c}()`,
+			`a.{|b| c}.call()`,
 		},
 		{
 			`a.m{c}`,
-			[]interface{}{},
-			map[string]interface{}{},
-			`a.{|self| c}()`,
+			`a.{|self| c}`,
 		},
 		{
 			`a.m{c}(1)`,
-			[]interface{}{1},
-			map[string]interface{}{},
-			`a.{|self| c}(1)`,
-		},
-		{
-			`a.{|b| c}(1)`,
-			[]interface{}{1},
-			map[string]interface{}{},
-			`a.{|b| c}(1)`,
-		},
-		{
-			`a.{|b| c}(1, foo)`,
-			[]interface{}{1, "foo"},
-			map[string]interface{}{},
-			`a.{|b| c}(1, foo)`,
-		},
-		{
-			`a.{|b| c}(foo: 2)`,
-			[]interface{}{},
-			map[string]interface{}{"foo": 2},
-			`a.{|b| c}(foo: 2)`,
-		},
-		{
-			`a.{|b| c}(1, foo, bar: 2)`,
-			[]interface{}{1, "foo"},
-			map[string]interface{}{"bar": 2},
-			`a.{|b| c}(1, foo, bar: 2)`,
-		},
-		{
-			`a.{|b| c}(1, bar: 2, foo)`,
-			[]interface{}{1, "foo"},
-			map[string]interface{}{"bar": 2},
-			`a.{|b| c}(1, foo, bar: 2)`,
-		},
-		{
-			`a.{|b| c}(1, f: 3, e, d: 2)`,
-			[]interface{}{1, "e"},
-			map[string]interface{}{"d": 2, "f": 3},
-			`a.{|b| c}(1, e, d: 2, f: 3)`,
-		},
-		{
-			`.{|b| c}()`,
-			[]interface{}{},
-			map[string]interface{}{},
-			`.{|b| c}()`,
+			`a.{|self| c}.call(1)`,
 		},
 		{
 			`.{|b| c}`,
-			[]interface{}{},
-			map[string]interface{}{},
+			`.{|b| c}`,
+		},
+		{
 			`.{|b| c}()`,
+			`.{|b| c}.call()`,
 		},
 		{
 			`.m{c}`,
-			[]interface{}{},
-			map[string]interface{}{},
-			`.{|self| c}()`,
+			`.{|self| c}`,
 		},
 		{
 			`.m{c}(1)`,
-			[]interface{}{1},
-			map[string]interface{}{},
-			`.{|self| c}(1)`,
+			`.{|self| c}.call(1)`,
 		},
 	}
 
 	for _, tt := range tests {
-		errPrefix := fmt.Sprintf("err in ```\n%s\n```\n", tt.input)
-
 		program := testParse(t, tt.input)
 		expr := extractExprStmt(t, program)
 
-		callExpr, ok := expr.(*ast.LiteralCallExpr)
-
-		if !ok {
-			t.Fatalf("%sexpr is not *ast.LiteralCallExpr. got=%T",
-				errPrefix, expr)
-		}
-		if len(callExpr.Args) != len(tt.args) {
-			t.Fatalf("%swrong arity of args, expected=%d, got=%d",
-				errPrefix, len(tt.args), len(callExpr.Args))
-		}
-
-		if len(callExpr.Kwargs) != len(tt.kwargs) {
-			t.Fatalf("%swrong arity of kwargs, expected=%d, got=%d",
-				errPrefix, len(tt.kwargs), len(callExpr.Kwargs))
-		}
-
-		if callExpr.String() != tt.printed {
+		if expr.String() != tt.printed {
 			t.Errorf("wrong output.expected=\n%s,\ngot=\n%s",
-				tt.printed, callExpr.String())
-		}
-
-		for i, expArg := range tt.args {
-			switch a := expArg.(type) {
-			case string:
-				testIdentifier(t, callExpr.Args[i], a)
-			default:
-				testLiteralExpr(t, callExpr.Args[i], a)
-			}
-		}
-
-		for ident, val := range callExpr.Kwargs {
-			name := ident.Token
-			exp, ok := tt.kwargs[name]
-			if ok {
-				testLiteralExpr(t, val, exp)
-			} else {
-				t.Errorf("unexpected kwarg %s found.", name)
-			}
+				tt.printed, expr.String())
 		}
 	}
 }
@@ -2772,7 +2683,7 @@ func TestMultipleLineChain(t *testing.T) {
 	program := testParse(t, input)
 	expr := extractExprStmt(t, program)
 
-	expectedStr := `foo.bar(1)@{|i| (i * 2)}()$(3)^hoge()~.+()`
+	expectedStr := `foo.bar(1)@{|i| (i * 2)}$(3)^hoge()~.+()`
 	if expr.String() != expectedStr {
 		t.Errorf("wrong output. expected=`\n%s\n`, got=`\n%s\n`",
 			expectedStr, expr.String())
