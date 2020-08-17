@@ -2653,6 +2653,30 @@ func TestEvalLiteralCall(t *testing.T) {
 	}
 }
 
+func TestEvalLonelyChain(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`nil&.a`,
+			object.BuiltInNil,
+		},
+		{
+			`[1, nil, 3]&@{|x| x * 2}`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(2),
+				object.NewPanInt(6),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestNameErr(t *testing.T) {
 	tests := []struct {
 		input    string
