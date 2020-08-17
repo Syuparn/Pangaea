@@ -36,6 +36,40 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInFalse
 			},
 		),
+		"-%": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("\\- requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isInt)
+				if !ok {
+					return object.NewTypeErr("\\1 must be int")
+				}
+
+				res := -self.(*object.PanInt).Value
+				return object.NewPanInt(res)
+			},
+		),
+		"/~": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("/~ requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isInt)
+				if !ok {
+					return object.NewTypeErr("\\1 must be int")
+				}
+
+				res := ^self.(*object.PanInt).Value
+				return object.NewPanInt(res)
+			},
+		),
 		"+": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
