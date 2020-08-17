@@ -25,13 +25,18 @@ func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
 		return appendStackTrace(err, node.Source())
 	}
 
+	ignoresNil := node.Chain.Additional == ast.Lonely
+
 	switch node.Chain.Main {
 	case ast.Scalar:
-		return evalScalarPropCall(node, env, recv, args, kwargs)
+		return evalScalarPropCall(
+			node, env, recv, args, kwargs, ignoresNil)
 	case ast.List:
-		return evalListPropCall(node, env, recv, args, kwargs)
+		return evalListPropCall(
+			node, env, recv, args, kwargs, ignoresNil)
 	case ast.Reduce:
-		return evalReducePropCall(node, env, recv, chainArg, args, kwargs)
+		return evalReducePropCall(
+			node, env, recv, chainArg, args, kwargs, ignoresNil)
 	default:
 		return nil
 	}
@@ -43,6 +48,7 @@ func evalListPropCall(
 	recv object.PanObject,
 	args []object.PanObject,
 	kwargs *object.PanObj,
+	ignoresNil bool,
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
 	if err != nil {
@@ -66,7 +72,8 @@ func evalListPropCall(
 		}
 
 		// treat next value as recv
-		evaluatedElem := evalScalarPropCall(node, env, nextRet, args, kwargs)
+		evaluatedElem := evalScalarPropCall(
+			node, env, nextRet, args, kwargs, ignoresNil)
 
 		if err, ok := evaluatedElem.(*object.PanErr); ok {
 			return appendStackTrace(err, node.Source())
@@ -88,6 +95,7 @@ func evalReducePropCall(
 	chainArg object.PanObject,
 	args []object.PanObject,
 	kwargs *object.PanObj,
+	ignoresNil bool, // currently not used
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
 	if err != nil {
@@ -154,7 +162,13 @@ func evalScalarPropCall(
 	recv object.PanObject,
 	args []object.PanObject,
 	kwargs *object.PanObj,
+	ignoresNil bool,
 ) object.PanObject {
+	// lonely chain
+	if recv == object.BuiltInNil && ignoresNil {
+		return recv
+	}
+
 	prop := evalProp(node.Prop.Value, recv)
 	if err, ok := prop.(*object.PanErr); ok {
 		return appendStackTrace(err, node.Source())
