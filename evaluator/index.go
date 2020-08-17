@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"../object"
+	"bytes"
 )
 
 func findElemInObj(
@@ -75,6 +76,45 @@ func findElemInArr(
 	}
 }
 
+func findElemInStr(
+	env *object.Env,
+	kwargs *object.PanObj,
+	args ...object.PanObject,
+) object.PanObject {
+	// NOTE: if index is not found, Obj#at is called
+
+	if len(args) < 2 {
+		return object.NewTypeErr("Str#at requires at least 2 args")
+	}
+	// TODO: duck typing for keys (allow child of arr)
+	self, ok := args[0].(*object.PanStr)
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	// TODO: duck typing for keys (allow child of arr)
+	indexArr, ok := args[1].(*object.PanArr)
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	if len(indexArr.Elems) < 1 {
+		return object.BuiltInNil
+	}
+
+	runes := []rune(self.Value)
+
+	switch index := indexArr.Elems[0].(type) {
+	case *object.PanInt:
+		// TODO: duck typing for keys (allow child of int)
+		return strIndex(index.Value, runes)
+	case *object.PanRange:
+		return strRange(index, runes)
+	default:
+		return findElemInObj(env, kwargs, args...)
+	}
+}
+
 func arrIndex(index int64, arr *object.PanArr) object.PanObject {
 	length := int64(len(arr.Elems))
 	if index >= length || index < -length {
@@ -88,10 +128,44 @@ func arrIndex(index int64, arr *object.PanArr) object.PanObject {
 	return arr.Elems[index]
 }
 
+func strIndex(index int64, runes []rune) object.PanObject {
+	length := int64(len(runes))
+	if index >= length || index < -length {
+		return object.BuiltInNil
+	}
+
+	if index < 0 {
+		return &object.PanStr{Value: string(runes[index+length])}
+	}
+
+	return &object.PanStr{Value: string(runes[index])}
+}
+
 func arrRange(r *object.PanRange, arr *object.PanArr) object.PanObject {
-	ok := canBeUsedForArrRange(r.Start) &&
-		canBeUsedForArrRange(r.Stop) &&
-		canBeUsedForArrRange(r.Step)
+	return valRange(r, len(arr.Elems), func(i int64) object.PanObject {
+		return arrIndex(i, arr)
+	})
+}
+
+func strRange(r *object.PanRange, runes []rune) object.PanObject {
+	runeArr := valRange(r, len(runes), func(i int64) object.PanObject {
+		return strIndex(i, runes)
+	})
+	var out bytes.Buffer
+	for _, elem := range runeArr.(*object.PanArr).Elems {
+		out.WriteString(elem.(*object.PanStr).Value)
+	}
+	return &object.PanStr{Value: out.String()}
+}
+
+func valRange(
+	r *object.PanRange,
+	size int,
+	valIndex func(int64) object.PanObject,
+) object.PanObject {
+	ok := canBeUsedForRange(r.Start) &&
+		canBeUsedForRange(r.Stop) &&
+		canBeUsedForRange(r.Step)
 	if !ok {
 		// empty array
 		return &object.PanArr{Elems: []object.PanObject{}}
@@ -107,7 +181,7 @@ func arrRange(r *object.PanRange, arr *object.PanArr) object.PanObject {
 		return object.NewValueErr("cannot use 0 for range step")
 	}
 
-	start, stop := fixRange(r, int64(len(arr.Elems)), step)
+	start, stop := fixRange(r, int64(size), step)
 
 	hasNext := func(i int64, stop int64) bool {
 		if step < 0 {
@@ -118,13 +192,13 @@ func arrRange(r *object.PanRange, arr *object.PanArr) object.PanObject {
 
 	elems := []object.PanObject{}
 	for i := start; hasNext(i, stop); i += step {
-		elems = append(elems, arrIndex(i, arr))
+		elems = append(elems, valIndex(i))
 	}
 
 	return &object.PanArr{Elems: elems}
 }
 
-func canBeUsedForArrRange(o object.PanObject) bool {
+func canBeUsedForRange(o object.PanObject) bool {
 	return o.Type() == object.INT_TYPE || o.Type() == object.NIL_TYPE
 }
 
