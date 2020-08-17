@@ -37,6 +37,28 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInFalse
 			},
 		),
+		"/~": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("/~ requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isStr)
+				if !ok {
+					return object.NewTypeErr("\\1 must be str")
+				}
+
+				strBytes := []byte(self.(*object.PanStr).Value)
+				negBytes := []byte{}
+				for _, b := range strBytes {
+					negBytes = append(negBytes, ^b)
+				}
+
+				return &object.PanStr{Value: string(negBytes)}
+			},
+		),
 		"+": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

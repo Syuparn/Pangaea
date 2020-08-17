@@ -3502,6 +3502,69 @@ func TestEvalInfixConstsEq(t *testing.T) {
 	}
 }
 
+func TestEvalPrefix(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`!false`,
+			object.BuiltInTrue,
+		},
+		// NOTE: negative number (like `-1`) is treated as literal by parser
+		{
+			`a := 1; -a`,
+			&object.PanInt{Value: -1},
+		},
+		{
+			`/~1`,
+			&object.PanInt{Value: -2},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalPrefixNot(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`!false`,
+			object.BuiltInTrue,
+		},
+		{
+			`!true`,
+			object.BuiltInFalse,
+		},
+		{
+			`!0`,
+			object.BuiltInTrue,
+		},
+		{
+			`!100`,
+			object.BuiltInFalse,
+		},
+		{
+			`!""`,
+			object.BuiltInTrue,
+		},
+		{
+			`!'a`,
+			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
