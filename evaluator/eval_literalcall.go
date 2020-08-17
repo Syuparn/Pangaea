@@ -31,15 +31,19 @@ func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObjec
 		return appendStackTrace(err, node.Source())
 	}
 
-	// TODO: handle args/kwargs
+	ignoresNil := node.Chain.Additional == ast.Lonely
+	recoversNil := node.Chain.Additional == ast.Thoughtful
 
 	switch node.Chain.Main {
 	case ast.Scalar:
-		return evalScalarLiteralCall(node, env, f, recv)
+		return evalScalarLiteralCall(
+			node, env, f, recv, ignoresNil, recoversNil)
 	case ast.List:
-		return evalListLiteralCall(node, env, f, recv)
+		return evalListLiteralCall(
+			node, env, f, recv, ignoresNil, recoversNil)
 	case ast.Reduce:
-		return evalReduceLiteralCall(node, env, f, recv, chainArg)
+		return evalReduceLiteralCall(
+			node, env, f, recv, chainArg, ignoresNil, recoversNil)
 	default:
 		return nil
 	}
@@ -50,11 +54,21 @@ func evalScalarLiteralCall(
 	env *object.Env,
 	f *object.PanFunc,
 	recv object.PanObject,
+	ignoresNil bool,
+	recoversNil bool,
 ) object.PanObject {
 	args := literalCallArgs(recv, f)
 	// prepend f itself to args
 	args = append([]object.PanObject{f}, args...)
-	return _evalLiteralCall(node, env, f, args)
+
+	ret := _evalLiteralCall(node, env, f, args)
+
+	// thoughtful chain
+	if recoversNil && shouldRecover(ret) {
+		return recv
+	}
+
+	return ret
 }
 
 func evalListLiteralCall(
@@ -62,6 +76,8 @@ func evalListLiteralCall(
 	env *object.Env,
 	f *object.PanFunc,
 	recv object.PanObject,
+	ignoresNil bool,
+	recoversNil bool,
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
 	if err != nil {
@@ -76,11 +92,16 @@ func evalListLiteralCall(
 		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
 			object.EmptyPanObjPtr(), iter, nextSym)
 
+		if isStopIter(nextRet) {
+			break
+		}
+
 		if err, ok := nextRet.(*object.PanErr); ok {
-			if err.ErrType == object.STOP_ITER_ERR {
-				break
+			// thoughtful chain
+			if recoversNil {
+				evaluatedElems = append(evaluatedElems, nextRet)
+				continue
 			}
-			// if err is not StopIterErr, don't catch
 			return appendStackTrace(err, node.Source())
 		}
 
@@ -90,6 +111,11 @@ func evalListLiteralCall(
 
 		// treat next value as recv
 		evaluatedElem := _evalLiteralCall(node, env, f, args)
+
+		// thoughtful chain
+		if recoversNil && shouldRecover(evaluatedElem) {
+			evaluatedElems = append(evaluatedElems, nextRet)
+		}
 
 		if err, ok := evaluatedElem.(*object.PanErr); ok {
 			return appendStackTrace(err, node.Source())
@@ -104,12 +130,22 @@ func evalListLiteralCall(
 	return &object.PanArr{Elems: evaluatedElems}
 }
 
+func isStopIter(obj object.PanObject) bool {
+	err, ok := obj.(*object.PanErr)
+	if !ok {
+		return false
+	}
+	return err.ErrType == object.STOP_ITER_ERR
+}
+
 func evalReduceLiteralCall(
 	node *ast.LiteralCallExpr,
 	env *object.Env,
 	f *object.PanFunc,
 	recv object.PanObject,
 	chainArg object.PanObject,
+	ignoresNil bool,
+	recoversNil bool,
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
 	if err != nil {
@@ -124,11 +160,15 @@ func evalReduceLiteralCall(
 		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
 			object.EmptyPanObjPtr(), iter, nextSym)
 
+		if isStopIter(nextRet) {
+			break
+		}
+
 		if err, ok := nextRet.(*object.PanErr); ok {
-			if err.ErrType == object.STOP_ITER_ERR {
-				break
+			// thoughtful chain
+			if recoversNil {
+				continue
 			}
-			// if err is not StopIterErr, don't catch
 			return appendStackTrace(err, node.Source())
 		}
 
@@ -136,6 +176,12 @@ func evalReduceLiteralCall(
 		args := []object.PanObject{f, acc, nextRet}
 		// reduce each iteration values
 		ret := _evalLiteralCall(node, env, f, args)
+
+		// thoughtful chain
+		if recoversNil && shouldRecover(ret) {
+			continue
+		}
+
 		if err, ok := ret.(*object.PanErr); ok {
 			return appendStackTrace(err, node.Source())
 		}
