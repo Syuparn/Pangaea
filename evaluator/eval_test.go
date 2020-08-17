@@ -2658,8 +2658,20 @@ func TestEvalLonelyChain(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
+		// propcall
 		{
 			`nil&.a`,
+			object.BuiltInNil,
+		},
+		{
+			`[nil, {a: 1}]&@a`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+			}},
+		},
+		// literalcall
+		{
+			`nil&.{|x| x.a}`,
 			object.BuiltInNil,
 		},
 		{

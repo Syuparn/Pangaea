@@ -57,6 +57,11 @@ func evalScalarLiteralCall(
 	ignoresNil bool,
 	recoversNil bool,
 ) object.PanObject {
+	// lonely chain
+	if ignoresNil && recv == object.BuiltInNil {
+		return recv
+	}
+
 	args := literalCallArgs(recv, f)
 	// prepend f itself to args
 	args = append([]object.PanObject{f}, args...)
@@ -144,7 +149,7 @@ func evalReduceLiteralCall(
 	f *object.PanFunc,
 	recv object.PanObject,
 	chainArg object.PanObject,
-	ignoresNil bool,
+	ignoresNil bool, // currently not used
 	recoversNil bool,
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
