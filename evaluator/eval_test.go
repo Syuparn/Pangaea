@@ -2749,6 +2749,35 @@ func TestEvalThoughtfulChain(t *testing.T) {
 	}
 }
 
+func TestEvalStrictChain(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// literalcall
+		{
+			`[1, nil]=@{|i| i}`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.BuiltInNil,
+			}},
+		},
+		// propcall
+		{
+			`[{a: 1}, {a: nil}]=@a`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.BuiltInNil,
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestNameErr(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -27,6 +27,7 @@ func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
 
 	ignoresNil := node.Chain.Additional == ast.Lonely
 	recoversNil := node.Chain.Additional == ast.Thoughtful
+	squashesNil := node.Chain.Additional != ast.Strict
 
 	switch node.Chain.Main {
 	case ast.Scalar:
@@ -34,7 +35,7 @@ func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
 			node, env, recv, args, kwargs, ignoresNil, recoversNil)
 	case ast.List:
 		return evalListPropCall(
-			node, env, recv, args, kwargs, ignoresNil, recoversNil)
+			node, env, recv, args, kwargs, ignoresNil, recoversNil, squashesNil)
 	case ast.Reduce:
 		return evalReducePropCall(
 			node, env, recv, chainArg, args, kwargs, ignoresNil, recoversNil)
@@ -51,6 +52,7 @@ func evalListPropCall(
 	kwargs *object.PanObj,
 	ignoresNil bool,
 	recoversNil bool,
+	squashesNil bool,
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
 	if err != nil {
@@ -85,10 +87,12 @@ func evalListPropCall(
 			return appendStackTrace(err, node.Source())
 		}
 
-		// NOTE: nil is ignored
-		if evaluatedElem != object.BuiltInNil {
-			evaluatedElems = append(evaluatedElems, evaluatedElem)
+		// ignore nil
+		if squashesNil && evaluatedElem == object.BuiltInNil {
+			continue
 		}
+
+		evaluatedElems = append(evaluatedElems, evaluatedElem)
 	}
 
 	return &object.PanArr{Elems: evaluatedElems}

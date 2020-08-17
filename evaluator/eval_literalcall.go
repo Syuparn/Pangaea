@@ -33,6 +33,7 @@ func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObjec
 
 	ignoresNil := node.Chain.Additional == ast.Lonely
 	recoversNil := node.Chain.Additional == ast.Thoughtful
+	squashesNil := node.Chain.Additional != ast.Strict
 
 	switch node.Chain.Main {
 	case ast.Scalar:
@@ -40,7 +41,7 @@ func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObjec
 			node, env, f, recv, ignoresNil, recoversNil)
 	case ast.List:
 		return evalListLiteralCall(
-			node, env, f, recv, ignoresNil, recoversNil)
+			node, env, f, recv, ignoresNil, recoversNil, squashesNil)
 	case ast.Reduce:
 		return evalReduceLiteralCall(
 			node, env, f, recv, chainArg, ignoresNil, recoversNil)
@@ -83,6 +84,7 @@ func evalListLiteralCall(
 	recv object.PanObject,
 	ignoresNil bool,
 	recoversNil bool,
+	squashesNil bool,
 ) object.PanObject {
 	iter, err := iterOf(env, recv)
 	if err != nil {
@@ -126,10 +128,12 @@ func evalListLiteralCall(
 			return appendStackTrace(err, node.Source())
 		}
 
-		// NOTE: nil is ignored
-		if evaluatedElem != object.BuiltInNil {
-			evaluatedElems = append(evaluatedElems, evaluatedElem)
+		// ignore nil
+		if squashesNil && evaluatedElem == object.BuiltInNil {
+			continue
 		}
+
+		evaluatedElems = append(evaluatedElems, evaluatedElem)
 	}
 
 	return &object.PanArr{Elems: evaluatedElems}
