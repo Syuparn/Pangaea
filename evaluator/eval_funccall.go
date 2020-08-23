@@ -67,6 +67,18 @@ func assignArgsToEnv(
 		}
 	}
 
+	// set argvars (like `\1`)
+	for i, arg := range args {
+		argVar := fmt.Sprintf(`\%d`, i+1)
+		env.Set(object.GetSymHash(argVar), arg)
+	}
+	// `\0`
+	env.Set(object.GetSymHash(`\0`), &object.PanArr{Elems: args})
+	// `\`
+	if len(args) > 0 {
+		env.Set(object.GetSymHash(`\`), args[0])
+	}
+
 	for symHash, defaultPair := range *kwargParams.Pairs {
 		kwargPair, ok := (*kwargs.Pairs)[symHash]
 
