@@ -88,6 +88,14 @@ func assignArgsToEnv(
 			env.Set(symHash, defaultPair.Value)
 		}
 	}
+
+	// set kwargvars (like `\hoge`)
+	for _, kwargPair := range *kwargs.Pairs {
+		sym := fmt.Sprintf("\\%s", kwargPair.Key.(*object.PanStr).Value)
+		env.Set(object.GetSymHash(sym), kwargPair.Value)
+	}
+	// `\_`
+	env.Set(object.GetSymHash("\\_"), kwargs)
 }
 
 func paddedArgs(args []object.PanObject, params []object.PanObject) []object.PanObject {

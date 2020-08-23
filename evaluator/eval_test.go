@@ -1291,7 +1291,12 @@ func toEnv(
 	for _, pair := range kwargPairs {
 		sym := object.GetSymHash(pair.Key.(*object.PanStr).Value)
 		env.Set(sym, pair.Value)
+		// \hoge
+		kwargSym := object.GetSymHash("\\" + pair.Key.(*object.PanStr).Value)
+		env.Set(kwargSym, pair.Value)
 	}
+	// \_
+	env.Set(object.GetSymHash("\\_"), toPanObj(kwargPairs))
 
 	return env
 }
@@ -2069,6 +2074,53 @@ func TestEvalArgVars(t *testing.T) {
 				&object.PanStr{Value: "one"},
 				&object.PanStr{Value: "two"},
 			}},
+		},
+		// NOTE: \0 does not contain kwargs
+		{
+			`{\0}("arg", kwarg: "kwarg")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "arg"},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalKwargVars(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{\a}(a: "A", b: "B")`,
+			&object.PanStr{Value: "A"},
+		},
+		{
+			`{\b}(a: "A", b: "B")`,
+			&object.PanStr{Value: "B"},
+		},
+		// NameErr if kwarg is not found
+		{
+			`{\c}(a: "A", b: "B")`,
+			object.NewNameErr("name `\\c` is not defined."),
+		},
+		// `\_` is obj of all kwargs
+		{
+			`{\_}(one: 1, two: 2)`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "one"},
+					Value: object.NewPanInt(1),
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "two"},
+					Value: object.NewPanInt(2),
+				},
+			}),
 		},
 		// NOTE: \0 does not contain kwargs
 		{
