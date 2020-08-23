@@ -36,6 +36,35 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInFalse
 			},
 		),
+		// TODO: use <=> instead
+		"!=": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("== requires at least 2 args")
+				}
+
+				// necessary for Int itself! (guarantee `Int == Int`)
+				if args[0] == object.BuiltInIntObj && args[1] == object.BuiltInIntObj {
+					return object.BuiltInTrue
+				}
+
+				self, ok := traceProtoOf(args[0], isInt)
+				if !ok {
+					return object.BuiltInFalse
+				}
+				other, ok := traceProtoOf(args[1], isInt)
+				if !ok {
+					return object.BuiltInFalse
+				}
+
+				if self.(*object.PanInt).Value != other.(*object.PanInt).Value {
+					return object.BuiltInTrue
+				}
+				return object.BuiltInFalse
+			},
+		),
 		"-%": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

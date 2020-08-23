@@ -33,6 +33,16 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				return compFuncs(self.(*object.PanFunc), other.(*object.PanFunc))
 			},
 		),
+		"_iter": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Iter#_iter requires at least 1 arg")
+				}
+				return args[0]
+			},
+		),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

@@ -1744,6 +1744,15 @@ func TestEvalListChainPropCall(t *testing.T) {
 				&object.PanStr{Value: "語"},
 			}},
 		},
+		// NOTE: must new() to init params
+		{
+			`<{|i| yield i if i != 3; recur(i+1)}>.new(0)@S`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "0"},
+				&object.PanStr{Value: "1"},
+				&object.PanStr{Value: "2"},
+			}},
+		},
 		// TODO: check obj/map/range
 	}
 
