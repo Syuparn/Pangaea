@@ -1215,6 +1215,7 @@ func TestEvalIterNew(t *testing.T) {
 							Value: &object.PanInt{Value: 10},
 						},
 					},
+					[]object.Pair{},
 					outerEnv,
 				),
 			),
@@ -1240,6 +1241,8 @@ func TestEvalIterNew(t *testing.T) {
 							Key:   &object.PanStr{Value: "b"},
 							Value: &object.PanStr{Value: "B"},
 						},
+					},
+					[]object.Pair{
 						object.Pair{
 							Key:   &object.PanStr{Value: "c"},
 							Value: &object.PanStr{Value: "C"},
@@ -1261,12 +1264,40 @@ func TestEvalIterNew(t *testing.T) {
 	}
 }
 
-func toEnv(pairs []object.Pair, outer *object.Env) *object.Env {
+func toEnv(
+	argPairs []object.Pair,
+	kwargPairs []object.Pair,
+	outer *object.Env,
+) *object.Env {
 	env := object.NewEnclosedEnv(outer)
-	for _, pair := range pairs {
+	for i, pair := range argPairs {
 		sym := object.GetSymHash(pair.Key.(*object.PanStr).Value)
 		env.Set(sym, pair.Value)
+		// \n
+		argSym := object.GetSymHash(fmt.Sprintf(`\%d`, i+1))
+		env.Set(argSym, pair.Value)
 	}
+	// \0
+	argValues := []object.PanObject{}
+	for _, pair := range argPairs {
+		argValues = append(argValues, pair.Value)
+	}
+	env.Set(object.GetSymHash(`\0`), &object.PanArr{Elems: argValues})
+	// \
+	if len(argValues) > 0 {
+		env.Set(object.GetSymHash("\\"), argValues[0])
+	}
+
+	for _, pair := range kwargPairs {
+		sym := object.GetSymHash(pair.Key.(*object.PanStr).Value)
+		env.Set(sym, pair.Value)
+		// \hoge
+		kwargSym := object.GetSymHash("\\" + pair.Key.(*object.PanStr).Value)
+		env.Set(kwargSym, pair.Value)
+	}
+	// \_
+	env.Set(object.GetSymHash("\\_"), toPanObj(kwargPairs))
+
 	return env
 }
 
@@ -2004,6 +2035,99 @@ func TestEvalAssignShadowingConsts(t *testing.T) {
 		{
 			`true := 100; true`,
 			&object.PanInt{Value: 100},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalArgVars(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{\1}("a", "b")`,
+			&object.PanStr{Value: "a"},
+		},
+		{
+			`{\2}("a", "b")`,
+			&object.PanStr{Value: "b"},
+		},
+		// NameErr if number exceeds arity
+		{
+			`{\3}("a", "b")`,
+			object.NewNameErr("name `\\3` is not defined."),
+		},
+		// `\` is syntax sugar of `\1`
+		{
+			`{\}("one", "two")`,
+			&object.PanStr{Value: "one"},
+		},
+		// `\0` is arr of all args
+		{
+			`{\0}("one", "two")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "one"},
+				&object.PanStr{Value: "two"},
+			}},
+		},
+		// NOTE: \0 does not contain kwargs
+		{
+			`{\0}("arg", kwarg: "kwarg")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "arg"},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalKwargVars(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{\a}(a: "A", b: "B")`,
+			&object.PanStr{Value: "A"},
+		},
+		{
+			`{\b}(a: "A", b: "B")`,
+			&object.PanStr{Value: "B"},
+		},
+		// NameErr if kwarg is not found
+		{
+			`{\c}(a: "A", b: "B")`,
+			object.NewNameErr("name `\\c` is not defined."),
+		},
+		// `\_` is obj of all kwargs
+		{
+			`{\_}(one: 1, two: 2)`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   &object.PanStr{Value: "one"},
+					Value: object.NewPanInt(1),
+				},
+				object.Pair{
+					Key:   &object.PanStr{Value: "two"},
+					Value: object.NewPanInt(2),
+				},
+			}),
+		},
+		// NOTE: \0 does not contain kwargs
+		{
+			`{\0}("arg", kwarg: "kwarg")`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "arg"},
+			}},
 		},
 	}
 
