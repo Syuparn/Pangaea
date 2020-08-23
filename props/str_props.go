@@ -3,11 +3,27 @@ package props
 import (
 	"../object"
 	"fmt"
+	"strings"
 )
 
 func StrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
+		"<=>": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkStrInfixArgs(args, "<=>")
+				if err != nil {
+					return err
+				}
+
+				selfVal := self.(*object.PanStr).Value
+				otherVal := other.(*object.PanStr).Value
+
+				return object.NewPanInt(int64(strings.Compare(selfVal, otherVal)))
+			},
+		),
 		"==": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -70,6 +86,32 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				res := self.(*object.PanStr).Value + other.(*object.PanStr).Value
 				return &object.PanStr{Value: res}
+			},
+		),
+		"_incBy": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Str#_incBy requires at least 2 args")
+				}
+
+				self, ok := traceProtoOf(args[0], isStr)
+				if !ok {
+					return object.NewTypeErr("\\1 must be str")
+				}
+
+				nInt, ok := traceProtoOf(args[1], isInt)
+				if !ok {
+					return object.NewTypeErr("\\2 must be int")
+				}
+				n := nInt.(*object.PanInt).Value
+
+				runes := []rune(self.(*object.PanStr).Value)
+				increasedRune := runes[len(runes)-1] + rune(n)
+				newRunes := append(runes[0:len(runes)-1], increasedRune)
+
+				return &object.PanStr{Value: string(newRunes)}
 			},
 		),
 		"_iter": f(
