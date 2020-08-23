@@ -1716,6 +1716,80 @@ func TestEvalStrIter(t *testing.T) {
 	}
 }
 
+func TestEvalRangeIter(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`it := (0:2)._iter
+			 it.next`,
+			object.NewPanInt(0),
+		},
+		{
+			`it := (0:2)._iter
+			 it.next
+			 it.next`,
+			object.NewPanInt(1),
+		},
+		{
+			`it := (0:2)._iter
+			 it.next
+			 it.next`,
+			object.NewPanInt(1),
+		},
+		{
+			`it := (0:2)._iter
+			 it.next
+			 it.next
+			 it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+		{
+			`it := (10:7:-2)._iter
+			 it.next`,
+			object.NewPanInt(10),
+		},
+		{
+			`it := (10:7:-2)._iter
+			 it.next
+			 it.next`,
+			object.NewPanInt(8),
+		},
+		{
+			`it := (10:7:-2)._iter
+			 it.next
+			 it.next
+			 it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+		// str
+		{
+			`it := ('a:'c)._iter
+			 it.next`,
+			&object.PanStr{Value: "a"},
+		},
+		{
+			`it := ('a:'c)._iter
+			 it.next
+			 it.next`,
+			&object.PanStr{Value: "b"},
+		},
+		{
+			`it := ('a:'c)._iter
+			 it.next
+			 it.next
+			 it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalListChainPropCall(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1753,7 +1827,15 @@ func TestEvalListChainPropCall(t *testing.T) {
 				&object.PanStr{Value: "2"},
 			}},
 		},
-		// TODO: check obj/map/range
+		{
+			`(1:6:2)@S`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanStr{Value: "1"},
+				&object.PanStr{Value: "3"},
+				&object.PanStr{Value: "5"},
+			}},
+		},
+		// TODO: check obj/map
 	}
 
 	for _, tt := range tests {
