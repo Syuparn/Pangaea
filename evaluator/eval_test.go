@@ -1716,6 +1716,71 @@ func TestEvalStrIter(t *testing.T) {
 	}
 }
 
+func TestEvalObjIter(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`it := {a: "A", b: "B"}._iter
+			 it.next`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.NewPanStr("A"),
+			}},
+		},
+		{
+			`it := {a: "A", b: "B"}._iter
+			 it.next
+			 it.next`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("b"),
+				object.NewPanStr("B"),
+			}},
+		},
+		// sorted in alphabetical order of keys
+		{
+			`it := {b: "B", a: "A"}._iter
+			 it.next`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.NewPanStr("A"),
+			}},
+		},
+		{
+			`it := {b: "B", a: "A"}._iter
+			 it.next
+			 it.next`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("b"),
+				object.NewPanStr("B"),
+			}},
+		},
+		{
+			`it := {a: "A", b: "B"}._iter
+			it.next
+			it.next
+			it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+		// private keys are ignored
+		{
+			`it := {
+				_secret: "invisible",
+				'+: "PLUS",
+				"include spaces": "ignored",
+			 }._iter
+			 it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalRangeIter(t *testing.T) {
 	tests := []struct {
 		input    string

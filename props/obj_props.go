@@ -30,6 +30,25 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"_iter": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Obj#_iter requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isObj)
+				if !ok {
+					return object.NewTypeErr(`Obj#_iter cannot be applied to \1`)
+				}
+
+				return &object.PanBuiltInIter{
+					Fn:  objIter(self.(*object.PanObj)),
+					Env: env, // not used
+				}
+			},
+		),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -129,4 +148,29 @@ func dtoaWrapper(f float64) string {
 	//               buf,    val, maxDecimalPlaces
 	buf := dtoa.Dtoa([]byte{}, f, 324)
 	return string(buf)
+}
+
+func objIter(o *object.PanObj) object.BuiltInFunc {
+	yieldIdx := 0
+	hashes := *o.Keys
+
+	return func(
+		env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+	) object.PanObject {
+		if yieldIdx >= len(hashes) {
+			return object.NewStopIterErr("iter stopped")
+		}
+		pair, ok := (*o.Pairs)[hashes[yieldIdx]]
+		// must be ok
+		if !ok {
+			return object.NewValueErr("pair data in obj somehow got changed")
+		}
+
+		yielded := &object.PanArr{Elems: []object.PanObject{
+			pair.Key,
+			pair.Value,
+		}}
+		yieldIdx += 1
+		return yielded
+	}
 }

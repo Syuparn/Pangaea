@@ -82,7 +82,81 @@ func TestObjProto(t *testing.T) {
 				tt.expectedName, tt.obj.Proto(), tt.obj.Proto())
 		}
 	}
+}
 
+func TestObjKeys(t *testing.T) {
+	tests := []struct {
+		obj      PanObject
+		expected []SymHash
+	}{
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{}),
+			[]SymHash{},
+		},
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
+			}),
+			[]SymHash{
+				GetSymHash("a"),
+			},
+		},
+		// keys are ordered alphabetically
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
+				GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: NewPanInt(2)},
+			}),
+			[]SymHash{
+				GetSymHash("a"),
+				GetSymHash("b"),
+			},
+		},
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("c"): Pair{Key: NewPanStr("c"), Value: NewPanInt(1)},
+				GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: NewPanInt(1)},
+			}),
+			[]SymHash{
+				GetSymHash("b"),
+				GetSymHash("c"),
+			},
+		},
+		// keys only contain public str
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("a"):  Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
+				GetSymHash("=="): Pair{Key: NewPanStr("=="), Value: NewPanInt(2)},
+				GetSymHash("_b"): Pair{Key: NewPanStr("_b"), Value: NewPanInt(3)},
+				GetSymHash("c "): Pair{Key: NewPanStr("c "), Value: NewPanInt(4)},
+				GetSymHash("d"):  Pair{Key: NewPanStr("d"), Value: NewPanInt(5)},
+			}),
+			[]SymHash{
+				GetSymHash("a"),
+				GetSymHash("d"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		obj, ok := tt.obj.(*PanObj)
+		if !ok {
+			t.Fatalf("obj is not PanObj. got=%T(%s)",
+				tt.obj, tt.obj.Type())
+		}
+
+		if len(*obj.Keys) != len(tt.expected) {
+			t.Fatalf("wrong keys length: expected=%d, got=%d",
+				len(tt.expected), len(*obj.Keys))
+		}
+
+		for i, key := range *obj.Keys {
+			if key != tt.expected[i] {
+				t.Errorf("keys[%d] in %s is wrong. expected=%d, got=%d",
+					i, tt.obj.Inspect(), tt.expected[i], key)
+			}
+		}
+	}
 }
 
 // checked by compiler (this function works nothing)
