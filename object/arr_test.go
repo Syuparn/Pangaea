@@ -25,7 +25,7 @@ func TestArrInspect(t *testing.T) {
 			`[1]`,
 		},
 		{
-			PanArr{[]PanObject{&PanStr{"foo"}}},
+			PanArr{[]PanObject{NewPanStr("foo")}},
 			`["foo"]`,
 		},
 		{
@@ -37,7 +37,7 @@ func TestArrInspect(t *testing.T) {
 			`[1, -10]`,
 		},
 		{
-			PanArr{[]PanObject{&PanInt{1}, &PanStr{"foo"}, &PanBool{false}}},
+			PanArr{[]PanObject{&PanInt{1}, NewPanStr("foo"), &PanBool{false}}},
 			`[1, "foo", false]`,
 		},
 	}

@@ -40,7 +40,7 @@ func GetSymHash(str string) SymHash {
 
 	// set PanStr object corresponding to created hash
 	// to generate PanStr from SymHash
-	StrTable[symHash] = &PanStr{str}
+	StrTable[symHash] = NewPanStr(str)
 
 	return symHash
 }

@@ -19,7 +19,7 @@ func evalKwargs(
 		}
 
 		paramName := k.String()
-		param := &object.PanStr{Value: paramName}
+		param := object.NewPanStr(paramName)
 		symHash := object.GetSymHash(paramName)
 
 		// NOTE: ignore duplicated params (`|a: 1, a: 2|` is same as `|a: 1|`)

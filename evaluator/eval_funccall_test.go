@@ -30,12 +30,12 @@ func TestFuncCall(t *testing.T) {
 			`{|x, y| [x, y]}`,
 			toPanObj([]object.Pair{}),
 			[]object.PanObject{
-				&object.PanStr{Value: "x"},
-				&object.PanStr{Value: "y"},
+				object.NewPanStr("x"),
+				object.NewPanStr("y"),
 			},
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "x"},
-				&object.PanStr{Value: "y"},
+				object.NewPanStr("x"),
+				object.NewPanStr("y"),
 			}},
 		},
 	}

@@ -4,7 +4,7 @@ import (
 	"../object"
 )
 
-var eqSym = &object.PanStr{Value: "=="}
+var eqSym = object.NewPanStr("==")
 
 func traceProtoOf(
 	obj object.PanObject,

@@ -16,7 +16,7 @@ func evalEmbeddedStr(node *ast.EmbeddedStr, env *object.Env) object.PanObject {
 		}
 
 		// call .S to convert into str
-		sSym := &object.PanStr{Value: "S"}
+		sSym := object.NewPanStr("S")
 		evaluatedS := builtInCallProp(env, object.EmptyPanObjPtr(),
 			object.EmptyPanObjPtr(), evaluated, sSym)
 
@@ -38,5 +38,5 @@ func evalEmbeddedStr(node *ast.EmbeddedStr, env *object.Env) object.PanObject {
 		out.WriteString(str)
 	}
 
-	return &object.PanStr{Value: out.String()}
+	return object.NewPanStr(out.String())
 }

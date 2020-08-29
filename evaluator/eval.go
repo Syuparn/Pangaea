@@ -23,9 +23,9 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 	case *ast.FloatLiteral:
 		return &object.PanFloat{Value: node.Value}
 	case *ast.StrLiteral:
-		return &object.PanStr{Value: node.Value}
+		return object.NewPanStr(node.Value)
 	case *ast.SymLiteral:
-		return &object.PanStr{Value: node.Value}
+		return object.NewPanStr(node.Value)
 	case *ast.RangeLiteral:
 		return evalRange(node, env)
 	case *ast.ArrLiteral:

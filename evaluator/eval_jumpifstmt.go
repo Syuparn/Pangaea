@@ -81,7 +81,7 @@ func isTruthy(obj object.PanObject, env *object.Env) bool {
 	}
 
 	// use (obj).B to check truthy/falsy
-	bSym := &object.PanStr{Value: "B"}
+	bSym := object.NewPanStr("B")
 	cond := builtInCallProp(env, object.EmptyPanObjPtr(),
 		object.EmptyPanObjPtr(), obj, bSym)
 	return cond == object.BuiltInTrue

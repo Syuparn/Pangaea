@@ -29,7 +29,7 @@ func TestRangeInspect(t *testing.T) {
 			"(nil:20:-1)",
 		},
 		{
-			PanRange{&PanStr{"a"}, &PanStr{"z"}, &PanInt{-1}},
+			PanRange{NewPanStr("a"), NewPanStr("z"), &PanInt{-1}},
 			`("a":"z":-1)`,
 		},
 	}

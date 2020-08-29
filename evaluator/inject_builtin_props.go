@@ -28,7 +28,7 @@ func injectProps(
 	for propName, propVal := range props(propContainer) {
 		propHash := object.GetSymHash(propName)
 		(*obj.Pairs)[propHash] = object.Pair{
-			Key:   &object.PanStr{Value: propName},
+			Key:   object.NewPanStr(propName),
 			Value: propVal,
 		}
 	}

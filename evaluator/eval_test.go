@@ -118,7 +118,7 @@ func TestEvalStrLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
-		expected := &object.PanStr{Value: tt.expected}
+		expected := object.NewPanStr(tt.expected)
 		testPanStr(t, actual, expected)
 	}
 }
@@ -130,26 +130,26 @@ func TestEvalEmbeddedStr(t *testing.T) {
 	}{
 		{
 			`"Hello, #{ "world" }!"`,
-			&object.PanStr{Value: "Hello, world!"},
+			object.NewPanStr("Hello, world!"),
 		},
 		// .S is called internal
 		{
 			`"1 + 1 = #{1 + 1}"`,
-			&object.PanStr{Value: "1 + 1 = 2"},
+			object.NewPanStr("1 + 1 = 2"),
 		},
 		{
 			`"arr: #{ [1, 2, "3"] }"`,
-			&object.PanStr{Value: `arr: [1, 2, "3"]`},
+			object.NewPanStr(`arr: [1, 2, "3"]`),
 		},
 		// NOTE: currently obj and func literal cannot be embedded...
 		{
 			`obj := {a: 1}; "three: #{ obj.a + 2 if true }"`,
-			&object.PanStr{Value: `three: 3`},
+			object.NewPanStr(`three: 3`),
 		},
 		// multiple embedding
 		{
 			`"a#{'bbc[1:]}d#{'eiffel[0:3:2]}g"`,
-			&object.PanStr{Value: `abcdefg`},
+			object.NewPanStr(`abcdefg`),
 		},
 	}
 
@@ -233,7 +233,7 @@ func TestEvalRangeLiteral(t *testing.T) {
 			`(3:"s":false)`,
 			&object.PanRange{
 				Start: &object.PanInt{Value: 3},
-				Stop:  &object.PanStr{Value: "s"},
+				Stop:  object.NewPanStr("s"),
 				Step:  object.BuiltInFalse,
 			},
 		},
@@ -249,9 +249,9 @@ func toPanRange(start, stop, step interface{}) *object.PanRange {
 	obj := func(o interface{}) object.PanObject {
 		switch o := o.(type) {
 		case string:
-			return &object.PanStr{Value: o}
+			return object.NewPanStr(o)
 		case int:
-			return &object.PanInt{Value: int64(o)}
+			return object.NewPanInt(int64(o))
 		default:
 			return object.BuiltInNil
 		}
@@ -285,7 +285,7 @@ func TestEvalArrLiteral(t *testing.T) {
 		{
 			`["a", 4]`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "a"},
+				object.NewPanStr("a"),
 				&object.PanInt{Value: 4},
 			}},
 		},
@@ -465,7 +465,7 @@ func TestEvalObjLiteral(t *testing.T) {
 			`{a: 1}`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 1},
 				},
 			}),
@@ -474,11 +474,11 @@ func TestEvalObjLiteral(t *testing.T) {
 			`{a: 1, b: 2}`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 1},
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "b"},
+					Key:   object.NewPanStr("b"),
 					Value: &object.PanInt{Value: 2},
 				},
 			}),
@@ -488,11 +488,11 @@ func TestEvalObjLiteral(t *testing.T) {
 			`{a: 1, b: 2, a: 3}`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 1},
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "b"},
+					Key:   object.NewPanStr("b"),
 					Value: &object.PanInt{Value: 2},
 				},
 			}),
@@ -502,12 +502,12 @@ func TestEvalObjLiteral(t *testing.T) {
 			`{a: 1, b: "B"}`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 1},
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "b"},
-					Value: &object.PanStr{Value: "B"},
+					Key:   object.NewPanStr("b"),
+					Value: object.NewPanStr("B"),
 				},
 			}),
 		},
@@ -516,10 +516,10 @@ func TestEvalObjLiteral(t *testing.T) {
 			`{a: {b: 10}}`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key: &object.PanStr{Value: "a"},
+					Key: object.NewPanStr("a"),
 					Value: toPanObj([]object.Pair{
 						object.Pair{
-							Key:   &object.PanStr{Value: "b"},
+							Key:   object.NewPanStr("b"),
 							Value: &object.PanInt{Value: 10},
 						},
 					}),
@@ -532,11 +532,11 @@ func TestEvalObjLiteral(t *testing.T) {
 			`{a: 1, **{b: 2}}`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 1},
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "b"},
+					Key:   object.NewPanStr("b"),
 					Value: &object.PanInt{Value: 2},
 				},
 			}),
@@ -545,11 +545,11 @@ func TestEvalObjLiteral(t *testing.T) {
 			`{**{a: 1}, **{b: 2}}`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 1},
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "b"},
+					Key:   object.NewPanStr("b"),
 					Value: &object.PanInt{Value: 2},
 				},
 			}),
@@ -646,7 +646,7 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: &object.PanInt{Value: 1},
 					},
 				},
@@ -659,7 +659,7 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: &object.PanInt{Value: 1},
 					},
 					object.Pair{
@@ -680,11 +680,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: &object.PanInt{Value: 1},
 					},
 					object.Pair{
-						Key:   &object.PanStr{Value: "b"},
+						Key:   object.NewPanStr("b"),
 						Value: &object.PanInt{Value: 2},
 					},
 				},
@@ -697,12 +697,12 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: &object.PanInt{Value: 1},
 					},
 					object.Pair{
-						Key:   &object.PanStr{Value: "b"},
-						Value: &object.PanStr{Value: "B"},
+						Key:   object.NewPanStr("b"),
+						Value: object.NewPanStr("B"),
 					},
 				},
 				[]object.Pair{},
@@ -714,11 +714,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key: &object.PanStr{Value: "a"},
+						Key: object.NewPanStr("a"),
 						Value: toPanMap(
 							[]object.Pair{
 								object.Pair{
-									Key:   &object.PanStr{Value: "b"},
+									Key:   object.NewPanStr("b"),
 									Value: &object.PanInt{Value: 10},
 								},
 							},
@@ -737,11 +737,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: &object.PanInt{Value: 1},
 					},
 					object.Pair{
-						Key:   &object.PanStr{Value: "b"},
+						Key:   object.NewPanStr("b"),
 						Value: &object.PanInt{Value: 2},
 					},
 				},
@@ -753,11 +753,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: &object.PanInt{Value: 1},
 					},
 					object.Pair{
-						Key:   &object.PanStr{Value: "b"},
+						Key:   object.NewPanStr("b"),
 						Value: &object.PanInt{Value: 2},
 					},
 				},
@@ -770,11 +770,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: &object.PanInt{Value: 1},
 					},
 					object.Pair{
-						Key:   &object.PanStr{Value: "b"},
+						Key:   object.NewPanStr("b"),
 						Value: &object.PanInt{Value: 2},
 					},
 				},
@@ -787,7 +787,7 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: &object.PanInt{Value: 1},
 					},
 				},
@@ -922,7 +922,7 @@ func TestEvalFuncLiteral(t *testing.T) {
 				[]string{"a", "b"},
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "c"},
+						Key:   object.NewPanStr("c"),
 						Value: &object.PanInt{Value: 10},
 					},
 				},
@@ -936,12 +936,12 @@ func TestEvalFuncLiteral(t *testing.T) {
 				[]string{"a", "b"},
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "c"},
+						Key:   object.NewPanStr("c"),
 						Value: &object.PanInt{Value: 10},
 					},
 					object.Pair{
-						Key:   &object.PanStr{Value: "d"},
-						Value: &object.PanStr{Value: "e"},
+						Key:   object.NewPanStr("d"),
+						Value: object.NewPanStr("e"),
 					},
 				},
 				`|a, b, c: 10, d: 'e| `,
@@ -964,7 +964,7 @@ func toPanFunc(
 ) *object.PanFunc {
 	argArr := []object.PanObject{}
 	for _, arg := range args {
-		argArr = append(argArr, &object.PanStr{Value: arg})
+		argArr = append(argArr, object.NewPanStr(arg))
 	}
 
 	funcWrapper := &FuncWrapperImpl{
@@ -998,16 +998,16 @@ func TestEvalFuncCall(t *testing.T) {
 		{
 			`{|x, y| [x, y]}("x", "y")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "x"},
-				&object.PanStr{Value: "y"},
+				object.NewPanStr("x"),
+				object.NewPanStr("y"),
 			}},
 		},
 		{
 			`{|foo, bar: "bar", baz| [foo, bar, baz]}("FOO", "BAZ")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "FOO"},
-				&object.PanStr{Value: "bar"},
-				&object.PanStr{Value: "BAZ"},
+				object.NewPanStr("FOO"),
+				object.NewPanStr("bar"),
+				object.NewPanStr("BAZ"),
 			}},
 		},
 	}
@@ -1134,7 +1134,7 @@ func TestEvalIterLiteral(t *testing.T) {
 				[]string{"a", "b"},
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "c"},
+						Key:   object.NewPanStr("c"),
 						Value: &object.PanInt{Value: 10},
 					},
 				},
@@ -1148,12 +1148,12 @@ func TestEvalIterLiteral(t *testing.T) {
 				[]string{"a", "b"},
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "c"},
+						Key:   object.NewPanStr("c"),
 						Value: &object.PanInt{Value: 10},
 					},
 					object.Pair{
-						Key:   &object.PanStr{Value: "d"},
-						Value: &object.PanStr{Value: "e"},
+						Key:   object.NewPanStr("d"),
+						Value: object.NewPanStr("e"),
 					},
 				},
 				`|a, b, c: 10, d: 'e| `,
@@ -1176,7 +1176,7 @@ func toPanIter(
 ) *object.PanFunc {
 	argArr := []object.PanObject{}
 	for _, arg := range args {
-		argArr = append(argArr, &object.PanStr{Value: arg})
+		argArr = append(argArr, object.NewPanStr(arg))
 	}
 
 	funcWrapper := &FuncWrapperImpl{
@@ -1211,7 +1211,7 @@ func TestEvalIterNew(t *testing.T) {
 				toEnv(
 					[]object.Pair{
 						object.Pair{
-							Key:   &object.PanStr{Value: "a"},
+							Key:   object.NewPanStr("a"),
 							Value: &object.PanInt{Value: 10},
 						},
 					},
@@ -1226,26 +1226,26 @@ func TestEvalIterNew(t *testing.T) {
 				[]string{"a", "b"},
 				[]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "c"},
-						Value: &object.PanStr{Value: "c"},
+						Key:   object.NewPanStr("c"),
+						Value: object.NewPanStr("c"),
 					},
 				},
 				`|a, b, c: 'c| yield a`,
 				toEnv(
 					[]object.Pair{
 						object.Pair{
-							Key:   &object.PanStr{Value: "a"},
-							Value: &object.PanStr{Value: "A"},
+							Key:   object.NewPanStr("a"),
+							Value: object.NewPanStr("A"),
 						},
 						object.Pair{
-							Key:   &object.PanStr{Value: "b"},
-							Value: &object.PanStr{Value: "B"},
+							Key:   object.NewPanStr("b"),
+							Value: object.NewPanStr("B"),
 						},
 					},
 					[]object.Pair{
 						object.Pair{
-							Key:   &object.PanStr{Value: "c"},
-							Value: &object.PanStr{Value: "C"},
+							Key:   object.NewPanStr("c"),
+							Value: object.NewPanStr("C"),
 						},
 					},
 					outerEnv,
@@ -1312,7 +1312,7 @@ func TestEvalYield(t *testing.T) {
 		},
 		{
 			`<{|a| yield a}>.new('a).next`,
-			&object.PanStr{Value: "a"},
+			object.NewPanStr("a"),
 		},
 		// recur
 		{
@@ -1611,13 +1611,13 @@ func TestEvalArrIter(t *testing.T) {
 		{
 			`it := ['a, 'b]._iter
 			 it.next`,
-			&object.PanStr{Value: "a"},
+			object.NewPanStr("a"),
 		},
 		{
 			`it := ['a, 'b]._iter
 			 it.next
 			 it.next`,
-			&object.PanStr{Value: "b"},
+			object.NewPanStr("b"),
 		},
 		{
 			`it := ['a, 'b]._iter
@@ -1673,13 +1673,13 @@ func TestEvalStrIter(t *testing.T) {
 		{
 			`it := "Hi"._iter
 			 it.next`,
-			&object.PanStr{Value: "H"},
+			object.NewPanStr("H"),
 		},
 		{
 			`it := "Hi"._iter
 			 it.next
 			 it.next`,
-			&object.PanStr{Value: "i"},
+			object.NewPanStr("i"),
 		},
 		{
 			`it := "Hi"._iter
@@ -1692,13 +1692,13 @@ func TestEvalStrIter(t *testing.T) {
 		{
 			`it := "日本語"._iter
 			 it.next`,
-			&object.PanStr{Value: "日"},
+			object.NewPanStr("日"),
 		},
 		{
 			`it := "日本語"._iter
 			 it.next
 			 it.next`,
-			&object.PanStr{Value: "本"},
+			object.NewPanStr("本"),
 		},
 		{
 			`it := "日本語"._iter
@@ -1767,13 +1767,13 @@ func TestEvalRangeIter(t *testing.T) {
 		{
 			`it := ('a:'c)._iter
 			 it.next`,
-			&object.PanStr{Value: "a"},
+			object.NewPanStr("a"),
 		},
 		{
 			`it := ('a:'c)._iter
 			 it.next
 			 it.next`,
-			&object.PanStr{Value: "b"},
+			object.NewPanStr("b"),
 		},
 		{
 			`it := ('a:'c)._iter
@@ -1805,34 +1805,34 @@ func TestEvalListChainPropCall(t *testing.T) {
 		{
 			`3@S`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "1"},
-				&object.PanStr{Value: "2"},
-				&object.PanStr{Value: "3"},
+				object.NewPanStr("1"),
+				object.NewPanStr("2"),
+				object.NewPanStr("3"),
 			}},
 		},
 		{
 			`"日本語"@S`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "日"},
-				&object.PanStr{Value: "本"},
-				&object.PanStr{Value: "語"},
+				object.NewPanStr("日"),
+				object.NewPanStr("本"),
+				object.NewPanStr("語"),
 			}},
 		},
 		// NOTE: must new() to init params
 		{
 			`<{|i| yield i if i != 3; recur(i+1)}>.new(0)@S`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "0"},
-				&object.PanStr{Value: "1"},
-				&object.PanStr{Value: "2"},
+				object.NewPanStr("0"),
+				object.NewPanStr("1"),
+				object.NewPanStr("2"),
 			}},
 		},
 		{
 			`(1:6:2)@S`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "1"},
-				&object.PanStr{Value: "3"},
-				&object.PanStr{Value: "5"},
+				object.NewPanStr("1"),
+				object.NewPanStr("3"),
+				object.NewPanStr("5"),
 			}},
 		},
 		// TODO: check obj/map
@@ -1852,8 +1852,8 @@ func TestEvalListChainPropCallIgnoresNil(t *testing.T) {
 		{
 			`[{name: 'Taro}, {name: nil}, {name: 'Jiro}]@name`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "Taro"},
-				&object.PanStr{Value: "Jiro"},
+				object.NewPanStr("Taro"),
+				object.NewPanStr("Jiro"),
 			}},
 		},
 	}
@@ -1879,17 +1879,17 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 		{
 			`3@{|i| i.S}`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "1"},
-				&object.PanStr{Value: "2"},
-				&object.PanStr{Value: "3"},
+				object.NewPanStr("1"),
+				object.NewPanStr("2"),
+				object.NewPanStr("3"),
 			}},
 		},
 		{
 			`"日本語"@{|c| c + "!"}`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "日!"},
-				&object.PanStr{Value: "本!"},
-				&object.PanStr{Value: "語!"},
+				object.NewPanStr("日!"),
+				object.NewPanStr("本!"),
+				object.NewPanStr("語!"),
 			}},
 		},
 		// TODO: check obj/map/range
@@ -1909,8 +1909,8 @@ func TestEvalListChainLiteralCallIgnoresNil(t *testing.T) {
 		{
 			`[{name: 'Taro}, {name: nil}, {name: 'Jiro}]@{|o| o.name}`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "Taro"},
-				&object.PanStr{Value: "Jiro"},
+				object.NewPanStr("Taro"),
+				object.NewPanStr("Jiro"),
 			}},
 		},
 	}
@@ -1997,11 +1997,11 @@ func TestEvalIfExpr(t *testing.T) {
 		// cond other than bool
 		{
 			`'t if 100 else 'f`,
-			&object.PanStr{Value: "t"},
+			object.NewPanStr("t"),
 		},
 		{
 			`'t if [] else 'f`,
-			&object.PanStr{Value: "f"},
+			object.NewPanStr("f"),
 		},
 	}
 
@@ -2019,31 +2019,31 @@ func TestEvalAssign(t *testing.T) {
 	}{
 		{
 			`a := 'A`,
-			&object.PanStr{Value: "A"},
+			object.NewPanStr("A"),
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
-					Value: &object.PanStr{Value: "A"},
+					Key:   object.NewPanStr("a"),
+					Value: object.NewPanStr("A"),
 				},
 			}),
 		},
 		{
 			`'A => a`,
-			&object.PanStr{Value: "A"},
+			object.NewPanStr("A"),
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
-					Value: &object.PanStr{Value: "A"},
+					Key:   object.NewPanStr("a"),
+					Value: object.NewPanStr("A"),
 				},
 			}),
 		},
 		{
 			`a := 'A; a`,
-			&object.PanStr{Value: "A"},
+			object.NewPanStr("A"),
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
-					Value: &object.PanStr{Value: "A"},
+					Key:   object.NewPanStr("a"),
+					Value: object.NewPanStr("A"),
 				},
 			}),
 		},
@@ -2055,11 +2055,11 @@ func TestEvalAssign(t *testing.T) {
 			}},
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 5},
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "b"},
+					Key:   object.NewPanStr("b"),
 					Value: &object.PanInt{Value: 10},
 				},
 			}),
@@ -2072,22 +2072,22 @@ func TestEvalAssign(t *testing.T) {
 			}},
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 2},
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "b"},
+					Key:   object.NewPanStr("b"),
 					Value: &object.PanInt{Value: 2},
 				},
 			}),
 		},
 		{
 			`"hi" => a; a`,
-			&object.PanStr{Value: "hi"},
+			object.NewPanStr("hi"),
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
-					Value: &object.PanStr{Value: "hi"},
+					Key:   object.NewPanStr("a"),
+					Value: object.NewPanStr("hi"),
 				},
 			}),
 		},
@@ -2099,11 +2099,11 @@ func TestEvalAssign(t *testing.T) {
 			}},
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "c"},
+					Key:   object.NewPanStr("c"),
 					Value: &object.PanInt{Value: 3},
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "d"},
+					Key:   object.NewPanStr("d"),
 					Value: &object.PanInt{Value: 3},
 				},
 			}),
@@ -2142,11 +2142,11 @@ func TestEvalArgVars(t *testing.T) {
 	}{
 		{
 			`{\1}("a", "b")`,
-			&object.PanStr{Value: "a"},
+			object.NewPanStr("a"),
 		},
 		{
 			`{\2}("a", "b")`,
-			&object.PanStr{Value: "b"},
+			object.NewPanStr("b"),
 		},
 		// NameErr if number exceeds arity
 		{
@@ -2156,21 +2156,21 @@ func TestEvalArgVars(t *testing.T) {
 		// `\` is syntax sugar of `\1`
 		{
 			`{\}("one", "two")`,
-			&object.PanStr{Value: "one"},
+			object.NewPanStr("one"),
 		},
 		// `\0` is arr of all args
 		{
 			`{\0}("one", "two")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "one"},
-				&object.PanStr{Value: "two"},
+				object.NewPanStr("one"),
+				object.NewPanStr("two"),
 			}},
 		},
 		// NOTE: \0 does not contain kwargs
 		{
 			`{\0}("arg", kwarg: "kwarg")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "arg"},
+				object.NewPanStr("arg"),
 			}},
 		},
 	}
@@ -2188,11 +2188,11 @@ func TestEvalKwargVars(t *testing.T) {
 	}{
 		{
 			`{\a}(a: "A", b: "B")`,
-			&object.PanStr{Value: "A"},
+			object.NewPanStr("A"),
 		},
 		{
 			`{\b}(a: "A", b: "B")`,
-			&object.PanStr{Value: "B"},
+			object.NewPanStr("B"),
 		},
 		// NameErr if kwarg is not found
 		{
@@ -2204,11 +2204,11 @@ func TestEvalKwargVars(t *testing.T) {
 			`{\_}(one: 1, two: 2)`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "one"},
+					Key:   object.NewPanStr("one"),
 					Value: object.NewPanInt(1),
 				},
 				object.Pair{
-					Key:   &object.PanStr{Value: "two"},
+					Key:   object.NewPanStr("two"),
 					Value: object.NewPanInt(2),
 				},
 			}),
@@ -2217,7 +2217,7 @@ func TestEvalKwargVars(t *testing.T) {
 		{
 			`{\0}("arg", kwarg: "kwarg")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "arg"},
+				object.NewPanStr("arg"),
 			}},
 		},
 	}
@@ -2333,7 +2333,7 @@ func TestEvalBearContents(t *testing.T) {
 			`Obj.bear({a: 1})`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: &object.PanInt{Value: 1},
 				},
 			}),
@@ -2357,49 +2357,49 @@ func TestEvalStringify(t *testing.T) {
 	}{
 		{
 			`[1].S`,
-			&object.PanStr{Value: "[1]"},
+			object.NewPanStr("[1]"),
 		},
 		// unnecessary zeros are omitted
 		{
 			`1.0.S`,
-			&object.PanStr{Value: "1.0"},
+			object.NewPanStr("1.0"),
 		},
 		{
 			`{|x| x}.S`,
-			&object.PanStr{Value: "{|x| x}"},
+			object.NewPanStr("{|x| x}"),
 		},
 		{
 			`10.S`,
-			&object.PanStr{Value: "10"},
+			object.NewPanStr("10"),
 		},
 		{
 			`%{'a: 1}.S`,
-			&object.PanStr{Value: `%{"a": 1}`},
+			object.NewPanStr(`%{"a": 1}`),
 		},
 		{
 			`nil.S`,
-			&object.PanStr{Value: `nil`},
+			object.NewPanStr(`nil`),
 		},
 		{
 			`{a: 1}.S`,
-			&object.PanStr{Value: `{"a": 1}`},
+			object.NewPanStr(`{"a": 1}`),
 		},
 		{
 			`(1:2).S`,
-			&object.PanStr{Value: "(1:2:nil)"},
+			object.NewPanStr("(1:2:nil)"),
 		},
 		// str is not quoted
 		{
 			`'a.S`,
-			&object.PanStr{Value: "a"},
+			object.NewPanStr("a"),
 		},
 		{
 			`true.S`,
-			&object.PanStr{Value: "true"},
+			object.NewPanStr("true"),
 		},
 		{
 			`false.S`,
-			&object.PanStr{Value: "false"},
+			object.NewPanStr("false"),
 		},
 	}
 
@@ -2515,49 +2515,49 @@ func TestEvalRepr(t *testing.T) {
 	}{
 		{
 			`[1].repr`,
-			&object.PanStr{Value: "[1]"},
+			object.NewPanStr("[1]"),
 		},
 		// precise value is shown
 		{
 			`1.0.repr`,
-			&object.PanStr{Value: "1.000000"},
+			object.NewPanStr("1.000000"),
 		},
 		{
 			`{|x| x}.repr`,
-			&object.PanStr{Value: "{|x| x}"},
+			object.NewPanStr("{|x| x}"),
 		},
 		{
 			`10.repr`,
-			&object.PanStr{Value: "10"},
+			object.NewPanStr("10"),
 		},
 		{
 			`%{'a: 1}.repr`,
-			&object.PanStr{Value: `%{"a": 1}`},
+			object.NewPanStr(`%{"a": 1}`),
 		},
 		{
 			`nil.repr`,
-			&object.PanStr{Value: `nil`},
+			object.NewPanStr(`nil`),
 		},
 		{
 			`{a: 1}.repr`,
-			&object.PanStr{Value: `{"a": 1}`},
+			object.NewPanStr(`{"a": 1}`),
 		},
 		{
 			`(1:2).repr`,
-			&object.PanStr{Value: "(1:2:nil)"},
+			object.NewPanStr("(1:2:nil)"),
 		},
 		// str is quoted
 		{
 			`'a.repr`,
-			&object.PanStr{Value: `"a"`},
+			object.NewPanStr(`"a"`),
 		},
 		{
 			`true.S`,
-			&object.PanStr{Value: "true"},
+			object.NewPanStr("true"),
 		},
 		{
 			`false.S`,
-			&object.PanStr{Value: "false"},
+			object.NewPanStr("false"),
 		},
 	}
 
@@ -2722,36 +2722,36 @@ func TestEvalPropChain(t *testing.T) {
 		{
 			`{a: m{|x, y| [x, y]}}.a("one", "two")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "one"},
-				&object.PanStr{Value: "two"},
+				object.NewPanStr("one"),
+				object.NewPanStr("two"),
 			}},
 		},
 		{
 			`{a: m{|x, y: "y"| [x, y]}}.a("x")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "x"},
-				&object.PanStr{Value: "y"},
+				object.NewPanStr("x"),
+				object.NewPanStr("y"),
 			}},
 		},
 		{
 			`{a: m{|x, y: "y"| [x, y]}}.a("x", y: "Y")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "x"},
-				&object.PanStr{Value: "Y"},
+				object.NewPanStr("x"),
+				object.NewPanStr("Y"),
 			}},
 		},
 		// if args are insufficient, they are padded by nil
 		{
 			`{a: m{|x, y| [x, y]}}.a("X")`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "X"},
+				object.NewPanStr("X"),
 				object.BuiltInNil,
 			}},
 		},
 		// if too many args are passed, they are just ignored
 		{
 			`{a: m{|x| x}}.a("arg", "needless", "extra", "args")`,
-			&object.PanStr{Value: "arg"},
+			object.NewPanStr("arg"),
 		},
 	}
 
@@ -2842,15 +2842,15 @@ func TestEvalMapAt(t *testing.T) {
 		// index other than str can also be used
 		{
 			`%{1: "one"}[1]`,
-			&object.PanStr{Value: "one"},
+			object.NewPanStr("one"),
 		},
 		{
 			`%{nil: "nil"}[nil]`,
-			&object.PanStr{Value: "nil"},
+			object.NewPanStr("nil"),
 		},
 		{
 			`%{[10]: "tenArr"}[[10]]`,
-			&object.PanStr{Value: "tenArr"},
+			object.NewPanStr("tenArr"),
 		},
 	}
 
@@ -2887,7 +2887,7 @@ func TestEvalLiteralCall(t *testing.T) {
 		{
 			`'X.{|i, j| [i, j]}`,
 			&object.PanArr{Elems: []object.PanObject{
-				&object.PanStr{Value: "X"},
+				object.NewPanStr("X"),
 				object.BuiltInNil,
 			}},
 		},
@@ -2954,7 +2954,7 @@ func TestEvalThoughtfulChain(t *testing.T) {
 			`['a, 'b]~@{|x| {a: 1}[x]}`,
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanInt(1),
-				&object.PanStr{Value: "b"},
+				object.NewPanStr("b"),
 			}},
 		},
 		{
@@ -2966,7 +2966,7 @@ func TestEvalThoughtfulChain(t *testing.T) {
 			`{a: nil}~.a`,
 			toPanObj([]object.Pair{
 				object.Pair{
-					Key:   &object.PanStr{Value: "a"},
+					Key:   object.NewPanStr("a"),
 					Value: object.BuiltInNil,
 				},
 			}),
@@ -2977,7 +2977,7 @@ func TestEvalThoughtfulChain(t *testing.T) {
 				object.NewPanInt(1),
 				toPanObj([]object.Pair{
 					object.Pair{
-						Key:   &object.PanStr{Value: "a"},
+						Key:   object.NewPanStr("a"),
 						Value: object.BuiltInNil,
 					},
 				}),
