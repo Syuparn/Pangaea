@@ -16,7 +16,7 @@ func evalInfix(node *ast.InfixExpr, env *object.Env) object.PanObject {
 		return appendStackTrace(err, node.Source())
 	}
 
-	propSym := &object.PanStr{Value: node.Operator}
+	propSym := object.NewPanStr(node.Operator)
 
 	// same as `Obj.callProp(left, propSym, right)`, which is evaluated to
 	// `left.^propSym(right)`

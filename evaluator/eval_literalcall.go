@@ -93,7 +93,7 @@ func evalListLiteralCall(
 
 	// call `next` prop until StopIterErr raises
 	evaluatedElems := []object.PanObject{}
-	nextSym := &object.PanStr{Value: "next"}
+	nextSym := object.NewPanStr("next")
 	for {
 		// call `(iter).next`
 		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
@@ -163,7 +163,7 @@ func evalReduceLiteralCall(
 
 	// call `next` prop until StopIterErr raises
 	acc := chainArg
-	nextSym := &object.PanStr{Value: "next"}
+	nextSym := object.NewPanStr("next")
 	for {
 		// call `(iter).next`
 		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),

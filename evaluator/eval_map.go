@@ -87,7 +87,7 @@ func existsNonHashableKey(
 	nonHashablePairs []object.Pair,
 	newPair object.Pair,
 ) bool {
-	eqSym := &object.PanStr{Value: "=="}
+	eqSym := object.NewPanStr("==")
 
 	for _, pair := range nonHashablePairs {
 		// use == method for each pair comparison

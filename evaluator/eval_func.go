@@ -18,7 +18,7 @@ func evalCallable(
 	for _, argNode := range component.Args {
 		var arg object.PanObject
 		if ident, ok := argNode.(*ast.Ident); ok {
-			arg = &object.PanStr{Value: ident.String()}
+			arg = object.NewPanStr(ident.String())
 		} else {
 			// TODO: error handling for pattern match exprs
 			arg = Eval(argNode, env)

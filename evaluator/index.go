@@ -135,10 +135,10 @@ func strIndex(index int64, runes []rune) object.PanObject {
 	}
 
 	if index < 0 {
-		return &object.PanStr{Value: string(runes[index+length])}
+		return object.NewPanStr(string(runes[index+length]))
 	}
 
-	return &object.PanStr{Value: string(runes[index])}
+	return object.NewPanStr(string(runes[index]))
 }
 
 func arrRange(r *object.PanRange, arr *object.PanArr) object.PanObject {
@@ -155,7 +155,7 @@ func strRange(r *object.PanRange, runes []rune) object.PanObject {
 	for _, elem := range runeArr.(*object.PanArr).Elems {
 		out.WriteString(elem.(*object.PanStr).Value)
 	}
-	return &object.PanStr{Value: out.String()}
+	return object.NewPanStr(out.String())
 }
 
 func valRange(
@@ -279,7 +279,7 @@ func findElemInMap(
 
 	for _, pair := range *self.NonHashablePairs {
 		// find key by == method
-		eqSym := &object.PanStr{Value: "=="}
+		eqSym := object.NewPanStr("==")
 
 		// equivalent to src `key == index`
 		ret := builtInCallProp(env, object.EmptyPanObjPtr(),

@@ -18,7 +18,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				// get args[0].B
-				bSym := &object.PanStr{Value: "B"}
+				bSym := object.NewPanStr("B")
 				objBool := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
 					env, object.EmptyPanObjPtr(),
 					object.EmptyPanObjPtr(), args[0], bSym,
@@ -69,7 +69,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				// get args[0].S
-				sSym := &object.PanStr{Value: "S"}
+				sSym := object.NewPanStr("S")
 				sRet := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
 					env, object.EmptyPanObjPtr(),
 					object.EmptyPanObjPtr(), args[0], sSym,
@@ -95,7 +95,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Obj#repr requires at least 1 arg")
 				}
-				return &object.PanStr{Value: args[0].Inspect()}
+				return object.NewPanStr(args[0].Inspect())
 			},
 		),
 		"S": f(
@@ -105,7 +105,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Obj#repr requires at least 1 arg")
 				}
-				return &object.PanStr{Value: formattedStr(args[0])}
+				return object.NewPanStr(formattedStr(args[0]))
 			},
 		),
 	}

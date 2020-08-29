@@ -14,8 +14,8 @@ func evalObjPair(node *ast.Pair, env *object.Env) (object.Pair, *object.PanErr) 
 	}
 
 	if ident, ok := node.Key.(*ast.Ident); ok {
-		// HACK: syntax sugar (`{a: 1}` is same as `{'a: 1}`)
-		k := &object.PanStr{Value: ident.String()}
+		// syntax sugar (`{a: 1}` is same as `{'a: 1}`)
+		k := object.NewPanStr(ident.String())
 		return object.Pair{Key: k, Value: v}, nil
 	}
 

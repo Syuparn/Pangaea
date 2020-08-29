@@ -1,9 +1,14 @@
 package object
 
+import (
+	"regexp"
+)
+
 const STR_TYPE = "STR_TYPE"
 
 type PanStr struct {
-	Value string
+	Value    string
+	IsPublic bool
 }
 
 func (s *PanStr) Type() PanObjType {
@@ -24,4 +29,14 @@ func (s *PanStr) Hash() HashKey {
 
 func (s *PanStr) SymHash() SymHash {
 	return GetSymHash(s.Value)
+}
+
+func NewPanStr(s string) *PanStr {
+	return &PanStr{Value: s, IsPublic: isPublic(s)}
+}
+
+var publicPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*[!?]?$`)
+
+func isPublic(s string) bool {
+	return publicPattern.MatchString(s)
 }

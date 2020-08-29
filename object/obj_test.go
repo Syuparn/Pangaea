@@ -23,32 +23,32 @@ func TestObjInspect(t *testing.T) {
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(&PanStr{"a"}).SymHash(): Pair{&PanStr{"a"}, &PanInt{1}},
+				(NewPanStr("a")).SymHash(): Pair{NewPanStr("a"), &PanInt{1}},
 			}),
 			`{"a": 1}`,
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(&PanStr{"a"}).SymHash():  Pair{&PanStr{"a"}, &PanStr{"A"}},
-				(&PanStr{"_b"}).SymHash(): Pair{&PanStr{"_b"}, &PanStr{"B"}},
+				(NewPanStr("a")).SymHash():  Pair{NewPanStr("a"), NewPanStr("A")},
+				(NewPanStr("_b")).SymHash(): Pair{NewPanStr("_b"), NewPanStr("B")},
 			}),
 			`{"_b": "B", "a": "A"}`,
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(&PanStr{"foo?"}).SymHash(): Pair{&PanStr{"foo?"}, &PanBool{true}},
-				(&PanStr{"b"}).SymHash():    Pair{&PanStr{"b"}, &PanStr{"B"}},
+				(NewPanStr("foo?")).SymHash(): Pair{NewPanStr("foo?"), &PanBool{true}},
+				(NewPanStr("b")).SymHash():    Pair{NewPanStr("b"), NewPanStr("B")},
 			}),
 			`{"b": "B", "foo?": true}`,
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(&PanStr{"foo?"}).SymHash(): Pair{&PanStr{"foo?"}, &PanBool{true}},
-				(&PanStr{"b"}).SymHash(): Pair{
-					&PanStr{"b"},
+				(NewPanStr("foo?")).SymHash(): Pair{NewPanStr("foo?"), &PanBool{true}},
+				(NewPanStr("b")).SymHash(): Pair{
+					NewPanStr("b"),
 					// NOTE: `&(NewPanObjInstance(...))` is syntax error
 					PanObjInstancePtr(&map[SymHash]Pair{
-						(&PanStr{"c"}).SymHash(): Pair{&PanStr{"c"}, &PanStr{"C"}},
+						(NewPanStr("c")).SymHash(): Pair{NewPanStr("c"), NewPanStr("C")},
 					}),
 				},
 			}),

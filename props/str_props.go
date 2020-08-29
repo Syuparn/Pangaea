@@ -72,7 +72,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					negBytes = append(negBytes, ^b)
 				}
 
-				return &object.PanStr{Value: string(negBytes)}
+				return object.NewPanStr(string(negBytes))
 			},
 		),
 		"+": f(
@@ -85,7 +85,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				res := self.(*object.PanStr).Value + other.(*object.PanStr).Value
-				return &object.PanStr{Value: res}
+				return object.NewPanStr(res)
 			},
 		),
 		"_incBy": f(
@@ -111,7 +111,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				increasedRune := runes[len(runes)-1] + rune(n)
 				newRunes := append(runes[0:len(runes)-1], increasedRune)
 
-				return &object.PanStr{Value: string(newRunes)}
+				return object.NewPanStr(string(newRunes))
 			},
 		),
 		"_iter": f(
@@ -187,7 +187,7 @@ func strIter(s *object.PanStr) object.BuiltInFunc {
 		if yieldIdx >= len(runes) {
 			return object.NewStopIterErr("iter stopped")
 		}
-		yielded := &object.PanStr{Value: string(runes[yieldIdx])}
+		yielded := object.NewPanStr(string(runes[yieldIdx]))
 		yieldIdx += 1
 		return yielded
 	}

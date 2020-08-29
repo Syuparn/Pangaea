@@ -5,7 +5,7 @@ import (
 )
 
 func TestStrType(t *testing.T) {
-	strObj := PanStr{"hello"}
+	strObj := NewPanStr("hello")
 	if strObj.Type() != STR_TYPE {
 		t.Fatalf("wrong type: expected=%s, got=%s", STR_TYPE, strObj.Type())
 	}
@@ -13,13 +13,13 @@ func TestStrType(t *testing.T) {
 
 func TestStrInspect(t *testing.T) {
 	tests := []struct {
-		obj      PanStr
+		obj      *PanStr
 		expected string
 	}{
-		{PanStr{"hello"}, `"hello"`},
-		{PanStr{"_foo"}, `"_foo"`},
-		{PanStr{"a i u e o"}, `"a i u e o"`},
-		{PanStr{`\a`}, `"\a"`},
+		{NewPanStr("hello"), `"hello"`},
+		{NewPanStr("_foo"), `"_foo"`},
+		{NewPanStr("a i u e o"), `"a i u e o"`},
+		{NewPanStr(`\a`), `"\a"`},
 	}
 
 	for _, tt := range tests {
@@ -31,7 +31,7 @@ func TestStrInspect(t *testing.T) {
 }
 
 func TestStrProto(t *testing.T) {
-	s := PanStr{"foo"}
+	s := NewPanStr("foo")
 	if s.Proto() != BuiltInStrObj {
 		t.Fatalf("Proto is not BuiltInStrObj. got=%T (%+v)",
 			s.Proto(), s.Proto())
@@ -40,13 +40,13 @@ func TestStrProto(t *testing.T) {
 
 func TestStrHash(t *testing.T) {
 	tests := []struct {
-		obj      PanStr
+		obj      *PanStr
 		expected string
 	}{
-		{PanStr{"hello"}, "hello"},
-		{PanStr{"a i u e o"}, "a i u e o"},
-		{PanStr{""}, ""},
-		{PanStr{"longlonglonglonglonglong"}, "longlonglonglonglonglong"},
+		{NewPanStr("hello"), "hello"},
+		{NewPanStr("a i u e o"), "a i u e o"},
+		{NewPanStr(""), ""},
+		{NewPanStr("longlonglonglonglonglong"), "longlonglonglonglonglong"},
 	}
 
 	for _, tt := range tests {
@@ -66,11 +66,40 @@ func TestStrHash(t *testing.T) {
 	}
 }
 
+func testStrIsPublic(t *testing.T) {
+	tests := []struct {
+		obj      *PanStr
+		expected bool
+	}{
+		// public
+		{NewPanStr("hello"), true},
+		{NewPanStr("hoge1"), true},
+		{NewPanStr("Hoge"), true},
+		{NewPanStr("Ho_ge"), true},
+		{NewPanStr("hoge?"), true},
+		{NewPanStr("hoge!"), true},
+		// private
+		{NewPanStr("_hoge"), false},
+		{NewPanStr("123"), false},
+		{NewPanStr("Hello, world!"), false},
+		{NewPanStr("+"), false},
+		{NewPanStr(`\1`), false},
+		{NewPanStr(`\foo`), false},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.IsPublic != tt.expected {
+			t.Errorf("wrong field IsPublic: expected=%t, got=%t",
+				tt.expected, tt.obj.IsPublic)
+		}
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testStrIsPanObject() {
-	var _ PanObject = &PanStr{"FOO"}
+	var _ PanObject = NewPanStr("FOO")
 }
 
 func testStrIsPanScalar() {
-	var _ PanScalar = &PanStr{"ABC"}
+	var _ PanScalar = NewPanStr("ABC")
 }

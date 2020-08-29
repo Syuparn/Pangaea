@@ -53,7 +53,7 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				// call prop `_incBy(range.step)`
-				incBySym := &object.PanStr{Value: "_incBy"}
+				incBySym := object.NewPanStr("_incBy")
 				next := func(n object.PanObject) object.PanObject {
 					return propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
 						env, object.EmptyPanObjPtr(),
@@ -62,7 +62,7 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				// call prop `<=>`
-				spaceshipSym := &object.PanStr{Value: "<=>"}
+				spaceshipSym := object.NewPanStr("<=>")
 				reachesStop := func(
 					r *object.PanRange,
 					o object.PanObject,

@@ -17,7 +17,7 @@ func evalPrefix(node *ast.PrefixExpr, env *object.Env) object.PanObject {
 		return appendStackTrace(err, node.Source())
 	}
 
-	propSym := &object.PanStr{Value: prefixOpMethodName(node.Operator)}
+	propSym := object.NewPanStr(prefixOpMethodName(node.Operator))
 
 	// same as `Obj.callProp(right, propSym)`, which is evaluated to
 	// `right.^propSym`
