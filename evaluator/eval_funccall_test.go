@@ -16,15 +16,15 @@ func TestFuncCall(t *testing.T) {
 			`{5}`,
 			toPanObj([]object.Pair{}),
 			[]object.PanObject{},
-			&object.PanInt{Value: 5},
+			object.NewPanInt(5),
 		},
 		{
 			`{|x| x}`,
 			toPanObj([]object.Pair{}),
 			[]object.PanObject{
-				&object.PanInt{Value: 10},
+				object.NewPanInt(10),
 			},
-			&object.PanInt{Value: 10},
+			object.NewPanInt(10),
 		},
 		{
 			`{|x, y| [x, y]}`,
