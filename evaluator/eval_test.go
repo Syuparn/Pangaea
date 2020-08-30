@@ -2456,6 +2456,57 @@ func TestEvalObjKeys(t *testing.T) {
 	}
 }
 
+func TestEvalObjValues(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.values`,
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
+		{
+			`{a: "A", b: "B"}.values`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("A"),
+				object.NewPanStr("B"),
+			}},
+		},
+		// private keys are ignored
+		{
+			`{
+			   a: "A",
+			   _b: "_B",
+			   '+: "PLUS",
+			   "with space": "WITH SPACE",
+			 }.values`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("A"),
+			}},
+		},
+		// with private keys (private keys follow public keys)
+		{
+			`{
+			   a: "A",
+			   _b: "_B",
+			   '+: "PLUS",
+			   "with space": "WITH SPACE",
+			 }.values(private?: true)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("A"),
+				object.NewPanStr("PLUS"),
+				object.NewPanStr("_B"),
+				object.NewPanStr("WITH SPACE"),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStringify(t *testing.T) {
 	tests := []struct {
 		input    string
