@@ -34,6 +34,25 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					propContainer, env)
 			},
 		),
+		"_iter": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Map#_iter requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isMap)
+				if !ok {
+					return object.NewTypeErr(`\1 must be map`)
+				}
+
+				return &object.PanBuiltInIter{
+					Fn:  mapIter(self.(*object.PanMap)),
+					Env: env, // not used
+				}
+			},
+		),
 		"at": propContainer["Map_at"],
 		"B": f(
 			func(
@@ -52,6 +71,93 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
+			},
+		),
+		"items": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// NOTE: order is not guaranteed!
+
+				if len(args) < 1 {
+					return object.NewTypeErr("Map#items requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isMap)
+				if !ok {
+					return &object.PanArr{Elems: []object.PanObject{}}
+				}
+				map_, _ := self.(*object.PanMap)
+
+				items := []object.PanObject{}
+				for _, pair := range *map_.Pairs {
+					items = append(items, &object.PanArr{Elems: []object.PanObject{
+						pair.Key,
+						pair.Value,
+					}})
+				}
+				for _, pair := range *map_.NonHashablePairs {
+					items = append(items, &object.PanArr{Elems: []object.PanObject{
+						pair.Key,
+						pair.Value,
+					}})
+				}
+
+				return &object.PanArr{Elems: items}
+			},
+		),
+		"keys": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// NOTE: order is not guaranteed!
+
+				if len(args) < 1 {
+					return object.NewTypeErr("Map#keys requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isMap)
+				if !ok {
+					return &object.PanArr{Elems: []object.PanObject{}}
+				}
+				map_, _ := self.(*object.PanMap)
+
+				keys := []object.PanObject{}
+				for _, pair := range *map_.Pairs {
+					keys = append(keys, pair.Key)
+				}
+				for _, pair := range *map_.NonHashablePairs {
+					keys = append(keys, pair.Key)
+				}
+
+				return &object.PanArr{Elems: keys}
+			},
+		),
+		"values": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// NOTE: order is not guaranteed!
+
+				if len(args) < 1 {
+					return object.NewTypeErr("Map#values requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isMap)
+				if !ok {
+					return &object.PanArr{Elems: []object.PanObject{}}
+				}
+				map_, _ := self.(*object.PanMap)
+
+				values := []object.PanObject{}
+				for _, pair := range *map_.Pairs {
+					values = append(values, pair.Value)
+				}
+				for _, pair := range *map_.NonHashablePairs {
+					values = append(values, pair.Value)
+				}
+
+				return &object.PanArr{Elems: values}
 			},
 		),
 	}
@@ -130,4 +236,48 @@ func containsKey(
 		}
 	}
 	return -1, false
+}
+
+func mapIter(m *object.PanMap) object.BuiltInFunc {
+	scalarYieldIdx := 0
+	hashes := []object.HashKey{}
+	for hash, _ := range *m.Pairs {
+		hashes = append(hashes, hash)
+	}
+
+	nonScalarYieldIdx := 0
+
+	return func(
+		env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+	) object.PanObject {
+		if scalarYieldIdx >= len(hashes) {
+			yielded := yieldNonScalar(m, nonScalarYieldIdx)
+			nonScalarYieldIdx += 1
+			return yielded
+		}
+		pair, ok := (*m.Pairs)[hashes[scalarYieldIdx]]
+		// must be ok
+		if !ok {
+			return object.NewValueErr("pair data in map somehow got changed")
+		}
+
+		yielded := &object.PanArr{Elems: []object.PanObject{
+			pair.Key,
+			pair.Value,
+		}}
+		scalarYieldIdx += 1
+		return yielded
+	}
+}
+
+func yieldNonScalar(m *object.PanMap, i int) object.PanObject {
+	if i >= len(*m.NonHashablePairs) {
+		return object.NewStopIterErr("iter stopped")
+	}
+
+	pair := (*m.NonHashablePairs)[i]
+	return &object.PanArr{Elems: []object.PanObject{
+		pair.Key,
+		pair.Value,
+	}}
 }
