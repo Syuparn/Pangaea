@@ -74,6 +74,32 @@ func TestEvalZeroAndOneToBuiltIn(t *testing.T) {
 	}
 }
 
+func TestEvalIntAt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// n[i] returns ith bit of n
+		{`5[0]`, object.NewPanInt(1)},
+		{`5[1]`, object.NewPanInt(0)},
+		{`5[2]`, object.NewPanInt(1)},
+		{`5[3]`, object.NewPanInt(0)},
+		{
+			`6[0:3]`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(0),
+				object.NewPanInt(1),
+				object.NewPanInt(1),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalFloatLiteral(t *testing.T) {
 	tests := []struct {
 		input    string

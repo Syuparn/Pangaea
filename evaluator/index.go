@@ -5,40 +5,6 @@ import (
 	"bytes"
 )
 
-func findElemInObj(
-	env *object.Env,
-	kwargs *object.PanObj,
-	args ...object.PanObject,
-) object.PanObject {
-	if len(args) < 2 {
-		return object.NewTypeErr("Obj#at requires at least 2 args")
-	}
-	self := args[0]
-
-	// TODO: duck typing for keys (allow child of arr)
-	indexArr, ok := args[1].(*object.PanArr)
-	if !ok {
-		return object.BuiltInNil
-	}
-
-	if len(indexArr.Elems) < 1 {
-		return object.BuiltInNil
-	}
-
-	// TODO: duck typing for keys (allow child of str)
-	propName, ok := indexArr.Elems[0].(*object.PanStr)
-	if !ok {
-		return object.BuiltInNil
-	}
-
-	ret, ok := callProp(self, object.GetSymHash(propName.Value))
-	if !ok {
-		return object.BuiltInNil
-	}
-
-	return ret
-}
-
 func findElemInArr(
 	env *object.Env,
 	kwargs *object.PanObj,
@@ -74,6 +40,77 @@ func findElemInArr(
 	default:
 		return findElemInObj(env, kwargs, args...)
 	}
+}
+
+func findBitInInt(
+	env *object.Env,
+	kwargs *object.PanObj,
+	args ...object.PanObject,
+) object.PanObject {
+	// NOTE: if index is not found, Obj#at is called
+
+	if len(args) < 2 {
+		return object.NewTypeErr("Int#at requires at least 2 args")
+	}
+	// TODO: duck typing for keys (allow child of arr)
+	self, ok := args[0].(*object.PanInt)
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	// TODO: duck typing for keys (allow child of arr)
+	indexArr, ok := args[1].(*object.PanArr)
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	if len(indexArr.Elems) < 1 {
+		return object.BuiltInNil
+	}
+
+	switch index := indexArr.Elems[0].(type) {
+	case *object.PanInt:
+		// TODO: duck typing for keys (allow child of int)
+		return intIndex(index.Value, self.Value)
+	case *object.PanRange:
+		return intRange(index, self.Value)
+	default:
+		return findElemInObj(env, kwargs, args...)
+	}
+}
+
+func findElemInObj(
+	env *object.Env,
+	kwargs *object.PanObj,
+	args ...object.PanObject,
+) object.PanObject {
+	if len(args) < 2 {
+		return object.NewTypeErr("Obj#at requires at least 2 args")
+	}
+	self := args[0]
+
+	// TODO: duck typing for keys (allow child of arr)
+	indexArr, ok := args[1].(*object.PanArr)
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	if len(indexArr.Elems) < 1 {
+		return object.BuiltInNil
+	}
+
+	// TODO: duck typing for keys (allow child of str)
+	propName, ok := indexArr.Elems[0].(*object.PanStr)
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	ret, ok := callProp(self, object.GetSymHash(propName.Value))
+	if !ok {
+		return object.BuiltInNil
+	}
+
+	return ret
 }
 
 func findElemInStr(
@@ -128,6 +165,21 @@ func arrIndex(index int64, arr *object.PanArr) object.PanObject {
 	return arr.Elems[index]
 }
 
+func intIndex(index int64, n int64) object.PanObject {
+	// bits of int64
+	length := int64(64)
+	if index >= length || index < -length {
+		return object.BuiltInNil
+	}
+
+	if index < 0 {
+		// NOTE: shift count must be uint
+		return object.NewPanInt((n >> uint64(index+length)) & 1)
+	}
+
+	return object.NewPanInt((n >> uint64(index)) & 1)
+}
+
 func strIndex(index int64, runes []rune) object.PanObject {
 	length := int64(len(runes))
 	if index >= length || index < -length {
@@ -144,6 +196,14 @@ func strIndex(index int64, runes []rune) object.PanObject {
 func arrRange(r *object.PanRange, arr *object.PanArr) object.PanObject {
 	return valRange(r, len(arr.Elems), func(i int64) object.PanObject {
 		return arrIndex(i, arr)
+	})
+}
+
+func intRange(r *object.PanRange, n int64) object.PanObject {
+	// bits of int64
+	intLen := 64
+	return valRange(r, intLen, func(i int64) object.PanObject {
+		return intIndex(i, n)
 	})
 }
 
