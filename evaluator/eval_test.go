@@ -1781,6 +1781,34 @@ func TestEvalObjIter(t *testing.T) {
 	}
 }
 
+func TestEvalMapIter(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// NOTE: order is not guaranteed!
+		{
+			`it := %{true: 1}._iter
+			 it.next`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.BuiltInTrue,
+				object.NewPanInt(1),
+			}},
+		},
+		{
+			`it := %{true: 1}._iter
+			 it.next
+			 it.next`,
+			object.NewStopIterErr("iter stopped"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalRangeIter(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1957,7 +1985,31 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 				object.NewPanStr("語!"),
 			}},
 		},
-		// TODO: check obj/map/range
+		{
+			`{a: 1, b: 2}@{|k, v| "#{k}: #{v}"}`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a: 1"),
+				object.NewPanStr("b: 2"),
+			}},
+		},
+		// NOTE: order of map elems is not guaranteed
+		{
+			`%{true: "yes"}@{|k, v| [k, v]}`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.BuiltInTrue,
+					object.NewPanStr("yes"),
+				}},
+			}},
+		},
+		{
+			`(1:6:2)@{|n| n+1}`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(2),
+				object.NewPanInt(4),
+				object.NewPanInt(6),
+			}},
+		},
 	}
 
 	for _, tt := range tests {
