@@ -6,8 +6,8 @@ import (
 )
 
 func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObject {
-	recv := Eval(node.Receiver, env)
-	if err, ok := recv.(*object.PanErr); ok {
+	recv, err := extractRecv(node.Receiver, env)
+	if err != nil {
 		return appendStackTrace(err, node.Source())
 	}
 

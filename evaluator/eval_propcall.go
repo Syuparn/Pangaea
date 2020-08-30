@@ -7,8 +7,8 @@ import (
 )
 
 func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
-	recv := Eval(node.Receiver, env)
-	if err, ok := recv.(*object.PanErr); ok {
+	recv, err := extractRecv(node.Receiver, env)
+	if err != nil {
 		return appendStackTrace(err, node.Source())
 	}
 
@@ -299,4 +299,30 @@ func evalFuncMethodCall(
 	// prepend recv to args
 	args = append([]object.PanObject{f, recv}, args...)
 	return evalFuncCall(env, kwargs, args...)
+}
+
+func extractRecv(
+	recvNode ast.Node,
+	env *object.Env,
+) (object.PanObject, *object.PanErr) {
+	// handle anonchain
+	if recvNode == nil {
+		self, err := extractAnonChainRecv(env)
+		return self, err
+	}
+
+	recv := Eval(recvNode, env)
+	if err, ok := recv.(*object.PanErr); ok {
+		return nil, err
+	}
+	return recv, nil
+}
+
+func extractAnonChainRecv(env *object.Env) (object.PanObject, *object.PanErr) {
+	// recv is 1st arg in current env
+	self, ok := env.Get(object.GetSymHash(`\1`))
+	if !ok {
+		return nil, object.NewNameErr("name `\\1` is not defined")
+	}
+	return self, nil
 }
