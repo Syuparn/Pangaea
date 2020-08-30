@@ -2279,7 +2279,7 @@ func TestEvalArgVars(t *testing.T) {
 		// NameErr if number exceeds arity
 		{
 			`{\3}("a", "b")`,
-			object.NewNameErr("name `\\3` is not defined."),
+			object.NewNameErr("name `\\3` is not defined"),
 		},
 		// `\` is syntax sugar of `\1`
 		{
@@ -2325,7 +2325,7 @@ func TestEvalKwargVars(t *testing.T) {
 		// NameErr if kwarg is not found
 		{
 			`{\c}(a: "A", b: "B")`,
-			object.NewNameErr("name `\\c` is not defined."),
+			object.NewNameErr("name `\\c` is not defined"),
 		},
 		// `\_` is obj of all kwargs
 		{
@@ -3089,7 +3089,7 @@ func TestEvalPrintErrIfNoIO(t *testing.T) {
 	}
 }
 
-func TestEvalPropChain(t *testing.T) {
+func TestEvalScalarPropChain(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected object.PanObject
@@ -3144,6 +3144,72 @@ func TestEvalPropChain(t *testing.T) {
 		{
 			`{a: m{|x| x}}.a("arg", "needless", "extra", "args")`,
 			object.NewPanStr("arg"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalAnonPropChain(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|x| .a}({a: 5})`,
+			object.NewPanInt(5),
+		},
+		{
+			`{|x| @a}([{a: 1}, {a: 2}, {a: 3}])`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+				object.NewPanInt(3),
+			}},
+		},
+		{
+			`{|x| $(0)+}([1, 2, 3])`,
+			object.NewPanInt(6),
+		},
+		{
+			`.a`,
+			object.NewNameErr("name `\\1` is not defined"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalAnonLiteralChain(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|x| .{|y| y + 2}}(3)`,
+			object.NewPanInt(5),
+		},
+		{
+			`{|nums| @{|n| n.S}}([1, 2, 3])`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("1"),
+				object.NewPanStr("2"),
+				object.NewPanStr("3"),
+			}},
+		},
+		{
+			`{|nums| $(0){|acc, i| acc + i}}([1, 2, 3])`,
+			object.NewPanInt(6),
+		},
+		{
+			`.{|x| x}`,
+			object.NewNameErr("name `\\1` is not defined"),
 		},
 	}
 
@@ -3428,64 +3494,78 @@ func TestNameErr(t *testing.T) {
 	}{
 		{
 			`a`,
-			object.NewNameErr("name `a` is not defined."),
+			object.NewNameErr("name `a` is not defined"),
 		},
 		// multiple lines
 		{
 			`1; two; 3`,
-			object.NewNameErr("name `two` is not defined."),
+			object.NewNameErr("name `two` is not defined"),
 		},
 		// in arr
 		{
 			`[A]`,
-			object.NewNameErr("name `A` is not defined."),
+			object.NewNameErr("name `A` is not defined"),
 		},
 		// in arr expansion
 		{
 			`[*ae]`,
-			object.NewNameErr("name `ae` is not defined."),
+			object.NewNameErr("name `ae` is not defined"),
 		},
 		// in obj
 		{
 			`{key: o}`,
-			object.NewNameErr("name `o` is not defined."),
+			object.NewNameErr("name `o` is not defined"),
 		},
 		// in obj expansion
 		{
 			`{**oe}`,
-			object.NewNameErr("name `oe` is not defined."),
+			object.NewNameErr("name `oe` is not defined"),
 		},
 		// in map key
 		{
 			`%{key: 1}`,
-			object.NewNameErr("name `key` is not defined."),
+			object.NewNameErr("name `key` is not defined"),
 		},
 		// in map val
 		{
 			`%{1: val}`,
-			object.NewNameErr("name `val` is not defined."),
+			object.NewNameErr("name `val` is not defined"),
 		},
 		// in map expansion
 		{
 			`%{**me}`,
-			object.NewNameErr("name `me` is not defined."),
+			object.NewNameErr("name `me` is not defined"),
 		},
 		// in func call
 		{
 			`{|a| fc}(1)`,
-			object.NewNameErr("name `fc` is not defined."),
+			object.NewNameErr("name `fc` is not defined"),
 		},
 		// in arg of func call
 		{
 			`{|a| 10}(afc)`,
-			object.NewNameErr("name `afc` is not defined."),
+			object.NewNameErr("name `afc` is not defined"),
 		},
 		// in kwarg of func call
 		{
 			`{|a: 1| 10}(a: kwfc)`,
-			object.NewNameErr("name `kwfc` is not defined."),
+			object.NewNameErr("name `kwfc` is not defined"),
 		},
-		// TODO: err in iter call
+		// in iter call
+		{
+			`<{|a| ic}>.new(1).next`,
+			object.NewNameErr("name `ic` is not defined"),
+		},
+		// in arg of iter call
+		{
+			`{|a| 10}.new(aic)`,
+			object.NewNameErr("name `aic` is not defined"),
+		},
+		// in kwarg of iter call
+		{
+			`{|a: 1| 10}(a: kwic)`,
+			object.NewNameErr("name `kwic` is not defined"),
+		},
 	}
 
 	for _, tt := range tests {

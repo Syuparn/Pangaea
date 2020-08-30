@@ -11,7 +11,7 @@ func evalIdent(ident *ast.Ident, env *object.Env) object.PanObject {
 
 	if !ok {
 		err := object.NewNameErr(
-			fmt.Sprintf("name `%s` is not defined.", ident.String()))
+			fmt.Sprintf("name `%s` is not defined", ident.String()))
 		return appendStackTrace(err, ident.Source())
 	}
 
