@@ -2507,6 +2507,78 @@ func TestEvalObjValues(t *testing.T) {
 	}
 }
 
+func TestEvalObjItems(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.items`,
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
+		{
+			`{a: "A", b: "B"}.items`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanStr("a"),
+					object.NewPanStr("A"),
+				}},
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanStr("b"),
+					object.NewPanStr("B"),
+				}},
+			}},
+		},
+		// private keys are ignored
+		{
+			`{
+			   a: "A",
+			   _b: "_B",
+			   '+: "PLUS",
+			   "with space": "WITH SPACE",
+			 }.items`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanStr("a"),
+					object.NewPanStr("A"),
+				}},
+			}},
+		},
+		// with private keys (private keys follow public keys)
+		{
+			`{
+			   a: "A",
+			   _b: "_B",
+			   '+: "PLUS",
+			   "with space": "WITH SPACE",
+			 }.items(private?: true)`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanStr("a"),
+					object.NewPanStr("A"),
+				}},
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanStr("+"),
+					object.NewPanStr("PLUS"),
+				}},
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanStr("_b"),
+					object.NewPanStr("_B"),
+				}},
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanStr("with space"),
+					object.NewPanStr("WITH SPACE"),
+				}},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStringify(t *testing.T) {
 	tests := []struct {
 		input    string
