@@ -8,18 +8,22 @@ import (
 const OBJ_TYPE = "OBJ_TYPE"
 
 func NewPanObj(pairs *map[SymHash]Pair, proto PanObject) *PanObj {
+	publicKeys, privateKeys := keyHashes(pairs)
 	return &PanObj{
-		Pairs: pairs,
-		Keys:  keyHashes(pairs),
-		proto: proto,
+		Pairs:       pairs,
+		Keys:        &publicKeys,
+		PrivateKeys: &privateKeys,
+		proto:       proto,
 	}
 }
 
 func PanObjInstance(pairs *map[SymHash]Pair) PanObj {
+	publicKeys, privateKeys := keyHashes(pairs)
 	return PanObj{
-		Pairs: pairs,
-		Keys:  keyHashes(pairs),
-		proto: BuiltInObjObj,
+		Pairs:       pairs,
+		Keys:        &publicKeys,
+		PrivateKeys: &privateKeys,
+		proto:       BuiltInObjObj,
 	}
 }
 
@@ -42,9 +46,10 @@ func ChildPanObjPtr(proto PanObject, src *PanObj) *PanObj {
 }
 
 type PanObj struct {
-	Pairs *map[SymHash]Pair
-	Keys  *[]SymHash
-	proto PanObject
+	Pairs       *map[SymHash]Pair
+	Keys        *[]SymHash
+	PrivateKeys *[]SymHash
+	proto       PanObject
 }
 
 func (o *PanObj) Type() PanObjType {
@@ -73,8 +78,9 @@ func (o *PanObj) Proto() PanObject {
 	return o.proto
 }
 
-func keyHashes(pairs *map[SymHash]Pair) *[]SymHash {
-	keyStrs := []string{}
+func keyHashes(pairs *map[SymHash]Pair) ([]SymHash, []SymHash) {
+	publicKeyStrs := []string{}
+	privateKeyStrs := []string{}
 
 	for _, pair := range *pairs {
 		str, ok := pair.Key.(*PanStr)
@@ -83,16 +89,24 @@ func keyHashes(pairs *map[SymHash]Pair) *[]SymHash {
 			continue
 		}
 		if str.IsPublic {
-			keyStrs = append(keyStrs, str.Value)
+			publicKeyStrs = append(publicKeyStrs, str.Value)
+		} else {
+			privateKeyStrs = append(privateKeyStrs, str.Value)
 		}
 	}
 
-	sort.Strings(keyStrs)
+	sort.Strings(publicKeyStrs)
+	sort.Strings(privateKeyStrs)
 
-	hashes := []SymHash{}
-	for _, str := range keyStrs {
-		hashes = append(hashes, GetSymHash(str))
+	publicHashes := []SymHash{}
+	for _, str := range publicKeyStrs {
+		publicHashes = append(publicHashes, GetSymHash(str))
 	}
 
-	return &hashes
+	privateHashes := []SymHash{}
+	for _, str := range privateKeyStrs {
+		privateHashes = append(privateHashes, GetSymHash(str))
+	}
+
+	return publicHashes, privateHashes
 }

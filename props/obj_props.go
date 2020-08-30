@@ -68,6 +68,39 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			},
 		),
 		"callProp": propContainer["Obj_callProp"],
+		"keys": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Obj#keys requires at least 1 arg")
+				}
+
+				withPrivate := false
+				if pair, ok := propIn(kwargs, "private?"); ok {
+					withPrivate = (pair.Value == object.BuiltInTrue)
+				}
+
+				self, ok := traceProtoOf(args[0], isObj)
+				if !ok {
+					return &object.PanArr{Elems: []object.PanObject{}}
+				}
+				obj, _ := self.(*object.PanObj)
+
+				keys := []object.PanObject{}
+				for _, keyHash := range *obj.Keys {
+					keys = append(keys, (*obj.Pairs)[keyHash].Key)
+				}
+
+				if withPrivate {
+					for _, keyHash := range *obj.PrivateKeys {
+						keys = append(keys, (*obj.Pairs)[keyHash].Key)
+					}
+				}
+
+				return &object.PanArr{Elems: keys}
+			},
+		),
 		"p": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

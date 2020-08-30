@@ -2415,6 +2415,47 @@ func TestEvalBearContents(t *testing.T) {
 	}
 }
 
+func TestEvalObjKeys(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.keys`,
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
+		{
+			`{a: 1, b: 2}.keys`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.NewPanStr("b"),
+			}},
+		},
+		// private keys are ignored
+		{
+			`{a: 1, _b: 2, '+: 3, "with space": 4}.keys`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+			}},
+		},
+		// with private keys (private keys follow public keys)
+		{
+			`{a: 1, _b: 2, '+: 3, "with space": 4}.keys(private?: true)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.NewPanStr("+"),
+				object.NewPanStr("_b"),
+				object.NewPanStr("with space"),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStringify(t *testing.T) {
 	tests := []struct {
 		input    string

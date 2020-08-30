@@ -57,3 +57,9 @@ func isRange(o object.PanObject) bool {
 func isStr(o object.PanObject) bool {
 	return o.Type() == object.STR_TYPE
 }
+
+func propIn(obj *object.PanObj, propName string) (object.Pair, bool) {
+	propSym := object.GetSymHash(propName)
+	pair, ok := (*obj.Pairs)[propSym]
+	return pair, ok
+}
