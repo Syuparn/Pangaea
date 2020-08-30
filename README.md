@@ -33,8 +33,15 @@ $ ./pangaea.exe
 - [simplexer](github.com/macrat/simplexer)
 - [dtoa](github.com/tanaton/dtoa)
 
+# Progress
+
+- [x] Lexer
+- [x] Parser
+- [ ] Evaluator (about 70%)
+- [ ] Methods/Properties (about 10%)
+
 # Plans for language features
-(there are only lexer and parser yet...)
+(Pangaea is under construction. currently codes below cannot be evaluated yet...)
 
 ## One-way!
 This language is tuned for a one-liner method chain!
