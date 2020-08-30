@@ -73,6 +73,33 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"keys": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// NOTE: order is not guaranteed!
+
+				if len(args) < 1 {
+					return object.NewTypeErr("Map#keys requires at least 1 arg")
+				}
+
+				self, ok := traceProtoOf(args[0], isMap)
+				if !ok {
+					return &object.PanArr{Elems: []object.PanObject{}}
+				}
+				map_, _ := self.(*object.PanMap)
+
+				keys := []object.PanObject{}
+				for _, pair := range *map_.Pairs {
+					keys = append(keys, pair.Key)
+				}
+				for _, pair := range *map_.NonHashablePairs {
+					keys = append(keys, pair.Key)
+				}
+
+				return &object.PanArr{Elems: keys}
+			},
+		),
 	}
 }
 

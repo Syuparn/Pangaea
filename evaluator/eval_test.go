@@ -2631,6 +2631,38 @@ func TestEvalObjItems(t *testing.T) {
 	}
 }
 
+func TestEvalMapKeys(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`%{}.keys`,
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
+		// NOTE: order is not guaranteed
+		{
+			`%{true: 1}.keys`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.BuiltInTrue,
+			}},
+		},
+		{
+			`%{[0]: "zero"}.keys`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanInt(0),
+				}},
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStringify(t *testing.T) {
 	tests := []struct {
 		input    string
