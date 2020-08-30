@@ -4775,6 +4775,36 @@ func TestBareRangeIndex(t *testing.T) {
 		[]string{"Int", "Int", ""}, []interface{}{1, 100, nil})
 }
 
+func TestEmptyBareRangeIndex(t *testing.T) {
+	input := `foo[:]`
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+	idxExpr, ok := expr.(*ast.PropCallExpr)
+	if !ok {
+		t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+	}
+
+	testIdentifier(t, idxExpr.Prop, "at")
+	testChainContext(t, idxExpr, ".", nil)
+
+	if len(idxExpr.Args) != 1 {
+		t.Fatalf("arity must be 1. got=%d", len(idxExpr.Args))
+	}
+
+	lst, ok := idxExpr.Args[0].(*ast.ArrLiteral)
+	if !ok {
+		t.Fatalf("1st arg must be *ast.ArrLiteral. got=%T",
+			idxExpr.Args[0])
+	}
+
+	if len(lst.Elems) != 1 {
+		t.Fatalf("lst must have 1 elem. got=%d", len(lst.Elems))
+	}
+
+	testRange(t, lst.Elems[0],
+		[]string{"", "", ""}, []interface{}{nil, nil, nil})
+}
+
 func TestRangeLiteralPrecedence(t *testing.T) {
 	input := `(1:(2+3):4)`
 	program := testParse(t, input)

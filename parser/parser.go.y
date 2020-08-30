@@ -1046,6 +1046,24 @@ arrLiteral
 		}
 		yylex.(*Lexer).curRule = "arrLiteral -> lBracket RBRACKET"
 	}
+	| lBracket COLON RBRACKET
+	{
+		emptyRange := &ast.RangeLiteral{
+			Token: $2.Literal,
+			Start: nil,
+			Stop: nil,
+			Step: nil,
+			Src: yylex.(*Lexer).Source,
+		}
+
+		$$ = &ast.ArrLiteral{
+			Token: $1.Literal,
+			Elems: []ast.Expr{emptyRange},
+			Src: yylex.(*Lexer).Source,
+
+		}
+		yylex.(*Lexer).curRule = "arrLiteral -> lBracket RBRACKET"
+	}
 	| lBracket exprList RBRACKET
 	{
 		$$ = &ast.ArrLiteral{
