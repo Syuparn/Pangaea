@@ -1801,6 +1801,17 @@ func TestEvalMapIter(t *testing.T) {
 			 it.next`,
 			object.NewStopIterErr("iter stopped"),
 		},
+		// non-scalar key
+		{
+			`it := %{[0]: 1}._iter
+			 it.next`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanInt(0),
+				}},
+				object.NewPanInt(1),
+			}},
+		},
 	}
 
 	for _, tt := range tests {
@@ -2683,6 +2694,44 @@ func TestEvalMapValues(t *testing.T) {
 			`%{[0]: "zero"}.values`,
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanStr("zero"),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalMapItems(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`%{}.items`,
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
+		// NOTE: order is not guaranteed
+		{
+			`%{true: 1}.items`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.BuiltInTrue,
+					object.NewPanInt(1),
+				}},
+			}},
+		},
+		{
+			`%{[0]: "zero"}.items`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					&object.PanArr{Elems: []object.PanObject{
+						object.NewPanInt(0),
+					}},
+					object.NewPanStr("zero"),
+				}},
 			}},
 		},
 	}
