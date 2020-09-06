@@ -40,6 +40,8 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 		return evalIter(node, env)
 	case *ast.Ident:
 		return evalIdent(node, env)
+	case *ast.PinnedIdent:
+		return evalPinnedIdent(node, env)
 	case *ast.AssignExpr:
 		return evalAssign(node, env)
 	case *ast.IfExpr:
