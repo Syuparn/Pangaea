@@ -54,6 +54,8 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 		return evalPropCall(node, env)
 	case *ast.LiteralCallExpr:
 		return evalLiteralCall(node, env)
+	case *ast.VarCallExpr:
+		return evalVarCall(node, env)
 	}
 
 	return nil

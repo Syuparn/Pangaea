@@ -2075,6 +2075,87 @@ func TestEvalListChainLiteralCallIgnoresNil(t *testing.T) {
 	}
 }
 
+func TestEvalListChainVarCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`f := {|i| i + 1}; [1, 2]@^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(2),
+				object.NewPanInt(3),
+			}},
+		},
+		{
+			`f := {|i| i.S}; 3@^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("1"),
+				object.NewPanStr("2"),
+				object.NewPanStr("3"),
+			}},
+		},
+		{
+			`f := {|c| c + "!"}; "日本語"@^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("日!"),
+				object.NewPanStr("本!"),
+				object.NewPanStr("語!"),
+			}},
+		},
+		{
+			`f := {|k, v| "#{k}: #{v}"}; {a: 1, b: 2}@^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a: 1"),
+				object.NewPanStr("b: 2"),
+			}},
+		},
+		// NOTE: order of map elems is not guaranteed
+		{
+			`f := {|k, v| [k, v]}; %{true: "yes"}@^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.BuiltInTrue,
+					object.NewPanStr("yes"),
+				}},
+			}},
+		},
+		{
+			`f := {|n| n+1}; (1:6:2)@^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(2),
+				object.NewPanInt(4),
+				object.NewPanInt(6),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalListChainVarCallIgnoresNil(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`f := {|o| o.name}; [{name: 'Taro}, {name: nil}, {name: 'Jiro}]@^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("Taro"),
+				object.NewPanStr("Jiro"),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalReduceChainPropCall(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -2117,6 +2198,32 @@ func TestEvalReduceChainLiteralCall(t *testing.T) {
 		// if chainarg is not set, acc is `nil`
 		{
 			`[nil]${|i, j| i == j}`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalReduceChainVarCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`f := {|i, j| i + j}; [1, 2, 3]$(0)^f`,
+			object.NewPanInt(6),
+		},
+		{
+			`f := {|i, j| i + j}; [1, 2, 3]$(4)^f`,
+			object.NewPanInt(10),
+		},
+		// if chainarg is not set, acc is `nil`
+		{
+			`f := {|i, j| i == j}; [nil]$^f`,
 			object.BuiltInTrue,
 		},
 	}
@@ -3378,6 +3485,50 @@ func TestEvalLiteralCall(t *testing.T) {
 		// if too many args are passed, they are just ignored
 		{
 			`[2, 3, "extra"].{|x, y| x + y}`,
+			object.NewPanInt(5),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalVarCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`f := {|i| i * 2}; 3.^f`,
+			object.NewPanInt(6),
+		},
+		{
+			`f := {|i| i * 2}; [1, 2].^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+			}},
+		},
+		// if arity is more than 1, arr is extracted to each param
+		{
+			`f := {|i, j| i + j}; [1, 2].^f`,
+			object.NewPanInt(3),
+		},
+		// if args are insufficient, they are padded by nil
+		{
+			`f := {|i, j| [i, j]}; "X".^f`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("X"),
+				object.BuiltInNil,
+			}},
+		},
+		// if too many args are passed, they are just ignored
+		{
+			`f := {|x, y| x + y}; [2, 3, "extra"].^f`,
 			object.NewPanInt(5),
 		},
 	}

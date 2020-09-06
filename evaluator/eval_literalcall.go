@@ -51,7 +51,7 @@ func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObjec
 }
 
 func evalScalarLiteralCall(
-	node *ast.LiteralCallExpr,
+	node ast.Node,
 	env *object.Env,
 	f *object.PanFunc,
 	recv object.PanObject,
@@ -78,7 +78,7 @@ func evalScalarLiteralCall(
 }
 
 func evalListLiteralCall(
-	node *ast.LiteralCallExpr,
+	node ast.Node,
 	env *object.Env,
 	f *object.PanFunc,
 	recv object.PanObject,
@@ -148,7 +148,7 @@ func isStopIter(obj object.PanObject) bool {
 }
 
 func evalReduceLiteralCall(
-	node *ast.LiteralCallExpr,
+	node ast.Node,
 	env *object.Env,
 	f *object.PanFunc,
 	recv object.PanObject,
@@ -201,7 +201,7 @@ func evalReduceLiteralCall(
 }
 
 func _evalLiteralCall(
-	node *ast.LiteralCallExpr,
+	node ast.Node,
 	env *object.Env,
 	f *object.PanFunc,
 	args []object.PanObject,
