@@ -588,6 +588,28 @@ func TestEvalObjLiteral(t *testing.T) {
 	}
 }
 
+func TestEvalPinnedObjKey(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanObj
+	}{
+		{
+			`a := "A"; {^a: 1}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   object.NewPanStr("A"),
+					Value: object.NewPanInt(1),
+				},
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testPanObj(t, actual, tt.expected)
+	}
+}
+
 func TestEvalBuiltInCallProp(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -876,6 +898,31 @@ func toPanMap(pairs []object.Pair, nonHashablePairs []object.Pair) *object.PanMa
 	return &object.PanMap{
 		Pairs:            &pairMap,
 		NonHashablePairs: &nonHashablePairs,
+	}
+}
+
+func TestEvalPinnedMapKey(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *object.PanMap
+	}{
+		{
+			`a := true; %{^a: 1}`,
+			toPanMap(
+				[]object.Pair{
+					object.Pair{
+						Key:   object.BuiltInTrue,
+						Value: object.NewPanInt(1),
+					},
+				},
+				[]object.Pair{},
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
 	}
 }
 
