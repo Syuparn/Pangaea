@@ -21,17 +21,16 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInTrue
 				}
 
-				self, ok := traceProtoOf(args[0], isArr)
+				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isArr)
+				other, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				return compArrs(self.(*object.PanArr), other.(*object.PanArr),
-					propContainer, env)
+				return compArrs(self, other, propContainer, env)
 			},
 		),
 		"+": f(
@@ -42,22 +41,19 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("+ requires at least 2 args")
 				}
 
-				self, ok := traceProtoOf(args[0], isArr)
+				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
 						fmt.Sprintf("`%s` cannot be treated as arr", args[0].Inspect()))
 				}
-				other, ok := traceProtoOf(args[1], isArr)
+				other, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
 					return object.NewTypeErr(
 						fmt.Sprintf("`%s` cannot be treated as arr", args[0].Inspect()))
 				}
 
 				// NOTE: no need to copy each elem because they are immutable
-				elems := append(
-					self.(*object.PanArr).Elems,
-					other.(*object.PanArr).Elems...,
-				)
+				elems := append(self.Elems, other.Elems...)
 				return &object.PanArr{Elems: elems}
 			},
 		),
@@ -69,14 +65,14 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("* requires at least 2 args")
 				}
 
-				self, ok := traceProtoOf(args[0], isArr)
+				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
 						fmt.Sprintf("`%s` cannot be treated as arr", args[0].Inspect()))
 				}
-				selfElems := self.(*object.PanArr).Elems
+				selfElems := self.Elems
 
-				other, ok := traceProtoOf(args[1], isInt)
+				other, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.NewTypeErr(
 						fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
@@ -84,7 +80,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				// NOTE: no need to copy each elem because they are immutable
 				elems := []object.PanObject{}
-				for i := int64(0); i < other.(*object.PanInt).Value; i++ {
+				for i := int64(0); i < other.Value; i++ {
 					elems = append(elems, selfElems...)
 				}
 				return &object.PanArr{Elems: elems}
@@ -98,13 +94,13 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Arr#_iter requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isArr)
+				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be arr")
 				}
 
 				return &object.PanBuiltInIter{
-					Fn:  arrIter(self.(*object.PanArr)),
+					Fn:  arrIter(self),
 					Env: env, // not used
 				}
 			},
@@ -117,12 +113,12 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Arr#B requires at least 1 arg")
 				}
-				self, ok := traceProtoOf(args[0], isArr)
+				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be arr`)
 				}
 
-				if len(self.(*object.PanArr).Elems) == 0 {
+				if len(self.Elems) == 0 {
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue

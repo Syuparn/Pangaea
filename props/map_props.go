@@ -21,17 +21,16 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInTrue
 				}
 
-				self, ok := traceProtoOf(args[0], isMap)
+				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isMap)
+				other, ok := object.TraceProtoOfMap(args[1])
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				return compMaps(self.(*object.PanMap), other.(*object.PanMap),
-					propContainer, env)
+				return compMaps(self, other, propContainer, env)
 			},
 		),
 		"_iter": f(
@@ -42,13 +41,13 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Map#_iter requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isMap)
+				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be map`)
 				}
 
 				return &object.PanBuiltInIter{
-					Fn:  mapIter(self.(*object.PanMap)),
+					Fn:  mapIter(self),
 					Env: env, // not used
 				}
 			},
@@ -61,13 +60,12 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Map#B requires at least 1 arg")
 				}
-				self, ok := traceProtoOf(args[0], isMap)
+				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be map`)
 				}
 
-				m, _ := self.(*object.PanMap)
-				if len(*m.Pairs) == 0 && len(*m.NonHashablePairs) == 0 {
+				if len(*self.Pairs) == 0 && len(*self.NonHashablePairs) == 0 {
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
@@ -83,20 +81,19 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Map#items requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isMap)
+				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
 					return &object.PanArr{Elems: []object.PanObject{}}
 				}
-				map_, _ := self.(*object.PanMap)
 
 				items := []object.PanObject{}
-				for _, pair := range *map_.Pairs {
+				for _, pair := range *self.Pairs {
 					items = append(items, &object.PanArr{Elems: []object.PanObject{
 						pair.Key,
 						pair.Value,
 					}})
 				}
-				for _, pair := range *map_.NonHashablePairs {
+				for _, pair := range *self.NonHashablePairs {
 					items = append(items, &object.PanArr{Elems: []object.PanObject{
 						pair.Key,
 						pair.Value,
@@ -116,17 +113,16 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Map#keys requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isMap)
+				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
 					return &object.PanArr{Elems: []object.PanObject{}}
 				}
-				map_, _ := self.(*object.PanMap)
 
 				keys := []object.PanObject{}
-				for _, pair := range *map_.Pairs {
+				for _, pair := range *self.Pairs {
 					keys = append(keys, pair.Key)
 				}
-				for _, pair := range *map_.NonHashablePairs {
+				for _, pair := range *self.NonHashablePairs {
 					keys = append(keys, pair.Key)
 				}
 
@@ -143,17 +139,16 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Map#values requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isMap)
+				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
 					return &object.PanArr{Elems: []object.PanObject{}}
 				}
-				map_, _ := self.(*object.PanMap)
 
 				values := []object.PanObject{}
-				for _, pair := range *map_.Pairs {
+				for _, pair := range *self.Pairs {
 					values = append(values, pair.Value)
 				}
-				for _, pair := range *map_.NonHashablePairs {
+				for _, pair := range *self.NonHashablePairs {
 					values = append(values, pair.Value)
 				}
 

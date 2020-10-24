@@ -61,12 +61,12 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("/~ requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isStr)
+				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be str")
 				}
 
-				strBytes := []byte(self.(*object.PanStr).Value)
+				strBytes := []byte(self.Value)
 				negBytes := []byte{}
 				for _, b := range strBytes {
 					negBytes = append(negBytes, ^b)
@@ -96,18 +96,18 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Str#_incBy requires at least 2 args")
 				}
 
-				self, ok := traceProtoOf(args[0], isStr)
+				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be str")
 				}
 
-				nInt, ok := traceProtoOf(args[1], isInt)
+				nInt, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.NewTypeErr("\\2 must be int")
 				}
-				n := nInt.(*object.PanInt).Value
+				n := nInt.Value
 
-				runes := []rune(self.(*object.PanStr).Value)
+				runes := []rune(self.Value)
 				increasedRune := runes[len(runes)-1] + rune(n)
 				newRunes := append(runes[0:len(runes)-1], increasedRune)
 
@@ -122,13 +122,13 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Str#_iter requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isStr)
+				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be int")
 				}
 
 				return &object.PanBuiltInIter{
-					Fn:  strIter(self.(*object.PanStr)),
+					Fn:  strIter(self),
 					Env: env, // not used
 				}
 			},
@@ -141,12 +141,12 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Str#B requires at least 1 arg")
 				}
-				self, ok := traceProtoOf(args[0], isStr)
+				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be str`)
 				}
 
-				if self.(*object.PanStr).Value == "" {
+				if self.Value == "" {
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue

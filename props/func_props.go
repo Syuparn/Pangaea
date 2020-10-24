@@ -22,27 +22,26 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				}
 
 				// func comparison
-				fn, ok := traceProtoOf(args[0], isFunc)
+				fn, ok := object.TraceProtoOfFunc(args[0])
 				if ok {
-					other, ok := traceProtoOf(args[1], isFunc)
+					other, ok := object.TraceProtoOfFunc(args[1])
 					if !ok {
 						return object.BuiltInFalse
 					}
-					return compFuncs(fn.(*object.PanFunc), other.(*object.PanFunc))
+					return compFuncs(fn, other)
 				}
 
 				// BuiltInFunc comparison
-				builtIn, ok := traceProtoOf(args[0], isBuiltInFunc)
+				builtIn, ok := object.TraceProtoOfBuiltInFunc(args[0])
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isBuiltInFunc)
+				other, ok := object.TraceProtoOfBuiltInFunc(args[1])
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				return compBuiltInFuncs(
-					builtIn.(*object.PanBuiltIn), other.(*object.PanBuiltIn))
+				return compBuiltInFuncs(builtIn, other)
 			},
 		),
 		"B": f(
@@ -52,7 +51,7 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				if len(args) < 1 {
 					return object.NewTypeErr("Func#B requires at least 1 arg")
 				}
-				_, ok := traceProtoOf(args[0], isFunc)
+				_, ok := object.TraceProtoOfFunc(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be func`)
 				}

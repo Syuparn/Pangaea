@@ -22,16 +22,16 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.BuiltInTrue
 				}
 
-				self, ok := traceProtoOf(args[0], isFloat)
+				self, ok := object.TraceProtoOfFloat(args[0])
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isFloat)
+				other, ok := object.TraceProtoOfFloat(args[1])
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				if self.(*object.PanFloat).Value == other.(*object.PanFloat).Value {
+				if self.Value == other.Value {
 					return object.BuiltInTrue
 				}
 				return object.BuiltInFalse
@@ -45,12 +45,12 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.NewTypeErr("\\- requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isFloat)
+				self, ok := object.TraceProtoOfFloat(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be float")
 				}
 
-				res := -self.(*object.PanFloat).Value
+				res := -self.Value
 				return &object.PanFloat{Value: res}
 			},
 		),
@@ -62,12 +62,12 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.NewTypeErr("/~ requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isFloat)
+				self, ok := object.TraceProtoOfFloat(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be float")
 				}
 
-				v := self.(*object.PanFloat).Value
+				v := self.Value
 				// NOTE: go cannot invert float bits directly
 				res := math.Float64frombits(^math.Float64bits(v))
 				return &object.PanFloat{Value: res}
@@ -81,18 +81,18 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.NewTypeErr("+ requires at least 2 args")
 				}
 
-				self, ok := traceProtoOf(args[0], isFloat)
+				self, ok := object.TraceProtoOfFloat(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as int", self.Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as float", self.Inspect()))
 				}
-				other, ok := traceProtoOf(args[1], isFloat)
+				other, ok := object.TraceProtoOfFloat(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as int", other.Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as float", other.Inspect()))
 				}
 
-				res := self.(*object.PanFloat).Value + other.(*object.PanFloat).Value
+				res := self.Value + other.Value
 				return &object.PanFloat{Value: res}
 			},
 		),
@@ -103,12 +103,12 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				if len(args) < 1 {
 					return object.NewTypeErr("Float#B requires at least 1 arg")
 				}
-				self, ok := traceProtoOf(args[0], isFloat)
+				self, ok := object.TraceProtoOfFloat(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be float`)
 				}
 
-				if self.(*object.PanFloat).Value == 0.0 {
+				if self.Value == 0.0 {
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue

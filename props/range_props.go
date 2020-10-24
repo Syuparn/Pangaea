@@ -20,17 +20,16 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.BuiltInTrue
 				}
 
-				self, ok := traceProtoOf(args[0], isRange)
+				self, ok := object.TraceProtoOfRange(args[0])
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isRange)
+				other, ok := object.TraceProtoOfRange(args[1])
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				return compRanges(
-					self.(*object.PanRange), other.(*object.PanRange), propContainer, env)
+				return compRanges(self, other, propContainer, env)
 			},
 		),
 		"_iter": f(
@@ -41,13 +40,12 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.NewTypeErr("Range#_iter requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isRange)
+				self, ok := object.TraceProtoOfRange(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be Range")
 				}
 
-				range_, _ := self.(*object.PanRange)
-				stepInt, err := stepIntOf(range_)
+				stepInt, err := stepIntOf(self)
 				if err != nil {
 					return err
 				}
@@ -76,21 +74,21 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 						return false, err
 					}
 
-					resInt, ok := traceProtoOf(res, isInt)
+					resInt, ok := object.TraceProtoOfInt(res)
 					if !ok {
 						return false, object.NewValueErr(`<=> returned non-int value`)
 					}
 
 					if stepInt.Value > 0 {
 						// o <=> r.Stop is 0 or 1 if o >= r.Stop
-						return resInt.(*object.PanInt).Value != -1, nil
+						return resInt.Value != -1, nil
 					}
 					// o <=> r.Stop is -1 or 0 if o <= r.Stop
-					return resInt.(*object.PanInt).Value != 1, nil
+					return resInt.Value != 1, nil
 				}
 
 				return &object.PanBuiltInIter{
-					Fn:  rangeIter(range_, next, reachesStop),
+					Fn:  rangeIter(self, next, reachesStop),
 					Env: env, // not used
 				}
 			},
@@ -102,7 +100,7 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				if len(args) < 1 {
 					return object.NewTypeErr("Range#B requires at least 1 arg")
 				}
-				_, ok := traceProtoOf(args[0], isRange)
+				_, ok := object.TraceProtoOfRange(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be range`)
 				}
@@ -146,17 +144,16 @@ func stepIntOf(r *object.PanRange) (*object.PanInt, *object.PanErr) {
 	}
 
 	// step must be proto of int
-	step, ok := traceProtoOf(r.Step, isInt)
+	step, ok := object.TraceProtoOfInt(r.Step)
 	if !ok {
 		return nil, object.NewValueErr("step must be Int")
 	}
 
-	stepInt, _ := step.(*object.PanInt)
-	if stepInt.Value == 0 {
+	if step.Value == 0 {
 		return nil, object.NewValueErr("cannot use 0 for range step")
 	}
 
-	return stepInt, nil
+	return step, nil
 }
 
 func rangeIter(

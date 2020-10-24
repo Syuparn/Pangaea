@@ -20,10 +20,10 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInTrue
 				}
 
-				if _, ok := traceProtoOf(args[0], isNil); !ok {
+				if _, ok := object.TraceProtoOfNil(args[0]); !ok {
 					return object.BuiltInFalse
 				}
-				if _, ok := traceProtoOf(args[1], isNil); !ok {
+				if _, ok := object.TraceProtoOfNil(args[1]); !ok {
 					return object.BuiltInFalse
 				}
 
@@ -37,7 +37,7 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Nil#B requires at least 1 arg")
 				}
-				_, ok := traceProtoOf(args[0], isNil)
+				_, ok := object.TraceProtoOfNil(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be nil`)
 				}

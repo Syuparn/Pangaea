@@ -21,16 +21,16 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				}
 
 				// same as func comparison
-				self, ok := traceProtoOf(args[0], isFunc)
+				self, ok := object.TraceProtoOfFunc(args[0])
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isFunc)
+				other, ok := object.TraceProtoOfFunc(args[1])
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				return compFuncs(self.(*object.PanFunc), other.(*object.PanFunc))
+				return compFuncs(self, other)
 			},
 		),
 		"_iter": f(
@@ -50,7 +50,7 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				if len(args) < 1 {
 					return object.NewTypeErr("Iter#B requires at least 1 arg")
 				}
-				_, ok := traceProtoOf(args[0], isFunc)
+				_, ok := object.TraceProtoOfFunc(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be func`)
 				}

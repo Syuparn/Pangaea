@@ -38,13 +38,13 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Obj#_iter requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isObj)
+				self, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(`Obj#_iter cannot be applied to \1`)
 				}
 
 				return &object.PanBuiltInIter{
-					Fn:  objIter(self.(*object.PanObj)),
+					Fn:  objIter(self),
 					Env: env, // not used
 				}
 			},
@@ -56,12 +56,12 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Obj#B requires at least 1 arg")
 				}
-				self, ok := traceProtoOf(args[0], isObj)
+				self, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be obj`)
 				}
 
-				if len(*self.(*object.PanObj).Pairs) == 0 {
+				if len(*self.Pairs) == 0 {
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
@@ -81,15 +81,14 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					withPrivate = (pair.Value == object.BuiltInTrue)
 				}
 
-				self, ok := traceProtoOf(args[0], isObj)
+				self, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return &object.PanArr{Elems: []object.PanObject{}}
 				}
-				obj, _ := self.(*object.PanObj)
 
 				items := []object.PanObject{}
-				for _, keyHash := range *obj.Keys {
-					pair, _ := (*obj.Pairs)[keyHash]
+				for _, keyHash := range *self.Keys {
+					pair, _ := (*self.Pairs)[keyHash]
 					items = append(items, &object.PanArr{Elems: []object.PanObject{
 						pair.Key,
 						pair.Value,
@@ -97,8 +96,8 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				if withPrivate {
-					for _, keyHash := range *obj.PrivateKeys {
-						pair, _ := (*obj.Pairs)[keyHash]
+					for _, keyHash := range *self.PrivateKeys {
+						pair, _ := (*self.Pairs)[keyHash]
 						items = append(items, &object.PanArr{Elems: []object.PanObject{
 							pair.Key,
 							pair.Value,
@@ -122,20 +121,19 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					withPrivate = (pair.Value == object.BuiltInTrue)
 				}
 
-				self, ok := traceProtoOf(args[0], isObj)
+				self, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return &object.PanArr{Elems: []object.PanObject{}}
 				}
-				obj, _ := self.(*object.PanObj)
 
 				keys := []object.PanObject{}
-				for _, keyHash := range *obj.Keys {
-					keys = append(keys, (*obj.Pairs)[keyHash].Key)
+				for _, keyHash := range *self.Keys {
+					keys = append(keys, (*self.Pairs)[keyHash].Key)
 				}
 
 				if withPrivate {
-					for _, keyHash := range *obj.PrivateKeys {
-						keys = append(keys, (*obj.Pairs)[keyHash].Key)
+					for _, keyHash := range *self.PrivateKeys {
+						keys = append(keys, (*self.Pairs)[keyHash].Key)
 					}
 				}
 
@@ -168,13 +166,13 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					object.EmptyPanObjPtr(), args[0], sSym,
 				)
 
-				str, ok := traceProtoOf(sRet, isStr)
+				str, ok := object.TraceProtoOfStr(sRet)
 				if !ok {
 					return object.NewTypeErr(`\1.S must be str`)
 				}
 
 				// print
-				io.WriteString(panIO.Out, str.(*object.PanStr).Value)
+				io.WriteString(panIO.Out, str.Value)
 				// breakline
 				io.WriteString(panIO.Out, "\n")
 
@@ -214,20 +212,19 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					withPrivate = (pair.Value == object.BuiltInTrue)
 				}
 
-				self, ok := traceProtoOf(args[0], isObj)
+				self, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return &object.PanArr{Elems: []object.PanObject{}}
 				}
-				obj, _ := self.(*object.PanObj)
 
 				values := []object.PanObject{}
-				for _, keyHash := range *obj.Keys {
-					values = append(values, (*obj.Pairs)[keyHash].Value)
+				for _, keyHash := range *self.Keys {
+					values = append(values, (*self.Pairs)[keyHash].Value)
 				}
 
 				if withPrivate {
-					for _, keyHash := range *obj.PrivateKeys {
-						values = append(values, (*obj.Pairs)[keyHash].Value)
+					for _, keyHash := range *self.PrivateKeys {
+						values = append(values, (*self.Pairs)[keyHash].Value)
 					}
 				}
 
