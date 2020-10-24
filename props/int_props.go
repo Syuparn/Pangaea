@@ -17,8 +17,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return err
 				}
 
-				selfVal := self.(*object.PanInt).Value
-				otherVal := other.(*object.PanInt).Value
+				selfVal := self.Value
+				otherVal := other.Value
 				var res int64
 
 				if selfVal > otherVal {
@@ -45,16 +45,16 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInTrue
 				}
 
-				self, ok := traceProtoOf(args[0], isInt)
+				self, ok := object.TraceProtoOfInt(args[0])
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isInt)
+				other, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				if self.(*object.PanInt).Value == other.(*object.PanInt).Value {
+				if self.Value == other.Value {
 					return object.BuiltInTrue
 				}
 				return object.BuiltInFalse
@@ -74,16 +74,16 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInTrue
 				}
 
-				self, ok := traceProtoOf(args[0], isInt)
+				self, ok := object.TraceProtoOfInt(args[0])
 				if !ok {
 					return object.BuiltInFalse
 				}
-				other, ok := traceProtoOf(args[1], isInt)
+				other, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.BuiltInFalse
 				}
 
-				if self.(*object.PanInt).Value != other.(*object.PanInt).Value {
+				if self.Value != other.Value {
 					return object.BuiltInTrue
 				}
 				return object.BuiltInFalse
@@ -97,12 +97,12 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("\\- requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isInt)
+				self, ok := object.TraceProtoOfInt(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be int")
 				}
 
-				res := -self.(*object.PanInt).Value
+				res := -self.Value
 				return object.NewPanInt(res)
 			},
 		),
@@ -114,12 +114,12 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("/~ requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isInt)
+				self, ok := object.TraceProtoOfInt(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be int")
 				}
 
-				res := ^self.(*object.PanInt).Value
+				res := ^self.Value
 				return object.NewPanInt(res)
 			},
 		),
@@ -132,7 +132,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return err
 				}
 
-				res := self.(*object.PanInt).Value + other.(*object.PanInt).Value
+				res := self.Value + other.Value
 				return object.NewPanInt(res)
 			},
 		),
@@ -145,7 +145,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return err
 				}
 
-				res := self.(*object.PanInt).Value * other.(*object.PanInt).Value
+				res := self.Value * other.Value
 				return object.NewPanInt(res)
 			},
 		),
@@ -158,7 +158,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return err
 				}
 
-				res := self.(*object.PanInt).Value + other.(*object.PanInt).Value
+				res := self.Value + other.Value
 				return object.NewPanInt(res)
 			},
 		),
@@ -170,13 +170,13 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Int#_iter requires at least 1 arg")
 				}
 
-				self, ok := traceProtoOf(args[0], isInt)
+				self, ok := object.TraceProtoOfInt(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be int")
 				}
 
 				return &object.PanBuiltInIter{
-					Fn:  intIter(self.(*object.PanInt)),
+					Fn:  intIter(self),
 					Env: env, // not used
 				}
 			},
@@ -189,12 +189,12 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Int#B requires at least 1 arg")
 				}
-				self, ok := traceProtoOf(args[0], isInt)
+				self, ok := object.TraceProtoOfInt(args[0])
 				if !ok {
 					return object.NewTypeErr(`\1 must be int`)
 				}
 
-				if self.(*object.PanInt).Value == 0 {
+				if self.Value == 0 {
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
@@ -206,17 +206,17 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 func checkIntInfixArgs(
 	args []object.PanObject,
 	propName string,
-) (object.PanObject, object.PanObject, *object.PanErr) {
+) (*object.PanInt, *object.PanInt, *object.PanErr) {
 	if len(args) < 2 {
 		return nil, nil, object.NewTypeErr(propName + " requires at least 2 args")
 	}
 
-	self, ok := traceProtoOf(args[0], isInt)
+	self, ok := object.TraceProtoOfInt(args[0])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
 			fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
 	}
-	other, ok := traceProtoOf(args[1], isInt)
+	other, ok := object.TraceProtoOfInt(args[1])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
 			fmt.Sprintf("`%s` cannot be treated as int", args[1].Inspect()))
