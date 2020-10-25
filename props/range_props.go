@@ -1,7 +1,7 @@
 package props
 
 import (
-	"../object"
+	"github.com/Syuparn/pangaea/object"
 )
 
 // RangeProps provides built-in props for Range.

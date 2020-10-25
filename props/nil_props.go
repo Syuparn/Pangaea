@@ -1,7 +1,7 @@
 package props
 
 import (
-	"../object"
+	"github.com/Syuparn/pangaea/object"
 )
 
 // NilProps provides built-in props for Nil.

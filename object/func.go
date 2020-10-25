@@ -1,8 +1,9 @@
 package object
 
 import (
-	"../ast"
 	"bytes"
+
+	"github.com/Syuparn/pangaea/ast"
 )
 
 // FuncType is a type of PanFunc.

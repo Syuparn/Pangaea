@@ -6,13 +6,14 @@
 package repl
 
 import (
-	"../evaluator"
-	"../object"
-	"../parser"
 	"bufio"
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/Syuparn/pangaea/evaluator"
+	"github.com/Syuparn/pangaea/object"
+	"github.com/Syuparn/pangaea/parser"
 )
 
 // PROMPT is a prefix string printed in Pangaea interpreter.

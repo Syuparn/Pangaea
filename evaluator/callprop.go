@@ -1,7 +1,7 @@
 package evaluator
 
 import (
-	"../object"
+	"github.com/Syuparn/pangaea/object"
 )
 
 func callProp(recv object.PanObject, propHash object.SymHash) (object.PanObject, bool) {

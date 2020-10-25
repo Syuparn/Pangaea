@@ -1,7 +1,7 @@
 package evaluator
 
 import (
-	"../object"
+	"github.com/Syuparn/pangaea/object"
 )
 
 // generate copied iter with args set to its env

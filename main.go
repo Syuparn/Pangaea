@@ -1,10 +1,11 @@
 package main
 
 import (
-	"./repl"
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/Syuparn/pangaea/repl"
 )
 
 var (

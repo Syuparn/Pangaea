@@ -1,8 +1,9 @@
 package object
 
 import (
-	"../ast"
 	"testing"
+
+	"github.com/Syuparn/pangaea/ast"
 )
 
 func TestFuncKind(t *testing.T) {
