@@ -1,8 +1,8 @@
 package evaluator
 
 import (
-	"../object"
-	"../props"
+	"github.com/Syuparn/pangaea/object"
+	"github.com/Syuparn/pangaea/props"
 )
 
 // InjectBuiltInProps injects and sets up builtin object props,

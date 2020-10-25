@@ -1,7 +1,7 @@
 package object
 
 import (
-	"../ast"
+	"github.com/Syuparn/pangaea/ast"
 )
 
 // DeferType is a type of DeferObj.

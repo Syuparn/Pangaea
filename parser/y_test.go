@@ -6,7 +6,7 @@
 package parser
 
 import (
-	"../ast"
+	"github.com/Syuparn/pangaea/ast"
 	"fmt"
 	"math"
 	"reflect"

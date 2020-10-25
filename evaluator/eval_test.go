@@ -6,9 +6,9 @@
 package evaluator
 
 import (
-	"../ast"
-	"../object"
-	"../parser"
+	"github.com/Syuparn/pangaea/ast"
+	"github.com/Syuparn/pangaea/object"
+	"github.com/Syuparn/pangaea/parser"
 	"bytes"
 	"fmt"
 	"os"

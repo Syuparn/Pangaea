@@ -1,7 +1,7 @@
 package props
 
 import (
-	"../object"
+	"github.com/Syuparn/pangaea/object"
 )
 
 // IterProps provides built-in props for Iter.

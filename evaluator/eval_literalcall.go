@@ -1,8 +1,8 @@
 package evaluator
 
 import (
-	"../ast"
-	"../object"
+	"github.com/Syuparn/pangaea/ast"
+	"github.com/Syuparn/pangaea/object"
 )
 
 func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObject {

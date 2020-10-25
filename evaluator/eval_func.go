@@ -1,8 +1,8 @@
 package evaluator
 
 import (
-	"../ast"
-	"../object"
+	"github.com/Syuparn/pangaea/ast"
+	"github.com/Syuparn/pangaea/object"
 )
 
 func evalFunc(node *ast.FuncLiteral, env *object.Env) object.PanObject {

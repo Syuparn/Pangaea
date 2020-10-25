@@ -1,9 +1,9 @@
 package evaluator
 
 import (
-	"../ast"
-	"../object"
 	"bytes"
+	"github.com/Syuparn/pangaea/ast"
+	"github.com/Syuparn/pangaea/object"
 	"strings"
 )
 

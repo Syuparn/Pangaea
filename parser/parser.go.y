@@ -14,7 +14,7 @@ import (
 
 	"github.com/macrat/simplexer"
 
-	"../ast"
+	"github.com/Syuparn/pangaea/ast"
 )
 
 %}
