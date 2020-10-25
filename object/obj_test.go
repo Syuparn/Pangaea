@@ -6,8 +6,8 @@ import (
 
 func TestObjType(t *testing.T) {
 	obj := PanObj{}
-	if obj.Type() != OBJ_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", OBJ_TYPE, obj.Type())
+	if obj.Type() != ObjType {
+		t.Fatalf("wrong type: expected=%s, got=%s", ObjType, obj.Type())
 	}
 }
 

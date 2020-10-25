@@ -7,8 +7,8 @@ import (
 
 func TestIOType(t *testing.T) {
 	obj := PanIO{In: os.Stdin, Out: os.Stdout}
-	if obj.Type() != IO_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", IO_TYPE, obj.Type())
+	if obj.Type() != IOType {
+		t.Fatalf("wrong type: expected=%s, got=%s", IOType, obj.Type())
 	}
 }
 

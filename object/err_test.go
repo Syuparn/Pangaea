@@ -4,10 +4,10 @@ import (
 	"testing"
 )
 
-func TestErrType(t *testing.T) {
+func TestErrKind(t *testing.T) {
 	errObj := NewPanErr("err")
-	if errObj.Type() != ERR_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", ERR_TYPE, errObj.Type())
+	if errObj.Type() != ErrType {
+		t.Fatalf("wrong type: expected=%s, got=%s", ErrType, errObj.Type())
 	}
 }
 

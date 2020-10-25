@@ -5,58 +5,68 @@ import (
 	"bytes"
 )
 
-const FUNC_TYPE = "FUNC_TYPE"
+// FuncType is a type of PanFunc.
+const FuncType = "FuncType"
 
+// PanFunc is object of func literal.
 type PanFunc struct {
 	FuncWrapper
-	FuncType FuncType
+	FuncKind FuncKind
 	Env      *Env
 }
 
+// Type returns type of this PanObject.
 func (f *PanFunc) Type() PanObjType {
-	return FUNC_TYPE
+	return FuncType
 }
 
+// Inspect returns formatted source code of this object.
 func (f *PanFunc) Inspect() string {
 	var out bytes.Buffer
-	out.WriteString(openParen(f.FuncType))
+	out.WriteString(openParen(f.FuncKind))
 	// delegate to FuncWrapper
 	out.WriteString(f.FuncWrapper.String())
-	out.WriteString(closeParen(f.FuncType))
+	out.WriteString(closeParen(f.FuncKind))
 
 	return out.String()
 }
 
+// Proto returns proto of this object.
 func (f *PanFunc) Proto() PanObject {
-	if f.FuncType == ITER_FUNC {
+	if f.FuncKind == IterFunc {
 		return BuiltInIterObj
 	}
 	return BuiltInFuncObj
 }
 
-type FuncType int
+// FuncKind is a type of func-like objects.
+// NOTE: The type is used to designate func and iter because their implementation is
+// same type.
+type FuncKind int
 
 const (
-	FUNC_FUNC FuncType = iota
-	ITER_FUNC
+	// FuncFunc shows PanFunc is func literal.
+	FuncFunc FuncKind = iota
+	// IterFunc shows PanFunc is iter literal.
+	IterFunc
 )
 
-func openParen(t FuncType) string {
-	if t == FUNC_FUNC {
+func openParen(t FuncKind) string {
+	if t == FuncFunc {
 		return "{"
 	}
 	return "<{"
 }
 
-func closeParen(t FuncType) string {
-	if t == FUNC_FUNC {
+func closeParen(t FuncKind) string {
+	if t == FuncFunc {
 		return "}"
 	}
 	return "}>"
 }
 
-// NOTE: keep loose coupling to ast.FuncComponent and PanFunc
-// ast.FuncComponent implements FuncWrapper
+// FuncWrapper is a wrapper for func literal ast node.
+// NOTE: use interface to keep loose coupling to ast package
 type FuncWrapper interface {
 	String() string
 	Args() *PanArr

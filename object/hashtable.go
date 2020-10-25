@@ -13,21 +13,23 @@ import (
 // (SHA-1 key is rejected because it is slower than string key)
 var symHashTable = make(map[string]SymHash)
 
-// for only symbols to call props (lighter than HashKey)
-// NOTE: do not change declaration to
-// `type SymHash uint64` otherwise
-// you have to write explicit type conversion between SymHash and uint64
+// SymHash is symbol hash to refer str literal efficiently.
+// This is lighter than HashKey and only for str.
 type SymHash = uint64
 
-// to store PanStr related to SymHash
+// StrTable is a table to store PanStr. Str literal can be obtained by symhash.
+// NOTE: This table is shared globally.
 var StrTable = make(map[SymHash]*PanStr)
 
+// HashKey is a hash for obj/map indexing.
+// All Scalar objects have its own hash.
 type HashKey struct {
 	// to distinguish different type values with same hash
 	Type  PanObjType
 	Value uint64
 }
 
+// GetSymHash gets symbol hash of the string.
 func GetSymHash(str string) SymHash {
 	if symHash, ok := symHashTable[str]; ok {
 		return symHash
@@ -45,6 +47,7 @@ func GetSymHash(str string) SymHash {
 	return symHash
 }
 
+// SymHash2Str gets str literal from symbol hash.
 func SymHash2Str(h SymHash) (PanObject, bool) {
 	strObj, ok := StrTable[h]
 	return strObj, ok

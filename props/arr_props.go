@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// ArrProps provides built-in props for Arr.
+// NOTE: Some Arr props are defind by native code (not by this function).
 func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
@@ -160,7 +162,7 @@ func arrIter(arr *object.PanArr) object.BuiltInFunc {
 			return object.NewStopIterErr("iter stopped")
 		}
 		yielded := arr.Elems[yieldIdx]
-		yieldIdx += 1
+		yieldIdx++
 		return yielded
 	}
 }

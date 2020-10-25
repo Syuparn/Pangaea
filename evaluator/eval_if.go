@@ -23,9 +23,9 @@ func evalIf(node *ast.IfExpr, env *object.Env) object.PanObject {
 		return object.BuiltInNil
 	}
 
-	else_ := Eval(node.Else, env)
-	if err, ok := else_.(*object.PanErr); ok {
+	_else := Eval(node.Else, env)
+	if err, ok := _else.(*object.PanErr); ok {
 		return appendStackTrace(err, node.Source())
 	}
-	return else_
+	return _else
 }

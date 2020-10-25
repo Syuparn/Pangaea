@@ -646,7 +646,7 @@ func TestTraceProtoOfObjFailed(t *testing.T) {
 	tests := []struct {
 		obj PanObject
 	}{
-		// NOTE: all valid panobjects have OBJ_TYPE proto BuiltInBaseObj.
+		// NOTE: all valid panobjects have ObjType proto BuiltInBaseObj.
 		// In this test, Invaild err object (, whose proto is nil) is used.
 		{
 			&PanErr{},

@@ -25,7 +25,7 @@ func iterNew(
 	assignArgsToEnv(newEnv, self.Args().Elems, self.Kwargs(), args[1:], kwargs)
 	return &object.PanFunc{
 		FuncWrapper: self.FuncWrapper,
-		FuncType:    object.ITER_FUNC,
+		FuncKind:    object.IterFunc,
 		Env:         newEnv,
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"../props"
 )
 
-// inject and set up builtin object props,
-// which are defined in "props" package
+// InjectBuiltInProps injects and sets up builtin object props,
+// which are defined in "props" package.
 func InjectBuiltInProps() {
 	injectProps(object.BuiltInArrObj, props.ArrProps)
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps)

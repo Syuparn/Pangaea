@@ -6,8 +6,8 @@ import (
 
 func TestStrType(t *testing.T) {
 	strObj := NewPanStr("hello")
-	if strObj.Type() != STR_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", STR_TYPE, strObj.Type())
+	if strObj.Type() != StrType {
+		t.Fatalf("wrong type: expected=%s, got=%s", StrType, strObj.Type())
 	}
 }
 
@@ -55,8 +55,8 @@ func TestStrHash(t *testing.T) {
 
 		h := tt.obj.Hash()
 
-		if h.Type != STR_TYPE {
-			t.Fatalf("hash type must be STR_TYPE. got=%s", h.Type)
+		if h.Type != StrType {
+			t.Fatalf("hash type must be StrType. got=%s", h.Type)
 		}
 
 		if h.Value != symHashTable[tt.expected] {

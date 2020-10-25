@@ -144,7 +144,7 @@ func isStopIter(obj object.PanObject) bool {
 	if !ok {
 		return false
 	}
-	return err.ErrType == object.STOP_ITER_ERR
+	return err.ErrKind == object.StopIterErr
 }
 
 func evalReduceLiteralCall(

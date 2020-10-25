@@ -6,8 +6,8 @@ import (
 
 func TestMatchType(t *testing.T) {
 	obj := PanMatch{}
-	if obj.Type() != MATCH_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", MATCH_TYPE, obj.Type())
+	if obj.Type() != MatchType {
+		t.Fatalf("wrong type: expected=%s, got=%s", MatchType, obj.Type())
 	}
 }
 

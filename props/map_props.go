@@ -4,6 +4,8 @@ import (
 	"../object"
 )
 
+// MapProps provides built-in props for Map.
+// NOTE: Some Map props are defind by native code (not by this function).
 func MapProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
@@ -236,7 +238,7 @@ func containsKey(
 func mapIter(m *object.PanMap) object.BuiltInFunc {
 	scalarYieldIdx := 0
 	hashes := []object.HashKey{}
-	for hash, _ := range *m.Pairs {
+	for hash := range *m.Pairs {
 		hashes = append(hashes, hash)
 	}
 
@@ -247,7 +249,7 @@ func mapIter(m *object.PanMap) object.BuiltInFunc {
 	) object.PanObject {
 		if scalarYieldIdx >= len(hashes) {
 			yielded := yieldNonScalar(m, nonScalarYieldIdx)
-			nonScalarYieldIdx += 1
+			nonScalarYieldIdx++
 			return yielded
 		}
 		pair, ok := (*m.Pairs)[hashes[scalarYieldIdx]]
@@ -260,7 +262,7 @@ func mapIter(m *object.PanMap) object.BuiltInFunc {
 			pair.Key,
 			pair.Value,
 		}}
-		scalarYieldIdx += 1
+		scalarYieldIdx++
 		return yielded
 	}
 }

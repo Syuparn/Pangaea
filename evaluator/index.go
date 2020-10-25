@@ -261,7 +261,7 @@ func valRange(
 }
 
 func canBeUsedForRange(o object.PanObject) bool {
-	return o.Type() == object.INT_TYPE || o.Type() == object.NIL_TYPE
+	return o.Type() == object.IntType || o.Type() == object.NilType
 }
 
 func fixRange(r *object.PanRange, length int64, step int64) (int64, int64) {
@@ -347,7 +347,7 @@ func findElemInMap(
 		ret := builtInCallProp(env, object.EmptyPanObjPtr(),
 			object.EmptyPanObjPtr(), index, eqSym, pair.Key)
 
-		if ret.Type() == object.ERR_TYPE {
+		if ret.Type() == object.ErrType {
 			return ret
 		}
 

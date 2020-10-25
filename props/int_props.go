@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// IntProps provides built-in props for Int.
+// NOTE: Some Int props are defind by native code (not by this function).
 func IntProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
@@ -235,7 +237,7 @@ func intIter(i *object.PanInt) object.BuiltInFunc {
 			return object.NewStopIterErr("iter stopped")
 		}
 		yielded := object.NewPanInt(yieldNum)
-		yieldNum += 1
+		yieldNum++
 		return yielded
 	}
 }

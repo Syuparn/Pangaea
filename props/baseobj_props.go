@@ -4,6 +4,8 @@ import (
 	"../object"
 )
 
+// BaseObjProps provides built-in props for BaseObj.
+// NOTE: Some BaseObj props are defind by native code (not by this function).
 func BaseObjProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{

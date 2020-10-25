@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// StrProps provides built-in props for Str.
+// NOTE: Some Str props are defind by native code (not by this function).
 func StrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
@@ -188,7 +190,7 @@ func strIter(s *object.PanStr) object.BuiltInFunc {
 			return object.NewStopIterErr("iter stopped")
 		}
 		yielded := object.NewPanStr(string(runes[yieldIdx]))
-		yieldIdx += 1
+		yieldIdx++
 		return yielded
 	}
 }

@@ -4,21 +4,25 @@ import (
 	"../ast"
 )
 
-const DEFER_TYPE = "DEFER_TYPE"
+// DeferType is a type of DeferObj.
+const DeferType = "DeferType"
 
-// wrapper for defer expr
+// DeferObj is a wrapper for deferred expr.
 type DeferObj struct {
 	Node ast.Expr
 }
 
+// Type returns type of this PanObject.
 func (o *DeferObj) Type() PanObjType {
-	return DEFER_TYPE
+	return DeferType
 }
 
+// Inspect returns formatted source code of this object.
 func (o *DeferObj) Inspect() string {
 	return "deferObj"
 }
 
+// Proto returns proto of this object.
 func (o *DeferObj) Proto() PanObject {
 	// never called
 	panic("deferObj does not have proto")

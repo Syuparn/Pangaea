@@ -42,11 +42,11 @@ func _evalStmts(
 			return ret.PanObject, deferObjs
 		}
 
-		if defer_, ok := val.(*object.DeferObj); ok {
-			deferObjs = append(deferObjs, *defer_)
+		if _defer, ok := val.(*object.DeferObj); ok {
+			deferObjs = append(deferObjs, *_defer)
 		}
 
-		if val.Type() == object.YIELD_TYPE {
+		if val.Type() == object.YieldType {
 			y := val.(*object.YieldObj).PanObject
 
 			if err, ok := y.(*object.PanErr); ok {

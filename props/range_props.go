@@ -4,6 +4,8 @@ import (
 	"../object"
 )
 
+// RangeProps provides built-in props for Range.
+// NOTE: Some Range props are defind by native code (not by this function).
 func RangeProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
@@ -139,7 +141,7 @@ func compRanges(
 
 func stepIntOf(r *object.PanRange) (*object.PanInt, *object.PanErr) {
 	// default step = 1
-	if r.Step.Type() == object.NIL_TYPE {
+	if r.Step.Type() == object.NilType {
 		return object.NewPanInt(1), nil
 	}
 

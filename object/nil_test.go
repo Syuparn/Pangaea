@@ -6,8 +6,8 @@ import (
 
 func TestNilType(t *testing.T) {
 	nilObj := PanNil{}
-	if nilObj.Type() != NIL_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", NIL_TYPE, nilObj.Type())
+	if nilObj.Type() != NilType {
+		t.Fatalf("wrong type: expected=%s, got=%s", NilType, nilObj.Type())
 	}
 }
 
@@ -46,8 +46,8 @@ func TestNilHash(t *testing.T) {
 	for _, tt := range tests {
 		h := tt.obj.Hash()
 
-		if h.Type != NIL_TYPE {
-			t.Fatalf("hash type must be NIL_TYPE. got=%s", h.Type)
+		if h.Type != NilType {
+			t.Fatalf("hash type must be NilType. got=%s", h.Type)
 		}
 
 		if h.Value != uint64(tt.expected) {
