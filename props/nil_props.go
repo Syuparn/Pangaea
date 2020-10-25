@@ -4,6 +4,8 @@ import (
 	"../object"
 )
 
+// NilProps provides built-in props for Nil.
+// NOTE: Some Nil props are defind by native code (not by this function).
 func NilProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{

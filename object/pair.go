@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Pair is a PanObject key-value pair for obj or map items.
 type Pair struct {
 	Key   PanObject
 	Value PanObject

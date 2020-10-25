@@ -9,16 +9,20 @@ import (
 	"io"
 )
 
+// NewEnv makes new environment of variables.
 func NewEnv() *Env {
 	s := make(map[SymHash]PanObject)
 	return &Env{s, nil}
 }
 
+// NewEnclosedEnv makes new environment of variables inside e.
+// It is used to make closure.
 func NewEnclosedEnv(e *Env) *Env {
 	s := make(map[SymHash]PanObject)
 	return &Env{s, e}
 }
 
+// NewEnvWithConsts makes new global environment, which includes all standart objects.
 func NewEnvWithConsts() *Env {
 	env := NewEnv()
 	env.Set(GetSymHash("Int"), BuiltInIntObj)
@@ -52,11 +56,13 @@ func NewEnvWithConsts() *Env {
 	return env
 }
 
+// Env is an environment of variables.
 type Env struct {
 	Store map[SymHash]PanObject
 	outer *Env
 }
 
+// Get fetches variable value from the environment.
 func (e *Env) Get(h SymHash) (PanObject, bool) {
 	obj, ok := e.Store[h]
 
@@ -68,10 +74,12 @@ func (e *Env) Get(h SymHash) (PanObject, bool) {
 	return obj, ok
 }
 
+// Set sets variable to the environment.
 func (e *Env) Set(h SymHash, obj PanObject) {
 	e.Store[h] = obj
 }
 
+// Items returns all variables in the enviroment as obj.
 func (e *Env) Items() PanObject {
 	pairs := make(map[SymHash]Pair)
 	for h, obj := range e.Store {
@@ -88,16 +96,19 @@ func (e *Env) Items() PanObject {
 	return PanObjInstancePtr(&pairs)
 }
 
+// Outer returns outer environment.
 func (e *Env) Outer() *Env {
 	return e.outer
 }
 
+// InjectIO injects reader and writer for `IO` object
 func (e *Env) InjectIO(in io.Reader, out io.Writer) {
 	// define const `IO` containing io of args
 	ioObj := &PanIO{In: in, Out: out}
 	e.Set(GetSymHash("IO"), ioObj)
 }
 
+// InjectRecur injects built-in func `recur`.
 func (e *Env) InjectRecur(recurFunc BuiltInFunc) {
 	// define const `recur` builtInFunc, which can only be used inside iter
 	recur := &PanBuiltIn{Fn: recurFunc}

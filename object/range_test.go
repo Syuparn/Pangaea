@@ -6,8 +6,8 @@ import (
 
 func TestRangeType(t *testing.T) {
 	obj := PanRange{}
-	if obj.Type() != RANGE_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", RANGE_TYPE, obj.Type())
+	if obj.Type() != RangeType {
+		t.Fatalf("wrong type: expected=%s, got=%s", RangeType, obj.Type())
 	}
 }
 

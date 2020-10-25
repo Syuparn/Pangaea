@@ -8,9 +8,9 @@ func TestNewEnv(t *testing.T) {
 	env := NewEnv()
 	items := env.Items()
 
-	if items.Type() != OBJ_TYPE {
+	if items.Type() != ObjType {
 		t.Fatalf("wrong type: expected=%s, got=%s",
-			OBJ_TYPE, items.Type())
+			ObjType, items.Type())
 	}
 
 	if items.Inspect() != "{}" {

@@ -163,9 +163,9 @@ func evalReducePropCall(
 
 func shouldRecover(ret object.PanObject) bool {
 	switch ret.Type() {
-	case "ERR_TYPE":
+	case "ErrType":
 		return true
-	case "NIL_TYPE":
+	case "NilType":
 		return true
 	default:
 		return false

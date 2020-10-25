@@ -4,118 +4,138 @@ import (
 	"fmt"
 )
 
-const ERR_TYPE = "ERR_TYPE"
+// ErrType is a type of PanErr.
+const ErrType = "ErrType"
 
+// PanErr is object of err literal.
 type PanErr struct {
-	ErrType    ErrType
+	ErrKind    ErrKind
 	Msg        string
 	StackTrace string
 	proto      PanObject
 }
 
+// Type returns type of this PanObject.
 func (e *PanErr) Type() PanObjType {
-	return ERR_TYPE
+	return ErrType
 }
 
+// Inspect returns formatted source code of this object.
 func (e *PanErr) Inspect() string {
-	return fmt.Sprintf("%s: %s", e.ErrType, e.Msg)
+	return fmt.Sprintf("%s: %s", e.ErrKind, e.Msg)
 }
 
+// Proto returns proto of this object.
 func (e *PanErr) Proto() PanObject {
 	return e.proto
 }
 
+// NewPanErr returns new err object.
 func NewPanErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: ERR,
+		ErrKind: Err,
 		Msg:     msg,
 		proto:   BuiltInErrObj,
 	}
 }
 
+// NewAssertionErr returns new assertionErr object.
 func NewAssertionErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: ASSERTION_ERR,
+		ErrKind: AssertionErr,
 		Msg:     msg,
 		proto:   BuiltInAssertionErr,
 	}
 }
 
+// NewNameErr returns new nameErr object.
 func NewNameErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: NAME_ERR,
+		ErrKind: NameErr,
 		Msg:     msg,
 		proto:   BuiltInNameErr,
 	}
 }
 
+// NewNoPropErr returns new noPropErr object.
 func NewNoPropErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: NO_PROP_ERR,
+		ErrKind: NoPropErr,
 		Msg:     msg,
 		proto:   BuiltInNoPropErr,
 	}
 }
 
+// NewNotImplementedErr returns new notImplementedErr object.
 func NewNotImplementedErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: NOT_IMPLEMENT_ERR,
+		ErrKind: NotImplementErr,
 		Msg:     msg,
 		proto:   BuiltInNotImplementedErr,
 	}
 }
 
+// NewStopIterErr returns new stopIterErr object.
+// NOTE: This error is prepared to make iter simpler, even though
+// stopIter is not an error actually.
 func NewStopIterErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: STOP_ITER_ERR,
+		ErrKind: StopIterErr,
 		Msg:     msg,
 		proto:   BuiltInStopIterErr,
 	}
 }
 
+// NewSyntaxErr returns new syntaxErr object.
 func NewSyntaxErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: SYNTAX_ERR,
+		ErrKind: SyntaxErr,
 		Msg:     msg,
 		proto:   BuiltInSyntaxErr,
 	}
 }
 
+// NewTypeErr returns new typeErr object.
 func NewTypeErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: TYPE_ERR,
+		ErrKind: TypeErr,
 		Msg:     msg,
 		proto:   BuiltInTypeErr,
 	}
 }
 
+// NewValueErr returns new valueErr object.
 func NewValueErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: VALUE_ERR,
+		ErrKind: ValueErr,
 		Msg:     msg,
 		proto:   BuiltInValueErr,
 	}
 }
 
+// NewZeroDivisionErr returns new zeroDivisionErr object.
 func NewZeroDivisionErr(msg string) *PanErr {
 	return &PanErr{
-		ErrType: ZERO_DIVISION_ERR,
+		ErrKind: ZeroDivisionErr,
 		Msg:     msg,
 		proto:   BuiltInZeroDivisionErr,
 	}
 }
 
-type ErrType string
+// ErrKind is a information to designate error type.
+// NOTE: ErrKind is necessary because all err is implemented by same struct, PanErr.
+type ErrKind string
 
+// nolint: comment
 const (
-	ERR               = "Err"
-	ASSERTION_ERR     = "AssertionErr"
-	NAME_ERR          = "NameErr"
-	NO_PROP_ERR       = "NoPropErr"
-	NOT_IMPLEMENT_ERR = "NotImplementedErr"
-	STOP_ITER_ERR     = "StopIterErr"
-	SYNTAX_ERR        = "SyntaxErr"
-	TYPE_ERR          = "TypeErr"
-	VALUE_ERR         = "ValueErr"
-	ZERO_DIVISION_ERR = "ZeroDivisionErr"
+	Err             = "Err"
+	AssertionErr    = "AssertionErr"
+	NameErr         = "NameErr"
+	NoPropErr       = "NoPropErr"
+	NotImplementErr = "NotImplementedErr"
+	StopIterErr     = "StopIterErr"
+	SyntaxErr       = "SyntaxErr"
+	TypeErr         = "TypeErr"
+	ValueErr        = "ValueErr"
+	ZeroDivisionErr = "ZeroDivisionErr"
 )

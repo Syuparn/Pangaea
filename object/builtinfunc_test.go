@@ -7,8 +7,8 @@ import (
 func TestBuiltInType(t *testing.T) {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
 	obj := PanBuiltIn{f}
-	if obj.Type() != BUILTIN_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", BUILTIN_TYPE, obj.Type())
+	if obj.Type() != BuiltInType {
+		t.Fatalf("wrong type: expected=%s, got=%s", BuiltInType, obj.Type())
 	}
 }
 

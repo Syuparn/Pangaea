@@ -5,17 +5,21 @@ import (
 	"strings"
 )
 
-const MAP_TYPE = "MAP_TYPE"
+// MapType is a type of PanMap.
+const MapType = "MapType"
 
+// PanMap is object of map literal.
 type PanMap struct {
 	Pairs            *map[HashKey]Pair
 	NonHashablePairs *[]Pair
 }
 
+// Type returns type of this PanObject.
 func (m *PanMap) Type() PanObjType {
-	return MAP_TYPE
+	return MapType
 }
 
+// Inspect returns formatted source code of this object.
 func (m *PanMap) Inspect() string {
 	var out bytes.Buffer
 	pairs := []Pair{}
@@ -44,6 +48,7 @@ func (m *PanMap) Inspect() string {
 	return out.String()
 }
 
+// Proto returns proto of this object.
 func (m *PanMap) Proto() PanObject {
 	return BuiltInMapObj
 }

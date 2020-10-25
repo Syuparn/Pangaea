@@ -7,8 +7,8 @@ import (
 
 func TestFloatType(t *testing.T) {
 	floatObj := PanFloat{1.5}
-	if floatObj.Type() != FLOAT_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", FLOAT_TYPE, floatObj.Type())
+	if floatObj.Type() != FloatType {
+		t.Fatalf("wrong type: expected=%s, got=%s", FloatType, floatObj.Type())
 	}
 }
 
@@ -54,8 +54,8 @@ func TestFloatHash(t *testing.T) {
 	for _, tt := range tests {
 		h := tt.obj.Hash()
 
-		if h.Type != FLOAT_TYPE {
-			t.Fatalf("hash type must be FLOAT_TYPE. got=%s", h.Type)
+		if h.Type != FloatType {
+			t.Fatalf("hash type must be FloatType. got=%s", h.Type)
 		}
 
 		if h.Value != tt.expected {

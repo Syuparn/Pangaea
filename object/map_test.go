@@ -6,8 +6,8 @@ import (
 
 func TestMapType(t *testing.T) {
 	obj := PanMap{}
-	if obj.Type() != MAP_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", MAP_TYPE, obj.Type())
+	if obj.Type() != MapType {
+		t.Fatalf("wrong type: expected=%s, got=%s", MapType, obj.Type())
 	}
 }
 

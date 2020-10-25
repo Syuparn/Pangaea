@@ -5,6 +5,7 @@ import (
 	"../object"
 )
 
+// Eval evaluates ast recursively.
 func Eval(node ast.Node, env *object.Env) object.PanObject {
 	switch node := node.(type) {
 	// Program

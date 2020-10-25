@@ -15,8 +15,10 @@ import (
 	"strings"
 )
 
+// PROMPT is a prefix string printed in Pangaea interpreter.
 const PROMPT = "> "
 
+// Start starts Pangaea interpreter.
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvWithConsts()
@@ -48,6 +50,7 @@ func Start(in io.Reader, out io.Writer) {
 	}
 }
 
+// StartParsing starts Pangaea interpreter but only lexing and parsing.
 func StartParsing(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 

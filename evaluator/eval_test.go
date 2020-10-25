@@ -1159,7 +1159,7 @@ func toPanFunc(
 
 	return &object.PanFunc{
 		FuncWrapper: funcWrapper,
-		FuncType:    object.FUNC_FUNC,
+		FuncKind:    object.FuncFunc,
 		Env:         object.NewEnclosedEnv(env),
 	}
 }
@@ -1371,7 +1371,7 @@ func toPanIter(
 
 	return &object.PanFunc{
 		FuncWrapper: funcWrapper,
-		FuncType:    object.ITER_FUNC,
+		FuncKind:    object.IterFunc,
 		Env:         env,
 	}
 }
@@ -4651,8 +4651,8 @@ func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) 
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.INT_TYPE {
-		t.Fatalf("Type must be INT_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.IntType {
+		t.Fatalf("Type must be IntType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4673,8 +4673,8 @@ func testPanFloat(t *testing.T, actual object.PanObject, expected *object.PanFlo
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.FLOAT_TYPE {
-		t.Fatalf("Type must be FLOAT_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.FloatType {
+		t.Fatalf("Type must be FloatType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4695,8 +4695,8 @@ func testPanStr(t *testing.T, actual object.PanObject, expected *object.PanStr) 
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.STR_TYPE {
-		t.Fatalf("Type must be STR_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.StrType {
+		t.Fatalf("Type must be StrType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4717,8 +4717,8 @@ func testPanBool(t *testing.T, actual object.PanObject, expected *object.PanBool
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.BOOL_TYPE {
-		t.Fatalf("Type must be BOOL_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.BoolType {
+		t.Fatalf("Type must be BoolType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4739,8 +4739,8 @@ func testPanNil(t *testing.T, actual object.PanObject, expected *object.PanNil) 
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.NIL_TYPE {
-		t.Fatalf("Type must be NIL_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.NilType {
+		t.Fatalf("Type must be NilType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4757,8 +4757,8 @@ func testPanRange(t *testing.T, actual object.PanObject, expected *object.PanRan
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.RANGE_TYPE {
-		t.Fatalf("Type must be RANGE_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.RangeType {
+		t.Fatalf("Type must be RangeType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4779,8 +4779,8 @@ func testPanArr(t *testing.T, actual object.PanObject, expected *object.PanArr) 
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.ARR_TYPE {
-		t.Fatalf("Type must be ARR_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.ArrType {
+		t.Fatalf("Type must be ArrType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4806,8 +4806,8 @@ func testPanObj(t *testing.T, actual object.PanObject, expected *object.PanObj) 
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.OBJ_TYPE {
-		t.Fatalf("Type must be OBJ_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.ObjType {
+		t.Fatalf("Type must be ObjType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4846,8 +4846,8 @@ func testPanMap(t *testing.T, actual object.PanObject, expected *object.PanMap) 
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.MAP_TYPE {
-		t.Fatalf("Type must be MAP_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.MapType {
+		t.Fatalf("Type must be MapType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4895,8 +4895,8 @@ func testPanFunc(t *testing.T, actual object.PanObject, expected *object.PanFunc
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.FUNC_TYPE {
-		t.Fatalf("Type must be FUNC_TYPE(%s). got=%s(%s)",
+	if actual.Type() != object.FuncType {
+		t.Fatalf("Type must be FuncType(%s). got=%s(%s)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4907,9 +4907,9 @@ func testPanFunc(t *testing.T, actual object.PanObject, expected *object.PanFunc
 		return
 	}
 
-	if obj.FuncType != expected.FuncType {
-		t.Errorf("FuncType must be %d. got=%d",
-			expected.FuncType, obj.FuncType)
+	if obj.FuncKind != expected.FuncKind {
+		t.Errorf("FuncKind must be %d. got=%d",
+			expected.FuncKind, obj.FuncKind)
 	}
 
 	testEnv(t, *obj.Env, *expected.Env)
@@ -4935,8 +4935,8 @@ func testPanBulitIn(t *testing.T, actual object.PanObject, expected *object.PanB
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.BUILTIN_TYPE {
-		t.Fatalf("Type must be BUILTIN_TYPE(`%s`). got=%s(`%s`)",
+	if actual.Type() != object.BuiltInType {
+		t.Fatalf("Type must be BuiltInType(`%s`). got=%s(`%s`)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4973,8 +4973,8 @@ func testPanErr(t *testing.T, actual object.PanObject, expected *object.PanErr) 
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
 	}
 
-	if actual.Type() != object.ERR_TYPE {
-		t.Fatalf("Type must be ERR_TYPE(`%s`). got=%s(`%s`)",
+	if actual.Type() != object.ErrType {
+		t.Fatalf("Type must be ErrType(`%s`). got=%s(`%s`)",
 			expected.Inspect(), actual.Type(), actual.Inspect())
 		return
 	}
@@ -4985,8 +4985,8 @@ func testPanErr(t *testing.T, actual object.PanObject, expected *object.PanErr) 
 		return
 	}
 
-	if e.ErrType != expected.ErrType {
-		t.Errorf("ErrType must be %s. got=%s", expected.ErrType, e.ErrType)
+	if e.ErrKind != expected.ErrKind {
+		t.Errorf("ErrKind must be %s. got=%s", expected.ErrKind, e.ErrKind)
 	}
 
 	if e.Inspect() != expected.Inspect() {

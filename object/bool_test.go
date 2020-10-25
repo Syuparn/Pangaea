@@ -6,8 +6,8 @@ import (
 
 func TestBoolType(t *testing.T) {
 	boolObj := PanBool{true}
-	if boolObj.Type() != BOOL_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", BOOL_TYPE, boolObj.Type())
+	if boolObj.Type() != BoolType {
+		t.Fatalf("wrong type: expected=%s, got=%s", BoolType, boolObj.Type())
 	}
 }
 
@@ -59,8 +59,8 @@ func TestBoolHash(t *testing.T) {
 	for _, tt := range tests {
 		h := tt.obj.Hash()
 
-		if h.Type != BOOL_TYPE {
-			t.Fatalf("hash type must be BOOL_TYPE. got=%s", h.Type)
+		if h.Type != BoolType {
+			t.Fatalf("hash type must be BoolType. got=%s", h.Type)
 		}
 
 		if h.Value != uint64(tt.expected) {

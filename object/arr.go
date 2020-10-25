@@ -5,16 +5,20 @@ import (
 	"strings"
 )
 
-const ARR_TYPE = "ARR_TYPE"
+// ArrType is a type of PanArr.
+const ArrType = "ArrType"
 
+// PanArr is object of arr literal.
 type PanArr struct {
 	Elems []PanObject
 }
 
+// Type returns type of this PanObject.
 func (a *PanArr) Type() PanObjType {
-	return ARR_TYPE
+	return ArrType
 }
 
+// Inspect returns formatted source code of this object.
 func (a *PanArr) Inspect() string {
 	var out bytes.Buffer
 	elems := []string{}
@@ -28,6 +32,7 @@ func (a *PanArr) Inspect() string {
 	return out.String()
 }
 
+// Proto returns proto of this object.
 func (a *PanArr) Proto() PanObject {
 	return BuiltInArrObj
 }

@@ -52,8 +52,8 @@ func TestSymHash2Str(t *testing.T) {
 			strObj1, strObj2)
 	}
 
-	if strObj1.Type() != STR_TYPE {
-		t.Fatalf("type of strObj1 must be STR_TYPE. got=%s",
+	if strObj1.Type() != StrType {
+		t.Fatalf("type of strObj1 must be StrType. got=%s",
 			strObj1.Type())
 	}
 
@@ -74,8 +74,8 @@ func TestStrTable(t *testing.T) {
 			StrTable)
 	}
 
-	if found.Type() != STR_TYPE {
-		t.Fatalf("StrTable must return STR_TYPE PanObject. got=%s",
+	if found.Type() != StrType {
+		t.Fatalf("StrTable must return StrType PanObject. got=%s",
 			found.Type())
 	}
 

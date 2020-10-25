@@ -6,8 +6,8 @@ import (
 
 func TestIntType(t *testing.T) {
 	intObj := PanInt{10}
-	if intObj.Type() != INT_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", INT_TYPE, intObj.Type())
+	if intObj.Type() != IntType {
+		t.Fatalf("wrong type: expected=%s, got=%s", IntType, intObj.Type())
 	}
 }
 
@@ -51,8 +51,8 @@ func TestIntHash(t *testing.T) {
 	for _, tt := range tests {
 		h := tt.obj.Hash()
 
-		if h.Type != INT_TYPE {
-			t.Fatalf("hash type must be INT_TYPE. got=%s", h.Type)
+		if h.Type != IntType {
+			t.Fatalf("hash type must be IntType. got=%s", h.Type)
 		}
 
 		if h.Value != uint64(tt.expected) {

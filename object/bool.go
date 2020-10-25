@@ -4,20 +4,25 @@ import (
 	"fmt"
 )
 
-const BOOL_TYPE = "BOOL_TYPE"
+// BoolType is a type of PanBool.
+const BoolType = "BoolType"
 
+// PanBool is object of bool literal.
 type PanBool struct {
 	Value bool
 }
 
+// Type returns type of this PanObject.
 func (b *PanBool) Type() PanObjType {
-	return BOOL_TYPE
+	return BoolType
 }
 
+// Inspect returns formatted source code of this object.
 func (b *PanBool) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
 }
 
+// Proto returns proto of this object.
 func (b *PanBool) Proto() PanObject {
 	if b.Value {
 		return BuiltInOneInt
@@ -25,6 +30,7 @@ func (b *PanBool) Proto() PanObject {
 	return BuiltInZeroInt
 }
 
+// Hash returns hashkey of this object.
 func (b *PanBool) Hash() HashKey {
 	var v uint64
 	if b.Value {
@@ -33,5 +39,5 @@ func (b *PanBool) Hash() HashKey {
 		v = 0
 	}
 
-	return HashKey{BOOL_TYPE, v}
+	return HashKey{BoolType, v}
 }

@@ -1,12 +1,14 @@
 package object
 
-const YIELD_TYPE = "YIELD_TYPE"
+// YieldType is a type of YieldObj.
+const YieldType = "YieldType"
 
-// wrapper for yielded value
+// YieldObj is a wrapper for yielded value.
 type YieldObj struct {
 	PanObject
 }
 
+// Type returns type of this PanObject.
 func (o *YieldObj) Type() PanObjType {
-	return YIELD_TYPE
+	return YieldType
 }

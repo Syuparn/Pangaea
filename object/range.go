@@ -5,18 +5,22 @@ import (
 	"strings"
 )
 
-const RANGE_TYPE = "RANGE_TYPE"
+// RangeType is a type of PanRange.
+const RangeType = "RangeType"
 
+// PanRange is object of range literal.
 type PanRange struct {
 	Start PanObject
 	Stop  PanObject
 	Step  PanObject
 }
 
+// Type returns type of this PanObject.
 func (r *PanRange) Type() PanObjType {
-	return RANGE_TYPE
+	return RangeType
 }
 
+// Inspect returns formatted source code of this object.
 func (r *PanRange) Inspect() string {
 	var out bytes.Buffer
 	elems := make([]string, 3)
@@ -30,6 +34,7 @@ func (r *PanRange) Inspect() string {
 	return out.String()
 }
 
+// Proto returns proto of this object.
 func (r *PanRange) Proto() PanObject {
 	return BuiltInRangeObj
 }

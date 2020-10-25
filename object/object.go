@@ -5,14 +5,17 @@
 
 package object
 
+// PanObjType is type information to designate each PanObject.
 type PanObjType string
 
+// PanObject is an interface of all Pangaea object implementations.
 type PanObject interface {
 	Type() PanObjType
 	Inspect() string
 	Proto() PanObject
 }
 
+// PanScalar is an interface of scalar PanObject, which does not have child components.
 type PanScalar interface {
 	PanObject
 	Hash() HashKey

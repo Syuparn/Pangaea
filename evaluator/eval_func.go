@@ -6,13 +6,13 @@ import (
 )
 
 func evalFunc(node *ast.FuncLiteral, env *object.Env) object.PanObject {
-	return evalCallable(node.FuncComponent, env, object.FUNC_FUNC)
+	return evalCallable(node.FuncComponent, env, object.FuncFunc)
 }
 
 func evalCallable(
 	component ast.FuncComponent,
 	env *object.Env,
-	funcType object.FuncType,
+	funcKind object.FuncKind,
 ) object.PanObject {
 	args := []object.PanObject{}
 	for _, argNode := range component.Args {
@@ -42,7 +42,7 @@ func evalCallable(
 
 	return &object.PanFunc{
 		FuncWrapper: wrapper,
-		FuncType:    funcType,
+		FuncKind:    funcKind,
 		Env:         object.NewEnclosedEnv(env),
 	}
 }

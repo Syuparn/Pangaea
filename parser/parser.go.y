@@ -1870,7 +1870,7 @@ pair
 	}
 	| CARET ident COLON expr
 	{
-		pinned := &ast.PinnedIdent{*$2}
+		pinned := &ast.PinnedIdent{Ident: *$2}
 		$$ = &ast.Pair{Key: pinned, Val: $4}
 	}
 

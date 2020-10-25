@@ -1,12 +1,14 @@
 package object
 
-const RETURN_TYPE = "RETURN_TYPE"
+// ReturnType is a type of ReturnObj.
+const ReturnType = "ReturnType"
 
-// wrapper for returned value
+// ReturnObj is a wrapper for returned value.
 type ReturnObj struct {
 	PanObject
 }
 
+// Type returns type of this PanObject.
 func (o *ReturnObj) Type() PanObjType {
-	return RETURN_TYPE
+	return ReturnType
 }

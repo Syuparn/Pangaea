@@ -6,6 +6,8 @@ import (
 	"io"
 )
 
+// ObjProps provides built-in props for Obj.
+// NOTE: Some Obj props are defind by native code (not by this function).
 func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
@@ -274,7 +276,7 @@ func objIter(o *object.PanObj) object.BuiltInFunc {
 			pair.Key,
 			pair.Value,
 		}}
-		yieldIdx += 1
+		yieldIdx++
 		return yielded
 	}
 }

@@ -7,8 +7,8 @@ import (
 func TestBuiltInIterType(t *testing.T) {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
 	obj := PanBuiltInIter{Fn: f, Env: NewEnv()}
-	if obj.Type() != BUILTIN_ITER_TYPE {
-		t.Fatalf("wrong type: expected=%s, got=%s", BUILTIN_ITER_TYPE, obj.Type())
+	if obj.Type() != BuiltInIterType {
+		t.Fatalf("wrong type: expected=%s, got=%s", BuiltInIterType, obj.Type())
 	}
 }
 
