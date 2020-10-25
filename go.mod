@@ -1,6 +1,6 @@
 module github.com/Syuparn/pangaea
 
-go 1.12
+go 1.15
 
 require (
 	github.com/macrat/simplexer v0.0.0-20180110131648-bce8e0661570
