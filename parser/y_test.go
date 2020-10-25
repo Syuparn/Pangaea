@@ -2127,7 +2127,6 @@ func TestCallWithArgs(t *testing.T) {
 		{`5=$hi(6)`, 5, "hi", []interface{}{6}},
 	}
 
-	// TODO: inplement test
 	for _, tt := range tests {
 		program := testParse(t, tt.input)
 		expr := extractExprStmt(t, program)

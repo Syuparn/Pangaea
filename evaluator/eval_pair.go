@@ -29,13 +29,13 @@ func evalObjPair(node *ast.Pair, env *object.Env) (object.Pair, *object.PanErr) 
 			return emptyPair, appendStackTrace(err, node.Val.Source())
 		}
 
-		// TODO: allow ancestors of str
-		if k.Type() != object.STR_TYPE {
+		strK, ok := object.TraceProtoOfStr(k)
+		if !ok {
 			err := object.NewTypeErr("key of obj must be str")
 			return emptyPair, appendStackTrace(err, node.Val.Source())
 		}
 
-		return object.Pair{Key: k, Value: v}, nil
+		return object.Pair{Key: strK, Value: v}, nil
 	}
 
 	k := Eval(node.Key, env)

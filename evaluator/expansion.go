@@ -27,9 +27,8 @@ func unpackArrExpansion(
 		return nil, appendStackTrace(err, pref.Source()), true
 	}
 
-	arr, ok := evaluated.(*object.PanArr)
+	arr, ok := object.TraceProtoOfArr(evaluated)
 
-	// TODO: error handling if evaluated is not *PanArr
 	if !ok {
 		err := object.NewTypeErr(
 			fmt.Sprintf("cannot use `*` unpacking for `%s`", evaluated.Inspect()))

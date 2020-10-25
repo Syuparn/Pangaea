@@ -14,8 +14,8 @@ func iterNew(
 		return object.NewTypeErr("Iter#new requires at least 1 arg")
 	}
 
-	// TODO: enable to use ansectors of iter
-	self, ok := args[0].(*object.PanFunc)
+	// allow descendant of iter
+	self, ok := object.TraceProtoOfFunc(args[0])
 	if !ok {
 		return object.NewTypeErr("\\1 must be iter")
 	}

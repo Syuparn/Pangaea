@@ -15,7 +15,8 @@ func evalObj(node *ast.ObjLiteral, env *object.Env) object.PanObject {
 			return appendStackTrace(err, node.Source())
 		}
 
-		panStr, ok := pair.Key.(*object.PanStr)
+		// NOTE: key must be str. if not, str proto is used instead
+		panStr, ok := object.TraceProtoOfStr(pair.Key)
 
 		if !ok {
 			err := object.NewTypeErr(
@@ -23,6 +24,8 @@ func evalObj(node *ast.ObjLiteral, env *object.Env) object.PanObject {
 			return appendStackTrace(err, node.Source())
 		}
 
+		// replace key with its str proto if it is not str
+		pair.Key = panStr
 		symHash := object.GetSymHash(panStr.Value)
 
 		// NOTE: ignore duplicated keys (`{a: 1, a: 2}` is same as `{a: 1}`)

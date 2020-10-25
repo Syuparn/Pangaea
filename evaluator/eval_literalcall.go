@@ -16,8 +16,8 @@ func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObjec
 		return appendStackTrace(err, node.Source())
 	}
 
-	// TODO: handle ancestors of func
-	f, ok := fObj.(*object.PanFunc)
+	// TODO: duck typing (allow all objs with `call` prop)
+	f, ok := object.TraceProtoOfFunc(fObj)
 	if !ok {
 		err := object.NewTypeErr("literal call must be func")
 		return appendStackTrace(err, node.Source())
@@ -216,10 +216,12 @@ func _evalLiteralCall(
 }
 
 func literalCallArgs(recv object.PanObject, f *object.PanFunc) []object.PanObject {
-	// NOTE: extract elems
-	// TODO: handle ancestors of arr
-	if len(f.Args().Elems) > 1 && recv.Type() == object.ARR_TYPE {
-		return recv.(*object.PanArr).Elems
+	// NOTE: extract elems if there are more than 1 params and recv is arr
+	if len(f.Args().Elems) > 1 {
+		arr, ok := object.TraceProtoOfArr(recv)
+		if ok {
+			return arr.Elems
+		}
 	}
 
 	return []object.PanObject{recv}

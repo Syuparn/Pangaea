@@ -92,6 +92,24 @@ func TestEvalIntAt(t *testing.T) {
 				object.NewPanInt(1),
 			}},
 		},
+		// use descendant of arr for arg
+		{
+			`5.at([0].bear)`,
+			object.NewPanInt(1),
+		},
+		// use descendant of int for index
+		{
+			`5[false]`,
+			object.NewPanInt(1),
+		},
+		// use descendant of range for index
+		{
+			`5[(0:2).bear]`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(0),
+			}},
+		},
 	}
 
 	for _, tt := range tests {
@@ -176,6 +194,46 @@ func TestEvalEmbeddedStr(t *testing.T) {
 		{
 			`"a#{'bbc[1:]}d#{'eiffel[0:3:2]}g"`,
 			object.NewPanStr(`abcdefg`),
+		},
+		// embedding succeeds even if embedded.S is descendant of str
+		{
+			`{S: "elem".bear()}.{|e| "embedded: #{e}"}`,
+			object.NewPanStr(`embedded: elem`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStrAt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// s[i] returns ith rune of s
+		{`'ab[0]`, object.NewPanStr("a")},
+		{`'ab[1]`, object.NewPanStr("b")},
+		{`'ab[2]`, object.BuiltInNil},
+		{`'abcde[0:3]`, object.NewPanStr("abc")},
+		// non-ascii string
+		{`"日本語"[1]`, object.NewPanStr("本")},
+		// use descendant of arr for arg
+		{
+			`'abc.at([0].bear)`,
+			object.NewPanStr("a"),
+		},
+		// use descendant of int for index
+		{
+			`'abc[false]`,
+			object.NewPanStr("a"),
+		},
+		// use descendant of range for index
+		{
+			`'abc[(0:2).bear]`,
+			object.NewPanStr("ab"),
 		},
 	}
 
@@ -347,6 +405,14 @@ func TestEvalArrLiteral(t *testing.T) {
 				object.NewPanInt(4),
 			}},
 		},
+		// embed descendant of arr (arr proto is embedded)
+		{
+			`[1, *([2].bear)]`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+			}},
+		},
 	}
 
 	for _, tt := range tests {
@@ -391,6 +457,21 @@ func TestEvalArrAt(t *testing.T) {
 		{
 			`[1, 2, 3][-4]`,
 			object.BuiltInNil,
+		},
+		// use descendant of arr for recv
+		{
+			`[1].bear[0]`,
+			object.NewPanInt(1),
+		},
+		// use descendant of arr for arg
+		{
+			`[1].at([0].bear)`,
+			object.NewPanInt(1),
+		},
+		// use descendant of int for index
+		{
+			`[1][false]`,
+			object.NewPanInt(1),
 		},
 	}
 
@@ -468,6 +549,14 @@ func TestEvalArrAtWithRange(t *testing.T) {
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanInt(1),
 				object.NewPanInt(3),
+			}},
+		},
+		// use descendant of range for index
+		{
+			`[1, 2, 3][(0:2).bear]`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
 			}},
 		},
 	}
@@ -580,6 +669,16 @@ func TestEvalObjLiteral(t *testing.T) {
 				},
 			}),
 		},
+		// enable to use descendant of str for key (str proto is set)
+		{
+			`{"hoge".bear: 1}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   object.NewPanStr("hoge"),
+					Value: object.NewPanInt(1),
+				},
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -598,6 +697,16 @@ func TestEvalPinnedObjKey(t *testing.T) {
 			toPanObj([]object.Pair{
 				object.Pair{
 					Key:   object.NewPanStr("A"),
+					Value: object.NewPanInt(1),
+				},
+			}),
+		},
+		// enable to use descendant of str for key (str proto is set)
+		{
+			`b := "B".bear; {^b: 1}`,
+			toPanObj([]object.Pair{
+				object.Pair{
+					Key:   object.NewPanStr("B"),
 					Value: object.NewPanInt(1),
 				},
 			}),
@@ -3423,6 +3532,16 @@ func TestEvalObjAt(t *testing.T) {
 			`{a: 5, b: 10}['at]`,
 			(*object.BuiltInBaseObj.Pairs)[object.GetSymHash("at")].Value,
 		},
+		// use descendant of arr for arg
+		{
+			`{a: 1}.at(['a].bear)`,
+			object.NewPanInt(1),
+		},
+		// use descendant of str for index
+		{
+			`{a: 1}['a.bear]`,
+			object.NewPanInt(1),
+		},
 	}
 
 	for _, tt := range tests {
@@ -3490,6 +3609,11 @@ func TestEvalMapAt(t *testing.T) {
 			`%{[10]: "tenArr"}[[10]]`,
 			object.NewPanStr("tenArr"),
 		},
+		// use descendant of arr for arg
+		{
+			`%{0: 1}.at([0].bear)`,
+			object.NewPanInt(1),
+		},
 	}
 
 	for _, tt := range tests {
@@ -3519,6 +3643,11 @@ func TestEvalLiteralCall(t *testing.T) {
 		// if arity is more than 1, arr is extracted to each param
 		{
 			`[1, 2].{|i, j| i + j}`,
+			object.NewPanInt(3),
+		},
+		// if arity is more than 1, descendant of arr is extracted to each param
+		{
+			`[1, 2].bear.{|i, j| i + j}`,
 			object.NewPanInt(3),
 		},
 		// if args are insufficient, they are padded by nil
@@ -3577,6 +3706,11 @@ func TestEvalVarCall(t *testing.T) {
 		{
 			`f := {|x, y| x + y}; [2, 3, "extra"].^f`,
 			object.NewPanInt(5),
+		},
+		// if descendant of func are passed, func proto is called
+		{
+			`f := {|i| i * 2}.bear; 5.^f`,
+			object.NewPanInt(10),
 		},
 	}
 
