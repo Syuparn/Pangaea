@@ -8,12 +8,10 @@ A programming language for one-liner method chain lovers! (Under construction...
 # Run
 
 ```bash:
-# 1. Install dependencies
+# 1. Install goyacc
 $ go get golang.org/x/tools/cmd/goyacc
-$ go get github.com/macrat/simplexer
-$ go get github.com/tanaton/dtoa
 
-# 2. Build
+# 2. Build (dependencies are installed automatically)
 $ make
 
 # 3. Run
@@ -27,7 +25,7 @@ $ ./pangaea.exe
 
 # Requirements
 ## Host language
-- Golang
+- Golang (1.15+)
 
 ## Packages
 - [goyacc](https://godoc.org/golang.org/x/tools/cmd/goyacc)
