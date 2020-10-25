@@ -15,14 +15,14 @@ func findElemInArr(
 	if len(args) < 2 {
 		return object.NewTypeErr("Arr#at requires at least 2 args")
 	}
-	// TODO: duck typing for keys (allow child of arr)
-	self, ok := args[0].(*object.PanArr)
+	// NOTE: allow descendant of arr
+	self, ok := object.TraceProtoOfArr(args[0])
 	if !ok {
 		return object.BuiltInNil
 	}
 
-	// TODO: duck typing for keys (allow child of arr)
-	indexArr, ok := args[1].(*object.PanArr)
+	// NOTE: allow descendant of arr
+	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
 		return object.BuiltInNil
 	}
@@ -31,15 +31,17 @@ func findElemInArr(
 		return object.BuiltInNil
 	}
 
-	switch index := indexArr.Elems[0].(type) {
-	case *object.PanInt:
-		// TODO: duck typing for keys (allow child of int)
+	if index, ok := object.TraceProtoOfInt(indexArr.Elems[0]); ok {
+		// allow child of int
 		return arrIndex(index.Value, self)
-	case *object.PanRange:
-		return arrRange(index, self)
-	default:
-		return findElemInObj(env, kwargs, args...)
 	}
+
+	if index, ok := object.TraceProtoOfRange(indexArr.Elems[0]); ok {
+		// allow child of range
+		return arrRange(index, self)
+	}
+
+	return findElemInObj(env, kwargs, args...)
 }
 
 func findBitInInt(
@@ -52,14 +54,14 @@ func findBitInInt(
 	if len(args) < 2 {
 		return object.NewTypeErr("Int#at requires at least 2 args")
 	}
-	// TODO: duck typing for keys (allow child of arr)
-	self, ok := args[0].(*object.PanInt)
+	// allow child of int
+	self, ok := object.TraceProtoOfInt(args[0])
 	if !ok {
 		return object.BuiltInNil
 	}
 
-	// TODO: duck typing for keys (allow child of arr)
-	indexArr, ok := args[1].(*object.PanArr)
+	// allow child of arr
+	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
 		return object.BuiltInNil
 	}
@@ -68,15 +70,15 @@ func findBitInInt(
 		return object.BuiltInNil
 	}
 
-	switch index := indexArr.Elems[0].(type) {
-	case *object.PanInt:
-		// TODO: duck typing for keys (allow child of int)
+	if index, ok := object.TraceProtoOfInt(indexArr.Elems[0]); ok {
 		return intIndex(index.Value, self.Value)
-	case *object.PanRange:
-		return intRange(index, self.Value)
-	default:
-		return findElemInObj(env, kwargs, args...)
 	}
+
+	if index, ok := object.TraceProtoOfRange(indexArr.Elems[0]); ok {
+		return intRange(index, self.Value)
+	}
+
+	return findElemInObj(env, kwargs, args...)
 }
 
 func findElemInObj(
@@ -89,8 +91,8 @@ func findElemInObj(
 	}
 	self := args[0]
 
-	// TODO: duck typing for keys (allow child of arr)
-	indexArr, ok := args[1].(*object.PanArr)
+	// allow child of arr
+	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
 		return object.BuiltInNil
 	}
@@ -99,8 +101,8 @@ func findElemInObj(
 		return object.BuiltInNil
 	}
 
-	// TODO: duck typing for keys (allow child of str)
-	propName, ok := indexArr.Elems[0].(*object.PanStr)
+	// allow child of str
+	propName, ok := object.TraceProtoOfStr(indexArr.Elems[0])
 	if !ok {
 		return object.BuiltInNil
 	}
@@ -123,14 +125,14 @@ func findElemInStr(
 	if len(args) < 2 {
 		return object.NewTypeErr("Str#at requires at least 2 args")
 	}
-	// TODO: duck typing for keys (allow child of arr)
-	self, ok := args[0].(*object.PanStr)
+	// allow child of str
+	self, ok := object.TraceProtoOfStr(args[0])
 	if !ok {
 		return object.BuiltInNil
 	}
 
-	// TODO: duck typing for keys (allow child of arr)
-	indexArr, ok := args[1].(*object.PanArr)
+	// allow child of arr
+	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
 		return object.BuiltInNil
 	}
@@ -141,15 +143,15 @@ func findElemInStr(
 
 	runes := []rune(self.Value)
 
-	switch index := indexArr.Elems[0].(type) {
-	case *object.PanInt:
-		// TODO: duck typing for keys (allow child of int)
+	if index, ok := object.TraceProtoOfInt(indexArr.Elems[0]); ok {
 		return strIndex(index.Value, runes)
-	case *object.PanRange:
-		return strRange(index, runes)
-	default:
-		return findElemInObj(env, kwargs, args...)
 	}
+
+	if index, ok := object.TraceProtoOfRange(indexArr.Elems[0]); ok {
+		return strRange(index, runes)
+	}
+
+	return findElemInObj(env, kwargs, args...)
 }
 
 func arrIndex(index int64, arr *object.PanArr) object.PanObject {
@@ -310,14 +312,14 @@ func findElemInMap(
 		return object.NewTypeErr("Obj#at requires at least 2 args")
 	}
 
-	// TODO: duck typing for keys (allow child of map)
-	self, ok := args[0].(*object.PanMap)
+	// allow child of map
+	self, ok := object.TraceProtoOfMap(args[0])
 	if !ok {
 		return object.BuiltInNil
 	}
 
-	// TODO: duck typing for keys (allow child of arr)
-	indexArr, ok := args[1].(*object.PanArr)
+	// allow child of arr
+	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
 		return object.BuiltInNil
 	}

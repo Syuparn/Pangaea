@@ -16,8 +16,8 @@ func evalVarCall(node *ast.VarCallExpr, env *object.Env) object.PanObject {
 		return appendStackTrace(err, node.Source())
 	}
 
-	// TODO: handle ancestors of func
-	f, ok := fObj.(*object.PanFunc)
+	// TODO: duck typing (allow all objs with `call` prop)
+	f, ok := object.TraceProtoOfFunc(fObj)
 	if !ok {
 		err := object.NewTypeErr("var call must be func")
 		return appendStackTrace(err, node.Source())

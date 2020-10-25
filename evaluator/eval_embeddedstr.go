@@ -20,8 +20,7 @@ func evalEmbeddedStr(node *ast.EmbeddedStr, env *object.Env) object.PanObject {
 		evaluatedS := builtInCallProp(env, object.EmptyPanObjPtr(),
 			object.EmptyPanObjPtr(), evaluated, sSym)
 
-		// TODO: allow ancestor of str
-		evaluatedStr, ok := evaluatedS.(*object.PanStr)
+		evaluatedStr, ok := object.TraceProtoOfStr(evaluatedS)
 		if !ok {
 			err := object.NewValueErr(".S must return str")
 			return appendStackTrace(err, node.Source())
