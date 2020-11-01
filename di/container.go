@@ -20,7 +20,8 @@ func InjectBuiltInProps() {
 func NewPropContainer() map[string]object.PanObject {
 	return map[string]object.PanObject{
 		// name format: "ObjName_propName"
-		"Str_eval": &object.PanBuiltIn{Fn: strEval},
+		"Str_eval":    &object.PanBuiltIn{Fn: strEval},
+		"Str_evalEnv": &object.PanBuiltIn{Fn: strEvalEnv},
 	}
 }
 

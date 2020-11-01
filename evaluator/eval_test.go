@@ -21,6 +21,7 @@ func TestMain(m *testing.M) {
 	ctn := NewPropContainer()
 	// inject stubs
 	ctn["Str_eval"] = object.NewNotImplementedErr("not implemented in evaluator")
+	ctn["Str_evalEnv"] = object.NewNotImplementedErr("not implemented in evaluator")
 	InjectBuiltInProps(ctn)
 	ret := m.Run()
 	os.Exit(ret)

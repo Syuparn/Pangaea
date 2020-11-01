@@ -154,7 +154,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
-		"eval": propContainer["Str_eval"],
+		"eval":    propContainer["Str_eval"],
+		"evalEnv": propContainer["Str_evalEnv"],
 	}
 }
 
