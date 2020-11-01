@@ -2804,6 +2804,13 @@ func TestEvalObjKeys(t *testing.T) {
 				object.NewPanStr("with space"),
 			}},
 		},
+		// child of obj
+		{
+			`{a: 1}.bear({b: 2}).keys`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("b"),
+			}},
+		},
 	}
 
 	for _, tt := range tests {
@@ -2853,6 +2860,13 @@ func TestEvalObjValues(t *testing.T) {
 				object.NewPanStr("PLUS"),
 				object.NewPanStr("_B"),
 				object.NewPanStr("WITH SPACE"),
+			}},
+		},
+		// child of obj
+		{
+			`{a: 1}.bear({b: 2}).values`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(2),
 			}},
 		},
 	}
@@ -2924,6 +2938,16 @@ func TestEvalObjItems(t *testing.T) {
 				&object.PanArr{Elems: []object.PanObject{
 					object.NewPanStr("with space"),
 					object.NewPanStr("WITH SPACE"),
+				}},
+			}},
+		},
+		// child of obj
+		{
+			`{a: 1}.bear({b: 2}).items`,
+			&object.PanArr{Elems: []object.PanObject{
+				&object.PanArr{Elems: []object.PanObject{
+					object.NewPanStr("b"),
+					object.NewPanInt(2),
 				}},
 			}},
 		},

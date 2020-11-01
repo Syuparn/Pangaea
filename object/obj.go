@@ -45,7 +45,12 @@ func EmptyPanObjPtr() *PanObj {
 // ChildPanObjPtr makes new child object of proto with props in src.
 func ChildPanObjPtr(proto PanObject, src *PanObj) *PanObj {
 	// share pairs with src because objects are immutable
-	i := PanObj{Pairs: src.Pairs, proto: proto}
+	i := PanObj{
+		Pairs:       src.Pairs,
+		Keys:        src.Keys,
+		PrivateKeys: src.PrivateKeys,
+		proto:       proto,
+	}
 	return &i
 }
 
