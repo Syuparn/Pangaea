@@ -6,11 +6,11 @@
 package evaluator
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
-	"bytes"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -18,7 +18,10 @@ import (
 
 func TestMain(m *testing.M) {
 	// setup for name resolution
-	InjectBuiltInProps()
+	ctn := NewPropContainer()
+	// inject stubs
+	ctn["Str_eval"] = object.NewNotImplementedErr("not implemented in evaluator")
+	InjectBuiltInProps(ctn)
 	ret := m.Run()
 	os.Exit(ret)
 }
