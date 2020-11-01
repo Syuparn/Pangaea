@@ -11,6 +11,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/Syuparn/pangaea/di"
 	"github.com/Syuparn/pangaea/evaluator"
 	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
@@ -43,7 +44,7 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		// necessary to setup built-in object props
-		evaluator.InjectBuiltInProps()
+		di.InjectBuiltInProps()
 
 		evaluated := evaluator.Eval(program, env)
 

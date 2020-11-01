@@ -1,8 +1,8 @@
 package props
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"fmt"
+	"github.com/Syuparn/pangaea/object"
 	"strings"
 )
 
@@ -154,6 +154,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"eval":    propContainer["Str_eval"],
+		"evalEnv": propContainer["Str_evalEnv"],
 	}
 }
 
