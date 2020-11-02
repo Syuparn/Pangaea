@@ -45,13 +45,17 @@ func injectProps(
 	propContainers ...map[string]object.PanObject,
 ) {
 	ctn := mergePropContainers(propContainers...)
-	for propName, propVal := range ctn {
-		propHash := object.GetSymHash(propName)
-		(*obj.Pairs)[propHash] = object.Pair{
-			Key:   object.NewPanStr(propName),
-			Value: propVal,
+	pairs := map[object.SymHash]object.Pair{}
+
+	for k, v := range ctn {
+		pair := object.Pair{
+			Key:   object.NewPanStr(k),
+			Value: v,
 		}
+		pairs[object.GetSymHash(k)] = pair
 	}
+
+	obj.AddPairs(&pairs)
 }
 
 func mergePropContainers(

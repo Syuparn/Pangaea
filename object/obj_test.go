@@ -84,6 +84,99 @@ func TestObjProto(t *testing.T) {
 	}
 }
 
+func TestObjAddPairs(t *testing.T) {
+	testPairA := Pair{NewPanStr("a"), NewPanInt(1)}
+	testPairB := Pair{NewPanStr("b"), NewPanInt(2)}
+	testPairC := Pair{NewPanStr("c"), NewPanInt(3)}
+	testPairC2 := Pair{NewPanStr("c"), NewPanInt(4)}
+
+	tests := []struct {
+		obj      *PanObj
+		added    map[SymHash]Pair
+		expected *PanObj
+	}{
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{}).(*PanObj),
+			map[SymHash]Pair{},
+			PanObjInstancePtr(&map[SymHash]Pair{}).(*PanObj),
+		},
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				(NewPanStr("a")).SymHash(): testPairA,
+				(NewPanStr("c")).SymHash(): testPairC,
+			}).(*PanObj),
+			map[SymHash]Pair{
+				(NewPanStr("b")).SymHash(): testPairB,
+				(NewPanStr("c")).SymHash(): testPairC2,
+			},
+			PanObjInstancePtr(&map[SymHash]Pair{
+				(NewPanStr("a")).SymHash(): testPairA,
+				(NewPanStr("b")).SymHash(): testPairB,
+				(NewPanStr("c")).SymHash(): testPairC,
+			}).(*PanObj),
+		},
+	}
+
+	for _, tt := range tests {
+		err := tt.obj.AddPairs(&tt.added)
+		if err != nil {
+			t.Fatalf("err must be nil. got=%s", err.Error())
+		}
+
+		// check keys
+		if len(*tt.obj.Keys) != len(*tt.expected.Keys) {
+			t.Fatalf("wrong keys length: expected=%d, got=%d",
+				len(*tt.expected.Keys), len(*tt.obj.Keys))
+		}
+
+		for i, key := range *tt.obj.Keys {
+			if key != (*tt.expected.Keys)[i] {
+				t.Errorf("keys[%d] in %s is wrong. expected=%d, got=%d",
+					i, tt.obj.Inspect(), (*tt.expected.Keys)[i], key)
+			}
+		}
+
+		// check PrivateKeys
+		if len(*tt.obj.PrivateKeys) != len(*tt.expected.PrivateKeys) {
+			t.Fatalf("wrong keys length: expected=%d, got=%d",
+				len(*tt.expected.PrivateKeys), len(*tt.obj.PrivateKeys))
+		}
+
+		for i, key := range *tt.obj.PrivateKeys {
+			if key != (*tt.expected.PrivateKeys)[i] {
+				t.Errorf("Privatekeys[%d] in %s is wrong. expected=%d, got=%d",
+					i, tt.obj.Inspect(), (*tt.expected.PrivateKeys)[i], key)
+			}
+		}
+
+		// check Pairs
+		if len(*tt.obj.Pairs) != len(*tt.expected.Pairs) {
+			t.Fatalf("wrong pairs length: expected=%d, got=%d",
+				len(*tt.expected.Pairs), len(*tt.obj.Pairs))
+		}
+
+		for sym, expected := range *tt.expected.Pairs {
+			actual, ok := (*tt.obj.Pairs)[sym]
+			if !ok {
+				sym, _ := SymHash2Str(sym)
+				t.Fatalf("key %s not found.", sym)
+			}
+			if actual != expected {
+				t.Errorf("value must be %s. got=%s",
+					expected.Value.Inspect(), actual.Value.Inspect())
+			}
+		}
+	}
+}
+
+func TestObjAddPairsErr(t *testing.T) {
+	obj := EmptyPanObjPtr()
+	err := obj.AddPairs(nil)
+	if err == nil {
+		t.Fatalf("err must not be nil")
+	}
+}
+
 func TestObjKeys(t *testing.T) {
 	tests := []struct {
 		obj      PanObject

@@ -47,13 +47,16 @@ func injectProps(
 	props func(map[string]object.PanObject) map[string]object.PanObject,
 	propContainer map[string]object.PanObject,
 ) {
-	for propName, propVal := range props(propContainer) {
-		propHash := object.GetSymHash(propName)
-		(*obj.Pairs)[propHash] = object.Pair{
-			Key:   object.NewPanStr(propName),
-			Value: propVal,
+	pairs := map[object.SymHash]object.Pair{}
+	for k, v := range props(propContainer) {
+		pair := object.Pair{
+			Key:   object.NewPanStr(k),
+			Value: v,
 		}
+		pairs[object.GetSymHash(k)] = pair
 	}
+
+	obj.AddPairs(&pairs)
 }
 
 func TestEvalIntLiteral(t *testing.T) {
