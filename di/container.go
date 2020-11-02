@@ -3,6 +3,7 @@ package di
 import (
 	"github.com/Syuparn/pangaea/evaluator"
 	"github.com/Syuparn/pangaea/object"
+	"github.com/Syuparn/pangaea/props"
 )
 
 // InjectBuiltInProps injects and sets up builtin object props,
@@ -12,7 +13,7 @@ func InjectBuiltInProps() {
 		NewPropContainer(),
 		evaluator.NewPropContainer(),
 	)
-	evaluator.InjectBuiltInProps(propContainer)
+	injectBuiltInProps(propContainer)
 }
 
 // NewPropContainer returns container of built-in props
@@ -22,6 +23,34 @@ func NewPropContainer() map[string]object.PanObject {
 		// name format: "ObjName_propName"
 		"Str_eval":    &object.PanBuiltIn{Fn: strEval},
 		"Str_evalEnv": &object.PanBuiltIn{Fn: strEvalEnv},
+	}
+}
+
+func injectBuiltInProps(ctn map[string]object.PanObject) {
+	injectProps(object.BuiltInArrObj, props.ArrProps(ctn), mustReadNativeCode("Arr"))
+	injectProps(object.BuiltInBaseObj, props.BaseObjProps(ctn))
+	injectProps(object.BuiltInFloatObj, props.FloatProps(ctn))
+	injectProps(object.BuiltInFuncObj, props.FuncProps(ctn))
+	injectProps(object.BuiltInIntObj, props.IntProps(ctn))
+	injectProps(object.BuiltInIterObj, props.IterProps(ctn))
+	injectProps(object.BuiltInMapObj, props.MapProps(ctn))
+	injectProps(object.BuiltInNilObj, props.NilProps(ctn))
+	injectProps(object.BuiltInObjObj, props.ObjProps(ctn))
+	injectProps(object.BuiltInRangeObj, props.RangeProps(ctn))
+	injectProps(object.BuiltInStrObj, props.StrProps(ctn))
+}
+
+func injectProps(
+	obj *object.PanObj,
+	propContainers ...map[string]object.PanObject,
+) {
+	ctn := mergePropContainers(propContainers...)
+	for propName, propVal := range ctn {
+		propHash := object.GetSymHash(propName)
+		(*obj.Pairs)[propHash] = object.Pair{
+			Key:   object.NewPanStr(propName),
+			Value: propVal,
+		}
 	}
 }
 

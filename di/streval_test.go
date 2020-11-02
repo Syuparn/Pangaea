@@ -62,6 +62,14 @@ func TestEvalStrEvalError(t *testing.T) {
 			`"a".eval`,
 			object.NewNameErr("name `a` is not defined"),
 		},
+		{
+			`Str['eval]()`,
+			object.NewTypeErr("eval requires at least 1 arg"),
+		},
+		{
+			`Str['eval](1)`,
+			object.NewTypeErr("\\1 must be str"),
+		},
 	}
 
 	for _, tt := range tests {

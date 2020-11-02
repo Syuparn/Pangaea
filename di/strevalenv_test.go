@@ -61,6 +61,14 @@ func TestEvalStrEvalEnvError(t *testing.T) {
 			`"a".evalEnv`,
 			object.NewNameErr("name `a` is not defined"),
 		},
+		{
+			`Str['evalEnv]()`,
+			object.NewTypeErr("evalEnv requires at least 1 arg"),
+		},
+		{
+			`Str['evalEnv](1)`,
+			object.NewTypeErr("\\1 must be str"),
+		},
 	}
 
 	for _, tt := range tests {

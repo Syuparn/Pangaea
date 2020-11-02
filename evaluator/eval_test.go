@@ -11,6 +11,7 @@ import (
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
+	"github.com/Syuparn/pangaea/props"
 	"os"
 	"strings"
 	"testing"
@@ -22,9 +23,37 @@ func TestMain(m *testing.M) {
 	// inject stubs
 	ctn["Str_eval"] = object.NewNotImplementedErr("not implemented in evaluator")
 	ctn["Str_evalEnv"] = object.NewNotImplementedErr("not implemented in evaluator")
-	InjectBuiltInProps(ctn)
+	injectBuiltInProps(ctn)
 	ret := m.Run()
 	os.Exit(ret)
+}
+
+func injectBuiltInProps(ctn map[string]object.PanObject) {
+	injectProps(object.BuiltInArrObj, props.ArrProps, ctn)
+	injectProps(object.BuiltInBaseObj, props.BaseObjProps, ctn)
+	injectProps(object.BuiltInFloatObj, props.FloatProps, ctn)
+	injectProps(object.BuiltInFuncObj, props.FuncProps, ctn)
+	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
+	injectProps(object.BuiltInIterObj, props.IterProps, ctn)
+	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
+	injectProps(object.BuiltInNilObj, props.NilProps, ctn)
+	injectProps(object.BuiltInObjObj, props.ObjProps, ctn)
+	injectProps(object.BuiltInRangeObj, props.RangeProps, ctn)
+	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
+}
+
+func injectProps(
+	obj *object.PanObj,
+	props func(map[string]object.PanObject) map[string]object.PanObject,
+	propContainer map[string]object.PanObject,
+) {
+	for propName, propVal := range props(propContainer) {
+		propHash := object.GetSymHash(propName)
+		(*obj.Pairs)[propHash] = object.Pair{
+			Key:   object.NewPanStr(propName),
+			Value: propVal,
+		}
+	}
 }
 
 func TestEvalIntLiteral(t *testing.T) {
@@ -306,6 +335,47 @@ func TestEvalStrAt(t *testing.T) {
 		{
 			`""['at]`,
 			(*object.BuiltInStrObj.Pairs)[object.GetSymHash("at")].Value,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStrLen(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"".len`,
+			object.NewPanInt(0),
+		},
+		{
+			`"abc".len`,
+			object.NewPanInt(3),
+		},
+		// length is counted by runes
+		{
+			`"ABCあいうえお".len`,
+			object.NewPanInt(8),
+		},
+		// use descendant of str for recv
+		{
+			`"a".bear.len`,
+			object.NewPanInt(1),
+		},
+		// if no args are passed, raise an error
+		{
+			`Str['len]()`,
+			object.NewTypeErr("Str#len requires at least 1 arg"),
+		},
+		// if \1 is not str, raise an error
+		{
+			`Str['len](1)`,
+			object.NewTypeErr("\\1 must be str"),
 		},
 	}
 
@@ -661,6 +731,42 @@ func TestEvalArrAtWithRange(t *testing.T) {
 				object.NewPanInt(1),
 				object.NewPanInt(2),
 			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalArrLen(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[].len`,
+			object.NewPanInt(0),
+		},
+		{
+			`[5, 10].len`,
+			object.NewPanInt(2),
+		},
+		// use descendant of arr for recv
+		{
+			`[1].bear.len`,
+			object.NewPanInt(1),
+		},
+		// if no args are passed, raise an error
+		{
+			`Arr['len]()`,
+			object.NewTypeErr("Arr#len requires at least 1 arg"),
+		},
+		// if \1 is not arr, raise an error
+		{
+			`Arr['len](1)`,
+			object.NewTypeErr("\\1 must be arr"),
 		},
 	}
 
@@ -3799,6 +3905,47 @@ func TestEvalMapAt(t *testing.T) {
 		{
 			`%{}[]`,
 			object.BuiltInNil,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalMapLen(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`%{}.len`,
+			object.NewPanInt(0),
+		},
+		{
+			`%{"a": 1}.len`,
+			object.NewPanInt(1),
+		},
+		// with non-scalar key
+		{
+			`%{"a": 1, [2]: 3}.len`,
+			object.NewPanInt(2),
+		},
+		// use descendant of str for recv
+		{
+			`%{1: 2}.bear.len`,
+			object.NewPanInt(1),
+		},
+		// if no args are passed, raise an error
+		{
+			`Map['len]()`,
+			object.NewTypeErr("Map#len requires at least 1 arg"),
+		},
+		// if \1 is not map, raise an error
+		{
+			`Map['len](1)`,
+			object.NewTypeErr("\\1 must be map"),
 		},
 	}
 

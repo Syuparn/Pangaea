@@ -131,6 +131,22 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return &object.PanArr{Elems: keys}
 			},
 		),
+		"len": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Map#len requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfMap(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be map`)
+				}
+
+				length := len(*self.Pairs) + len(*self.NonHashablePairs)
+				return object.NewPanInt(int64(length))
+			},
+		),
 		"values": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
