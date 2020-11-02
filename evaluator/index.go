@@ -1,8 +1,8 @@
 package evaluator
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"bytes"
+	"github.com/Syuparn/pangaea/object"
 )
 
 func findElemInArr(
@@ -18,13 +18,13 @@ func findElemInArr(
 	// NOTE: allow descendant of arr
 	self, ok := object.TraceProtoOfArr(args[0])
 	if !ok {
-		return object.BuiltInNil
+		return findElemInObj(env, kwargs, args...)
 	}
 
 	// NOTE: allow descendant of arr
 	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
-		return object.BuiltInNil
+		return findElemInObj(env, kwargs, args...)
 	}
 
 	if len(indexArr.Elems) < 1 {
@@ -57,13 +57,13 @@ func findBitInInt(
 	// allow child of int
 	self, ok := object.TraceProtoOfInt(args[0])
 	if !ok {
-		return object.BuiltInNil
+		return findElemInObj(env, kwargs, args...)
 	}
 
 	// allow child of arr
 	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
-		return object.BuiltInNil
+		return findElemInObj(env, kwargs, args...)
 	}
 
 	if len(indexArr.Elems) < 1 {
@@ -128,13 +128,13 @@ func findElemInStr(
 	// allow child of str
 	self, ok := object.TraceProtoOfStr(args[0])
 	if !ok {
-		return object.BuiltInNil
+		return findElemInObj(env, kwargs, args...)
 	}
 
 	// allow child of arr
 	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
-		return object.BuiltInNil
+		return findElemInObj(env, kwargs, args...)
 	}
 
 	if len(indexArr.Elems) < 1 {
@@ -315,13 +315,13 @@ func findElemInMap(
 	// allow child of map
 	self, ok := object.TraceProtoOfMap(args[0])
 	if !ok {
-		return object.BuiltInNil
+		return findElemInObj(env, kwargs, args...)
 	}
 
 	// allow child of arr
 	indexArr, ok := object.TraceProtoOfArr(args[1])
 	if !ok {
-		return object.BuiltInNil
+		return findElemInObj(env, kwargs, args...)
 	}
 
 	if len(indexArr.Elems) < 1 {

@@ -21,6 +21,7 @@ func TestErrInspect(t *testing.T) {
 		{NewNameErr("err"), "NameErr: err"},
 		{NewNoPropErr("err"), "NoPropErr: err"},
 		{NewNotImplementedErr("err"), "NotImplementedErr: err"},
+		{NewStopIterErr("err"), "StopIterErr: err"},
 		{NewSyntaxErr("err"), "SyntaxErr: err"},
 		{NewTypeErr("err"), "TypeErr: err"},
 		{NewValueErr("err"), "ValueErr: err"},
@@ -65,6 +66,11 @@ func TestErrProto(t *testing.T) {
 			NewNotImplementedErr("err"),
 			BuiltInNotImplementedErr,
 			"BuiltInNotImplementedErr",
+		},
+		{
+			NewStopIterErr("err"),
+			BuiltInStopIterErr,
+			"BuiltInStopIterErr",
 		},
 		{
 			NewSyntaxErr("err"),

@@ -233,6 +233,75 @@ func TestObjPrivateKeys(t *testing.T) {
 	}
 }
 
+func TestEmptyPanObjPtr(t *testing.T) {
+	actual := EmptyPanObjPtr()
+
+	if actual.Pairs == nil {
+		t.Fatal("Pairs must not be nil.")
+	}
+	if len(*actual.Pairs) != 0 {
+		t.Errorf("len(Pairs) must be 0. got=%d", len(*actual.Pairs))
+	}
+
+	if actual.Keys == nil {
+		t.Fatal("Keys must not be nil.")
+	}
+	if len(*actual.Keys) != 0 {
+		t.Errorf("len(Keys) must be 0. got=%d", len(*actual.Keys))
+	}
+
+	if actual.PrivateKeys == nil {
+		t.Fatal("PrivateKeys must not be nil.")
+	}
+	if len(*actual.PrivateKeys) != 0 {
+		t.Errorf("len(PrivateKeys) must be 0. got=%d", len(*actual.PrivateKeys))
+	}
+
+	if actual.Proto() != BuiltInObjObj {
+		t.Errorf("Proto must be BuiltInObjObj. got=%s", actual.Proto().Inspect())
+	}
+}
+
+func TestChildPanObjPtr(t *testing.T) {
+	tests := []struct {
+		proto *PanObj
+		src   *PanObj
+	}{
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
+			}).(*PanObj),
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: NewPanInt(2)},
+			}).(*PanObj),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := ChildPanObjPtr(tt.proto, tt.src)
+
+		if actual.Proto() != tt.proto {
+			t.Errorf("Proto must be tt.proto. got=%s", actual.Proto().Inspect())
+		}
+
+		if actual.Pairs != tt.src.Pairs {
+			t.Errorf("Pairs must be same as src. expected=%s(%+v), got=%s(%+v)",
+				tt.src.Inspect(), tt.src.Pairs, actual.Inspect(), actual.Pairs)
+		}
+
+		if actual.Keys != tt.src.Keys {
+			t.Errorf("Keys must be same as src. expected=%s(%+v), got=%s(%+v)",
+				tt.src.Inspect(), tt.src.Keys, actual.Inspect(), actual.Keys)
+		}
+
+		if actual.PrivateKeys != tt.src.PrivateKeys {
+			t.Errorf("PrivateKeys must be same as src. expected=%s(%+v), got=%s(%+v)",
+				tt.src.Inspect(), tt.src.PrivateKeys,
+				actual.Inspect(), actual.PrivateKeys)
+		}
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testObjIsPanObject() {
 	var _ PanObject = &PanObj{}

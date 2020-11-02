@@ -51,7 +51,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("TypeErr"), BuiltInTypeErr)
 	env.Set(GetSymHash("ValueErr"), BuiltInValueErr)
 	env.Set(GetSymHash("ZeroDivisionErr"), BuiltInZeroDivisionErr)
-	env.Set(GetSymHash("_"), NewNotImplementedErr("Not implemented"))
+	env.Set(GetSymHash("_"), BuiltInNotImplemented)
 
 	return env
 }

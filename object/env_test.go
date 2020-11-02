@@ -49,6 +49,54 @@ func TestEnclosedEnv(t *testing.T) {
 	}
 }
 
+func TestEnvWithConsts(t *testing.T) {
+	tests := []struct {
+		constName string
+		expected  PanObject
+	}{
+		{"Int", BuiltInIntObj},
+		{"Float", BuiltInFloatObj},
+		{"Num", BuiltInNumObj},
+		{"Nil", BuiltInNilObj},
+		{"Str", BuiltInStrObj},
+		{"Arr", BuiltInArrObj},
+		{"Range", BuiltInRangeObj},
+		{"Func", BuiltInFuncObj},
+		{"Iter", BuiltInIterObj},
+		{"Match", BuiltInMatchObj},
+		{"Obj", BuiltInObjObj},
+		{"BaseObj", BuiltInBaseObj},
+		{"Map", BuiltInMapObj},
+		{"true", BuiltInTrue},
+		{"false", BuiltInFalse},
+		{"nil", BuiltInNil},
+		{"Err", BuiltInErrObj},
+		{"AssertionErr", BuiltInAssertionErr},
+		{"NameErr", BuiltInNameErr},
+		{"NoPropErr", BuiltInNoPropErr},
+		{"NotImplementedErr", BuiltInNotImplementedErr},
+		{"StopIterErr", BuiltInStopIterErr},
+		{"SyntaxErr", BuiltInSyntaxErr},
+		{"TypeErr", BuiltInTypeErr},
+		{"ValueErr", BuiltInValueErr},
+		{"ZeroDivisionErr", BuiltInZeroDivisionErr},
+		{"_", BuiltInNotImplemented},
+	}
+
+	env := NewEnvWithConsts()
+	for _, tt := range tests {
+		actual, ok := env.Get(GetSymHash(tt.constName))
+		if !ok {
+			t.Fatalf("element %s must be in env", tt.constName)
+		}
+
+		if actual != tt.expected {
+			t.Errorf("element %s must be %s. got=%s",
+				tt.constName, tt.expected, actual)
+		}
+	}
+}
+
 func TestGetInOuter(t *testing.T) {
 	outer := NewEnv()
 	inner := NewEnclosedEnv(outer)
