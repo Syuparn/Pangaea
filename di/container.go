@@ -27,7 +27,7 @@ func NewPropContainer() map[string]object.PanObject {
 }
 
 func injectBuiltInProps(ctn map[string]object.PanObject) {
-	injectProps(object.BuiltInArrObj, props.ArrProps(ctn))
+	injectProps(object.BuiltInArrObj, props.ArrProps(ctn), mustReadNativeCode("Arr"))
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps(ctn))
 	injectProps(object.BuiltInFloatObj, props.FloatProps(ctn))
 	injectProps(object.BuiltInFuncObj, props.FuncProps(ctn))

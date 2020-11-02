@@ -1,0 +1,4 @@
+{
+  # empty? returns whether self contains elements.
+  empty?: m{|| self.len.!},
+}

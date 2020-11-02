@@ -3,6 +3,7 @@ package di
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -13,6 +14,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	// HACK: adjust relative file path to read native codes
+	apath, _ := filepath.Abs("../")
+	os.Chdir(apath)
 	// setup for name resolution
 	InjectBuiltInProps()
 	ret := m.Run()
