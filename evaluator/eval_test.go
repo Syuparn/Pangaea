@@ -699,6 +699,42 @@ func TestEvalArrAtWithRange(t *testing.T) {
 	}
 }
 
+func TestEvalArrLen(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[].len`,
+			object.NewPanInt(0),
+		},
+		{
+			`[5, 10].len`,
+			object.NewPanInt(2),
+		},
+		// use descendant of arr for recv
+		{
+			`[1].bear.len`,
+			object.NewPanInt(1),
+		},
+		// if no args are passed, raise an error
+		{
+			`Arr['len]()`,
+			object.NewTypeErr("Arr#len requires at least 1 arg"),
+		},
+		// if \1 is not arr, raise an error
+		{
+			`Arr['len](1)`,
+			object.NewTypeErr("\\1 must be arr"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalObjLiteral(t *testing.T) {
 	tests := []struct {
 		input    string

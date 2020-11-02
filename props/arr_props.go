@@ -1,8 +1,9 @@
 package props
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"fmt"
+
+	"github.com/Syuparn/pangaea/object"
 )
 
 // ArrProps provides built-in props for Arr.
@@ -124,6 +125,21 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
+			},
+		),
+		"len": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Arr#len requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfArr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be arr`)
+				}
+
+				return object.NewPanInt(int64(len(self.Elems)))
 			},
 		),
 	}
