@@ -2,6 +2,7 @@ package object
 
 import (
 	"bytes"
+	"errors"
 	"sort"
 )
 
@@ -123,4 +124,26 @@ func keyHashes(pairs *map[SymHash]Pair) ([]SymHash, []SymHash) {
 	}
 
 	return publicHashes, privateHashes
+}
+
+// AddPairs adds pairs to obj.
+// NOTE: Use this method only for prop DI. Otherwise immutability gets broken.
+func (o *PanObj) AddPairs(pairs *map[SymHash]Pair) error {
+	if pairs == nil {
+		return errors.New("pairs must not be nil")
+	}
+
+	// add new pairs
+	for k, v := range *pairs {
+		// set only if prop does not exist
+		if _, ok := (*o.Pairs)[k]; !ok {
+			(*o.Pairs)[k] = v
+		}
+	}
+
+	// update keys
+	publicKeys, privateKeys := keyHashes(o.Pairs)
+	o.Keys = &publicKeys
+	o.PrivateKeys = &privateKeys
+	return nil
 }
