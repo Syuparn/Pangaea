@@ -11,6 +11,7 @@ import (
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
+	"github.com/Syuparn/pangaea/props"
 	"os"
 	"strings"
 	"testing"
@@ -22,9 +23,37 @@ func TestMain(m *testing.M) {
 	// inject stubs
 	ctn["Str_eval"] = object.NewNotImplementedErr("not implemented in evaluator")
 	ctn["Str_evalEnv"] = object.NewNotImplementedErr("not implemented in evaluator")
-	InjectBuiltInProps(ctn)
+	injectBuiltInProps(ctn)
 	ret := m.Run()
 	os.Exit(ret)
+}
+
+func injectBuiltInProps(ctn map[string]object.PanObject) {
+	injectProps(object.BuiltInArrObj, props.ArrProps, ctn)
+	injectProps(object.BuiltInBaseObj, props.BaseObjProps, ctn)
+	injectProps(object.BuiltInFloatObj, props.FloatProps, ctn)
+	injectProps(object.BuiltInFuncObj, props.FuncProps, ctn)
+	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
+	injectProps(object.BuiltInIterObj, props.IterProps, ctn)
+	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
+	injectProps(object.BuiltInNilObj, props.NilProps, ctn)
+	injectProps(object.BuiltInObjObj, props.ObjProps, ctn)
+	injectProps(object.BuiltInRangeObj, props.RangeProps, ctn)
+	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
+}
+
+func injectProps(
+	obj *object.PanObj,
+	props func(map[string]object.PanObject) map[string]object.PanObject,
+	propContainer map[string]object.PanObject,
+) {
+	for propName, propVal := range props(propContainer) {
+		propHash := object.GetSymHash(propName)
+		(*obj.Pairs)[propHash] = object.Pair{
+			Key:   object.NewPanStr(propName),
+			Value: propVal,
+		}
+	}
 }
 
 func TestEvalIntLiteral(t *testing.T) {
