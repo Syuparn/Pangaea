@@ -36,7 +36,7 @@ $ ./pangaea.exe
 
 - [x] Lexer
 - [x] Parser
-- [ ] Evaluator (about 70%)
+- [ ] Evaluator (about 90%)
 - [ ] Methods/Properties (about 10%)
 
 # Plans for language features
@@ -48,7 +48,7 @@ You don't have to go back to beginning of line!
 
 ```
 "Hello, world!".puts # Hello, world!
-(1:5).to_a.sum.puts # 15
+(1:5).A.sum.puts # 15
 ```
 
 Looks similar to other language though?
@@ -103,7 +103,7 @@ which works same as "lonely operator" in Ruby.
 # nil.capital.puts # NoPropErr: nil does not have property "capital"
 nil&.capital.puts # nil
 
-[1, 2, nil, 4]&@to_f.puts # [1.0, 2.0, nil, 4.0]
+[1, 2, nil, 4]&@F.puts # [1.0, 2.0, nil, 4.0]
 ```
 
 #### Thoughtful Chain
@@ -115,7 +115,7 @@ This chain returns receiver instead if returned value is `nil`
 
 (3:20)~$([2]){|acc, n| [*acc, n] if acc.all? {|p| n % p}}.puts # [2, 3, 5, ..., 19]
 
-# (Of course there is also an embedded prime function)
+# (Of course there is also an built-in prime function)
 20@filter(prime?).puts # [2, 3, 5, ..., 19]
 ```
 
