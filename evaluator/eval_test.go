@@ -114,6 +114,40 @@ func TestEvalIntAt(t *testing.T) {
 				object.NewPanInt(0),
 			}},
 		},
+		// if \1 is not int, return nil
+		{
+			`Int['at]({}, [1])`,
+			object.BuiltInNil,
+		},
+		// if \2 is not arr, return nil
+		{
+			`1.at({})`,
+			object.BuiltInNil,
+		},
+		// if key is insufficient, return nil
+		{
+			`1[]`,
+			object.BuiltInNil,
+		},
+		// if index is out of range, return nil
+		{
+			`1[100]`,
+			object.BuiltInNil,
+		},
+		// minus index
+		{
+			`1[-1]`,
+			object.NewPanInt(0),
+		},
+		{
+			`1[-100]`,
+			object.BuiltInNil,
+		},
+		// if non-int value is passed, call parent's at method
+		{
+			`1['at]`,
+			(*object.BuiltInIntObj.Pairs)[object.GetSymHash("at")].Value,
+		},
 	}
 
 	for _, tt := range tests {
@@ -238,6 +272,40 @@ func TestEvalStrAt(t *testing.T) {
 		{
 			`'abc[(0:2).bear]`,
 			object.NewPanStr("ab"),
+		},
+		// if \1 is not str, return nil
+		{
+			`Str['at]({}, [1])`,
+			object.BuiltInNil,
+		},
+		// if \2 is not arr, return nil
+		{
+			`"".at({})`,
+			object.BuiltInNil,
+		},
+		// if key is insufficient, return nil
+		{
+			`""[]`,
+			object.BuiltInNil,
+		},
+		// if index is out of range, return nil
+		{
+			`""[100]`,
+			object.BuiltInNil,
+		},
+		// minus index
+		{
+			`"abc"[-1]`,
+			object.NewPanStr("c"),
+		},
+		{
+			`"abc"[-4]`,
+			object.BuiltInNil,
+		},
+		// if non-int value is passed, call parent's at method
+		{
+			`""['at]`,
+			(*object.BuiltInStrObj.Pairs)[object.GetSymHash("at")].Value,
 		},
 	}
 
@@ -477,6 +545,16 @@ func TestEvalArrAt(t *testing.T) {
 			`[1][false]`,
 			object.NewPanInt(1),
 		},
+		// if \1 is not arr, return nil
+		{
+			`Arr['at]({}, [1])`,
+			object.BuiltInNil,
+		},
+		// if \2 is not arr, return nil
+		{
+			`[1, 2, 3].at({})`,
+			object.BuiltInNil,
+		},
 	}
 
 	for _, tt := range tests {
@@ -558,6 +636,27 @@ func TestEvalArrAtWithRange(t *testing.T) {
 		// use descendant of range for index
 		{
 			`[1, 2, 3][(0:2).bear]`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+			}},
+		},
+		// range is fixed even if start or step is out of range
+		{
+			`[0, 1, 2][-3:-2]`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(0),
+			}},
+		},
+		{
+			`[0, 1, 2][-100:2]`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(0),
+				object.NewPanInt(1),
+			}},
+		},
+		{
+			`[0, 1, 2][-2:10000]`,
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanInt(1),
 				object.NewPanInt(2),
@@ -3570,6 +3669,50 @@ func TestEvalObjAt(t *testing.T) {
 			`{a: 1}['a.bear]`,
 			object.NewPanInt(1),
 		},
+		// if \1 is not obj, return nil
+		{
+			`Obj['at]([], [1])`,
+			object.BuiltInNil,
+		},
+		// if \2 is not arr, return nil
+		{
+			`{}.at({})`,
+			object.BuiltInNil,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalIndexErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.at`,
+			object.NewTypeErr("Obj#at requires at least 2 args"),
+		},
+		{
+			`[].at`,
+			object.NewTypeErr("Arr#at requires at least 2 args"),
+		},
+		{
+			`"".at`,
+			object.NewTypeErr("Str#at requires at least 2 args"),
+		},
+		{
+			`1.at`,
+			object.NewTypeErr("Int#at requires at least 2 args"),
+		},
+		// invalid index range
+		{
+			`[1,2,3][1:5:0]`,
+			object.NewValueErr("cannot use 0 for range step"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -3641,6 +3784,21 @@ func TestEvalMapAt(t *testing.T) {
 		{
 			`%{0: 1}.at([0].bear)`,
 			object.NewPanInt(1),
+		},
+		// if \1 is not map, return nil
+		{
+			`Map['at]({}, [1])`,
+			object.BuiltInNil,
+		},
+		// if \2 is not arr, return nil
+		{
+			`%{}.at({})`,
+			object.BuiltInNil,
+		},
+		// if key is insufficient, return nil
+		{
+			`%{}[]`,
+			object.BuiltInNil,
 		},
 	}
 
