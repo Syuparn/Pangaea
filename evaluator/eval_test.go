@@ -344,6 +344,47 @@ func TestEvalStrAt(t *testing.T) {
 	}
 }
 
+func TestEvalStrLen(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"".len`,
+			object.NewPanInt(0),
+		},
+		{
+			`"abc".len`,
+			object.NewPanInt(3),
+		},
+		// length is counted by runes
+		{
+			`"ABCあいうえお".len`,
+			object.NewPanInt(8),
+		},
+		// use descendant of str for recv
+		{
+			`"a".bear.len`,
+			object.NewPanInt(1),
+		},
+		// if no args are passed, raise an error
+		{
+			`Str['len]()`,
+			object.NewTypeErr("Str#len requires at least 1 arg"),
+		},
+		// if \1 is not str, raise an error
+		{
+			`Str['len](1)`,
+			object.NewTypeErr("\\1 must be str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalBoolLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
