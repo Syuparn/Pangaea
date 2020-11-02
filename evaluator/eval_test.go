@@ -3914,6 +3914,47 @@ func TestEvalMapAt(t *testing.T) {
 	}
 }
 
+func TestEvalMapLen(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`%{}.len`,
+			object.NewPanInt(0),
+		},
+		{
+			`%{"a": 1}.len`,
+			object.NewPanInt(1),
+		},
+		// with non-scalar key
+		{
+			`%{"a": 1, [2]: 3}.len`,
+			object.NewPanInt(2),
+		},
+		// use descendant of str for recv
+		{
+			`%{1: 2}.bear.len`,
+			object.NewPanInt(1),
+		},
+		// if no args are passed, raise an error
+		{
+			`Map['len]()`,
+			object.NewTypeErr("Map#len requires at least 1 arg"),
+		},
+		// if \1 is not map, raise an error
+		{
+			`Map['len](1)`,
+			object.NewTypeErr("\\1 must be map"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalLiteralCall(t *testing.T) {
 	tests := []struct {
 		input    string
