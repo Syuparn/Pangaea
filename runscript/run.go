@@ -18,7 +18,7 @@ func Run(fileName string, in io.Reader, out io.Writer) int {
 	env.InjectIO(in, out)
 
 	// necessary to setup built-in object props
-	di.InjectBuiltInProps()
+	di.InjectBuiltInProps(env)
 
 	// enable to use Kernel props directly in top-level
 	// NOTE: InjectFrom must be called after BuiltInKernelObj is set up

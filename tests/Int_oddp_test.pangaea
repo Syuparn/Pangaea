@@ -1,0 +1,2 @@
+assert(1.odd? == true)
+assert(2.odd? == false)

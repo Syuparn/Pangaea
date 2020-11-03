@@ -51,8 +51,14 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 				other, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
+					// NOTE: nil is treated as []
+					_, ok := object.TraceProtoOfNil(args[1])
+					if ok {
+						return self
+					}
+
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as arr", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as arr", args[1].Inspect()))
 				}
 
 				// NOTE: no need to copy each elem because they are immutable
@@ -125,6 +131,32 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
+			},
+		),
+		"has?": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Arr#has? requires at least 2 args")
+				}
+				self, ok := object.TraceProtoOfArr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be arr`)
+				}
+
+				for _, elem := range self.Elems {
+					// == comparison
+					isEq := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+						env, object.EmptyPanObjPtr(),
+						object.EmptyPanObjPtr(), elem, eqSym, args[1],
+					)
+					if isEq == object.BuiltInTrue {
+						return object.BuiltInTrue
+					}
+				}
+
+				return object.BuiltInFalse
 			},
 		),
 		"len": f(

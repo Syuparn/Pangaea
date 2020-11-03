@@ -1,0 +1,2 @@
+assert("hello wORLd".capital == "Hello world")
+assert("あbc".capital == "あbc")

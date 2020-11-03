@@ -8,8 +8,8 @@ import (
 	"github.com/Syuparn/pangaea/object"
 )
 
-func mustReadNativeCode(srcName string) map[string]object.PanObject {
-	propContainer, err := readNativeCode(srcName)
+func mustReadNativeCode(srcName string, env *object.Env) map[string]object.PanObject {
+	propContainer, err := readNativeCode(srcName, env)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -17,7 +17,7 @@ func mustReadNativeCode(srcName string) map[string]object.PanObject {
 	return propContainer
 }
 
-func readNativeCode(srcName string) (map[string]object.PanObject, error) {
+func readNativeCode(srcName string, env *object.Env) (map[string]object.PanObject, error) {
 	srcPath := "native"
 	fileName := fmt.Sprintf("%s/%s.pangaea", srcPath, srcName)
 
@@ -29,7 +29,9 @@ func readNativeCode(srcName string) (map[string]object.PanObject, error) {
 	}
 	defer fp.Close()
 
-	result := eval(fp, object.NewEnv())
+	// NOTE: must pass EnclosedEnv otherwise outerenv of func literal cannot work
+	// (cannot call top-level consts for example)
+	result := eval(fp, object.NewEnclosedEnv(env))
 	if result.Type() == object.ErrType {
 		return map[string]object.PanObject{}, errors.New(result.Inspect())
 	}

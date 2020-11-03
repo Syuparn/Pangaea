@@ -1,8 +1,8 @@
 package props
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"fmt"
+	"github.com/Syuparn/pangaea/object"
 	"math"
 )
 
@@ -79,19 +79,9 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				if len(args) < 2 {
-					return object.NewTypeErr("+ requires at least 2 args")
-				}
-
-				self, ok := object.TraceProtoOfFloat(args[0])
-				if !ok {
-					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as float", self.Inspect()))
-				}
-				other, ok := object.TraceProtoOfFloat(args[1])
-				if !ok {
-					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as float", other.Inspect()))
+				self, other, err := checkFloatInfixArgs(args, "+", &object.PanFloat{Value: 0.0})
+				if err != nil {
+					return err
 				}
 
 				res := self.Value + other.Value
@@ -117,4 +107,33 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 			},
 		),
 	}
+}
+
+func checkFloatInfixArgs(
+	args []object.PanObject,
+	propName string,
+	nilAs *object.PanFloat,
+) (*object.PanFloat, *object.PanFloat, *object.PanErr) {
+	if len(args) < 2 {
+		return nil, nil, object.NewTypeErr(propName + " requires at least 2 args")
+	}
+
+	self, ok := object.TraceProtoOfFloat(args[0])
+	if !ok {
+		return nil, nil, object.NewTypeErr(
+			fmt.Sprintf("`%s` cannot be treated as float", args[0].Inspect()))
+	}
+	other, ok := object.TraceProtoOfFloat(args[1])
+	if !ok {
+		// NOTE: nil is treated as nilAs (0 in `+` and 1 in `*` for example)
+		_, ok := object.TraceProtoOfNil(args[1])
+		if ok {
+			return self, nilAs, nil
+		}
+
+		return nil, nil, object.NewTypeErr(
+			fmt.Sprintf("`%s` cannot be treated as float", args[1].Inspect()))
+	}
+
+	return self, other, nil
 }

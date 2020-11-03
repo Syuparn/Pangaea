@@ -21,7 +21,7 @@ func TestReadNativeCodeSuccess(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		ctn, err := readNativeCode("testdata/" + tt.srcName)
+		ctn, err := readNativeCode("testdata/"+tt.srcName, object.NewEnv())
 		if err != nil {
 			t.Fatalf("err must be nil. got=%s", err.Error())
 		}
@@ -62,7 +62,7 @@ func TestReadNativeCodeFailed(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		_, err := readNativeCode("testdata/" + tt.srcName)
+		_, err := readNativeCode("testdata/"+tt.srcName, object.NewEnv())
 		if err == nil {
 			t.Fatal("err must be occurred.")
 		}
@@ -88,7 +88,7 @@ func TestMustReadNativeCodeSuccess(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		ctn := mustReadNativeCode("testdata/" + tt.srcName)
+		ctn := mustReadNativeCode("testdata/"+tt.srcName, object.NewEnv())
 
 		if len(ctn) != len(tt.expected) {
 			t.Fatalf("len(ctn) must be %d. got=%d", len(tt.expected), len(ctn))
@@ -125,7 +125,7 @@ func TestMustReadNativeCodePanics(t *testing.T) {
 				}
 			}()
 
-			_ = mustReadNativeCode("testdata/" + tt.srcName)
+			_ = mustReadNativeCode("testdata/"+tt.srcName, object.NewEnv())
 		}()
 	}
 }

@@ -8,12 +8,12 @@ import (
 
 // InjectBuiltInProps injects and sets up builtin object props,
 // which are defined in "props" package.
-func InjectBuiltInProps() {
+func InjectBuiltInProps(env *object.Env) {
 	propContainer := mergePropContainers(
 		NewPropContainer(),
 		evaluator.NewPropContainer(),
 	)
-	injectBuiltInProps(propContainer)
+	injectBuiltInProps(env, propContainer)
 }
 
 // NewPropContainer returns container of built-in props
@@ -26,19 +26,23 @@ func NewPropContainer() map[string]object.PanObject {
 	}
 }
 
-func injectBuiltInProps(ctn map[string]object.PanObject) {
-	injectProps(object.BuiltInArrObj, props.ArrProps(ctn), mustReadNativeCode("Arr"))
+func injectBuiltInProps(
+	env *object.Env,
+	ctn map[string]object.PanObject,
+) {
+	injectProps(object.BuiltInArrObj, props.ArrProps(ctn), mustReadNativeCode("Arr", env))
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps(ctn))
 	injectProps(object.BuiltInFloatObj, props.FloatProps(ctn))
 	injectProps(object.BuiltInFuncObj, props.FuncProps(ctn))
-	injectProps(object.BuiltInIntObj, props.IntProps(ctn))
+	injectProps(object.BuiltInIntObj, props.IntProps(ctn), mustReadNativeCode("Int", env))
 	injectProps(object.BuiltInIterObj, props.IterProps(ctn))
 	injectProps(object.BuiltInKernelObj, props.KernelProps(ctn))
 	injectProps(object.BuiltInMapObj, props.MapProps(ctn))
 	injectProps(object.BuiltInNilObj, props.NilProps(ctn))
-	injectProps(object.BuiltInObjObj, props.ObjProps(ctn))
+	injectProps(object.BuiltInNumObj, props.NumProps(ctn))
+	injectProps(object.BuiltInObjObj, props.ObjProps(ctn), mustReadNativeCode("Obj", env))
 	injectProps(object.BuiltInRangeObj, props.RangeProps(ctn))
-	injectProps(object.BuiltInStrObj, props.StrProps(ctn))
+	injectProps(object.BuiltInStrObj, props.StrProps(ctn), mustReadNativeCode("Str", env))
 }
 
 func injectProps(

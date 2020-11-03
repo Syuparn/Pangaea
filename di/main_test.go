@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 	apath, _ := filepath.Abs("../")
 	os.Chdir(apath)
 	// setup for name resolution
-	InjectBuiltInProps()
+	InjectBuiltInProps(object.NewEnvWithConsts())
 	ret := m.Run()
 	os.Exit(ret)
 }

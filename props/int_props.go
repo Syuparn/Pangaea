@@ -1,8 +1,10 @@
 package props
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"fmt"
+	"math/big"
+
+	"github.com/Syuparn/pangaea/object"
 )
 
 // IntProps provides built-in props for Int.
@@ -14,7 +16,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkIntInfixArgs(args, "<=>")
+				self, other, err := checkIntInfixArgs(args, "<=>", object.NewPanInt(0))
 				if err != nil {
 					return err
 				}
@@ -129,7 +131,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkIntInfixArgs(args, "+")
+				self, other, err := checkIntInfixArgs(args, "+", object.NewPanInt(0))
 				if err != nil {
 					return err
 				}
@@ -142,7 +144,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkIntInfixArgs(args, "*")
+				self, other, err := checkIntInfixArgs(args, "*", object.NewPanInt(1))
 				if err != nil {
 					return err
 				}
@@ -151,11 +153,28 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanInt(res)
 			},
 		),
+		"%": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkIntInfixArgs(args, "%", object.NewPanInt(0))
+				if err != nil {
+					return err
+				}
+
+				if other.Value == 0 {
+					return object.NewZeroDivisionErr("cannot be divided by 0")
+				}
+
+				res := self.Value % other.Value
+				return object.NewPanInt(res)
+			},
+		),
 		"_incBy": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkIntInfixArgs(args, "_incBy")
+				self, other, err := checkIntInfixArgs(args, "_incBy", object.NewPanInt(0))
 				if err != nil {
 					return err
 				}
@@ -202,12 +221,40 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"prime?": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Int#prime? requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfInt(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be int`)
+				}
+
+				if self.Value <= 1 {
+					return object.BuiltInFalse
+				}
+
+				// NOTE: ProbablyPrime is 100% accurate if n < 2^64
+				var n big.Int
+				// self.Value must be positive
+				n.SetUint64(uint64(self.Value))
+				if ok := n.ProbablyPrime(0); ok {
+					return object.BuiltInTrue
+				}
+
+				return object.BuiltInFalse
+			},
+		),
 	}
 }
 
 func checkIntInfixArgs(
 	args []object.PanObject,
 	propName string,
+	nilAs *object.PanInt,
 ) (*object.PanInt, *object.PanInt, *object.PanErr) {
 	if len(args) < 2 {
 		return nil, nil, object.NewTypeErr(propName + " requires at least 2 args")
@@ -220,6 +267,12 @@ func checkIntInfixArgs(
 	}
 	other, ok := object.TraceProtoOfInt(args[1])
 	if !ok {
+		// NOTE: nil is treated as nilAs (0 in `+` and 1 in `*` for example)
+		_, ok := object.TraceProtoOfNil(args[1])
+		if ok {
+			return self, nilAs, nil
+		}
+
 		return nil, nil, object.NewTypeErr(
 			fmt.Sprintf("`%s` cannot be treated as int", args[1].Inspect()))
 	}

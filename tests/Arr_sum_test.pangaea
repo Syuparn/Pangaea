@@ -1,0 +1,6 @@
+assert([].sum == nil)
+assert([1].sum == 1)
+assert([1, 2, 3].sum == 6)
+assert([1.0, 2.0, 3.0].sum == 6.0)
+assert(["a"].sum == "a")
+assert(["a", "b", "c"].sum == "abc")

@@ -1,0 +1,2 @@
+assert(1.even? == false)
+assert(2.even? == true)

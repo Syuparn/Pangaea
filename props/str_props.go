@@ -156,6 +156,21 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 		),
 		"eval":    propContainer["Str_eval"],
 		"evalEnv": propContainer["Str_evalEnv"],
+		"lc": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Str#lc requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be str`)
+				}
+
+				return object.NewPanStr(strings.ToLower(self.Value))
+			},
+		),
 		"len": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -171,6 +186,21 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanInt(int64(len([]rune(self.Value))))
 			},
 		),
+		"uc": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Str#uc requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be str`)
+				}
+
+				return object.NewPanStr(strings.ToUpper(self.Value))
+			},
+		),
 	}
 }
 
@@ -179,18 +209,24 @@ func checkStrInfixArgs(
 	propName string,
 ) (object.PanObject, object.PanObject, *object.PanErr) {
 	if len(args) < 2 {
-		return nil, nil, object.NewTypeErr("== requires at least 2 args")
+		return nil, nil, object.NewTypeErr(propName + " requires at least 2 args")
 	}
 
 	self, ok := args[0].(*object.PanStr)
 	if !ok {
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+			fmt.Sprintf("`%s` cannot be treated as str", args[0].Inspect()))
 	}
 	other, ok := args[1].(*object.PanStr)
 	if !ok {
+		// NOTE: nil is treated as ""
+		_, ok := object.TraceProtoOfNil(args[1])
+		if ok {
+			return self, object.NewPanStr(""), nil
+		}
+
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+			fmt.Sprintf("`%s` cannot be treated as str", args[1].Inspect()))
 	}
 
 	return self, other, nil
