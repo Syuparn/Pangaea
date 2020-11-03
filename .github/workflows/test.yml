@@ -25,7 +25,11 @@ jobs:
       run: make
 
     - name: Test
-      run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+      run: |
+        go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+        for file in `\find tests/ -name '*.pangaea'`; do
+          ./pangaea $file
+        done
 
     - name: Upload coverage
       run: bash <(curl -s https://codecov.io/bash)
