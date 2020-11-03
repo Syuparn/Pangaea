@@ -1,0 +1,2 @@
+assert([].empty? == true)
+assert([1].empty? == false)
