@@ -34,7 +34,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps(ctn))
 	injectProps(object.BuiltInFloatObj, props.FloatProps(ctn))
 	injectProps(object.BuiltInFuncObj, props.FuncProps(ctn))
-	injectProps(object.BuiltInIntObj, props.IntProps(ctn))
+	injectProps(object.BuiltInIntObj, props.IntProps(ctn), mustReadNativeCode("Int", env))
 	injectProps(object.BuiltInIterObj, props.IterProps(ctn))
 	injectProps(object.BuiltInKernelObj, props.KernelProps(ctn))
 	injectProps(object.BuiltInMapObj, props.MapProps(ctn))
