@@ -38,6 +38,7 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInKernelObj, props.KernelProps, ctn)
 	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
 	injectProps(object.BuiltInNilObj, props.NilProps, ctn)
+	injectProps(object.BuiltInNumObj, props.NumProps, ctn)
 	injectProps(object.BuiltInObjObj, props.ObjProps, ctn)
 	injectProps(object.BuiltInRangeObj, props.RangeProps, ctn)
 	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
@@ -3432,6 +3433,50 @@ func TestEvalBoolify(t *testing.T) {
 		{
 			`"".B`,
 			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalFloatify(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// int
+		{
+			`1.F`,
+			&object.PanFloat{Value: 1.0},
+		},
+		// float
+		{
+			`4.0.F`,
+			&object.PanFloat{Value: 4.0},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalFloatifyErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1['F]()`,
+			object.NewTypeErr("Num#F requires at least 1 arg"),
+		},
+		{
+			`1['F]("a")`,
+			object.NewTypeErr("`\"a\"` cannot be treated as num"),
 		},
 	}
 

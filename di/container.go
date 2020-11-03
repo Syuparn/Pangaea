@@ -39,6 +39,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInKernelObj, props.KernelProps(ctn))
 	injectProps(object.BuiltInMapObj, props.MapProps(ctn))
 	injectProps(object.BuiltInNilObj, props.NilProps(ctn))
+	injectProps(object.BuiltInNumObj, props.NumProps(ctn))
 	injectProps(object.BuiltInObjObj, props.ObjProps(ctn), mustReadNativeCode("Obj", env))
 	injectProps(object.BuiltInRangeObj, props.RangeProps(ctn))
 	injectProps(object.BuiltInStrObj, props.StrProps(ctn))
