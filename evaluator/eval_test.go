@@ -3889,6 +3889,54 @@ func TestEvalScalarPropChain(t *testing.T) {
 	}
 }
 
+func TestEvalArgUnpack(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|i, j, k| [i, j, k]}(*[1, 2, 3])`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+				object.NewPanInt(3),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalKwargUnpack(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|a: 1, b: 2| [a, b]}(**{a: 5, b: 10})`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(5),
+				object.NewPanInt(10),
+			}},
+		},
+		{
+			`{|a: 1, b: 2| [a, b]}(a: 3, **{a: 6, b: 9})`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(3),
+				object.NewPanInt(9),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAnonPropChain(t *testing.T) {
 	tests := []struct {
 		input    string

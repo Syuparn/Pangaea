@@ -6,8 +6,8 @@
 package parser
 
 import (
-	"github.com/Syuparn/pangaea/ast"
 	"fmt"
+	"github.com/Syuparn/pangaea/ast"
 	"math"
 	"reflect"
 	"strings"
@@ -2098,6 +2098,80 @@ func TestArgOrders(t *testing.T) {
 				testLiteralExpr(t, val, exp)
 			} else {
 				t.Errorf("unexpected kwarg %s found.", name)
+			}
+		}
+	}
+}
+
+func TestArgUnpack(t *testing.T) {
+	tests := []struct {
+		input   string
+		args    []string
+		kwargs  map[string]string
+		printed string
+	}{
+		// embedded elements are set in args
+		{
+			`5.a(*[1])`,
+			[]string{"(*[1])"},
+			map[string]string{},
+			`5.a((*[1]))`,
+		},
+		{
+			`5.a(**{b: 2})`,
+			[]string{"(**{b: 2})"},
+			map[string]string{},
+			`5.a((**{b: 2}))`,
+		},
+		{
+			`5.a(**{c: 3}, **{d: 4})`,
+			[]string{"(**{c: 3})", "(**{d: 4})"},
+			map[string]string{},
+			`5.a((**{c: 3}), (**{d: 4}))`,
+		},
+		// kwarg expansion must be at the end
+		{
+			`5.a(1, **{c: 3}, **{d: 4})`,
+			[]string{"1", "(**{c: 3})", "(**{d: 4})"},
+			map[string]string{},
+			`5.a(1, (**{c: 3}), (**{d: 4}))`,
+		},
+		{
+			`5.a(1, *[2], **{c: 3}, **{d: 4})`,
+			[]string{"1", "(*[2])", "(**{c: 3})", "(**{d: 4})"},
+			map[string]string{},
+			`5.a(1, (*[2]), (**{c: 3}), (**{d: 4}))`,
+		},
+	}
+
+	for _, tt := range tests {
+		program := testParse(t, tt.input)
+		expr := extractExprStmt(t, program)
+
+		callExpr, ok := expr.(*ast.PropCallExpr)
+		if !ok {
+			t.Fatalf("expr is not *ast.PropCallExpr. got=%T", expr)
+		}
+
+		if len(callExpr.Args) != len(tt.args) {
+			t.Fatalf("wrong arity of args, expected=%d, got=%d",
+				len(tt.args), len(callExpr.Args))
+		}
+
+		if len(callExpr.Kwargs) != len(tt.kwargs) {
+			t.Fatalf("wrong arity of kwargs, expected=%d, got=%d",
+				len(tt.kwargs), len(callExpr.Kwargs))
+		}
+
+		if callExpr.String() != tt.printed {
+			t.Errorf("wrong output.expected=\n%s,\ngot=\n%s",
+				tt.printed, callExpr.String())
+		}
+
+		for i, expArg := range tt.args {
+			if callExpr.Args[i].String() != expArg {
+				t.Errorf("args[%d] must be `%s`. got=`%s`",
+					i, expArg, callExpr.Args[i].String())
 			}
 		}
 	}
