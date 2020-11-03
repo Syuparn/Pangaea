@@ -1,0 +1,3 @@
+# When is this method useful? 🤭
+assert("".sum == nil)
+assert("abc".sum == "abc")

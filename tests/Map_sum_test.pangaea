@@ -1,0 +1,2 @@
+assert(%{}.sum == nil)
+assert(%{"a": 1}.sum == ["a", 1])
