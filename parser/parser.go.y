@@ -2235,7 +2235,16 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	}
 
 	lval.token = token
-	l.Source = l.convertSourceInfo(token)
+	newSource := l.convertSourceInfo(token)
+	// NOTE: fix Line string because Line refers next line
+	// when token is at the end of the line.
+	if l.Source != nil {
+		if l.Source.Pos.Line == newSource.Pos.Line && l.Source.Line != newSource.Line {
+			newSource.Line = l.Source.Line
+		}
+	}
+
+	l.Source = newSource
 	return int(token.Type.GetID())
 }
 
