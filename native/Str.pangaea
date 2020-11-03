@@ -1,0 +1,3 @@
+{
+  capital: m{|| self[0].uc + self[1:].lc},
+}
