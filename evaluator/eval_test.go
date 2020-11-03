@@ -5252,6 +5252,61 @@ func TestEvalInfixNilAddErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixIntMod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 % 2`,
+			object.NewPanInt(0),
+		},
+		{
+			`10 % 3`,
+			object.NewPanInt(1),
+		},
+		// decendant of int can be added
+		{
+			`4 % true`,
+			object.NewPanInt(0),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntModErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 % 0`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+		},
+		{
+			`1 % []`,
+			object.NewTypeErr("`[]` cannot be treated as int"),
+		},
+		{
+			`1['%]({}, 2)`,
+			object.NewTypeErr("`{}` cannot be treated as int"),
+		},
+		{
+			`1.%`,
+			object.NewTypeErr("% requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalPrefix(t *testing.T) {
 	tests := []struct {
 		input    string
