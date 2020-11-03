@@ -1,6 +1,7 @@
 package runscript
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // Run runs Pangaea script source file.
-func Run(fileName string, in io.Reader, out io.Writer) {
+func Run(fileName string, in io.Reader, out io.Writer) int {
 	env := object.NewEnvWithConsts()
 	// setup object `IO`
 	env.InjectIO(in, out)
@@ -25,20 +26,23 @@ func Run(fileName string, in io.Reader, out io.Writer) {
 
 	fp, err := os.Open(fileName)
 	if err != nil {
-		io.WriteString(out, err.Error())
-		return
+		fmt.Fprint(os.Stderr, err.Error()+"\n")
+		return 1
 	}
 
 	node, err := parser.Parse(fp)
 	if err != nil {
-		io.WriteString(out, err.Error()+"\n")
-		return
+		fmt.Fprint(os.Stderr, err.Error()+"\n")
+		return 1
 	}
 
 	evaluated := evaluator.Eval(node, env)
 
 	if err, ok := evaluated.(*object.PanErr); ok {
-		io.WriteString(out, err.Inspect()+"\n")
-		io.WriteString(out, err.StackTrace+"\n")
+		fmt.Fprint(os.Stderr, err.Inspect()+"\n")
+		fmt.Fprint(os.Stderr, err.StackTrace+"\n")
+		return 1
 	}
+
+	return 0
 }

@@ -17,8 +17,8 @@ func main() {
 	flag.Parse()
 
 	if srcFileName := flag.Arg(0); srcFileName != "" {
-		runScript(srcFileName)
-		return
+		exitCode := runScript(srcFileName)
+		os.Exit(exitCode)
 	}
 
 	if *parse {
@@ -29,8 +29,9 @@ func main() {
 	runRepl()
 }
 
-func runScript(fileName string) {
-	runscript.Run(fileName, os.Stdin, os.Stdout)
+func runScript(fileName string) int {
+	exitCode := runscript.Run(fileName, os.Stdin, os.Stdout)
+	return exitCode
 }
 
 func runRepl() {
