@@ -859,6 +859,42 @@ func TestEvalArrAtWithRange(t *testing.T) {
 	}
 }
 
+func TestEvalArrHasp(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[1, 2].has?(2)`,
+			object.BuiltInTrue,
+		},
+		{
+			`[1].has?(2)`,
+			object.BuiltInFalse,
+		},
+		// non-scalar can be used
+		{
+			`[[1, 2, 3], [4, 5]].has?([1, 2, 3])`,
+			object.BuiltInTrue,
+		},
+		// if no args are passed, raise an error
+		{
+			`[].has?`,
+			object.NewTypeErr("Arr#has? requires at least 2 args"),
+		},
+		// if \1 is not Arr, raise an error
+		{
+			`Arr['has?](1, 1)`,
+			object.NewTypeErr("\\1 must be arr"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalArrLen(t *testing.T) {
 	tests := []struct {
 		input    string
