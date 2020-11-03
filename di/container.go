@@ -33,6 +33,7 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInFuncObj, props.FuncProps(ctn))
 	injectProps(object.BuiltInIntObj, props.IntProps(ctn))
 	injectProps(object.BuiltInIterObj, props.IterProps(ctn))
+	injectProps(object.BuiltInKernelObj, props.KernelProps(ctn))
 	injectProps(object.BuiltInMapObj, props.MapProps(ctn))
 	injectProps(object.BuiltInNilObj, props.NilProps(ctn))
 	injectProps(object.BuiltInObjObj, props.ObjProps(ctn))

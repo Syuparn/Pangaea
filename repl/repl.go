@@ -27,6 +27,13 @@ func Start(in io.Reader, out io.Writer) {
 	// setup object `IO`
 	env.InjectIO(in, out)
 
+	// necessary to setup built-in object props
+	di.InjectBuiltInProps()
+
+	// enable to use Kernel props directly in top-level
+	// NOTE: InjectFrom must be called after BuiltInKernelObj is set up
+	env.InjectFrom(object.BuiltInKernelObj)
+
 	for {
 		fmt.Printf(PROMPT)
 		ok := scanner.Scan()
@@ -42,9 +49,6 @@ func Start(in io.Reader, out io.Writer) {
 			io.WriteString(out, err.Error())
 			continue
 		}
-
-		// necessary to setup built-in object props
-		di.InjectBuiltInProps()
 
 		evaluated := evaluator.Eval(program, env)
 

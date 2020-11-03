@@ -38,6 +38,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("Obj"), BuiltInObjObj)
 	env.Set(GetSymHash("BaseObj"), BuiltInBaseObj)
 	env.Set(GetSymHash("Map"), BuiltInMapObj)
+	env.Set(GetSymHash("Kernel"), BuiltInKernelObj)
 	env.Set(GetSymHash("true"), BuiltInTrue)
 	env.Set(GetSymHash("false"), BuiltInFalse)
 	env.Set(GetSymHash("nil"), BuiltInNil)
@@ -113,4 +114,11 @@ func (e *Env) InjectRecur(recurFunc BuiltInFunc) {
 	// define const `recur` builtInFunc, which can only be used inside iter
 	recur := &PanBuiltIn{Fn: recurFunc}
 	e.Set(GetSymHash("recur"), recur)
+}
+
+// InjectFrom injects all obj props to env.
+func (e *Env) InjectFrom(obj *PanObj) {
+	for sym, pair := range *obj.Pairs {
+		e.Set(sym, pair.Value)
+	}
 }

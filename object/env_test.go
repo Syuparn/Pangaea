@@ -40,6 +40,39 @@ func TestEnvGetAndSet(t *testing.T) {
 	}
 }
 
+func TestInjectFrom(t *testing.T) {
+	value1 := NewPanInt(1)
+	value2 := NewPanInt(2)
+
+	obj := PanObjInstancePtr(&map[SymHash]Pair{
+		GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: value1},
+		GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: value2},
+	}).(*PanObj)
+
+	env := NewEnv()
+	env.InjectFrom(obj)
+
+	if len(env.Store) != 2 {
+		t.Fatalf("env must have 2 vars. got=%d", len(env.Store))
+	}
+
+	actual1, ok := env.Get(GetSymHash("a"))
+	if !ok {
+		t.Fatalf("`a` must be in env.")
+	}
+	if actual1 != value1 {
+		t.Errorf("a must be %s. got=%s", value1.Inspect(), actual1.Inspect())
+	}
+
+	actual2, ok := env.Get(GetSymHash("b"))
+	if !ok {
+		t.Fatalf("`b` must be in env.")
+	}
+	if actual2 != value2 {
+		t.Errorf("b must be %s. got=%s", value2.Inspect(), actual2.Inspect())
+	}
+}
+
 func TestEnclosedEnv(t *testing.T) {
 	outer := NewEnv()
 	inner := NewEnclosedEnv(outer)
@@ -67,6 +100,7 @@ func TestEnvWithConsts(t *testing.T) {
 		{"Obj", BuiltInObjObj},
 		{"BaseObj", BuiltInBaseObj},
 		{"Map", BuiltInMapObj},
+		{"Kernel", BuiltInKernelObj},
 		{"true", BuiltInTrue},
 		{"false", BuiltInFalse},
 		{"nil", BuiltInNil},

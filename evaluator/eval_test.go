@@ -35,6 +35,7 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInFuncObj, props.FuncProps, ctn)
 	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
 	injectProps(object.BuiltInIterObj, props.IterProps, ctn)
+	injectProps(object.BuiltInKernelObj, props.KernelProps, ctn)
 	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
 	injectProps(object.BuiltInNilObj, props.NilProps, ctn)
 	injectProps(object.BuiltInObjObj, props.ObjProps, ctn)
@@ -4982,6 +4983,39 @@ func TestEvalPrefixNot(t *testing.T) {
 	}
 }
 
+func TestEvalAssert(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Kernel['assert](true)`,
+			object.BuiltInNil,
+		},
+		{
+			`assert(true)`,
+			object.BuiltInNil,
+		},
+		{
+			`assert(false)`,
+			object.NewAssertionErr("false is not truthy."),
+		},
+		{
+			`assert("")`,
+			object.NewAssertionErr(`"" is not truthy.`),
+		},
+		{
+			`assert(1 == 2)`,
+			object.NewAssertionErr(`false is not truthy.`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
@@ -5370,7 +5404,11 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 }
 
 func testEval(t *testing.T, input string) object.PanObject {
-	return testEvalInEnv(t, input, object.NewEnvWithConsts())
+	// NOTE: props in Kernel can be accessed directly in top-level
+	env := object.NewEnvWithConsts()
+	env.InjectFrom(object.BuiltInKernelObj)
+
+	return testEvalInEnv(t, input, env)
 }
 
 func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject {

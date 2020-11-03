@@ -16,6 +16,13 @@ func Run(fileName string, in io.Reader, out io.Writer) {
 	// setup object `IO`
 	env.InjectIO(in, out)
 
+	// necessary to setup built-in object props
+	di.InjectBuiltInProps()
+
+	// enable to use Kernel props directly in top-level
+	// NOTE: InjectFrom must be called after BuiltInKernelObj is set up
+	env.InjectFrom(object.BuiltInKernelObj)
+
 	fp, err := os.Open(fileName)
 	if err != nil {
 		io.WriteString(out, err.Error())
@@ -28,8 +35,6 @@ func Run(fileName string, in io.Reader, out io.Writer) {
 		return
 	}
 
-	// necessary to setup built-in object props
-	di.InjectBuiltInProps()
 	evaluated := evaluator.Eval(node, env)
 
 	if err, ok := evaluated.(*object.PanErr); ok {
