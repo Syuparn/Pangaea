@@ -156,6 +156,21 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 		),
 		"eval":    propContainer["Str_eval"],
 		"evalEnv": propContainer["Str_evalEnv"],
+		"lc": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Str#lc requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be str`)
+				}
+
+				return object.NewPanStr(strings.ToLower(self.Value))
+			},
+		),
 		"len": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -169,6 +184,21 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return object.NewPanInt(int64(len([]rune(self.Value))))
+			},
+		),
+		"uc": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Str#uc requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be str`)
+				}
+
+				return object.NewPanStr(strings.ToUpper(self.Value))
 			},
 		),
 	}

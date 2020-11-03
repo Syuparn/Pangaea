@@ -390,6 +390,80 @@ func TestEvalStrLen(t *testing.T) {
 	}
 }
 
+func TestEvalStrLc(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"AbC".lc`,
+			object.NewPanStr("abc"),
+		},
+		// non-alphabetical characters are ignored
+		{
+			`"AbC日本語".lc`,
+			object.NewPanStr("abc日本語"),
+		},
+		// use descendant of str for recv
+		{
+			`"A".bear.lc`,
+			object.NewPanStr("a"),
+		},
+		// if no args are passed, raise an error
+		{
+			`Str['lc]()`,
+			object.NewTypeErr("Str#lc requires at least 1 arg"),
+		},
+		// if \1 is not str, raise an error
+		{
+			`Str['lc](1)`,
+			object.NewTypeErr("\\1 must be str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStrUc(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"AbC".uc`,
+			object.NewPanStr("ABC"),
+		},
+		// non-alphabetical characters are ignored
+		{
+			`"AbC日本語".uc`,
+			object.NewPanStr("ABC日本語"),
+		},
+		// use descendant of str for recv
+		{
+			`"a".bear.uc`,
+			object.NewPanStr("A"),
+		},
+		// if no args are passed, raise an error
+		{
+			`Str['uc]()`,
+			object.NewTypeErr("Str#uc requires at least 1 arg"),
+		},
+		// if \1 is not str, raise an error
+		{
+			`Str['uc](1)`,
+			object.NewTypeErr("\\1 must be str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalBoolLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
