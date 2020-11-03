@@ -3902,6 +3902,15 @@ func TestEvalArgUnpack(t *testing.T) {
 				object.NewPanInt(3),
 			}},
 		},
+		// with other prefix
+		{
+			`{|i, j, k| [i, j, k]}(*[1, 2], !3)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+				object.BuiltInFalse,
+			}},
+		},
 	}
 
 	for _, tt := range tests {
@@ -3928,6 +3937,35 @@ func TestEvalKwargUnpack(t *testing.T) {
 				object.NewPanInt(3),
 				object.NewPanInt(9),
 			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalUnpackError(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|a: 1, b: 2| [a, b]}(**c)`,
+			object.NewNameErr("name `c` is not defined"),
+		},
+		{
+			`{|a: 1, b: 2| [a, b]}(**[])`,
+			object.NewTypeErr("cannot use `**` unpacking for `[]`"),
+		},
+		{
+			`{|a, b| [a, b]}(*c)`,
+			object.NewNameErr("name `c` is not defined"),
+		},
+		{
+			`{|a, b| [a, b]}(*{})`,
+			object.NewTypeErr("cannot use `*` unpacking for `{}`"),
 		},
 	}
 
