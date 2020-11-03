@@ -115,3 +115,10 @@ func (e *Env) InjectRecur(recurFunc BuiltInFunc) {
 	recur := &PanBuiltIn{Fn: recurFunc}
 	e.Set(GetSymHash("recur"), recur)
 }
+
+// InjectFrom injects all obj props to env.
+func (e *Env) InjectFrom(obj *PanObj) {
+	for sym, pair := range *obj.Pairs {
+		e.Set(sym, pair.Value)
+	}
+}

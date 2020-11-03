@@ -4993,12 +4993,20 @@ func TestEvalAssert(t *testing.T) {
 			object.BuiltInNil,
 		},
 		{
-			`Kernel['assert](false)`,
+			`assert(true)`,
+			object.BuiltInNil,
+		},
+		{
+			`assert(false)`,
 			object.NewAssertionErr("false is not truty."),
 		},
 		{
-			`Kernel['assert]("")`,
+			`assert("")`,
 			object.NewAssertionErr(`"" is not truty.`),
+		},
+		{
+			`assert(1 == 2)`,
+			object.NewAssertionErr(`false is not truty.`),
 		},
 	}
 
@@ -5396,7 +5404,11 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 }
 
 func testEval(t *testing.T, input string) object.PanObject {
-	return testEvalInEnv(t, input, object.NewEnvWithConsts())
+	// NOTE: props in Kernel can be accessed directly in top-level
+	env := object.NewEnvWithConsts()
+	env.InjectFrom(object.BuiltInKernelObj)
+
+	return testEvalInEnv(t, input, env)
 }
 
 func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject {
