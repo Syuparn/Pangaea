@@ -1,9 +1,10 @@
 package evaluator
 
 import (
+	"fmt"
+
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
-	"fmt"
 )
 
 func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
@@ -133,7 +134,7 @@ func evalReducePropCall(
 			return appendStackTrace(err, node.Source())
 		}
 
-		prop := evalProp(node.Prop.Value, nextRet)
+		prop := evalProp(node.Prop.Value, acc)
 		if err, ok := prop.(*object.PanErr); ok {
 			// thoughtful chain
 			if recoversNil {

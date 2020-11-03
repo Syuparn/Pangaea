@@ -2531,10 +2531,6 @@ func TestEvalReduceChainPropCall(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`[1, 2, 3]$(0)+`,
-			object.NewPanInt(6),
-		},
-		{
 			`[1, 2, 3]$(4)+`,
 			object.NewPanInt(10),
 		},
@@ -2542,6 +2538,25 @@ func TestEvalReduceChainPropCall(t *testing.T) {
 		{
 			`[nil]$==`,
 			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalReduceChainPropCallRecvIsAcc(t *testing.T) {
+	// reciever of prop is resolved to acc
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// "a"['+] is called
+		{
+			`[1]$("a")+`,
+			object.NewTypeErr("`1` cannot be treated as str"),
 		},
 	}
 
