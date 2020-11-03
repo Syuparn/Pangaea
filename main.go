@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Syuparn/pangaea/repl"
+	"github.com/Syuparn/pangaea/runscript"
 )
 
 var (
@@ -15,12 +16,21 @@ var (
 func main() {
 	flag.Parse()
 
+	if srcFileName := flag.Arg(0); srcFileName != "" {
+		runScript(srcFileName)
+		return
+	}
+
 	if *parse {
 		runParsing()
 		return
 	}
 
 	runRepl()
+}
+
+func runScript(fileName string) {
+	runscript.Run(fileName, os.Stdin, os.Stdout)
 }
 
 func runRepl() {

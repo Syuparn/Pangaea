@@ -1,0 +1,12 @@
+objWithErr := {
+  process1: m{|| .process2},
+  process2: m{|| .process3},
+  process3: m{||
+    .val
+      |._incBy(2)
+      |@{|i| .undefinedProp}
+  },
+  val: 1,
+}
+
+objWithErr.process1
