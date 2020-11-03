@@ -1,4 +1,4 @@
-name: GoTest
+name: Test
 
 on: [push, pull_request]
 
@@ -24,10 +24,13 @@ jobs:
     - name: Build
       run: make
 
-    - name: Test
+    - name: GoTest
+      run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+    - name: PangaeaTest
       run: |
-        go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
         for file in `\find tests/ -name '*.pangaea'`; do
+          echo $file
           ./pangaea $file
         done
 
