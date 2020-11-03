@@ -1,0 +1,2 @@
+assert("abc".any? {\ == "a"} == true)
+assert("def".any? {\ == "a"} == false)

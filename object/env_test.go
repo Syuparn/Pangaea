@@ -96,6 +96,7 @@ func TestEnvWithConsts(t *testing.T) {
 		{"Range", BuiltInRangeObj},
 		{"Func", BuiltInFuncObj},
 		{"Iter", BuiltInIterObj},
+		{"Iterable", BuiltInIterableObj},
 		{"Match", BuiltInMatchObj},
 		{"Obj", BuiltInObjObj},
 		{"BaseObj", BuiltInBaseObj},

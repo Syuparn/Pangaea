@@ -1,0 +1,3 @@
+assert([].unwrap == [])
+assert([1, 2].unwrap == [1, 2])
+assert([1].unwrap == 1)

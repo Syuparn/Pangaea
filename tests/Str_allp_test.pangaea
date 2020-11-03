@@ -1,0 +1,2 @@
+assert("aaaaa".all? {\ == "a"} == true)
+assert("abc".all? {\ == "a"} == false)
