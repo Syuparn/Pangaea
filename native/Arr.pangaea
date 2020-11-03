@@ -1,16 +1,8 @@
 {
-  # all? returns whether all elements meet the predicate f
-  all?: m{|f| @^f.has?(false).!},
-  # any? returns whether any element meets the predicate f
-  any?: m{|f| @^f.has?(true)},
+  # A converts self into arr.
+  A: m{|| self},
   # empty? returns whether self contains elements.
   empty?: m{|| .len.!},
-  # exclude selects elements for which f returns false.
-  exclude: m{|f| @{\ if !f(\)}},
-  # map is a wrapper of mapchain.
-  map: m{|f| @^f},
-  # select selects elements for which f returns true.
-  select: m{|f| @{\ if f(\)}},
-  # sum returns sum of elements in self.
-  sum: m{|| $(nil)+},
+  # unwrap extracts element if there is only one element.
+  unwrap: m{|| self[0] if .len == 1 else self},
 }

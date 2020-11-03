@@ -1,0 +1,2 @@
+assert(%{'a: 2, 'b: 4}.all? {|k, v| v.even?} == true)
+assert(%{'a: 2, 'b: 4}.all? {|k, v| k == 'a} == false)

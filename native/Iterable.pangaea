@@ -1,0 +1,18 @@
+{
+  # A converts self into arr.
+  A: m{|| @{\}},
+  # all? returns whether all elements meet the predicate f
+  all?: m{|f| @^f.has?(false).!},
+  # any? returns whether any element meets the predicate f
+  any?: m{|f| @^f.has?(true)},
+  # empty? returns whether self contains elements.
+  empty?: m{|| .A.empty?},
+  # exclude selects elements for which f returns false.
+  exclude: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if !f(*\)}},
+  # map is a wrapper of mapchain.
+  map: m{|f| @^f},
+  # select selects elements for which f returns true.
+  select: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if f(*\)}},
+  # sum returns sum of elements in self.
+  sum: m{|| $(nil)+},
+}

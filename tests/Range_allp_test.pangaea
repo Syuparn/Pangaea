@@ -1,0 +1,2 @@
+assert((1:5:2).all? {.odd?} == true)
+assert((1:10).all? {.odd?} == false)

@@ -1,0 +1,1 @@
+assert((1:4).select {|n| n.odd?} == [1, 3])

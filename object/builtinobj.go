@@ -49,6 +49,9 @@ var BuiltInIOObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 // BuiltInKernelObj is an object of Kernel, whose props can be used in top-level.
 var BuiltInKernelObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
+// BuiltInIterableObj is an object of Iterable, which is mixed-in iterable objects.
+var BuiltInIterableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+
 // BuiltInOneInt is an int object `1`.
 var BuiltInOneInt = &PanInt{1}
 

@@ -1,0 +1,1 @@
+assert("abc".exclude {|n| n == "a"} == ["b", "c"])

@@ -1,0 +1,2 @@
+assert((0:0).empty? == true)
+assert((0:2).empty? == false)

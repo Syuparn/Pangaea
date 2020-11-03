@@ -1628,6 +1628,76 @@ callArgs
 		$$ = $2
 		yylex.(*Lexer).curRule = "callArgs -> lParen argList RET RPAREN"
 	}
+	| lParen kwargExpansionList RPAREN %prec GROUPING
+	{
+		expansionList := []ast.Expr{}
+		for _, exp := range $2 {
+			prefixExpr :=  &ast.PrefixExpr{
+				Token: "**",
+				Operator: "**",
+				Right: exp,
+				Src: yylex.(*Lexer).Source,
+			}
+			expansionList = append(expansionList, prefixExpr)
+		}
+
+		argList := ast.ExprToArgList(expansionList[0])
+		for _, e := range expansionList[1:] {
+			argList.AppendArg(e)
+		}
+		$$ = argList
+		yylex.(*Lexer).curRule = "callArgs -> lParen kwargExpansionList RPAREN"
+	}
+	| lParen kwargExpansionList RET RPAREN %prec GROUPING
+	{
+		expansionList := []ast.Expr{}
+		for _, exp := range $2 {
+			prefixExpr :=  &ast.PrefixExpr{
+				Token: "**",
+				Operator: "**",
+				Right: exp,
+				Src: yylex.(*Lexer).Source,
+			}
+			expansionList = append(expansionList, prefixExpr)
+		}
+
+		argList := ast.ExprToArgList(expansionList[0])
+		for _, e := range expansionList[1:] {
+			argList.AppendArg(e)
+		}
+		$$ = argList
+		yylex.(*Lexer).curRule = "callArgs -> lParen kwargExpansionList RET RPAREN"
+	}
+	| lParen argList comma kwargExpansionList RPAREN %prec GROUPING
+	{
+		argList := $2
+		for _, exp := range $4 {
+			prefixExpr :=  &ast.PrefixExpr{
+				Token: "**",
+				Operator: "**",
+				Right: exp,
+				Src: yylex.(*Lexer).Source,
+			}
+			argList.AppendArg(prefixExpr)
+		}
+		$$ = argList
+		yylex.(*Lexer).curRule = "callArgs -> lParen kwargExpansionList RPAREN"
+	}
+	| lParen argList comma kwargExpansionList RET RPAREN %prec GROUPING
+	{
+		argList := $2
+		for _, exp := range $4 {
+			prefixExpr :=  &ast.PrefixExpr{
+				Token: "**",
+				Operator: "**",
+				Right: exp,
+				Src: yylex.(*Lexer).Source,
+			}
+			argList.AppendArg(prefixExpr)
+		}
+		$$ = argList
+		yylex.(*Lexer).curRule = "callArgs -> lParen argList kwargExpansionList RET RPAREN"
+	}
 	| callArgs funcLiteral %prec GROUPING
 	{
 		$$ = $1.AppendArg($2)

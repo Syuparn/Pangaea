@@ -1,0 +1,2 @@
+assert({}.empty? == true)
+assert({a: 1}.empty? == false)

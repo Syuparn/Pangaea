@@ -1,0 +1,2 @@
+assert(10.any? {.odd?} == true)
+assert(3.any? {\ == 0} == false)

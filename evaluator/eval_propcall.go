@@ -247,7 +247,9 @@ func evalCallArgs(
 	node *ast.PropCallExpr,
 	env *object.Env,
 ) ([]object.PanObject, *object.PanObj, *object.PanErr) {
-	args, err := evalArgs(node.Args, env)
+	// NOTE: for syntactic reason, kwarg expansion is in Args as `**` prefixExpr
+	// (not in Kwargs)
+	args, unpackedKwargs, err := evalArgs(node.Args, env)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -256,6 +258,7 @@ func evalCallArgs(
 	if err != nil {
 		return nil, nil, err
 	}
+	kwargs.AddPairs(unpackedKwargs)
 
 	return args, kwargs, nil
 }

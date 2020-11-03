@@ -1,0 +1,3 @@
+assert(0.sum == nil)
+assert(1.sum == 1)
+assert(3.sum == 6)
