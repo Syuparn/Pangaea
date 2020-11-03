@@ -1,6 +1,6 @@
 # Pangaea programming language
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
-![](https://github.com/Syuparn/Pangaea/workflows/GoTest/badge.svg?branch=master)
+![](https://github.com/Syuparn/Pangaea/workflows/Test/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
 
 A programming language for one-liner method chain lovers! (Under construction...)
@@ -44,11 +44,10 @@ $ ./pangaea.exe ./example/hello.pangaea
 
 - [x] Lexer
 - [x] Parser
-- [ ] Evaluator (about 90%)
-- [ ] Methods/Properties (about 10%)
+- [x] Evaluator
+- [ ] Methods/Properties (about 20%)
 
-# Plans for language features
-(Pangaea is under construction. currently codes below cannot be evaluated yet...)
+# language features (Let's run your REPL!)
 
 ## One-way!
 This language is tuned for a one-liner method chain!
@@ -56,7 +55,7 @@ You don't have to go back to beginning of line!
 
 ```
 "Hello, world!".puts # Hello, world!
-(1:5).A.sum.puts # 15
+(1:5).A.sum.puts # 10
 ```
 
 Looks similar to other language though?
@@ -70,30 +69,31 @@ There are some kinds of chain styles, and each one shows different "context".
 There are 3 kinds of chain context(`.`, `@`, `$`).
 
 ### Scalar Chain
-A receiver is left-side value, which is ordinary method chain.
+The receiver is left-side value, which is ordinary method chain.
 
 ```
 10.puts # 10
 ```
 
 ### List Chain
-A receiver is **each element of** left-side value.
+The receiver is **each element of** left-side value.
 This can be used as "map" or "filter" in other languages.
 
 ```
 [1, 2, 3]@{|i| i * 2}.puts # [2, 4, 6]
 ["foo", "var", "hoge"]@capital.puts # ["Foo", "Var", "Hoge"]
+# select only evens because nils are ignored
 (1:10)@{|i| i if i.even?}.puts # [2, 4, 6, 8]
 ```
 
 ### Reduce Chain
-A receiver is **each element of** left-side value.
+The receiver is **each element of** left-side value.
 Also, returned value of previous call is passed to 2nd argument.
 (In short, it's reduce!)
 
 ```
 # reduce chain can hold initial value.
-[1, 2, 3]$(0){|acc, i| acc+i}.puts # 6
+[1, 2, 3]$(0){|acc, i| acc+i} # 6
 # same as above
 [1, 2, 3]$(0)+ # 6
 ```
@@ -108,10 +108,10 @@ This chain ignores call and return `nil` if its receiver is `nil` (what a "lonel
 which works same as "lonely operator" in Ruby.
 
 ```
-# nil.capital.puts # NoPropErr: nil does not have property "capital"
+# nil.capital.puts # NoPropErr: property `capital` is not defined.
 nil&.capital.puts # nil
 
-[1, 2, nil, 4]&@F.puts # [1.0, 2.0, nil, 4.0]
+[1, 2, nil, 4]&@F.puts # [1.000000, 2.000000, 4.000000]
 ```
 
 #### Thoughtful Chain
@@ -119,12 +119,12 @@ This chain returns receiver instead if returned value is `nil`
 (it "thoughtfully" repairs failed call).
 
 ```
-(1:16)~@{|i| ['fizz][i%3] + ['buzz][i%5]}.puts # [1, 2, 'fizz, 4, 'buzz, ..., 'fizzbuzz]
+(1:16)~@{|i| ['fizz][i%3] + ['buzz][i%5]}.puts # [1, 2, "fizz", 4, "buzz", ..., "fizzbuzz"]
 
 (3:20)~$([2]){|acc, n| [*acc, n] if acc.all? {|p| n % p}}.puts # [2, 3, 5, ..., 19]
 
 # (Of course you can use built-in prime function)
-20@filter(prime?).puts # [2, 3, 5, ..., 19]
+20.select {.prime?}.puts # [2, 3, 5, ..., 19]
 ```
 
 #### Strict Chain
