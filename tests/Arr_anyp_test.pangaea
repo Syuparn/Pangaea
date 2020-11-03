@@ -1,0 +1,2 @@
+assert([1, 2, 3].any? {.odd?} == true)
+assert([2, 4, 6].any? {.odd?} == false)
