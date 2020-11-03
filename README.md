@@ -15,10 +15,18 @@ $ go get golang.org/x/tools/cmd/goyacc
 $ make
 
 # 3. Run
+
+# Run REPL
 # (Linux, Mac)
 $ ./pangaea
 # (Windows)
 $ ./pangaea.exe
+
+# Run script file
+# (Linux, Mac)
+$ ./pangaea ./example/hello.pangaea
+# (Windows)
+$ ./pangaea.exe ./example/hello.pangaea
 
 # 4. Enjoy!
 ```
@@ -111,11 +119,11 @@ This chain returns receiver instead if returned value is `nil`
 (it "thoughtfully" repairs failed call).
 
 ```
-(1:16)~@{|i| [`fizz][i%3] + [`buzz][i%5]}.puts # [1, 2, `fizz, 4, `buzz, ..., `fizzbuzz]
+(1:16)~@{|i| ['fizz][i%3] + ['buzz][i%5]}.puts # [1, 2, 'fizz, 4, 'buzz, ..., 'fizzbuzz]
 
 (3:20)~$([2]){|acc, n| [*acc, n] if acc.all? {|p| n % p}}.puts # [2, 3, 5, ..., 19]
 
-# (Of course there is also an built-in prime function)
+# (Of course you can use built-in prime function)
 20@filter(prime?).puts # [2, 3, 5, ..., 19]
 ```
 
