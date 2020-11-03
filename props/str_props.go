@@ -179,18 +179,24 @@ func checkStrInfixArgs(
 	propName string,
 ) (object.PanObject, object.PanObject, *object.PanErr) {
 	if len(args) < 2 {
-		return nil, nil, object.NewTypeErr("== requires at least 2 args")
+		return nil, nil, object.NewTypeErr(propName + " requires at least 2 args")
 	}
 
 	self, ok := args[0].(*object.PanStr)
 	if !ok {
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+			fmt.Sprintf("`%s` cannot be treated as str", args[0].Inspect()))
 	}
 	other, ok := args[1].(*object.PanStr)
 	if !ok {
+		// NOTE: nil is treated as ""
+		_, ok := object.TraceProtoOfNil(args[1])
+		if ok {
+			return self, object.NewPanStr(""), nil
+		}
+
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+			fmt.Sprintf("`%s` cannot be treated as str", args[1].Inspect()))
 	}
 
 	return self, other, nil

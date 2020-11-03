@@ -32,6 +32,17 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"+": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// anything can be added to nil (and nil works as zero value).
+				if len(args) < 2 {
+					return object.NewTypeErr("+ requires at least 2 args")
+				}
+				return args[1]
+			},
+		),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

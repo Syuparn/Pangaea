@@ -51,8 +51,14 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 				other, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
+					// NOTE: nil is treated as []
+					_, ok := object.TraceProtoOfNil(args[1])
+					if ok {
+						return self
+					}
+
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as arr", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as arr", args[1].Inspect()))
 				}
 
 				// NOTE: no need to copy each elem because they are immutable
