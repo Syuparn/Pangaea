@@ -1,6 +1,8 @@
 {
   # empty? returns whether self contains elements.
   empty?: m{|| .len.!},
+  # map is a wrapper of mapchain.
+  map: m{|f| @^f},
   # sum returns sum of elements in self.
   sum: m{|| $(nil)+},
 }
