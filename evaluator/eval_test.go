@@ -190,6 +190,46 @@ func TestEvalIntAt(t *testing.T) {
 	}
 }
 
+func TestEvalIntPrimep(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`7.prime?`,
+			object.BuiltInTrue,
+		},
+		{
+			`12.prime?`,
+			object.BuiltInFalse,
+		},
+		{
+			`-5.prime?`,
+			object.BuiltInFalse,
+		},
+		// use descendant of int for recv
+		{
+			`true.prime?`,
+			object.BuiltInFalse,
+		},
+		// if no args are passed, raise an error
+		{
+			`Int['prime?]()`,
+			object.NewTypeErr("Int#prime? requires at least 1 arg"),
+		},
+		// if \1 is not int, raise an error
+		{
+			`Int['prime?]("a")`,
+			object.NewTypeErr("\\1 must be int"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalFloatLiteral(t *testing.T) {
 	tests := []struct {
 		input    string

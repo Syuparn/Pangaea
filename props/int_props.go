@@ -2,6 +2,8 @@ package props
 
 import (
 	"fmt"
+	"math/big"
+
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -217,6 +219,33 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
+			},
+		),
+		"prime?": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Int#prime? requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfInt(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be int`)
+				}
+
+				if self.Value <= 1 {
+					return object.BuiltInFalse
+				}
+
+				// NOTE: ProbablyPrime is 100% accurate if n < 2^64
+				var n big.Int
+				// self.Value must be positive
+				n.SetUint64(uint64(self.Value))
+				if ok := n.ProbablyPrime(0); ok {
+					return object.BuiltInTrue
+				}
+
+				return object.BuiltInFalse
 			},
 		),
 	}
