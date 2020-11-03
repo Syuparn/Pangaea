@@ -38,6 +38,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("Obj"), BuiltInObjObj)
 	env.Set(GetSymHash("BaseObj"), BuiltInBaseObj)
 	env.Set(GetSymHash("Map"), BuiltInMapObj)
+	env.Set(GetSymHash("Kernel"), BuiltInKernelObj)
 	env.Set(GetSymHash("true"), BuiltInTrue)
 	env.Set(GetSymHash("false"), BuiltInFalse)
 	env.Set(GetSymHash("nil"), BuiltInNil)

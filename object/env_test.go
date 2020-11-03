@@ -67,6 +67,7 @@ func TestEnvWithConsts(t *testing.T) {
 		{"Obj", BuiltInObjObj},
 		{"BaseObj", BuiltInBaseObj},
 		{"Map", BuiltInMapObj},
+		{"Kernel", BuiltInKernelObj},
 		{"true", BuiltInTrue},
 		{"false", BuiltInFalse},
 		{"nil", BuiltInNil},

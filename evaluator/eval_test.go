@@ -35,6 +35,7 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInFuncObj, props.FuncProps, ctn)
 	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
 	injectProps(object.BuiltInIterObj, props.IterProps, ctn)
+	injectProps(object.BuiltInKernelObj, props.KernelProps, ctn)
 	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
 	injectProps(object.BuiltInNilObj, props.NilProps, ctn)
 	injectProps(object.BuiltInObjObj, props.ObjProps, ctn)
@@ -4973,6 +4974,31 @@ func TestEvalPrefixNot(t *testing.T) {
 		{
 			`!'a`,
 			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalAssert(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Kernel['assert](true)`,
+			object.BuiltInNil,
+		},
+		{
+			`Kernel['assert](false)`,
+			object.NewAssertionErr("false is not truty."),
+		},
+		{
+			`Kernel['assert]("")`,
+			object.NewAssertionErr(`"" is not truty.`),
 		},
 	}
 
