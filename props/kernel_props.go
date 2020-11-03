@@ -30,7 +30,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 					return object.BuiltInNil
 				}
 
-				return object.NewAssertionErr(fmt.Sprintf("%s is not truty.",
+				return object.NewAssertionErr(fmt.Sprintf("%s is not truthy.",
 					args[0].Inspect()))
 			},
 		),

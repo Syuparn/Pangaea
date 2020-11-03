@@ -4998,15 +4998,15 @@ func TestEvalAssert(t *testing.T) {
 		},
 		{
 			`assert(false)`,
-			object.NewAssertionErr("false is not truty."),
+			object.NewAssertionErr("false is not truthy."),
 		},
 		{
 			`assert("")`,
-			object.NewAssertionErr(`"" is not truty.`),
+			object.NewAssertionErr(`"" is not truthy.`),
 		},
 		{
 			`assert(1 == 2)`,
-			object.NewAssertionErr(`false is not truty.`),
+			object.NewAssertionErr(`false is not truthy.`),
 		},
 	}
 
