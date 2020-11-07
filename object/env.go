@@ -89,7 +89,7 @@ func (e *Env) Items() PanObject {
 
 		if !ok {
 			panic("Failed to fetch PanStr by SymHash2Str().\n" +
-				"StrTable may be broken.")
+				"strTable may be broken.")
 		}
 
 		pairs[h] = Pair{strObj, obj}

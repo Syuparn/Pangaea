@@ -30,11 +30,34 @@ func injectBuiltInProps(
 	env *object.Env,
 	ctn map[string]object.PanObject,
 ) {
-	arrNatives := mustReadNativeCode("Arr", env)
-	intNatives := mustReadNativeCode("Int", env)
-	iterableNatives := mustReadNativeCode("Iterable", env)
-	objNatives := mustReadNativeCode("Obj", env)
-	strNatives := mustReadNativeCode("Str", env)
+	// HACK: read source codes concurrently to run faster
+	// (evaluating native codes are bottleneck of injection)
+	arrNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		arrNativesCh <- mustReadNativeCode("Arr", env)
+	}()
+	intNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		intNativesCh <- mustReadNativeCode("Int", env)
+	}()
+	iterableNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		iterableNativesCh <- mustReadNativeCode("Iterable", env)
+	}()
+	objNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		objNativesCh <- mustReadNativeCode("Obj", env)
+	}()
+	strNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		strNativesCh <- mustReadNativeCode("Str", env)
+	}()
+
+	arrNatives := <-arrNativesCh
+	intNatives := <-intNativesCh
+	iterableNatives := <-iterableNativesCh
+	objNatives := <-objNativesCh
+	strNatives := <-strNativesCh
 
 	// NOTE: injection order is important! (if same-named props appear, first one remains)
 	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), arrNatives, iterableNatives)
