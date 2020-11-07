@@ -142,9 +142,20 @@ This is useful only in list context, which removes returned `nil`.
 
 ```bash
 # build (make before git push so that native source files are embedded in statik)
-make
+$ make
 
 # test
-go test -v -race ./...
-./pangaea test tests/
+$ go test -v -race ./...
+$ ./pangaea test tests/
+
+# benchmark of setup() (evaluation and initialization of built-in objects)
+$ cd runscript
+$ go test -bench=BenchmarkSetup -cpuprofile cpu.out
+$ go tool pprof http cpu.out
+(pprof) top
+Showing nodes accounting for 1560ms, 83.42% of 1870ms total
+Showing top 10 nodes out of 137
+      flat  flat%   sum%        cum   cum%
+     560ms 29.95% 29.95%      560ms 29.95%  unicode/utf8.DecodeLastRuneInString
+     ...
 ```

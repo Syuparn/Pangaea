@@ -9,34 +9,46 @@ import (
 func TestReadNativeCodeSuccess(t *testing.T) {
 	tests := []struct {
 		srcName  string
-		expected map[string]object.PanObject
+		expected map[object.SymHash]object.Pair
 	}{
 		{
 			"testSuccess",
-			map[string]object.PanObject{
-				"a": object.NewPanInt(1),
-				"b": object.NewPanInt(2),
+			map[object.SymHash]object.Pair{
+				object.GetSymHash("a"): object.Pair{
+					Key:   object.NewPanStr("a"),
+					Value: object.NewPanInt(1),
+				},
+				object.GetSymHash("b"): object.Pair{
+					Key:   object.NewPanStr("b"),
+					Value: object.NewPanInt(2),
+				},
 			},
 		},
 	}
 
 	for _, tt := range tests {
-		ctn, err := readNativeCode("testdata/"+tt.srcName, object.NewEnv())
+		pairsPtr, err := readNativeCode("testdata/"+tt.srcName, object.NewEnv())
 		if err != nil {
 			t.Fatalf("err must be nil. got=%s", err.Error())
 		}
+		if pairsPtr == nil {
+			t.Fatalf("pairs must not be nil.")
+		}
+		pairs := *pairsPtr
 
-		if len(ctn) != len(tt.expected) {
-			t.Fatalf("len(ctn) must be %d. got=%d", len(tt.expected), len(ctn))
+		if len(pairs) != len(tt.expected) {
+			t.Fatalf("len(pairs) must be %d. got=%d", len(tt.expected), len(pairs))
 		}
 
 		for k, expected := range tt.expected {
-			actual, ok := ctn[k]
+			actual, ok := pairs[k]
 			if !ok {
-				t.Fatalf("key %s not found in ctn.", k)
+				t.Fatalf("key %s(%d) not found in pairs.",
+					expected.Key.Inspect(), k)
 			}
 
-			testValue(t, actual, expected)
+			testValue(t, actual.Key, expected.Key)
+			testValue(t, actual.Value, expected.Value)
 		}
 	}
 }
@@ -76,31 +88,43 @@ func TestReadNativeCodeFailed(t *testing.T) {
 func TestMustReadNativeCodeSuccess(t *testing.T) {
 	tests := []struct {
 		srcName  string
-		expected map[string]object.PanObject
+		expected map[object.SymHash]object.Pair
 	}{
 		{
 			"testSuccess",
-			map[string]object.PanObject{
-				"a": object.NewPanInt(1),
-				"b": object.NewPanInt(2),
+			map[object.SymHash]object.Pair{
+				object.GetSymHash("a"): object.Pair{
+					Key:   object.NewPanStr("a"),
+					Value: object.NewPanInt(1),
+				},
+				object.GetSymHash("b"): object.Pair{
+					Key:   object.NewPanStr("b"),
+					Value: object.NewPanInt(2),
+				},
 			},
 		},
 	}
 
 	for _, tt := range tests {
-		ctn := mustReadNativeCode("testdata/"+tt.srcName, object.NewEnv())
+		pairsPtr := mustReadNativeCode("testdata/"+tt.srcName, object.NewEnv())
+		if pairsPtr == nil {
+			t.Fatalf("pairsPtr must not be nil.")
+		}
+		pairs := *pairsPtr
 
-		if len(ctn) != len(tt.expected) {
-			t.Fatalf("len(ctn) must be %d. got=%d", len(tt.expected), len(ctn))
+		if len(pairs) != len(tt.expected) {
+			t.Fatalf("len(pairs) must be %d. got=%d", len(tt.expected), len(pairs))
 		}
 
 		for k, expected := range tt.expected {
-			actual, ok := ctn[k]
+			actual, ok := pairs[k]
 			if !ok {
-				t.Fatalf("key %s not found in ctn.", k)
+				t.Fatalf("key %s(%d) not found in pairs.",
+					expected.Key.Inspect(), k)
 			}
 
-			testValue(t, actual, expected)
+			testValue(t, actual.Key, expected.Key)
+			testValue(t, actual.Value, expected.Value)
 		}
 	}
 }

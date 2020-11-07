@@ -5,3 +5,6 @@ parser/y.output
 pangaea.exe
 # linux/mac binary
 pangaea
+# benchmark results
+runscript/cpu.out
+runscript/runscript.test*

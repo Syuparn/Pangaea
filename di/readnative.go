@@ -11,16 +11,22 @@ import (
 	_ "github.com/Syuparn/pangaea/statik"
 )
 
-func mustReadNativeCode(srcName string, env *object.Env) map[string]object.PanObject {
-	propContainer, err := readNativeCode(srcName, env)
+func mustReadNativeCode(
+	srcName string,
+	env *object.Env,
+) *map[object.SymHash]object.Pair {
+	pairs, err := readNativeCode(srcName, env)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	return propContainer
+	return pairs
 }
 
-func readNativeCode(srcName string, env *object.Env) (map[string]object.PanObject, error) {
+func readNativeCode(
+	srcName string,
+	env *object.Env,
+) (*map[object.SymHash]object.Pair, error) {
 	fileName := fmt.Sprintf("/%s.pangaea", srcName)
 
 	// NOTE: instead of native source files, open embedded statik file system
@@ -34,7 +40,7 @@ func readNativeCode(srcName string, env *object.Env) (map[string]object.PanObjec
 	if err != nil {
 		e := fmt.Errorf("failed to read native %s props in native%s (zipped in statik/)",
 			srcName, fileName)
-		return map[string]object.PanObject{}, e
+		return nil, e
 	}
 	defer fp.Close()
 
@@ -42,28 +48,17 @@ func readNativeCode(srcName string, env *object.Env) (map[string]object.PanObjec
 	// (cannot call top-level consts for example)
 	result := eval(fp, object.NewEnclosedEnv(env))
 	if result.Type() == object.ErrType {
-		return map[string]object.PanObject{}, errors.New(result.Inspect())
+		return nil, errors.New(result.Inspect())
 	}
 
 	obj, ok := result.(*object.PanObj)
 	if !ok {
 		e := fmt.Errorf("result must be ObjType. got=%s", result.Type())
-		return map[string]object.PanObject{}, e
+		return nil, e
 	}
 	if obj.Pairs == nil {
-		return map[string]object.PanObject{}, errors.New("Pairs must not be nil")
+		return nil, errors.New("Pairs must not be nil")
 	}
 
-	propContainer := map[string]object.PanObject{}
-	for _, v := range *obj.Pairs {
-		keyStr, ok := v.Key.(*object.PanStr)
-		if !ok {
-			e := fmt.Errorf("key must be StrType. got=%s", v.Key.Inspect())
-			return map[string]object.PanObject{}, e
-		}
-
-		propContainer[keyStr.Value] = v.Value
-	}
-
-	return propContainer, nil
+	return obj.Pairs, nil
 }
