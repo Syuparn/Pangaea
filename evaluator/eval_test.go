@@ -4149,6 +4149,48 @@ func TestEvalNoPropErr(t *testing.T) {
 	}
 }
 
+func TestEvalMissing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// if no prop found is proto chain, _missing is called
+		{
+			`{_missing: 'default}.hoge`,
+			object.NewPanStr("default"),
+		},
+		{
+			`[{_missing: 'a}, {_missing: 'b}]@hoge`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.NewPanStr("b"),
+			}},
+		},
+		{
+			`['A, 'B]$({_missing: m{|name, i| "#{name} not found"+i}})+`,
+			object.NewPanStr("+ not foundAB"),
+		},
+		// prop name and args are passed
+		{
+			`{_missing: m{|name, arg| [name, arg]}}.hoge(1)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("hoge"),
+				object.NewPanInt(1),
+			}},
+		},
+		// proto _missing works
+		{
+			`{_missing: 'proto}.bear.hoge`,
+			object.NewPanStr("proto"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalMapAt(t *testing.T) {
 	tests := []struct {
 		input    string

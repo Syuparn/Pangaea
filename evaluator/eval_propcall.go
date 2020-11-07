@@ -134,7 +134,7 @@ func evalReducePropCall(
 			return appendStackTrace(err, node.Source())
 		}
 
-		prop := evalProp(node.Prop.Value, acc)
+		prop, isMissing := evalProp(node.Prop.Value, acc)
 		if err, ok := prop.(*object.PanErr); ok {
 			// thoughtful chain
 			if recoversNil {
@@ -145,6 +145,11 @@ func evalReducePropCall(
 
 		// prepend iteration value to args
 		argsToPass := append([]object.PanObject{nextRet}, args...)
+		// prepend prop name to arg if _missing is called
+		if isMissing {
+			propName := object.NewPanStr(node.Prop.Value)
+			argsToPass = append([]object.PanObject{propName}, argsToPass...)
+		}
 		// reduce each iteration values
 		ret := evalCall(env, acc, prop, argsToPass, kwargs)
 
@@ -207,12 +212,18 @@ func evalScalarPropCall(
 		return recv
 	}
 
-	prop := evalProp(node.Prop.Value, recv)
+	prop, isMissing := evalProp(node.Prop.Value, recv)
 	if err, ok := prop.(*object.PanErr); ok {
 		if recoversNil {
 			return recv
 		}
 		return appendStackTrace(err, node.Source())
+	}
+
+	// prepend prop name to arg if _missing is called
+	if isMissing {
+		propName := object.NewPanStr(node.Prop.Value)
+		args = append([]object.PanObject{propName}, args...)
 	}
 
 	ret := evalCall(env, recv, prop, args, kwargs)
@@ -229,18 +240,29 @@ func evalScalarPropCall(
 	return ret
 }
 
-func evalProp(propStr string, recv object.PanObject) object.PanObject {
+func evalProp(
+	propStr string,
+	recv object.PanObject,
+) (o object.PanObject, isMissing bool) {
 	propHash := object.GetSymHash(propStr)
 
 	prop, ok := callProp(recv, propHash)
 
+	if ok {
+		return prop, false
+	}
+
+	// try to find _missing instead
+	missingHash := object.GetSymHash("_missing")
+	missing, ok := callProp(recv, missingHash)
+
 	if !ok {
 		err := object.NewNoPropErr(
 			fmt.Sprintf("property `%s` is not defined.", propStr))
-		return err
+		return err, false
 	}
 
-	return prop
+	return missing, true
 }
 
 func evalCallArgs(
