@@ -31,6 +31,7 @@ func TestMain(m *testing.M) {
 func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInArrObj, props.ArrProps, ctn)
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps, ctn)
+	injectProps(object.BuiltInDiamondObj, props.DiamondProps, ctn)
 	injectProps(object.BuiltInFloatObj, props.FloatProps, ctn)
 	injectProps(object.BuiltInFuncObj, props.FuncProps, ctn)
 	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
@@ -1845,6 +1846,162 @@ func toEnv(
 	env.Set(object.GetSymHash("\\_"), toPanObj(kwargPairs))
 
 	return env
+}
+
+func TestEvalDiamondLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`<>`,
+			object.BuiltInDiamondObj,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalDiamondProps(t *testing.T) {
+	tests := []struct {
+		stdin    string
+		input    string
+		expected object.PanObject
+	}{
+		// NOTE: <> can use all str props
+		{
+			`hoge`,
+			`<>.uc`,
+			object.NewPanStr("HOGE"),
+		},
+		{
+			"HOGE\nFUGA",
+			`<>.lc
+			 <>.lc`,
+			object.NewPanStr("fuga"),
+		},
+		// after reached to EOF, "" is read
+		{
+			"hoge\nfuga",
+			`<>.uc
+			 <>.uc
+			 <>.uc`,
+			object.NewPanStr(""),
+		},
+		// Diamond#S returns read line str
+		{
+			"hoge\nfuga",
+			`<>.S+<>.S`,
+			object.NewPanStr("hogefuga"),
+		},
+	}
+	for _, tt := range tests {
+		reader := strings.NewReader(tt.stdin)
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(reader, os.Stdout)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalDiamondPropsErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`<>._missing`,
+			object.NewTypeErr("_missing requires at least 2 args"),
+		},
+		{
+			`<>['S]()`,
+			object.NewTypeErr("Diamond#S requires at least 1 arg"),
+		},
+		{
+			`<>._missing(1)`,
+			object.NewTypeErr("\\2 must be prop name str"),
+		},
+		{
+			`IO := 1; <>.uc`,
+			object.NewTypeErr("name `IO` must be IO obj"),
+		},
+	}
+	for _, tt := range tests {
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(os.Stdin, os.Stdout)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalDiamondPropsErrIONotFound(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`<>.lc`,
+			object.NewNameErr("`IO` is not found in env"),
+		},
+		{
+			`<>.S`,
+			object.NewNameErr("`IO` is not found in env"),
+		},
+		{
+			`<>@{\}`,
+			object.NewNameErr("`IO` is not found in env"),
+		},
+	}
+	for _, tt := range tests {
+		// without IO injection
+		env := object.NewEnvWithConsts()
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalDiamondIter(t *testing.T) {
+	tests := []struct {
+		stdin    string
+		input    string
+		expected object.PanObject
+	}{
+		// <> reads all lines until EOF
+		{
+			"hoge\nfuga\npiyo",
+			`<>@{\}`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("hoge"),
+				object.NewPanStr("fuga"),
+				object.NewPanStr("piyo"),
+			}},
+		},
+		{
+			"hoge\nfuga\npiyo\n",
+			`<>@{\}`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("hoge"),
+				object.NewPanStr("fuga"),
+				object.NewPanStr("piyo"),
+			}},
+		},
+	}
+	for _, tt := range tests {
+		reader := strings.NewReader(tt.stdin)
+		// setup IO
+		env := object.NewEnvWithConsts()
+		env.InjectIO(reader, os.Stdout)
+
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+	}
 }
 
 func TestEvalYield(t *testing.T) {

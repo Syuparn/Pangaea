@@ -62,6 +62,7 @@ func injectBuiltInProps(
 	// NOTE: injection order is important! (if same-named props appear, first one remains)
 	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), arrNatives, iterableNatives)
 	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)))
+	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)))
 	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)))
 	injectProps(object.BuiltInFuncObj, toPairs(props.FuncProps(ctn)))
 	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), intNatives, iterableNatives)

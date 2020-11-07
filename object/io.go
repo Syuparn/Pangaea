@@ -1,16 +1,27 @@
 package object
 
 import (
+	"bufio"
 	"io"
 )
 
 // IOType is a type of PanIO.
 const IOType = "IOType"
 
+// NewPanIO makes new io object.
+func NewPanIO(in io.Reader, out io.Writer) *PanIO {
+	return &PanIO{
+		In:      in,
+		Out:     out,
+		scanner: bufio.NewScanner(in),
+	}
+}
+
 // PanIO is object of IO literal.
 type PanIO struct {
-	In  io.Reader
-	Out io.Writer
+	In      io.Reader
+	Out     io.Writer
+	scanner *bufio.Scanner
 }
 
 // Type returns type of this PanObject.
@@ -26,4 +37,13 @@ func (io *PanIO) Inspect() string {
 // Proto returns proto of this object.
 func (io *PanIO) Proto() PanObject {
 	return BuiltInIOObj
+}
+
+// ReadLine reads line from in and returns it as PanStr.
+func (io *PanIO) ReadLine() (*PanStr, bool) {
+	if !io.scanner.Scan() {
+		return nil, false
+	}
+	line := io.scanner.Text()
+	return NewPanStr(line), true
 }

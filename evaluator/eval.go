@@ -39,6 +39,8 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 		return evalFunc(node, env)
 	case *ast.IterLiteral:
 		return evalIter(node, env)
+	case *ast.DiamondLiteral:
+		return evalDiamond(node, env)
 	case *ast.Ident:
 		return evalIdent(node, env)
 	case *ast.PinnedIdent:
@@ -61,5 +63,5 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 		return evalVarCall(node, env)
 	}
 
-	return nil
+	return object.NewSyntaxErr("this syntax is not supported yet")
 }
