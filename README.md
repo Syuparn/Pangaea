@@ -8,10 +8,11 @@ A programming language for one-liner method chain lovers! (Under construction...
 # Run
 
 ```bash:
-# 1. Install goyacc
+# 1. Install dependent tools
 $ go get golang.org/x/tools/cmd/goyacc
+$ go get github.com/rakyll/statik
 
-# 2. Build (dependencies are installed automatically)
+# 2. Build (imported modules are installed automatically)
 $ make
 
 # 3. Run
@@ -39,6 +40,7 @@ $ ./pangaea.exe ./example/hello.pangaea
 - [goyacc](https://godoc.org/golang.org/x/tools/cmd/goyacc)
 - [simplexer](github.com/macrat/simplexer)
 - [dtoa](github.com/tanaton/dtoa)
+- [statik](github.com/rakyll/statik)
 
 # Progress
 
@@ -134,4 +136,15 @@ This is useful only in list context, which removes returned `nil`.
 ```
 (1:10)@{|i| i if i.even?}.puts # [2, 4, 6, 8]
 (1:10)=@{|i| i if i.even?}.puts # [nil, 2, nil, 4, nil, 6, nil, 8, nil]
+```
+
+# For Developers
+
+```bash
+# build (make before git push so that native source files are embedded in statik)
+make
+
+# test
+go test -v -race ./...
+./pangaea test tests/
 ```
