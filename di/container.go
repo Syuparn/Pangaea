@@ -30,30 +30,36 @@ func injectBuiltInProps(
 	env *object.Env,
 	ctn map[string]object.PanObject,
 ) {
-	injectProps(object.BuiltInArrObj, props.ArrProps(ctn), mustReadNativeCode("Arr", env), mustReadNativeCode("Iterable", env))
-	injectProps(object.BuiltInBaseObj, props.BaseObjProps(ctn))
-	injectProps(object.BuiltInFloatObj, props.FloatProps(ctn))
-	injectProps(object.BuiltInFuncObj, props.FuncProps(ctn))
-	injectProps(object.BuiltInIntObj, props.IntProps(ctn), mustReadNativeCode("Int", env), mustReadNativeCode("Iterable", env))
-	injectProps(object.BuiltInIterObj, props.IterProps(ctn))
+	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), mustReadNativeCode("Arr", env), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)))
+	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)))
+	injectProps(object.BuiltInFuncObj, toPairs(props.FuncProps(ctn)))
+	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), mustReadNativeCode("Int", env), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInIterObj, toPairs(props.IterProps(ctn)))
 	injectProps(object.BuiltInIterableObj, mustReadNativeCode("Iterable", env))
-	injectProps(object.BuiltInKernelObj, props.KernelProps(ctn))
-	injectProps(object.BuiltInMapObj, props.MapProps(ctn), mustReadNativeCode("Iterable", env))
-	injectProps(object.BuiltInNilObj, props.NilProps(ctn))
-	injectProps(object.BuiltInNumObj, props.NumProps(ctn))
-	injectProps(object.BuiltInObjObj, props.ObjProps(ctn), mustReadNativeCode("Obj", env), mustReadNativeCode("Iterable", env))
-	injectProps(object.BuiltInRangeObj, props.RangeProps(ctn), mustReadNativeCode("Iterable", env))
-	injectProps(object.BuiltInStrObj, props.StrProps(ctn), mustReadNativeCode("Str", env), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInKernelObj, toPairs(props.KernelProps(ctn)))
+	injectProps(object.BuiltInMapObj, toPairs(props.MapProps(ctn)), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInNilObj, toPairs(props.NilProps(ctn)))
+	injectProps(object.BuiltInNumObj, toPairs(props.NumProps(ctn)))
+	injectProps(object.BuiltInObjObj, toPairs(props.ObjProps(ctn)), mustReadNativeCode("Obj", env), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInRangeObj, toPairs(props.RangeProps(ctn)), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInStrObj, toPairs(props.StrProps(ctn)), mustReadNativeCode("Str", env), mustReadNativeCode("Iterable", env))
 }
 
 func injectProps(
 	obj *object.PanObj,
-	propContainers ...map[string]object.PanObject,
+	pairsList ...*map[object.SymHash]object.Pair,
 ) {
-	ctn := mergePropContainers(propContainers...)
-	pairs := map[object.SymHash]object.Pair{}
+	for _, pairs := range pairsList {
+		obj.AddPairs(pairs)
+	}
+}
 
-	for k, v := range ctn {
+func toPairs(
+	propContainer map[string]object.PanObject,
+) *map[object.SymHash]object.Pair {
+	pairs := map[object.SymHash]object.Pair{}
+	for k, v := range propContainer {
 		pair := object.Pair{
 			Key:   object.NewPanStr(k),
 			Value: v,
@@ -61,7 +67,7 @@ func injectProps(
 		pairs[object.GetSymHash(k)] = pair
 	}
 
-	obj.AddPairs(&pairs)
+	return &pairs
 }
 
 func mergePropContainers(
