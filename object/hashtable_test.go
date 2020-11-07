@@ -67,15 +67,15 @@ func TestStrTable(t *testing.T) {
 	str := "foo"
 	hash := GetSymHash(str)
 
-	found, ok := StrTable[hash]
+	found, ok := strTable[hash]
 
 	if !ok {
-		t.Fatalf("str not found in StrTable(%+v)",
-			StrTable)
+		t.Fatalf("str not found in strTable(%+v)",
+			strTable)
 	}
 
 	if found.Type() != StrType {
-		t.Fatalf("StrTable must return StrType PanObject. got=%s",
+		t.Fatalf("strTable must return StrType PanObject. got=%s",
 			found.Type())
 	}
 

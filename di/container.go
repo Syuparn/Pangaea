@@ -30,20 +30,50 @@ func injectBuiltInProps(
 	env *object.Env,
 	ctn map[string]object.PanObject,
 ) {
-	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), mustReadNativeCode("Arr", env), mustReadNativeCode("Iterable", env))
+	// HACK: read source codes concurrently to run faster
+	// (evaluating native codes are bottleneck of injection)
+	arrNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		arrNativesCh <- mustReadNativeCode("Arr", env)
+	}()
+	intNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		intNativesCh <- mustReadNativeCode("Int", env)
+	}()
+	iterableNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		iterableNativesCh <- mustReadNativeCode("Iterable", env)
+	}()
+	objNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		objNativesCh <- mustReadNativeCode("Obj", env)
+	}()
+	strNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		strNativesCh <- mustReadNativeCode("Str", env)
+	}()
+
+	arrNatives := <-arrNativesCh
+	intNatives := <-intNativesCh
+	iterableNatives := <-iterableNativesCh
+	objNatives := <-objNativesCh
+	strNatives := <-strNativesCh
+
+	// NOTE: injection order is important! (if same-named props appear, first one remains)
+	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), arrNatives, iterableNatives)
 	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)))
 	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)))
 	injectProps(object.BuiltInFuncObj, toPairs(props.FuncProps(ctn)))
-	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), mustReadNativeCode("Int", env), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), intNatives, iterableNatives)
 	injectProps(object.BuiltInIterObj, toPairs(props.IterProps(ctn)))
-	injectProps(object.BuiltInIterableObj, mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInIterableObj, iterableNatives)
 	injectProps(object.BuiltInKernelObj, toPairs(props.KernelProps(ctn)))
-	injectProps(object.BuiltInMapObj, toPairs(props.MapProps(ctn)), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInMapObj, toPairs(props.MapProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInNilObj, toPairs(props.NilProps(ctn)))
 	injectProps(object.BuiltInNumObj, toPairs(props.NumProps(ctn)))
-	injectProps(object.BuiltInObjObj, toPairs(props.ObjProps(ctn)), mustReadNativeCode("Obj", env), mustReadNativeCode("Iterable", env))
-	injectProps(object.BuiltInRangeObj, toPairs(props.RangeProps(ctn)), mustReadNativeCode("Iterable", env))
-	injectProps(object.BuiltInStrObj, toPairs(props.StrProps(ctn)), mustReadNativeCode("Str", env), mustReadNativeCode("Iterable", env))
+	injectProps(object.BuiltInObjObj, toPairs(props.ObjProps(ctn)), objNatives, iterableNatives)
+	injectProps(object.BuiltInRangeObj, toPairs(props.RangeProps(ctn)), iterableNatives)
+	injectProps(object.BuiltInStrObj, toPairs(props.StrProps(ctn)), strNatives, iterableNatives)
 }
 
 func injectProps(
