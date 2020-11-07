@@ -51,13 +51,12 @@ func runScript(fileName string) int {
 }
 
 func runRepl() {
-	fmt.Println("Pangaea ver0.0.0 (alpha)")
-	fmt.Println("Under construction...")
+	fmt.Println("Pangaea ver0.1.1 (alpha)")
 	repl.Start(os.Stdin, os.Stdout)
 }
 
 func runParsing() {
-	fmt.Println("Pangaea ver0.0.0 (alpha)")
+	fmt.Println("Pangaea ver0.1.1 (alpha)")
 	fmt.Println("Parsing mode(parsed ast is not evaluated)")
 	repl.StartParsing(os.Stdin, os.Stdout)
 }
