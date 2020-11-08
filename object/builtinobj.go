@@ -46,6 +46,9 @@ var BuiltInMapObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 // BuiltInIOObj is an object of IO (proto of each io).
 var BuiltInIOObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
+// BuiltInDiamondObj is an object of Diamond.
+var BuiltInDiamondObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+
 // BuiltInKernelObj is an object of Kernel, whose props can be used in top-level.
 var BuiltInKernelObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 

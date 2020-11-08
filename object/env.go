@@ -39,6 +39,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("Obj"), BuiltInObjObj)
 	env.Set(GetSymHash("BaseObj"), BuiltInBaseObj)
 	env.Set(GetSymHash("Map"), BuiltInMapObj)
+	env.Set(GetSymHash("Diamond"), BuiltInDiamondObj)
 	env.Set(GetSymHash("Kernel"), BuiltInKernelObj)
 	env.Set(GetSymHash("true"), BuiltInTrue)
 	env.Set(GetSymHash("false"), BuiltInFalse)
@@ -106,7 +107,7 @@ func (e *Env) Outer() *Env {
 // InjectIO injects reader and writer for `IO` object
 func (e *Env) InjectIO(in io.Reader, out io.Writer) {
 	// define const `IO` containing io of args
-	ioObj := &PanIO{In: in, Out: out}
+	ioObj := NewPanIO(in, out)
 	e.Set(GetSymHash("IO"), ioObj)
 }
 
