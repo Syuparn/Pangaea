@@ -11,6 +11,7 @@ import (
 
 var (
 	parse      = flag.Bool("parse", false, "only parse instead of eval")
+	oneLiner   = flag.String("e", "", "run one-line script")
 	testCmdSet = flag.NewFlagSet("test", flag.ExitOnError)
 )
 
@@ -26,6 +27,12 @@ func main() {
 
 	// normal mode
 	flag.Parse()
+
+	// run one-liner
+	if *oneLiner != "" {
+		exitCode := runOneLiner(*oneLiner)
+		os.Exit(exitCode)
+	}
 
 	if srcFileName := flag.Arg(0); srcFileName != "" {
 		exitCode := runScript(srcFileName)
@@ -47,6 +54,11 @@ func runTest(path string) int {
 
 func runScript(fileName string) int {
 	exitCode := runscript.Run(fileName, os.Stdin, os.Stdout)
+	return exitCode
+}
+
+func runOneLiner(src string) int {
+	exitCode := runscript.RunSource(src, os.Stdin, os.Stdout)
 	return exitCode
 }
 

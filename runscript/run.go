@@ -43,6 +43,14 @@ func RunTest(path string, in io.Reader, out io.Writer) int {
 	return exitCode
 }
 
+// RunSource runs input src.
+func RunSource(src string, in io.Reader, out io.Writer) int {
+	env := setup(in, out)
+	reader := strings.NewReader(src)
+	exitCode := runSource(reader, in, out, env)
+	return exitCode
+}
+
 func run(fileName string, in io.Reader, out io.Writer, env *object.Env) int {
 	fp, err := os.Open(fileName)
 	if err != nil {
@@ -50,6 +58,11 @@ func run(fileName string, in io.Reader, out io.Writer, env *object.Env) int {
 		return 1
 	}
 
+	exitCode := runSource(fp, in, out, env)
+	return exitCode
+}
+
+func runSource(fp io.Reader, in io.Reader, out io.Writer, env *object.Env) int {
 	node, err := parser.Parse(fp)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err.Error()+"\n")
