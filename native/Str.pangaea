@@ -1,8 +1,8 @@
 {
   # IA converts self into int arr
-  IA: m{|sep: "\s"| .split(sep: sep)@I},
+  IA: m{|sep: `\s`| .split(sep: sep)@I},
   # capital make first letter of self uppercase and the others lowercase
   capital: m{|| self[0].uc + self[1:].lc},
   # split splits self into arr by sep
-  split: m{|sep: "\s"| self / sep},
+  split: m{|sep: `\s`| self / sep},
 }

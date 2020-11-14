@@ -173,11 +173,24 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`\1.S must be str`)
 				}
 
+				// get kwarg end (default: breakline)
+				endPair, ok := (*kwargs.Pairs)[object.GetSymHash("end")]
+				if !ok {
+					// print
+					io.WriteString(panIO.Out, str.Value)
+					// breakline
+					io.WriteString(panIO.Out, "\n")
+					return object.BuiltInNil
+				}
+
+				endStr, ok := object.TraceProtoOfStr(endPair.Value)
+				if !ok {
+					return object.NewTypeErr("end must be str")
+				}
+
 				// print
 				io.WriteString(panIO.Out, str.Value)
-				// breakline
-				io.WriteString(panIO.Out, "\n")
-
+				io.WriteString(panIO.Out, endStr.Value)
 				return object.BuiltInNil
 			},
 		),

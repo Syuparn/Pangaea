@@ -4112,6 +4112,11 @@ func TestEvalPrint(t *testing.T) {
 			`false.p`,
 			"false\n",
 		},
+		// set-up end
+		{
+			`"abc".p(end: ",")`,
+			"abc,",
+		},
 	}
 
 	for _, tt := range tests {
@@ -4153,6 +4158,10 @@ func TestEvalPrintErr(t *testing.T) {
 		{
 			`{S: 1}.p`,
 			object.NewTypeErr(`\1.S must be str`),
+		},
+		{
+			`"abc".p(end: 1)`,
+			object.NewTypeErr(`end must be str`),
 		},
 	}
 
