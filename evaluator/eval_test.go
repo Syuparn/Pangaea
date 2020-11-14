@@ -468,6 +468,106 @@ func TestEvalStrLc(t *testing.T) {
 	}
 }
 
+func TestEvalStrMatch(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"hello".match("l+")`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("ll"),
+			}},
+		},
+		{
+			`"--aabcbcbcxyyyzz--".match("a+((bc)*)x([yz]+)")`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("aabcbcbcxyyyzz"),
+				object.NewPanStr("bcbcbc"),
+				object.NewPanStr("bc"),
+				object.NewPanStr("yyyzz"),
+			}},
+		},
+		// use descendant of str for recv
+		{
+			`"abbbc".bear.match("b+")`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("bbb"),
+			}},
+		},
+		// if no args are passed, raise an error
+		{
+			`Str.match`,
+			object.NewTypeErr("Str#match requires at least 2 args"),
+		},
+		// if \1 is not str, raise an error
+		{
+			`Str['match](1, "a")`,
+			object.NewTypeErr("\\1 must be str"),
+		},
+		// if \2 is not str, raise an error
+		{
+			`"a".match(1)`,
+			object.NewTypeErr("\\2 must be str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStrSub(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"rice".sub("r", "m")`,
+			object.NewPanStr("mice"),
+		},
+		{
+			`"secret: 1234".sub("\d", "x")`,
+			object.NewPanStr("secret: xxxx"),
+		},
+		{
+			`"abbc".sub("(b+)", "[$1]")`,
+			object.NewPanStr("a[bb]c"),
+		},
+		// use descendant of str for recv
+		{
+			`"hoge".bear.sub("o", "i")`,
+			object.NewPanStr("hige"),
+		},
+		// if no args are passed, raise an error
+		{
+			`Str.sub("a")`,
+			object.NewTypeErr("Str#sub requires at least 3 args"),
+		},
+		// if \1 is not str, raise an error
+		{
+			`Str['sub](1, "a", "b")`,
+			object.NewTypeErr("\\1 must be str"),
+		},
+		// if \2 is not str, raise an error
+		{
+			`"a".sub(2, "b")`,
+			object.NewTypeErr("\\2 must be str"),
+		},
+		// if \3 is not str, raise an error
+		{
+			`"a".sub("b", 3)`,
+			object.NewTypeErr("\\3 must be str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStrUc(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -887,6 +987,48 @@ func TestEvalArrHasp(t *testing.T) {
 		{
 			`Arr['has?](1, 1)`,
 			object.NewTypeErr("\\1 must be arr"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalArrJoin(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`["hello", "world"].join(" ")`,
+			object.NewPanStr("hello world"),
+		},
+		// non-str elems are stringified by .S
+		{
+			`[1, [2, 3], true, "five"].join("&")`,
+			object.NewPanStr("1&[2, 3]&true&five"),
+		},
+		// if arity is insufficient, raise an error
+		{
+			`[].join`,
+			object.NewTypeErr("Arr#join requires at least 2 args"),
+		},
+		// if \1 is not arr, raise an error
+		{
+			`Arr['join](1, " ")`,
+			object.NewTypeErr("\\1 must be arr"),
+		},
+		// if \2 is not str, raise an error
+		{
+			`['a, 'b].join(1)`,
+			object.NewTypeErr("\\2 must be str"),
+		},
+		// if (elem).S is not str, raise an error
+		{
+			`['a, {S: 1}].join(" ")`,
+			object.NewTypeErr(`{"S": 1}.S returned non-str value 1`),
 		},
 	}
 
@@ -3749,6 +3891,52 @@ func TestEvalBoolify(t *testing.T) {
 	}
 }
 
+func TestEvalIntify(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"1".I`,
+			object.NewPanInt(1),
+		},
+		{
+			`"-5".I`,
+			object.NewPanInt(-5),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalIntifyErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Str['I]()`,
+			object.NewTypeErr("Str#I requires at least 1 arg"),
+		},
+		{
+			`"1"['I](1)`,
+			object.NewTypeErr("`1` cannot be treated as str"),
+		},
+		{
+			`"-5a".I`,
+			object.NewValueErr("`\"-5a\"` cannot be converted into int"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalFloatify(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -3763,6 +3951,15 @@ func TestEvalFloatify(t *testing.T) {
 		{
 			`4.0.F`,
 			&object.PanFloat{Value: 4.0},
+		},
+		// str
+		{
+			`"1.0".F`,
+			&object.PanFloat{Value: 1.0},
+		},
+		{
+			`"-5.25".F`,
+			&object.PanFloat{Value: -5.25},
 		},
 	}
 
@@ -3784,6 +3981,18 @@ func TestEvalFloatifyErr(t *testing.T) {
 		{
 			`1['F]("a")`,
 			object.NewTypeErr("`\"a\"` cannot be treated as num"),
+		},
+		{
+			`Str['F]()`,
+			object.NewTypeErr("Str#F requires at least 1 arg"),
+		},
+		{
+			`"1"['F](2)`,
+			object.NewTypeErr("`2` cannot be treated as str"),
+		},
+		{
+			`"-5.a".F`,
+			object.NewValueErr("`\"-5.a\"` cannot be converted into float"),
 		},
 	}
 
@@ -5471,6 +5680,114 @@ func TestEvalInfixIntAddErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixIntSub(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`3 - 1`,
+			object.NewPanInt(2),
+		},
+		{
+			`5 - -10`,
+			object.NewPanInt(15),
+		},
+		// decendant of int can be subbed
+		{
+			`3 - true`,
+			object.NewPanInt(2),
+		},
+		// nil is treated as 0
+		{
+			`3 - nil`,
+			object.NewPanInt(3),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntSubErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 - []`,
+			object.NewTypeErr("`[]` cannot be treated as int"),
+		},
+		{
+			`1['-]({}, 2)`,
+			object.NewTypeErr("`{}` cannot be treated as int"),
+		},
+		{
+			`1.-`,
+			object.NewTypeErr("- requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntMul(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`2 * 3`,
+			object.NewPanInt(6),
+		},
+		// decendant of int can be added
+		{
+			`3 * true`,
+			object.NewPanInt(3),
+		},
+		// nil is treated as 1
+		{
+			`3 * nil`,
+			object.NewPanInt(3),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntMulErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 * []`,
+			object.NewTypeErr("`[]` cannot be treated as int"),
+		},
+		{
+			`1['*]({}, 2)`,
+			object.NewTypeErr("`{}` cannot be treated as int"),
+		},
+		{
+			`1.*`,
+			object.NewTypeErr("* requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixStrAdd(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -5483,6 +5800,11 @@ func TestEvalInfixStrAdd(t *testing.T) {
 		{
 			`"にほ" + "んご"`,
 			object.NewPanStr("にほんご"),
+		},
+		// decendant of str can be added
+		{
+			`"c" + "d".bear`,
+			object.NewPanStr("cd"),
 		},
 		// nil is treated as ""
 		{
@@ -5513,6 +5835,122 @@ func TestEvalInfixStrAddErr(t *testing.T) {
 		{
 			`"a".+`,
 			object.NewTypeErr("+ requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixStrMul(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"w" * 3`,
+			object.NewPanStr("www"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixStrMulErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"a" * -1`,
+			object.NewValueErr("`-1` is not positive"),
+		},
+		{
+			`"w" * []`,
+			object.NewTypeErr("`[]` cannot be treated as int"),
+		},
+		{
+			`'x['*]({}, 2)`,
+			object.NewTypeErr("`{}` cannot be treated as str"),
+		},
+		{
+			`?y.*`,
+			object.NewTypeErr("* requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixStrDiv(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"hello world" / " "`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("hello"),
+				object.NewPanStr("world"),
+			}},
+		},
+		{
+			`"a  b    c " / " "`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.NewPanStr("b"),
+				object.NewPanStr("c"),
+			}},
+		},
+		// use regex
+		{
+			`"abc1de23f" / "\d"`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("abc"),
+				object.NewPanStr("de"),
+				object.NewPanStr("f"),
+			}},
+		},
+		// decendant of str can be added
+		{
+			`"a,b" / ",".bear`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.NewPanStr("b"),
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixStrDivErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"w" / []`,
+			object.NewTypeErr("`[]` cannot be treated as str"),
+		},
+		{
+			`'x['/]({}, "a")`,
+			object.NewTypeErr("`{}` cannot be treated as str"),
+		},
+		{
+			`?y./`,
+			object.NewTypeErr("/ requires at least 2 args"),
 		},
 	}
 
@@ -5569,6 +6007,62 @@ func TestEvalInfixFloatAddErr(t *testing.T) {
 		{
 			`1.0.+`,
 			object.NewTypeErr("+ requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatSub(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`3.0 - 1.0`,
+			&object.PanFloat{Value: 2.0},
+		},
+		{
+			`5.0 - -10.0`,
+			&object.PanFloat{Value: 15.0},
+		},
+		// decendant of int can be added
+		{
+			`4.0 - 1.0.bear`,
+			&object.PanFloat{Value: 3.0},
+		},
+		// nil is treated as 0.0
+		{
+			`3.0 - nil`,
+			&object.PanFloat{Value: 3.0},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatSubErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.0 - []`,
+			object.NewTypeErr("`[]` cannot be treated as float"),
+		},
+		{
+			`0.0['-]({}, 1.0)`,
+			object.NewTypeErr("`{}` cannot be treated as float"),
+		},
+		{
+			`1.0.-`,
+			object.NewTypeErr("- requires at least 2 args"),
 		},
 	}
 

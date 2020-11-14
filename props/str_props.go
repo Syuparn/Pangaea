@@ -2,8 +2,11 @@ package props
 
 import (
 	"fmt"
-	"github.com/Syuparn/pangaea/object"
+	"regexp"
+	"strconv"
 	"strings"
+
+	"github.com/Syuparn/pangaea/object"
 )
 
 // StrProps provides built-in props for Str.
@@ -20,10 +23,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return err
 				}
 
-				selfVal := self.(*object.PanStr).Value
-				otherVal := other.(*object.PanStr).Value
-
-				return object.NewPanInt(int64(strings.Compare(selfVal, otherVal)))
+				return object.NewPanInt(int64(strings.Compare(self.Value, other.Value)))
 			},
 		),
 		"==": f(
@@ -86,8 +86,57 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return err
 				}
 
-				res := self.(*object.PanStr).Value + other.(*object.PanStr).Value
+				res := self.Value + other.Value
 				return object.NewPanStr(res)
+			},
+		),
+		"*": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("* requires at least 2 args")
+				}
+
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as str", args[0].Inspect()))
+				}
+
+				nInt, ok := object.TraceProtoOfInt(args[1])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as int", args[1].Inspect()))
+				}
+				n := nInt.Value
+
+				if n < 0 {
+					return object.NewValueErr(
+						fmt.Sprintf("`%s` is not positive", args[1].Inspect()))
+				}
+
+				return object.NewPanStr(strings.Repeat(self.Value, int(n)))
+			},
+		),
+		"/": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, sep, err := checkStrInfixArgs(args, "/")
+				if err != nil {
+					return err
+				}
+				splitted := regexp.MustCompile(sep.Value).Split(self.Value, -1)
+				strs := []object.PanObject{}
+				for _, s := range splitted {
+					// exclude empty elems
+					if s != "" {
+						strs = append(strs, object.NewPanStr(s))
+					}
+				}
+
+				return &object.PanArr{Elems: strs}
 			},
 		),
 		"_incBy": f(
@@ -156,6 +205,48 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 		),
 		"eval":    propContainer["Str_eval"],
 		"evalEnv": propContainer["Str_evalEnv"],
+		"F": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Str#F requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as str", args[0].Inspect()))
+				}
+
+				f, err := strconv.ParseFloat(self.Value, 64)
+				if err != nil {
+					return object.NewValueErr(
+						fmt.Sprintf("`%s` cannot be converted into float", args[0].Inspect()))
+				}
+				return &object.PanFloat{Value: f}
+			},
+		),
+		"I": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Str#I requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as str", args[0].Inspect()))
+				}
+
+				i, err := strconv.ParseInt(self.Value, 10, 64)
+				if err != nil {
+					return object.NewValueErr(
+						fmt.Sprintf("`%s` cannot be converted into int", args[0].Inspect()))
+				}
+				return object.NewPanInt(i)
+			},
+		),
 		"lc": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -186,6 +277,57 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanInt(int64(len([]rune(self.Value))))
 			},
 		),
+		"match": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Str#match requires at least 2 args")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be str`)
+				}
+				pattern, ok := object.TraceProtoOfStr(args[1])
+				if !ok {
+					return object.NewTypeErr(`\2 must be str`)
+				}
+
+				found := regexp.MustCompile(pattern.Value).FindStringSubmatch(self.Value)
+				elems := []object.PanObject{}
+				for _, s := range found {
+					elems = append(elems, object.NewPanStr(s))
+				}
+
+				return &object.PanArr{Elems: elems}
+			},
+		),
+		"sub": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 3 {
+					return object.NewTypeErr("Str#sub requires at least 3 args")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be str`)
+				}
+				pattern, ok := object.TraceProtoOfStr(args[1])
+				if !ok {
+					return object.NewTypeErr(`\2 must be str`)
+				}
+				sub, ok := object.TraceProtoOfStr(args[2])
+				if !ok {
+					return object.NewTypeErr(`\3 must be str`)
+				}
+
+				replaced := regexp.MustCompile(pattern.Value).
+					ReplaceAllString(self.Value, sub.Value)
+
+				return object.NewPanStr(replaced)
+			},
+		),
 		"uc": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -207,17 +349,17 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 func checkStrInfixArgs(
 	args []object.PanObject,
 	propName string,
-) (object.PanObject, object.PanObject, *object.PanErr) {
+) (*object.PanStr, *object.PanStr, *object.PanErr) {
 	if len(args) < 2 {
 		return nil, nil, object.NewTypeErr(propName + " requires at least 2 args")
 	}
 
-	self, ok := args[0].(*object.PanStr)
+	self, ok := object.TraceProtoOfStr(args[0])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
 			fmt.Sprintf("`%s` cannot be treated as str", args[0].Inspect()))
 	}
-	other, ok := args[1].(*object.PanStr)
+	other, ok := object.TraceProtoOfStr(args[1])
 	if !ok {
 		// NOTE: nil is treated as ""
 		_, ok := object.TraceProtoOfNil(args[1])

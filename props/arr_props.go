@@ -2,6 +2,7 @@ package props
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Syuparn/pangaea/object"
 )
@@ -157,6 +158,45 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return object.BuiltInFalse
+			},
+		),
+		"join": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Arr#join requires at least 2 args")
+				}
+				self, ok := object.TraceProtoOfArr(args[0])
+				if !ok {
+					return object.NewTypeErr(`\1 must be arr`)
+				}
+				joiner, ok := object.TraceProtoOfStr(args[1])
+				if !ok {
+					return object.NewTypeErr(`\2 must be str`)
+				}
+
+				elemStrs := []string{}
+				for _, elem := range self.Elems {
+					// stringify each elem
+					s := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+						env, object.EmptyPanObjPtr(),
+						object.EmptyPanObjPtr(), elem, sSym, args[1],
+					)
+					if s.Type() == object.ErrType {
+						return s
+					}
+					str, ok := object.TraceProtoOfStr(s)
+					if !ok {
+						return object.NewTypeErr(
+							fmt.Sprintf("%s.S returned non-str value %s",
+								elem.Inspect(), s.Inspect()))
+					}
+					elemStrs = append(elemStrs, str.Value)
+				}
+				res := strings.Join(elemStrs, joiner.Value)
+
+				return object.NewPanStr(res)
 			},
 		),
 		"len": f(
