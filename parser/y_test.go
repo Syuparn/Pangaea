@@ -527,6 +527,7 @@ func TestBackQuoteStrLiteral(t *testing.T) {
 		``,
 		`foo`,
 		`12345`,
+		// escape does not work
 		`\n`,
 		`Hello, world!`,
 		`#comment?`,
@@ -568,8 +569,8 @@ func TestDoubleQuoteStrLiteral(t *testing.T) {
 		{`"12345"`, "12345"},
 		{`"Hello, world!"`, "Hello, world!"},
 		{`"comment?"`, "comment?"},
-		// NOTE: escape is not evaluated in parser
-		{`"\n"`, `\n`},
+		// NOTE: escape is evaluated in parser
+		{`"\n"`, "\n"},
 		{`"` + "``" + `"`, "``"},
 		{`".hoge"`, ".hoge"},
 		{`"1 + 1"`, "1 + 1"},

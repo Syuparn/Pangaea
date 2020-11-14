@@ -1116,9 +1116,12 @@ strLiteral
 	}
 	| DOUBLEQUOTE_STR
 	{
+		// unquote escape sequences here
+		// NOTE: backquotes are unwraped in Unquote
+		unquoted, _ := strconv.Unquote($1.Literal)
 		$$ = &ast.StrLiteral{
 			Token: $1.Literal,
-			Value: $1.Literal[1:len($1.Literal)-1],
+			Value: unquoted,
 			IsRaw: false,
 			Src: yylex.(*Lexer).Source,
 		}

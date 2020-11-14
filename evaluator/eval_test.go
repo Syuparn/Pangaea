@@ -528,7 +528,7 @@ func TestEvalStrSub(t *testing.T) {
 			object.NewPanStr("mice"),
 		},
 		{
-			`"secret: 1234".sub("\d", "x")`,
+			"`secret: 1234`.sub(`\\d`, `x`)",
 			object.NewPanStr("secret: xxxx"),
 		},
 		{
@@ -5912,7 +5912,7 @@ func TestEvalInfixStrDiv(t *testing.T) {
 		},
 		// use regex
 		{
-			`"abc1de23f" / "\d"`,
+			"`abc1de23f` / `\\d`",
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanStr("abc"),
 				object.NewPanStr("de"),
