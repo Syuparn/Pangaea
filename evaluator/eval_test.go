@@ -528,7 +528,7 @@ func TestEvalStrSub(t *testing.T) {
 			object.NewPanStr("mice"),
 		},
 		{
-			`"secret: 1234".sub("\d", "x")`,
+			"`secret: 1234`.sub(`\\d`, `x`)",
 			object.NewPanStr("secret: xxxx"),
 		},
 		{
@@ -4112,6 +4112,11 @@ func TestEvalPrint(t *testing.T) {
 			`false.p`,
 			"false\n",
 		},
+		// set-up end
+		{
+			`"abc".p(end: ",")`,
+			"abc,",
+		},
 	}
 
 	for _, tt := range tests {
@@ -4153,6 +4158,10 @@ func TestEvalPrintErr(t *testing.T) {
 		{
 			`{S: 1}.p`,
 			object.NewTypeErr(`\1.S must be str`),
+		},
+		{
+			`"abc".p(end: 1)`,
+			object.NewTypeErr(`end must be str`),
 		},
 	}
 
@@ -5912,7 +5921,7 @@ func TestEvalInfixStrDiv(t *testing.T) {
 		},
 		// use regex
 		{
-			`"abc1de23f" / "\d"`,
+			"`abc1de23f` / `\\d`",
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanStr("abc"),
 				object.NewPanStr("de"),
