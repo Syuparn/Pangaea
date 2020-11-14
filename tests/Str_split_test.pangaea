@@ -1,0 +1,4 @@
+assert("hello world".split() == ["hello", "world"])
+assert("a,b,c".split(sep: ",") == ["a", "b", "c"])
+assert("a   b  c  ".split() == ["a", "b", "c"])
+assert("a;b,c d".split(sep: "[;, ]") == ["a", "b", "c", "d"])

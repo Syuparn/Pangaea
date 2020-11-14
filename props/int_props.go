@@ -140,6 +140,19 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanInt(res)
 			},
 		),
+		"-": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkIntInfixArgs(args, "-", object.NewPanInt(0))
+				if err != nil {
+					return err
+				}
+
+				res := self.Value - other.Value
+				return object.NewPanInt(res)
+			},
+		),
 		"*": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
