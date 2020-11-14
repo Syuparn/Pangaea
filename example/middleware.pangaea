@@ -1,0 +1,40 @@
+# middleware pattern (often used in golang) written in pangaea
+dearMiddleware := {|next|
+	{|w|
+    w("dear developers,")
+    next(w)
+  }
+}
+sincerelyMiddleware := {|next|
+	{|w|
+    next(w)
+    w("Sincerely,")
+    w("Pangaea")
+  }
+}
+dashMiddleware := {|next|
+  {|w| 
+    w("-" * 10)
+    next(w)
+    w("-" * 10)
+  }
+}
+breaklineMiddleware := {|next|
+  {|w| 
+    w("")
+    next(w)
+    w("")
+  }
+}
+
+Chain := {
+  new: m{.bear({middlewares: \0[1:]})},
+  then: m{|handler| .middlewares$(handler){|acc, i| i(acc)}},
+}
+
+# wrap message by middirewares!
+handler := Chain
+  |.new(breaklineMiddleware, dearMiddleware, sincerelyMiddleware, dashMiddleware)
+  |.then {|w| w("Thank you for using.")}
+
+handler({.p})
