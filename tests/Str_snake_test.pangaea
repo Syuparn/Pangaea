@@ -1,0 +1,5 @@
+assert("a_snake".snake == "a_snake")
+assert("noLegs".snake == "no_legs")
+assert("HatchEggs".snake == "hatch_eggs")
+assert("strong-poison".snake == "strong_poison")
+assert("itCrawls-silently".snake == "it_crawls_silently")

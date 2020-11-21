@@ -1,0 +1,5 @@
+assert("original-kebab".kebab == "original-kebab")
+assert("kebabShop".kebab == "kebab-shop")
+assert("KebabSandwich".kebab == "kebab-sandwich")
+assert("kebab_cutter".kebab == "kebab-cutter")
+assert("iAm_starving".kebab == "i-am-starving")
