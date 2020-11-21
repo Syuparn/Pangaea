@@ -474,13 +474,13 @@ func TestEvalStrMatch(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`"hello".match("l+")`,
+			"`hello`.match(`l+`)",
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanStr("ll"),
 			}},
 		},
 		{
-			`"--aabcbcbcxyyyzz--".match("a+((bc)*)x([yz]+)")`,
+			"`--aabcbcbcxyyyzz--`.match(`a+((bc)*)x([yz]+)`)",
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanStr("aabcbcbcxyyyzz"),
 				object.NewPanStr("bcbcbc"),
@@ -490,7 +490,7 @@ func TestEvalStrMatch(t *testing.T) {
 		},
 		// use descendant of str for recv
 		{
-			`"abbbc".bear.match("b+")`,
+			"`abbbc`.bear.match(`b+`)",
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanStr("bbb"),
 			}},
@@ -509,6 +509,11 @@ func TestEvalStrMatch(t *testing.T) {
 		{
 			`"a".match(1)`,
 			object.NewTypeErr("\\2 must be str"),
+		},
+		// if \2 is illegal for regex syntax, raise an error
+		{
+			`"a".match("[")`,
+			object.NewValueErr(`"[" is invalid regex pattern`),
 		},
 	}
 
@@ -559,6 +564,16 @@ func TestEvalStrSub(t *testing.T) {
 		{
 			`"a".sub("b", 3)`,
 			object.NewTypeErr("\\3 must be str"),
+		},
+		// if \2 is illegal for regex syntax, raise an error
+		{
+			`"a".sub("[", "b")`,
+			object.NewValueErr(`"[" is invalid regex pattern`),
+		},
+		// if \3 is illegal for regex syntax, raise an error
+		{
+			`"a".sub("a", "$999999999999")`,
+			object.NewValueErr(`"$999999999999" is invalid regex pattern`),
 		},
 	}
 
@@ -5936,6 +5951,11 @@ func TestEvalInfixStrDiv(t *testing.T) {
 				object.NewPanStr("b"),
 			}},
 		},
+		// if \2 is illegal for regex syntax, raise an error
+		{
+			"`a` / `[`",
+			object.NewValueErr(`"[" is invalid regex pattern`),
+		},
 	}
 
 	for _, tt := range tests {
@@ -6487,7 +6507,9 @@ func testPanArr(t *testing.T, actual object.PanObject, expected *object.PanArr) 
 	}
 
 	if len(obj.Elems) != len(expected.Elems) {
-		t.Fatalf("length must be %d. got=%d", len(expected.Elems), len(obj.Elems))
+		t.Fatalf("length must be %d(%s). got=%d(%s)",
+			len(expected.Elems), expected.Inspect(),
+			len(obj.Elems), obj.Inspect())
 		return
 	}
 

@@ -2,9 +2,10 @@ package props
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/dlclark/regexp2"
 
 	"github.com/Syuparn/pangaea/object"
 )
@@ -127,7 +128,19 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if err != nil {
 					return err
 				}
-				splitted := regexp.MustCompile(sep.Value).Split(self.Value, -1)
+				//                        pattern     RegexOptions
+				p, cerr := regexp2.Compile(sep.Value, 0)
+				if cerr != nil {
+					return object.NewValueErr(
+						fmt.Sprintf("%s is invalid regex pattern", sep.Inspect()))
+				}
+				// TODO: replace to Split() function when regexp2 implements it
+				splitted, serr := splitBySep(p, self.Value)
+				if serr != nil {
+					return object.NewPanErr(
+						fmt.Sprintf("unexpectedly failed to find match: %s", serr.Error()))
+				}
+
 				strs := []object.PanObject{}
 				for _, s := range splitted {
 					// exclude empty elems
@@ -293,10 +306,21 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`\2 must be str`)
 				}
 
-				found := regexp.MustCompile(pattern.Value).FindStringSubmatch(self.Value)
+				//                        pattern     RegexOptions
+				p, err := regexp2.Compile(pattern.Value, 0)
+				if err != nil {
+					return object.NewValueErr(
+						fmt.Sprintf("%s is invalid regex pattern", pattern.Inspect()))
+				}
+				match, err := p.FindStringMatch(self.Value)
+				if err != nil {
+					return object.NewPanErr(
+						fmt.Sprintf("unexpectedly failed to find match: %s", err.Error()))
+				}
+
 				elems := []object.PanObject{}
-				for _, s := range found {
-					elems = append(elems, object.NewPanStr(s))
+				for _, group := range match.Groups() {
+					elems = append(elems, object.NewPanStr(group.String()))
 				}
 
 				return &object.PanArr{Elems: elems}
@@ -322,8 +346,18 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`\3 must be str`)
 				}
 
-				replaced := regexp.MustCompile(pattern.Value).
-					ReplaceAllString(self.Value, sub.Value)
+				//                        pattern     RegexOptions
+				p, err := regexp2.Compile(pattern.Value, 0)
+				if err != nil {
+					return object.NewValueErr(
+						fmt.Sprintf("%s is invalid regex pattern", pattern.Inspect()))
+				}
+
+				replaced, err := p.Replace(self.Value, sub.Value, -1, -1)
+				if err != nil {
+					return object.NewValueErr(
+						fmt.Sprintf("%s is invalid regex pattern", sub.Inspect()))
+				}
 
 				return object.NewPanStr(replaced)
 			},
@@ -388,4 +422,27 @@ func strIter(s *object.PanStr) object.BuiltInFunc {
 		yieldIdx++
 		return yielded
 	}
+}
+
+// TODO: delete it when Split() is implemented in regexp2
+func splitBySep(re *regexp2.Regexp, str string) ([]string, error) {
+	splitted := []string{}
+	m, err := re.FindStringMatch(str)
+	if err != nil {
+		return nil, err
+	}
+
+	sepFrom, sepTo := m.Index, (m.Index + m.Length)
+	splitted = append(splitted, str[0:sepFrom])
+	for m, err := re.FindNextMatch(m); m != nil; m, err = re.FindNextMatch(m) {
+		if err != nil {
+			return nil, err
+		}
+		sepFrom = m.Index
+		splitted = append(splitted, str[sepTo:sepFrom])
+		sepTo = m.Index + m.Length
+	}
+	splitted = append(splitted, str[sepTo:len(str)])
+
+	return splitted, nil
 }
