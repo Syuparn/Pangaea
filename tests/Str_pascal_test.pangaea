@@ -1,0 +1,5 @@
+assert("BlaisePascal".pascal == "BlaisePascal")
+assert("pascalsTriangle".pascal == "PascalsTriangle")
+assert("pascals-theorem".pascal == "PascalsTheorem")
+assert("a_thinking_reed".pascal == "AThinkingReed")
+assert("newton_per-squareMeter".pascal == "NewtonPerSquareMeter")
