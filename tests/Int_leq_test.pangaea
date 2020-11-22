@@ -1,0 +1,3 @@
+assert((3 <= 4) == true)
+assert((4 <= 4) == true)
+assert((5 <= 4) == false)

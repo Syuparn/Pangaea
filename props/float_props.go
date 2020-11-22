@@ -11,6 +11,30 @@ import (
 func FloatProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
+		"<=>": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkFloatInfixArgs(args, "<=>", &object.PanFloat{Value: 0.0})
+				if err != nil {
+					return err
+				}
+
+				selfVal := self.Value
+				otherVal := other.Value
+				var res int64
+
+				if selfVal > otherVal {
+					res = 1
+				} else if selfVal == otherVal {
+					res = 0
+				} else {
+					res = -1
+				}
+
+				return object.NewPanInt(res)
+			},
+		),
 		"==": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
