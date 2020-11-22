@@ -1,0 +1,14 @@
+{
+  # == returns whether self and other are equivalent.
+  '==: m{|other| (self <=> other) == 0},
+  # != returns whether self and other are not equivalent.
+  '!=: m{|other| (self <=> other) != 0},
+  # < returns whether self is smaller then other.
+  '<: m{|other| (self <=> other) == -1},
+  # <= returns whether self is not larger then other.
+  '<=: m{|other| (self <=> other) != 1},
+  # > returns whether self is larger then other.
+  '>: m{|other| (self <=> other) == 1},
+  # >= returns whether self is not smaller then other.
+  '>=: m{|other| (self <=> other) != -1},
+}

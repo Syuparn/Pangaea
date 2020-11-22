@@ -36,6 +36,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanInt(res)
 			},
 		),
+		// NOTE: this cannot be removed (Comparable uses Int#== internally)
 		"==": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -64,7 +65,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInFalse
 			},
 		),
-		// TODO: use <=> instead
+		// NOTE: this cannot be removed (Comparable uses Int#!= internally)
 		"!=": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
