@@ -2,15 +2,15 @@
   # IA converts self into int arr
   IA: m{|sep: `\s`| .split(sep: sep)@I},
   # camel makes self camelCase
-  camel: {.pascal.{\[0].lc+\[1:]}},
+  camel: m{self[0].lc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
   # capital makes first letter of self uppercase and the others lowercase
-  capital: m{|| self[0].uc + self[1:].lc},
+  capital: m{self[0].uc + self[1:].lc},
   # kebab makes self kebab-case
-  kebab: {.sub(`_`, `-`).sub(`([A-Z])`, `-$1`).lc.sub(`^-`, ``)},
+  kebab: m{.sub(`_`, `-`).sub(`([A-Z])`, `-$1`).lc.sub(`^-`, ``)},
   # pascal makes self PascalCase
-  pascal: {.sub(`([A-Z])`, `_$1`).split(sep: `[_-]`)@capital.join("")},
+  pascal: m{self[0].uc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
   # snake makes self snake_case
-  snake: {.sub(`-`, `_`).sub(`([A-Z])`, `_$1`).lc.sub(`^_`, ``)},
+  snake: m{.sub(`-`, `_`).sub(`([A-Z])`, `_$1`).lc.sub(`^_`, ``)},
   # split splits self into arr by sep
   split: m{|sep: `\s`| self / sep},
 }

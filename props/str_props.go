@@ -358,8 +358,31 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewValueErr(
 						fmt.Sprintf("%s is invalid regex pattern", sub.Inspect()))
 				}
+				// HACK: handle \U...\E (uppercase) and \L...E (lowercase)
+				// TODO: remain (\U|\L)...\E in original string
+				ucPattern := regexp2.MustCompile(`\\U(.*?)\\E`, 0)
+				ucReplaced, err := ucPattern.ReplaceFunc(
+					replaced, func(m regexp2.Match) string {
+						return strings.ToUpper(m.Groups()[1].String())
+					}, -1, -1)
 
-				return object.NewPanStr(replaced)
+				if err != nil {
+					return object.NewValueErr(
+						fmt.Sprintf("%s is invalid regex pattern", sub.Inspect()))
+				}
+
+				lcPattern := regexp2.MustCompile(`\\L(.*?)\\E`, 0)
+				lcReplaced, err := lcPattern.ReplaceFunc(
+					ucReplaced, func(m regexp2.Match) string {
+						return strings.ToLower(m.Groups()[1].String())
+					}, -1, -1)
+
+				if err != nil {
+					return object.NewValueErr(
+						fmt.Sprintf("%s is invalid regex pattern", sub.Inspect()))
+				}
+
+				return object.NewPanStr(lcReplaced)
 			},
 		),
 		"uc": f(
