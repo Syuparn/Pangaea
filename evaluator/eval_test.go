@@ -545,6 +545,21 @@ func TestEvalStrSub(t *testing.T) {
 			`"hoge".bear.sub("o", "i")`,
 			object.NewPanStr("hige"),
 		},
+		// convert to lowercase
+		{
+			"`PANGAEA`.sub(`(A|E)`, `\\L$1\\E`)",
+			object.NewPanStr("PaNGaea"),
+		},
+		// convert to uppercase
+		{
+			"`pangaea`.sub(`(a|e)`, `\\U$1\\E`)",
+			object.NewPanStr("pAngAEA"),
+		},
+		// use both of \U and \L
+		{
+			"`SIng`.sub(`(Ing)`, `\\U$1\\E\\L$1\\E`)",
+			object.NewPanStr("SINGing"),
+		},
 		// if no args are passed, raise an error
 		{
 			`Str.sub("a")`,
