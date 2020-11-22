@@ -1,0 +1,5 @@
+assert(3.clip(2, 4) == 3)
+assert(2.clip(2, 4) == 2)
+assert(4.clip(2, 4) == 4)
+assert(1.clip(2, 4) == 2)
+assert(5.clip(2, 4) == 4)

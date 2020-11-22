@@ -1,0 +1,3 @@
+assert("".max == nil)
+assert("a".max == "a")
+assert("adbc".max == "d")

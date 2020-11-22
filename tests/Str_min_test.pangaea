@@ -1,0 +1,3 @@
+assert("".min == nil)
+assert("a".min == "a")
+assert("dbac".min == "a")

@@ -1,0 +1,3 @@
+assert("abc".trim == "abc")
+assert("  abc  ".trim == "abc")
+assert("\t abc\n ".trim == "abc")

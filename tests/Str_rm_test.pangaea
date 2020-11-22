@@ -1,0 +1,3 @@
+assert("abc".rm("b") == "ac")
+assert("pangaea".rm(`[ae]`) == "png")
+assert("abc".rm("d") == "abc")
