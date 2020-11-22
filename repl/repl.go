@@ -18,7 +18,7 @@ import (
 )
 
 // PROMPT is a prefix string printed in Pangaea interpreter.
-const PROMPT = "> "
+const PROMPT = "pangaea> "
 
 // Start starts Pangaea interpreter.
 func Start(in io.Reader, out io.Writer) {
