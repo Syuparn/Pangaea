@@ -2,15 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
-	"github.com/Syuparn/pangaea/repl"
 	"github.com/Syuparn/pangaea/runscript"
 )
 
 var (
-	parse      = flag.Bool("parse", false, "only parse instead of eval")
 	oneLiner   = flag.String("e", "", "run one-line script")
 	testCmdSet = flag.NewFlagSet("test", flag.ExitOnError)
 )
@@ -39,11 +36,6 @@ func main() {
 		os.Exit(exitCode)
 	}
 
-	if *parse {
-		runParsing()
-		return
-	}
-
 	runRepl()
 }
 
@@ -63,12 +55,5 @@ func runOneLiner(src string) int {
 }
 
 func runRepl() {
-	fmt.Println("Pangaea ver0.1.1 (alpha)")
-	repl.Start(os.Stdin, os.Stdout)
-}
-
-func runParsing() {
-	fmt.Println("Pangaea ver0.1.1 (alpha)")
-	fmt.Println("Parsing mode(parsed ast is not evaluated)")
-	repl.StartParsing(os.Stdin, os.Stdout)
+	runscript.StartREPL(os.Stdin, os.Stdout)
 }
