@@ -11,12 +11,14 @@
   pascal: m{self[0].uc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
   # rev returns reversed string.
   rev: m{self[::-1]},
+  # rm removes pattern in self.
+  rm: m{|pattern| .sub(pattern, "")},
   # snake makes self snake_case
   snake: m{.sub(`-`, `_`).sub(`([A-Z])`, `_$1`).lc.sub(`^_`, ``)},
   # split splits self into arr by sep
   split: m{|sep: `\s`| self / sep},
   # trim trims both side of spaces in self
-  trim: m{self.sub(`(^\s+|\s+$)`, "")},
+  trim: m{.rm(`(^\s+|\s+$)`)},
   # truncate truncates self length to len
   truncate: m{|len, end: "..."| self if .len <= len else self[:len-end.len] + end},
 }
