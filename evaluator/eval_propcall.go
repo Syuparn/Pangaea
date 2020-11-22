@@ -246,7 +246,7 @@ func evalProp(
 ) (o object.PanObject, isMissing bool) {
 	propHash := object.GetSymHash(propStr)
 
-	prop, ok := callProp(recv, propHash)
+	prop, ok := object.FindPropAlongProtos(recv, propHash)
 
 	if ok {
 		return prop, false
@@ -254,7 +254,7 @@ func evalProp(
 
 	// try to find _missing instead
 	missingHash := object.GetSymHash("_missing")
-	missing, ok := callProp(recv, missingHash)
+	missing, ok := object.FindPropAlongProtos(recv, missingHash)
 
 	if !ok {
 		err := object.NewNoPropErr(

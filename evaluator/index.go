@@ -107,7 +107,7 @@ func findElemInObj(
 		return object.BuiltInNil
 	}
 
-	ret, ok := callProp(self, object.GetSymHash(propName.Value))
+	ret, ok := object.FindPropAlongProtos(self, object.GetSymHash(propName.Value))
 	if !ok {
 		return object.BuiltInNil
 	}
