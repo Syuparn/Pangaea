@@ -1,8 +1,10 @@
 {
   # A converts self into arr.
-  A: m{|| self},
+  A: m{self},
   # empty? returns whether self contains elements.
-  empty?: m{|| .len.!},
+  empty?: m{.len.!},
+  # rev returns arr with reversed elements.
+  rev: m{self[::-1]},
   # unwrap extracts element if there is only one element.
-  unwrap: m{|| self[0] if .len == 1 else self},
+  unwrap: m{self[0] if .len == 1 else self},
 }
