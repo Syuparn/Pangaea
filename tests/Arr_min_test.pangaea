@@ -1,0 +1,5 @@
+assert([].min == nil)
+assert([-1].min == -1)
+assert([-1, 2].min == -1)
+assert([3, 1, 2, 4].min == 1)
+assert(['b, 'a, 'd, 'c].min == 'a)
