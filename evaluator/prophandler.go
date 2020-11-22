@@ -19,7 +19,7 @@ func builtInCallProp(
 		return object.BuiltInNil
 	}
 
-	ret, ok := callProp(obj, object.GetSymHash(propName.Value))
+	ret, ok := object.FindPropAlongProtos(obj, object.GetSymHash(propName.Value))
 	if !ok {
 		return object.BuiltInNil
 	}
