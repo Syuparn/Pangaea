@@ -3136,6 +3136,112 @@ func TestEvalIfExpr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixOr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`true || false`,
+			object.BuiltInTrue,
+		},
+		{
+			`false || true`,
+			object.BuiltInTrue,
+		},
+		{
+			`false || false`,
+			object.BuiltInFalse,
+		},
+		{
+			`true || true`,
+			object.BuiltInTrue,
+		},
+		{
+			`'a || 10`,
+			object.NewPanStr("a"),
+		},
+		{
+			`false || 10`,
+			object.NewPanInt(10),
+		},
+		// evaluated to right if left is falsy
+		{
+			`[] || 1`,
+			object.NewPanInt(1),
+		},
+		{
+			`"" || "b"`,
+			object.NewPanStr("b"),
+		},
+		// shortcut
+		{
+			`5 || _`,
+			object.NewPanInt(5),
+		},
+		{
+			`_ || 5`,
+			object.BuiltInNotImplemented,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixAnd(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`true && false`,
+			object.BuiltInFalse,
+		},
+		{
+			`false && true`,
+			object.BuiltInFalse,
+		},
+		{
+			`false && false`,
+			object.BuiltInFalse,
+		},
+		{
+			`true && true`,
+			object.BuiltInTrue,
+		},
+		{
+			`false && 10`,
+			object.BuiltInFalse,
+		},
+		// evaluated to right if left is truthy
+		{
+			`['a] && 1`,
+			object.NewPanInt(1),
+		},
+		{
+			`"abc" && "b"`,
+			object.NewPanStr("b"),
+		},
+		// shortcut
+		{
+			`"" && _`,
+			object.NewPanStr(""),
+		},
+		{
+			`_ && ""`,
+			object.BuiltInNotImplemented,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssign(t *testing.T) {
 	tests := []struct {
 		input       string
