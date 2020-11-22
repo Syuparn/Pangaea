@@ -1,0 +1,3 @@
+assert("".rev == "")
+assert("a".rev == "a")
+assert("hello".rev == "olleh")

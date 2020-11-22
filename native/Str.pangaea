@@ -9,6 +9,8 @@
   kebab: m{.sub(`_`, `-`).sub(`([A-Z])`, `-$1`).lc.sub(`^-`, ``)},
   # pascal makes self PascalCase
   pascal: m{self[0].uc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
+  # rev returns reversed string.
+  rev: m{self[::-1]},
   # snake makes self snake_case
   snake: m{.sub(`-`, `_`).sub(`([A-Z])`, `_$1`).lc.sub(`^_`, ``)},
   # split splits self into arr by sep
