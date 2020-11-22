@@ -1,0 +1,3 @@
+assert(('a <= 'b) == true)
+assert(('b <= 'b) == true)
+assert(('c <= 'b) == false)
