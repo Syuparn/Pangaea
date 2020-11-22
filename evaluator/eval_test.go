@@ -5663,6 +5663,96 @@ func TestEvalInfixConstsEq(t *testing.T) {
 	}
 }
 
+func TestEvalInfixIntSpaceship(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`2 <=> 2`,
+			object.NewPanInt(0),
+		},
+		{
+			`2 <=> 3`,
+			object.NewPanInt(-1),
+		},
+		{
+			`3 <=> 2`,
+			object.NewPanInt(1),
+		},
+		// ancestor of int is also comparable
+		{
+			`1 <=> true`,
+			object.NewPanInt(0),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixStrSpaceship(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`'b <=> 'b`,
+			object.NewPanInt(0),
+		},
+		{
+			`'a <=> 'b`,
+			object.NewPanInt(-1),
+		},
+		{
+			`'c <=> 'b`,
+			object.NewPanInt(1),
+		},
+		// ancestor of int is also comparable
+		{
+			`'b <=> 'b.bear`,
+			object.NewPanInt(0),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatSpaceship(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.0 <=> 1.0`,
+			object.NewPanInt(0),
+		},
+		{
+			`1.5 <=> 2.0`,
+			object.NewPanInt(-1),
+		},
+		{
+			`2.5 <=> 2.0`,
+			object.NewPanInt(1),
+		},
+		// ancestor of float is also comparable
+		{
+			`1.0 <=> 1.0.bear`,
+			object.NewPanInt(0),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixIntAdd(t *testing.T) {
 	tests := []struct {
 		input    string
