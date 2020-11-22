@@ -11,4 +11,6 @@
   '>: m{|other| (self <=> other) == 1},
   # >= returns whether self is not smaller then other.
   '>=: m{|other| (self <=> other) != -1},
+  # between? returns whether self is between min and max.
+  between?: m{|min, max| (min <= self) && (self <= max)},
 }

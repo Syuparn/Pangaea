@@ -1,0 +1,5 @@
+assert('c.between?('b, 'd) == true)
+assert('b.between?('b, 'd) == true)
+assert('d.between?('b, 'd) == true)
+assert('a.between?('b, 'd) == false)
+assert('e.between?('b, 'd) == false)

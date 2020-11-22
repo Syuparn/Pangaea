@@ -1,0 +1,5 @@
+assert(1.2.between?(1.0, 2.0) == true)
+assert(1.0.between?(1.0, 2.0) == true)
+assert(2.0.between?(1.0, 2.0) == true)
+assert(0.5.between?(1.0, 2.0) == false)
+assert(2.5.between?(1.0, 2.0) == false)
