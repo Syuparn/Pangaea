@@ -15,6 +15,8 @@
   snake: m{.sub(`-`, `_`).sub(`([A-Z])`, `_$1`).lc.sub(`^_`, ``)},
   # split splits self into arr by sep
   split: m{|sep: `\s`| self / sep},
+  # trim trims both side of spaces in self
+  trim: m{self.sub(`(^\s+|\s+$)`, "")},
   # truncate truncates self length to len
   truncate: m{|len, end: "..."| self if .len <= len else self[:len-end.len] + end},
 }
