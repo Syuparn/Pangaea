@@ -8,13 +8,14 @@ package evaluator
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
 	"github.com/Syuparn/pangaea/props"
-	"os"
-	"strings"
-	"testing"
 )
 
 func TestMain(m *testing.M) {
@@ -1116,7 +1117,7 @@ func TestEvalObjLiteral(t *testing.T) {
 		{
 			`{a: 1}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
@@ -1125,11 +1126,11 @@ func TestEvalObjLiteral(t *testing.T) {
 		{
 			`{a: 1, b: 2}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanInt(2),
 				},
@@ -1139,11 +1140,11 @@ func TestEvalObjLiteral(t *testing.T) {
 		{
 			`{a: 1, b: 2, a: 3}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanInt(2),
 				},
@@ -1153,11 +1154,11 @@ func TestEvalObjLiteral(t *testing.T) {
 		{
 			`{a: 1, b: "B"}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanStr("B"),
 				},
@@ -1167,10 +1168,10 @@ func TestEvalObjLiteral(t *testing.T) {
 		{
 			`{a: {b: 10}}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key: object.NewPanStr("a"),
 					Value: toPanObj([]object.Pair{
-						object.Pair{
+						{
 							Key:   object.NewPanStr("b"),
 							Value: object.NewPanInt(10),
 						},
@@ -1183,11 +1184,11 @@ func TestEvalObjLiteral(t *testing.T) {
 		{
 			`{a: 1, **{b: 2}}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanInt(2),
 				},
@@ -1196,11 +1197,11 @@ func TestEvalObjLiteral(t *testing.T) {
 		{
 			`{**{a: 1}, **{b: 2}}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanInt(2),
 				},
@@ -1210,7 +1211,7 @@ func TestEvalObjLiteral(t *testing.T) {
 		{
 			`{"hoge".bear: 1}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("hoge"),
 					Value: object.NewPanInt(1),
 				},
@@ -1232,7 +1233,7 @@ func TestEvalPinnedObjKey(t *testing.T) {
 		{
 			`a := "A"; {^a: 1}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("A"),
 					Value: object.NewPanInt(1),
 				},
@@ -1242,7 +1243,7 @@ func TestEvalPinnedObjKey(t *testing.T) {
 		{
 			`b := "B".bear; {^b: 1}`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("B"),
 					Value: object.NewPanInt(1),
 				},
@@ -1339,7 +1340,7 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{'a: 1}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.NewPanInt(1),
 					},
@@ -1352,15 +1353,15 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{'a: 1, 2: 3, true: 5}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.NewPanInt(1),
 					},
-					object.Pair{
+					{
 						Key:   object.NewPanInt(2),
 						Value: object.NewPanInt(3),
 					},
-					object.Pair{
+					{
 						Key:   object.BuiltInTrue,
 						Value: object.NewPanInt(5),
 					},
@@ -1373,11 +1374,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{'a: 1, 'b: 2, 'a: 3}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.NewPanInt(1),
 					},
-					object.Pair{
+					{
 						Key:   object.NewPanStr("b"),
 						Value: object.NewPanInt(2),
 					},
@@ -1390,11 +1391,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{"a": 1, "b": "B"}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.NewPanInt(1),
 					},
-					object.Pair{
+					{
 						Key:   object.NewPanStr("b"),
 						Value: object.NewPanStr("B"),
 					},
@@ -1407,11 +1408,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{'a: %{'b: 10}}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key: object.NewPanStr("a"),
 						Value: toPanMap(
 							[]object.Pair{
-								object.Pair{
+								{
 									Key:   object.NewPanStr("b"),
 									Value: object.NewPanInt(10),
 								},
@@ -1430,11 +1431,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{'a: 1, **%{'b: 2}}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.NewPanInt(1),
 					},
-					object.Pair{
+					{
 						Key:   object.NewPanStr("b"),
 						Value: object.NewPanInt(2),
 					},
@@ -1446,11 +1447,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{**%{'a: 1}, **%{'b: 2}}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.NewPanInt(1),
 					},
-					object.Pair{
+					{
 						Key:   object.NewPanStr("b"),
 						Value: object.NewPanInt(2),
 					},
@@ -1463,11 +1464,11 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{**%{'a: 1}, **{b: 2}}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.NewPanInt(1),
 					},
-					object.Pair{
+					{
 						Key:   object.NewPanStr("b"),
 						Value: object.NewPanInt(2),
 					},
@@ -1480,23 +1481,23 @@ func TestEvalMapLiteral(t *testing.T) {
 			`%{'a: 1, [1, 2]: 3, %{4: 5}: 6}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.NewPanInt(1),
 					},
 				},
 				[]object.Pair{
-					object.Pair{
+					{
 						Key: &object.PanArr{Elems: []object.PanObject{
 							object.NewPanInt(1),
 							object.NewPanInt(2),
 						}},
 						Value: object.NewPanInt(3),
 					},
-					object.Pair{
+					{
 						Key: toPanMap(
 							[]object.Pair{
-								object.Pair{
+								{
 									Key:   object.NewPanInt(4),
 									Value: object.NewPanInt(5),
 								},
@@ -1514,7 +1515,7 @@ func TestEvalMapLiteral(t *testing.T) {
 			toPanMap(
 				[]object.Pair{},
 				[]object.Pair{
-					object.Pair{
+					{
 						Key: &object.PanArr{Elems: []object.PanObject{
 							object.NewPanInt(1),
 							object.NewPanInt(2),
@@ -1556,7 +1557,7 @@ func TestEvalPinnedMapKey(t *testing.T) {
 			`a := true; %{^a: 1}`,
 			toPanMap(
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.BuiltInTrue,
 						Value: object.NewPanInt(1),
 					},
@@ -1640,7 +1641,7 @@ func TestEvalFuncLiteral(t *testing.T) {
 			toPanFunc(
 				[]string{"a", "b"},
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("c"),
 						Value: object.NewPanInt(10),
 					},
@@ -1654,11 +1655,11 @@ func TestEvalFuncLiteral(t *testing.T) {
 			toPanFunc(
 				[]string{"a", "b"},
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("c"),
 						Value: object.NewPanInt(10),
 					},
-					object.Pair{
+					{
 						Key:   object.NewPanStr("d"),
 						Value: object.NewPanStr("e"),
 					},
@@ -1852,7 +1853,7 @@ func TestEvalIterLiteral(t *testing.T) {
 			toPanIter(
 				[]string{"a", "b"},
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("c"),
 						Value: object.NewPanInt(10),
 					},
@@ -1866,11 +1867,11 @@ func TestEvalIterLiteral(t *testing.T) {
 			toPanIter(
 				[]string{"a", "b"},
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("c"),
 						Value: object.NewPanInt(10),
 					},
-					object.Pair{
+					{
 						Key:   object.NewPanStr("d"),
 						Value: object.NewPanStr("e"),
 					},
@@ -1929,7 +1930,7 @@ func TestEvalIterNew(t *testing.T) {
 				`|a| yield a`,
 				toEnv(
 					[]object.Pair{
-						object.Pair{
+						{
 							Key:   object.NewPanStr("a"),
 							Value: object.NewPanInt(10),
 						},
@@ -1944,7 +1945,7 @@ func TestEvalIterNew(t *testing.T) {
 			toPanIter(
 				[]string{"a", "b"},
 				[]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("c"),
 						Value: object.NewPanStr("c"),
 					},
@@ -1952,17 +1953,17 @@ func TestEvalIterNew(t *testing.T) {
 				`|a, b, c: 'c| yield a`,
 				toEnv(
 					[]object.Pair{
-						object.Pair{
+						{
 							Key:   object.NewPanStr("a"),
 							Value: object.NewPanStr("A"),
 						},
-						object.Pair{
+						{
 							Key:   object.NewPanStr("b"),
 							Value: object.NewPanStr("B"),
 						},
 					},
 					[]object.Pair{
-						object.Pair{
+						{
 							Key:   object.NewPanStr("c"),
 							Value: object.NewPanStr("C"),
 						},
@@ -3252,7 +3253,7 @@ func TestEvalAssign(t *testing.T) {
 			`a := 'A`,
 			object.NewPanStr("A"),
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanStr("A"),
 				},
@@ -3262,7 +3263,7 @@ func TestEvalAssign(t *testing.T) {
 			`'A => a`,
 			object.NewPanStr("A"),
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanStr("A"),
 				},
@@ -3272,7 +3273,7 @@ func TestEvalAssign(t *testing.T) {
 			`a := 'A; a`,
 			object.NewPanStr("A"),
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanStr("A"),
 				},
@@ -3285,11 +3286,11 @@ func TestEvalAssign(t *testing.T) {
 				object.NewPanInt(10),
 			}},
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(5),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanInt(10),
 				},
@@ -3302,11 +3303,11 @@ func TestEvalAssign(t *testing.T) {
 				object.NewPanInt(2),
 			}},
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(2),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanInt(2),
 				},
@@ -3316,7 +3317,7 @@ func TestEvalAssign(t *testing.T) {
 			`"hi" => a; a`,
 			object.NewPanStr("hi"),
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanStr("hi"),
 				},
@@ -3329,11 +3330,11 @@ func TestEvalAssign(t *testing.T) {
 				object.NewPanInt(3),
 			}},
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("c"),
 					Value: object.NewPanInt(3),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("d"),
 					Value: object.NewPanInt(3),
 				},
@@ -3434,11 +3435,11 @@ func TestEvalKwargVars(t *testing.T) {
 		{
 			`{\_}(one: 1, two: 2)`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("one"),
 					Value: object.NewPanInt(1),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("two"),
 					Value: object.NewPanInt(2),
 				},
@@ -3563,7 +3564,7 @@ func TestEvalBearContents(t *testing.T) {
 		{
 			`Obj.bear({a: 1})`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
@@ -4967,7 +4968,7 @@ func TestEvalThoughtfulChain(t *testing.T) {
 		{
 			`{a: nil}~.a`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.BuiltInNil,
 				},
@@ -4978,7 +4979,7 @@ func TestEvalThoughtfulChain(t *testing.T) {
 			&object.PanArr{Elems: []object.PanObject{
 				object.NewPanInt(1),
 				toPanObj([]object.Pair{
-					object.Pair{
+					{
 						Key:   object.NewPanStr("a"),
 						Value: object.BuiltInNil,
 					},
