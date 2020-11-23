@@ -6155,6 +6155,21 @@ func TestEvalInfixStrDiv(t *testing.T) {
 				object.NewPanStr("f"),
 			}},
 		},
+		{
+			"`123 \n45  \t6` / `\\s`",
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("123"),
+				object.NewPanStr("45"),
+				object.NewPanStr("6"),
+			}},
+		},
+		// if no separators found, return whole string
+		{
+			"`a` / `x`",
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+			}},
+		},
 		// decendant of str can be added
 		{
 			`"a,b" / ",".bear`,
