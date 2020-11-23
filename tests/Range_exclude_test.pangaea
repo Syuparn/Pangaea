@@ -1,1 +1,1 @@
-assert((2:5).exclude {|n| n.odd?} == [2, 4])
+assertEq((2:5).exclude {|n| n.odd?}, [2, 4])

@@ -1,2 +1,2 @@
-assert("".empty? == true)
-assert("a".empty? == false)
+assertEq("".empty?, true)
+assertEq("a".empty?, false)

@@ -1,1 +1,1 @@
-assert(3.map {|i| i * 2} == [2, 4, 6])
+assertEq(3.map {|i| i * 2}, [2, 4, 6])

@@ -1,1 +1,1 @@
-assert(%{"a": 1, "b": 2}.select {|k, v| v.odd?} == [["a", 1]])
+assertEq(%{"a": 1, "b": 2}.select {|k, v| v.odd?}, [["a", 1]])

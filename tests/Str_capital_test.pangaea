@@ -1,2 +1,2 @@
-assert("hello wORLd".capital == "Hello world")
-assert("あbc".capital == "あbc")
+assertEq("hello wORLd".capital, "Hello world")
+assertEq("あbc".capital, "あbc")

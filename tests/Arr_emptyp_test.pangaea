@@ -1,2 +1,2 @@
-assert([].empty? == true)
-assert([1].empty? == false)
+assertEq([].empty?, true)
+assertEq([1].empty?, false)

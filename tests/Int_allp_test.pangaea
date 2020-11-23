@@ -1,2 +1,2 @@
-assert(10.all? {\ != 11} == true)
-assert(10.all? {.odd?} == false)
+assertEq(10.all? {\ != 11}, true)
+assertEq(10.all? {.odd?}, false)

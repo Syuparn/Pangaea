@@ -1,1 +1,1 @@
-assert({a: 'b, c: 'd}.A == [["a", "b"], ["c", "d"]])
+assertEq({a: 'b, c: 'd}.A, [["a", "b"], ["c", "d"]])

@@ -1,2 +1,2 @@
-assert(1.even? == false)
-assert(2.even? == true)
+assertEq(1.even?, false)
+assertEq(2.even?, true)

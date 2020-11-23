@@ -1,1 +1,1 @@
-assert("abc".exclude {|n| n == "a"} == ["b", "c"])
+assertEq("abc".exclude {|n| n == "a"}, ["b", "c"])

@@ -1,1 +1,1 @@
-assert([1, 2, 3].select {|n| n.odd?} == [1, 3])
+assertEq([1, 2, 3].select {|n| n.odd?}, [1, 3])
