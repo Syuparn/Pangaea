@@ -1,3 +1,3 @@
 # NOTE: cannot test multiple pairs testcases
 # because order of map is not guaranteed.
-assert(%{'a: 'b}.A == [["a", "b"]])
+assertEq(%{'a: 'b}.A, [["a", "b"]])

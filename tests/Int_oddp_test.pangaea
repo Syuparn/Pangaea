@@ -1,2 +1,2 @@
-assert(1.odd? == true)
-assert(2.odd? == false)
+assertEq(1.odd?, true)
+assertEq(2.odd?, false)

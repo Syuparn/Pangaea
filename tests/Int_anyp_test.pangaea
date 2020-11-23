@@ -1,2 +1,2 @@
-assert(10.any? {.odd?} == true)
-assert(3.any? {\ == 0} == false)
+assertEq(10.any? {.odd?}, true)
+assertEq(3.any? {\ == 0}, false)

@@ -1,1 +1,1 @@
-assert({a: 1, b: 2, c: 3}.select {|k, v| v.odd?} == [["a", 1], ["c", 3]])
+assertEq({a: 1, b: 2, c: 3}.select {|k, v| v.odd?}, [["a", 1], ["c", 3]])

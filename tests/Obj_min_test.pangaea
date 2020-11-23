@@ -1,5 +1,5 @@
 # values are compared
-assert({}.min == nil)
-assert({a: 1}.min == 1)
-assert({a: 2, b: 1}.min == 1)
-assert({a: 2, b: 1, c: 3}.min == 1)
+assertEq({}.min, nil)
+assertEq({a: 1}.min, 1)
+assertEq({a: 2, b: 1}.min, 1)
+assertEq({a: 2, b: 1, c: 3}.min, 1)

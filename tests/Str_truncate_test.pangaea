@@ -1,4 +1,4 @@
-assert("Lorem ipsum".truncate(8) == "Lorem...")
-assert("Pangaea".truncate(8) == "Pangaea")
-assert("12345678".truncate(8) == "12345678")
-assert("language".truncate(4, end: "(ry") == "l(ry")
+assertEq("Lorem ipsum".truncate(8), "Lorem...")
+assertEq("Pangaea".truncate(8), "Pangaea")
+assertEq("12345678".truncate(8), "12345678")
+assertEq("language".truncate(4, end: "(ry"), "l(ry")

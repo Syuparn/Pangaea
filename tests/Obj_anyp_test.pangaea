@@ -1,2 +1,2 @@
-assert({a: 1, b: 2}.any? {|k, v| v.even?} == true)
-assert({a: 1, b: 3}.any? {|k, v| v.even?} == false)
+assertEq({a: 1, b: 2}.any? {|k, v| v.even?}, true)
+assertEq({a: 1, b: 3}.any? {|k, v| v.even?}, false)

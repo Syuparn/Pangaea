@@ -1,4 +1,4 @@
-assert((1:1).max == nil)
-assert((1:2).max == 1)
-assert((1:4:2).max == 3)
-assert(('a:'d:2).max == 'c)
+assertEq((1:1).max, nil)
+assertEq((1:2).max, 1)
+assertEq((1:4:2).max, 3)
+assertEq(('a:'d:2).max, 'c)

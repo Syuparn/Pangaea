@@ -1,1 +1,1 @@
-assert("abc".map { ._incBy(1) } == ["b", "c", "d"])
+assertEq("abc".map { ._incBy(1) }, ["b", "c", "d"])

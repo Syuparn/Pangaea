@@ -1,2 +1,2 @@
-assert("aaaaa".all? {\ == "a"} == true)
-assert("abc".all? {\ == "a"} == false)
+assertEq("aaaaa".all? {\ == "a"}, true)
+assertEq("abc".all? {\ == "a"}, false)

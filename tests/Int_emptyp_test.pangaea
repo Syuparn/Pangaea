@@ -1,2 +1,2 @@
-assert(0.empty? == true)
-assert(1.empty? == false)
+assertEq(0.empty?, true)
+assertEq(1.empty?, false)

@@ -1,2 +1,2 @@
-assert("abc".any? {\ == "a"} == true)
-assert("def".any? {\ == "a"} == false)
+assertEq("abc".any? {\ == "a"}, true)
+assertEq("def".any? {\ == "a"}, false)

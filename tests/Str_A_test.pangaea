@@ -1,1 +1,1 @@
-assert("abc".A == ["a", "b", "c"])
+assertEq("abc".A, ["a", "b", "c"])

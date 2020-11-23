@@ -1,4 +1,4 @@
-assert((1:1).min == nil)
-assert((1:2).min == 1)
-assert((1:4:2).min == 1)
-assert(('a:'d:2).min == 'a)
+assertEq((1:1).min, nil)
+assertEq((1:2).min, 1)
+assertEq((1:4:2).min, 1)
+assertEq(('a:'d:2).min, 'a)

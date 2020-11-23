@@ -1,1 +1,1 @@
-assert(%{"a": 1, "b": 2}.exclude {|k, v| v.odd?} == [["b", 2]])
+assertEq(%{"a": 1, "b": 2}.exclude {|k, v| v.odd?}, [["b", 2]])

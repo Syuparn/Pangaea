@@ -1,2 +1,2 @@
-assert((1:10).any? {.odd?} == true)
-assert((2:10:2).any? {.odd?} == false)
+assertEq((1:10).any? {.odd?}, true)
+assertEq((2:10:2).any? {.odd?}, false)
