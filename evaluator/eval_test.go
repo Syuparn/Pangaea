@@ -6560,6 +6560,7 @@ func TestEvalAssert(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
+		// NOTE: do not pass reciever to assert! (it is a function)
 		{
 			`Kernel['assert](true)`,
 			object.BuiltInNil,
@@ -6570,15 +6571,19 @@ func TestEvalAssert(t *testing.T) {
 		},
 		{
 			`assert(false)`,
-			object.NewAssertionErr("false is not truthy."),
+			object.NewAssertionErr("false is not truthy"),
 		},
 		{
 			`assert("")`,
-			object.NewAssertionErr(`"" is not truthy.`),
+			object.NewAssertionErr(`"" is not truthy`),
 		},
 		{
 			`assert(1 == 2)`,
-			object.NewAssertionErr(`false is not truthy.`),
+			object.NewAssertionErr(`false is not truthy`),
+		},
+		{
+			`assert()`,
+			object.NewTypeErr("assert requires at least 1 arg"),
 		},
 	}
 
@@ -6613,6 +6618,10 @@ func TestEvalAssertEq(t *testing.T) {
 		{
 			`assertEq({a: 1, b: 3}, {b: 2, a: 1})`,
 			object.NewAssertionErr(`{"a": 1, "b": 3} != {"a": 1, "b": 2}`),
+		},
+		{
+			`assertEq(1)`,
+			object.NewTypeErr("assertEq requires at least 2 args"),
 		},
 	}
 

@@ -30,7 +30,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 					return object.BuiltInNil
 				}
 
-				return object.NewAssertionErr(fmt.Sprintf("%s is not truthy.",
+				return object.NewAssertionErr(fmt.Sprintf("%s is not truthy",
 					args[0].Inspect()))
 			},
 		),
@@ -39,7 +39,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
 				if len(args) < 2 {
-					return object.NewTypeErr("assertEq requires at least 2 arg")
+					return object.NewTypeErr("assertEq requires at least 2 args")
 				}
 
 				// compare args[0] and args[1]
