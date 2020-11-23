@@ -6588,6 +6588,40 @@ func TestEvalAssert(t *testing.T) {
 	}
 }
 
+func TestEvalAssertEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// NOTE: do not pass reciever to assertEq! (it is a function)
+		{
+			`Kernel['assertEq]('a, 'a)`,
+			object.BuiltInNil,
+		},
+		{
+			`Kernel['assertEq](1 + 1, 2)`,
+			object.BuiltInNil,
+		},
+		{
+			`assertEq(true, true)`,
+			object.BuiltInNil,
+		},
+		{
+			`assertEq(1 + 1, 3)`,
+			object.NewAssertionErr("2 != 3"),
+		},
+		{
+			`assertEq({a: 1, b: 3}, {b: 2, a: 1})`,
+			object.NewAssertionErr(`{"a": 1, "b": 3} != {"a": 1, "b": 2}`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)

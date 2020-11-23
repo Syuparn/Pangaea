@@ -34,5 +34,27 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 					args[0].Inspect()))
 			},
 		),
+		"assertEq": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("assertEq requires at least 2 arg")
+				}
+
+				// compare args[0] and args[1]
+				objBool := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), args[0], eqSym, args[1],
+				)
+
+				if objBool == object.BuiltInTrue {
+					return object.BuiltInNil
+				}
+
+				return object.NewAssertionErr(fmt.Sprintf("%s != %s",
+					args[0].Inspect(), args[1].Inspect()))
+			},
+		),
 	}
 }
