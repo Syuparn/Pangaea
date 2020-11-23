@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	oneLiner        = flag.String("e", "", "run one-line script")
-	readsStdinLines = flag.Bool("n", false, "assign stdin each line to \\")
-	version         = flag.Bool("v", false, "show version")
-	testCmdSet      = flag.NewFlagSet("test", flag.ExitOnError)
+	oneLiner            = flag.String("e", "", "run one-line script")
+	readsLines          = flag.Bool("n", false, "assign stdin each line to \\")
+	readsAndWritesLines = flag.Bool("p", false, "similar to -n but also print to evaluated values")
+	version             = flag.Bool("v", false, "show version")
+	testCmdSet          = flag.NewFlagSet("test", flag.ExitOnError)
 )
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 
 	// run one-liner
 	if *oneLiner != "" {
-		src := wrapSource(*oneLiner, *readsStdinLines)
+		src := wrapSource(*oneLiner, *readsLines, *readsAndWritesLines)
 		exitCode := runOneLiner(src)
 		os.Exit(exitCode)
 	}
@@ -72,8 +73,11 @@ func showVersion() {
 	fmt.Println(runscript.Version)
 }
 
-func wrapSource(original string, readsStdinLines bool) string {
-	if readsStdinLines {
+func wrapSource(original string, readsLines, readsAndWritesLines bool) string {
+	if readsAndWritesLines {
+		return fmt.Sprintf(runscript.ReadStdinLinesAndWritesTemplate, original)
+	}
+	if readsLines {
 		return fmt.Sprintf(runscript.ReadStdinLinesTemplate, original)
 	}
 	return original
