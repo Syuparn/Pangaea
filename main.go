@@ -2,14 +2,18 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/Syuparn/pangaea/runscript"
 )
 
 var (
-	oneLiner   = flag.String("e", "", "run one-line script")
-	testCmdSet = flag.NewFlagSet("test", flag.ExitOnError)
+	oneLiner            = flag.String("e", "", "run one-line script")
+	readsLines          = flag.Bool("n", false, "assign stdin each line to \\")
+	readsAndWritesLines = flag.Bool("p", false, "similar to -n but also print to evaluated values")
+	version             = flag.Bool("v", false, "show version")
+	testCmdSet          = flag.NewFlagSet("test", flag.ExitOnError)
 )
 
 func main() {
@@ -25,9 +29,16 @@ func main() {
 	// normal mode
 	flag.Parse()
 
+	// show version
+	if *version {
+		showVersion()
+		os.Exit(0)
+	}
+
 	// run one-liner
 	if *oneLiner != "" {
-		exitCode := runOneLiner(*oneLiner)
+		src := wrapSource(*oneLiner, *readsLines, *readsAndWritesLines)
+		exitCode := runOneLiner(src)
 		os.Exit(exitCode)
 	}
 
@@ -56,4 +67,18 @@ func runOneLiner(src string) int {
 
 func runRepl() {
 	runscript.StartREPL(os.Stdin, os.Stdout)
+}
+
+func showVersion() {
+	fmt.Println(runscript.Version)
+}
+
+func wrapSource(original string, readsLines, readsAndWritesLines bool) string {
+	if readsAndWritesLines {
+		return fmt.Sprintf(runscript.ReadStdinLinesAndWritesTemplate, original)
+	}
+	if readsLines {
+		return fmt.Sprintf(runscript.ReadStdinLinesTemplate, original)
+	}
+	return original
 }
