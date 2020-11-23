@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/Syuparn/pangaea/runscript"
@@ -9,6 +10,7 @@ import (
 
 var (
 	oneLiner   = flag.String("e", "", "run one-line script")
+	version    = flag.Bool("v", false, "show version")
 	testCmdSet = flag.NewFlagSet("test", flag.ExitOnError)
 )
 
@@ -24,6 +26,12 @@ func main() {
 
 	// normal mode
 	flag.Parse()
+
+	// show version
+	if *version {
+		showVersion()
+		os.Exit(0)
+	}
 
 	// run one-liner
 	if *oneLiner != "" {
@@ -56,4 +64,8 @@ func runOneLiner(src string) int {
 
 func runRepl() {
 	runscript.StartREPL(os.Stdin, os.Stdout)
+}
+
+func showVersion() {
+	fmt.Println(runscript.Version)
 }
