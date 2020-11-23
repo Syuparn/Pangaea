@@ -454,6 +454,10 @@ func splitBySep(re *regexp2.Regexp, str string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	// if nothing is matched, just return original str
+	if m == nil {
+		return []string{str}, nil
+	}
 
 	sepFrom, sepTo := m.Index, (m.Index + m.Length)
 	splitted = append(splitted, str[0:sepFrom])
@@ -465,7 +469,7 @@ func splitBySep(re *regexp2.Regexp, str string) ([]string, error) {
 		splitted = append(splitted, str[sepTo:sepFrom])
 		sepTo = m.Index + m.Length
 	}
-	splitted = append(splitted, str[sepTo:len(str)])
+	splitted = append(splitted, str[sepTo:])
 
 	return splitted, nil
 }
