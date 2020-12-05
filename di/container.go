@@ -73,6 +73,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), intNatives, iterableNatives, comparableNatives)
 	injectProps(object.BuiltInIterObj, toPairs(props.IterProps(ctn)))
 	injectProps(object.BuiltInIterableObj, iterableNatives)
+	injectProps(object.BuiltInComparableObj, comparableNatives)
 	injectProps(object.BuiltInKernelObj, toPairs(props.KernelProps(ctn)))
 	injectProps(object.BuiltInMapObj, toPairs(props.MapProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInNilObj, toPairs(props.NilProps(ctn)))

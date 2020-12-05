@@ -55,6 +55,9 @@ var BuiltInKernelObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 // BuiltInIterableObj is an object of Iterable, which is mixed-in iterable objects.
 var BuiltInIterableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
+// BuiltInComparableObj is an object of Comparable, which is mixed-in comparable objects.
+var BuiltInComparableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+
 // BuiltInOneInt is an int object `1`.
 var BuiltInOneInt = &PanInt{1}
 
