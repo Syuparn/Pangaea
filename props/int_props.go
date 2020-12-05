@@ -167,6 +167,48 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanInt(res)
 			},
 		),
+		"/": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkIntInfixArgs(args, "/", object.NewPanInt(1))
+				if err != nil {
+					return err
+				}
+
+				if other.Value == 0 {
+					return object.NewZeroDivisionErr("cannot be divided by 0")
+				}
+
+				// truediv
+				res := float64(self.Value) / float64(other.Value)
+				return &object.PanFloat{Value: res}
+			},
+		),
+		"//": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkIntInfixArgs(args, "//", object.NewPanInt(1))
+				if err != nil {
+					return err
+				}
+
+				if other.Value == 0 {
+					return object.NewZeroDivisionErr("cannot be divided by 0")
+				}
+
+				// floordiv
+				res := self.Value / other.Value
+
+				// HACK: convert round to floor
+				if res < 0 && self.Value%other.Value != 0 {
+					return object.NewPanInt(res - 1)
+				}
+
+				return object.NewPanInt(res)
+			},
+		),
 		"%": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

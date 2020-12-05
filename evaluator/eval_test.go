@@ -6026,6 +6026,118 @@ func TestEvalInfixIntMulErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixIntDiv(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 / 5`,
+			&object.PanFloat{Value: 2.0},
+		},
+		{
+			`-5 / 4`,
+			&object.PanFloat{Value: -1.25},
+		},
+		// decendant of int can be devided
+		{
+			`3 / true`,
+			&object.PanFloat{Value: 3.0},
+		},
+		// nil is treated as 1
+		{
+			`5 / nil`,
+			&object.PanFloat{Value: 5.0},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntDivErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 / []`,
+			object.NewTypeErr("`[]` cannot be treated as int"),
+		},
+		{
+			`1['/]({}, 2)`,
+			object.NewTypeErr("`{}` cannot be treated as int"),
+		},
+		{
+			`1./`,
+			object.NewTypeErr("/ requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntFloorDiv(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 // 5`,
+			object.NewPanInt(2),
+		},
+		{
+			`-5 // 2`,
+			object.NewPanInt(-3),
+		},
+		// decendant of int can be devided
+		{
+			`3 // true`,
+			object.NewPanInt(3),
+		},
+		// nil is treated as 1
+		{
+			`5 // nil`,
+			object.NewPanInt(5),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntFloorDivErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 // []`,
+			object.NewTypeErr("`[]` cannot be treated as int"),
+		},
+		{
+			`1['//]({}, 2)`,
+			object.NewTypeErr("`{}` cannot be treated as int"),
+		},
+		{
+			`1.//`,
+			object.NewTypeErr("// requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixStrAdd(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -6677,13 +6789,12 @@ func TestEvalFmap(t *testing.T) {
 			}),
 		},
 		// failure
-		// TODO: replace to div
 		{
-			`1.try.fmap {\ % 0}`,
+			`1.try.fmap {\ / 0}`,
 			object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
 		},
 		{
-			`1.try.fmap {\ % 0}.fmap {\ - 1}`,
+			`1.try.fmap {\ / 0}.fmap {\ - 1}`,
 			object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
 		},
 		// raises errors (highly unrecommended because it is not caught)
@@ -6692,7 +6803,7 @@ func TestEvalFmap(t *testing.T) {
 			object.NewTypeErr("Val#fmap requires at least 2 args"),
 		},
 		{
-			`1.try.fmap {\ % 0}.fmap`,
+			`1.try.fmap {\ / 0}.fmap`,
 			object.NewTypeErr("Err#fmap requires at least 2 args"),
 		},
 		{
@@ -6728,9 +6839,8 @@ func TestEvalEitherA(t *testing.T) {
 			}},
 		},
 		// failure
-		// TODO: replace to div
 		{
-			`1.try.fmap {\ % 0}.A`,
+			`1.try.fmap {\ / 0}.A`,
 			&object.PanArr{Elems: []object.PanObject{
 				object.BuiltInNil,
 				object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
@@ -6742,7 +6852,7 @@ func TestEvalEitherA(t *testing.T) {
 			object.NewTypeErr("Val#A requires at least 1 arg"),
 		},
 		{
-			`1.try.fmap {\ % 0}['A]()`,
+			`1.try.fmap {\ / 0}['A]()`,
 			object.NewTypeErr("Err#A requires at least 1 arg"),
 		},
 		{
