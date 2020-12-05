@@ -68,6 +68,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), arrNatives, iterableNatives)
 	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)))
 	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)))
+	injectProps(object.BuiltInErrObj, toPairs(props.ErrProps(ctn)))
 	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)), comparableNatives)
 	injectProps(object.BuiltInFuncObj, toPairs(props.FuncProps(ctn)))
 	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), intNatives, iterableNatives, comparableNatives)
@@ -81,6 +82,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInObjObj, toPairs(props.ObjProps(ctn)), objNatives, iterableNatives)
 	injectProps(object.BuiltInRangeObj, toPairs(props.RangeProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInStrObj, toPairs(props.StrProps(ctn)), strNatives, iterableNatives, comparableNatives)
+	injectProps(object.BuiltInValObj, toPairs(props.ValProps(ctn)))
 }
 
 func injectProps(

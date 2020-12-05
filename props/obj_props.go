@@ -1,9 +1,10 @@
 package props
 
 import (
+	"io"
+
 	"github.com/Syuparn/pangaea/object"
 	"github.com/tanaton/dtoa"
-	"io"
 )
 
 // ObjProps provides built-in props for Obj.
@@ -214,6 +215,16 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanStr(formattedStr(args[0]))
 			},
 		),
+		"try": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Obj#try requires at least 1 arg")
+				}
+				return toEitherVal(args[0])
+			},
+		),
 		"values": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -247,6 +258,15 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			},
 		),
 	}
+}
+
+func toEitherVal(o object.PanObject) object.PanObject {
+	// wrap o by Val
+	pairMap := map[object.SymHash]object.Pair{
+		object.GetSymHash("_value"): {Key: object.NewPanStr("_value"), Value: o},
+	}
+
+	return object.NewPanObj(&pairMap, object.BuiltInValObj)
 }
 
 func formattedStr(o object.PanObject) string {
