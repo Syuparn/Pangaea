@@ -6,7 +6,7 @@ import (
 
 func TestFindProp(t *testing.T) {
 	obj1 := PanObjInstancePtr(&map[SymHash]Pair{
-		GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: BuiltInTrue},
+		GetSymHash("a"): {Key: NewPanStr("a"), Value: BuiltInTrue},
 	})
 
 	tests := []struct {
@@ -52,10 +52,10 @@ func TestFindProp(t *testing.T) {
 
 func TestFindPropAlongProtos(t *testing.T) {
 	obj1 := PanObjInstancePtr(&map[SymHash]Pair{
-		GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: BuiltInTrue},
+		GetSymHash("a"): {Key: NewPanStr("a"), Value: BuiltInTrue},
 	}).(*PanObj)
 	obj2 := PanObjInstancePtr(&map[SymHash]Pair{
-		GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: BuiltInFalse},
+		GetSymHash("b"): {Key: NewPanStr("b"), Value: BuiltInFalse},
 	}).(*PanObj)
 
 	tests := []struct {

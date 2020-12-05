@@ -23,32 +23,32 @@ func TestObjInspect(t *testing.T) {
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(NewPanStr("a")).SymHash(): Pair{NewPanStr("a"), &PanInt{1}},
+				(NewPanStr("a")).SymHash(): {NewPanStr("a"), &PanInt{1}},
 			}),
 			`{"a": 1}`,
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(NewPanStr("a")).SymHash():  Pair{NewPanStr("a"), NewPanStr("A")},
-				(NewPanStr("_b")).SymHash(): Pair{NewPanStr("_b"), NewPanStr("B")},
+				(NewPanStr("a")).SymHash():  {NewPanStr("a"), NewPanStr("A")},
+				(NewPanStr("_b")).SymHash(): {NewPanStr("_b"), NewPanStr("B")},
 			}),
 			`{"_b": "B", "a": "A"}`,
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(NewPanStr("foo?")).SymHash(): Pair{NewPanStr("foo?"), &PanBool{true}},
-				(NewPanStr("b")).SymHash():    Pair{NewPanStr("b"), NewPanStr("B")},
+				(NewPanStr("foo?")).SymHash(): {NewPanStr("foo?"), &PanBool{true}},
+				(NewPanStr("b")).SymHash():    {NewPanStr("b"), NewPanStr("B")},
 			}),
 			`{"b": "B", "foo?": true}`,
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(NewPanStr("foo?")).SymHash(): Pair{NewPanStr("foo?"), &PanBool{true}},
-				(NewPanStr("b")).SymHash(): Pair{
+				(NewPanStr("foo?")).SymHash(): {NewPanStr("foo?"), &PanBool{true}},
+				(NewPanStr("b")).SymHash(): {
 					NewPanStr("b"),
 					// NOTE: `&(NewPanObjInstance(...))` is syntax error
 					PanObjInstancePtr(&map[SymHash]Pair{
-						(NewPanStr("c")).SymHash(): Pair{NewPanStr("c"), NewPanStr("C")},
+						(NewPanStr("c")).SymHash(): {NewPanStr("c"), NewPanStr("C")},
 					}),
 				},
 			}),
@@ -188,7 +188,7 @@ func TestObjKeys(t *testing.T) {
 		},
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
+				GetSymHash("a"): {Key: NewPanStr("a"), Value: NewPanInt(1)},
 			}),
 			[]SymHash{
 				GetSymHash("a"),
@@ -197,8 +197,8 @@ func TestObjKeys(t *testing.T) {
 		// keys are ordered alphabetically
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
-				GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: NewPanInt(2)},
+				GetSymHash("a"): {Key: NewPanStr("a"), Value: NewPanInt(1)},
+				GetSymHash("b"): {Key: NewPanStr("b"), Value: NewPanInt(2)},
 			}),
 			[]SymHash{
 				GetSymHash("a"),
@@ -207,8 +207,8 @@ func TestObjKeys(t *testing.T) {
 		},
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("c"): Pair{Key: NewPanStr("c"), Value: NewPanInt(1)},
-				GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: NewPanInt(1)},
+				GetSymHash("c"): {Key: NewPanStr("c"), Value: NewPanInt(1)},
+				GetSymHash("b"): {Key: NewPanStr("b"), Value: NewPanInt(1)},
 			}),
 			[]SymHash{
 				GetSymHash("b"),
@@ -218,11 +218,11 @@ func TestObjKeys(t *testing.T) {
 		// keys only contain public str
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("a"):  Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
-				GetSymHash("=="): Pair{Key: NewPanStr("=="), Value: NewPanInt(2)},
-				GetSymHash("_b"): Pair{Key: NewPanStr("_b"), Value: NewPanInt(3)},
-				GetSymHash("c "): Pair{Key: NewPanStr("c "), Value: NewPanInt(4)},
-				GetSymHash("d"):  Pair{Key: NewPanStr("d"), Value: NewPanInt(5)},
+				GetSymHash("a"):  {Key: NewPanStr("a"), Value: NewPanInt(1)},
+				GetSymHash("=="): {Key: NewPanStr("=="), Value: NewPanInt(2)},
+				GetSymHash("_b"): {Key: NewPanStr("_b"), Value: NewPanInt(3)},
+				GetSymHash("c "): {Key: NewPanStr("c "), Value: NewPanInt(4)},
+				GetSymHash("d"):  {Key: NewPanStr("d"), Value: NewPanInt(5)},
 			}),
 			[]SymHash{
 				GetSymHash("a"),
@@ -263,15 +263,15 @@ func TestObjPrivateKeys(t *testing.T) {
 		},
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
+				GetSymHash("a"): {Key: NewPanStr("a"), Value: NewPanInt(1)},
 			}),
 			[]SymHash{},
 		},
 		// keys are ordered alphabetically
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("_a"): Pair{Key: NewPanStr("_a"), Value: NewPanInt(1)},
-				GetSymHash("_b"): Pair{Key: NewPanStr("_b"), Value: NewPanInt(2)},
+				GetSymHash("_a"): {Key: NewPanStr("_a"), Value: NewPanInt(1)},
+				GetSymHash("_b"): {Key: NewPanStr("_b"), Value: NewPanInt(2)},
 			}),
 			[]SymHash{
 				GetSymHash("_a"),
@@ -280,8 +280,8 @@ func TestObjPrivateKeys(t *testing.T) {
 		},
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("_c"): Pair{Key: NewPanStr("_c"), Value: NewPanInt(1)},
-				GetSymHash("_b"): Pair{Key: NewPanStr("_b"), Value: NewPanInt(1)},
+				GetSymHash("_c"): {Key: NewPanStr("_c"), Value: NewPanInt(1)},
+				GetSymHash("_b"): {Key: NewPanStr("_b"), Value: NewPanInt(1)},
 			}),
 			[]SymHash{
 				GetSymHash("_b"),
@@ -291,11 +291,11 @@ func TestObjPrivateKeys(t *testing.T) {
 		// private keys only contain private str
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("a"):  Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
-				GetSymHash("=="): Pair{Key: NewPanStr("=="), Value: NewPanInt(2)},
-				GetSymHash("_b"): Pair{Key: NewPanStr("_b"), Value: NewPanInt(3)},
-				GetSymHash("c "): Pair{Key: NewPanStr("c "), Value: NewPanInt(4)},
-				GetSymHash("d"):  Pair{Key: NewPanStr("d"), Value: NewPanInt(5)},
+				GetSymHash("a"):  {Key: NewPanStr("a"), Value: NewPanInt(1)},
+				GetSymHash("=="): {Key: NewPanStr("=="), Value: NewPanInt(2)},
+				GetSymHash("_b"): {Key: NewPanStr("_b"), Value: NewPanInt(3)},
+				GetSymHash("c "): {Key: NewPanStr("c "), Value: NewPanInt(4)},
+				GetSymHash("d"):  {Key: NewPanStr("d"), Value: NewPanInt(5)},
 			}),
 			[]SymHash{
 				GetSymHash("=="),
@@ -362,10 +362,10 @@ func TestChildPanObjPtr(t *testing.T) {
 	}{
 		{
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: NewPanInt(1)},
+				GetSymHash("a"): {Key: NewPanStr("a"), Value: NewPanInt(1)},
 			}).(*PanObj),
 			PanObjInstancePtr(&map[SymHash]Pair{
-				GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: NewPanInt(2)},
+				GetSymHash("b"): {Key: NewPanStr("b"), Value: NewPanInt(2)},
 			}).(*PanObj),
 		},
 	}

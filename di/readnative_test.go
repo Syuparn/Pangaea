@@ -14,11 +14,11 @@ func TestReadNativeCodeSuccess(t *testing.T) {
 		{
 			"testSuccess",
 			map[object.SymHash]object.Pair{
-				object.GetSymHash("a"): object.Pair{
+				object.GetSymHash("a"): {
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
-				object.GetSymHash("b"): object.Pair{
+				object.GetSymHash("b"): {
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanInt(2),
 				},
@@ -93,11 +93,11 @@ func TestMustReadNativeCodeSuccess(t *testing.T) {
 		{
 			"testSuccess",
 			map[object.SymHash]object.Pair{
-				object.GetSymHash("a"): object.Pair{
+				object.GetSymHash("a"): {
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
-				object.GetSymHash("b"): object.Pair{
+				object.GetSymHash("b"): {
 					Key:   object.NewPanStr("b"),
 					Value: object.NewPanInt(2),
 				},

@@ -45,8 +45,8 @@ func TestInjectFrom(t *testing.T) {
 	value2 := NewPanInt(2)
 
 	obj := PanObjInstancePtr(&map[SymHash]Pair{
-		GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: value1},
-		GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: value2},
+		GetSymHash("a"): {Key: NewPanStr("a"), Value: value1},
+		GetSymHash("b"): {Key: NewPanStr("b"), Value: value2},
 	}).(*PanObj)
 
 	env := NewEnv()
