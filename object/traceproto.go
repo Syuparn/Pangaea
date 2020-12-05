@@ -139,3 +139,13 @@ func TraceProtoOfStr(obj PanObject) (*PanStr, bool) {
 	}
 	return nil, false
 }
+
+// TraceProtoOfErrWrapper traces proto chain of obj and returns errWrapper proto.
+func TraceProtoOfErrWrapper(obj PanObject) (*PanErrWrapper, bool) {
+	for o := obj; o.Proto() != nil; o = o.Proto() {
+		if v, ok := o.(*PanErrWrapper); ok {
+			return v, true
+		}
+	}
+	return nil, false
+}

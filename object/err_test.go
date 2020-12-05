@@ -60,7 +60,7 @@ func TestErrProto(t *testing.T) {
 		{
 			NewNoPropErr("err"),
 			BuiltInNoPropErr,
-			"BuiltInAssertionErr",
+			"BuiltInNoPropErr",
 		},
 		{
 			NewNotImplementedErr("err"),
@@ -97,6 +97,82 @@ func TestErrProto(t *testing.T) {
 		if tt.obj.Proto() != tt.expected {
 			t.Fatalf("Proto is not %s. got=%T (%+v)",
 				tt.expectedTypeName, tt.obj.Proto(), tt.obj.Proto())
+		}
+	}
+}
+
+func TestErrMessageMethod(t *testing.T) {
+	tests := []struct {
+		obj      *PanErr
+		expected string
+	}{
+		{
+			NewPanErr("err"),
+			"err",
+		},
+		{
+			NewValueErr("error has occurred"),
+			"error has occurred",
+		},
+	}
+
+	for _, tt := range tests {
+		if msg := tt.obj.Message(); msg != tt.expected {
+			t.Errorf("Message is not %s. got=%s", tt.expected, msg)
+		}
+	}
+}
+
+func TestErrKindMethod(t *testing.T) {
+	tests := []struct {
+		obj      *PanErr
+		expected string
+	}{
+		{
+			NewPanErr("err"),
+			"Err",
+		},
+		{
+			NewAssertionErr("err"),
+			"AssertionErr",
+		},
+		{
+			NewNameErr("err"),
+			"NameErr",
+		},
+		{
+			NewNoPropErr("err"),
+			"NoPropErr",
+		},
+		{
+			NewNotImplementedErr("err"),
+			"NotImplementedErr",
+		},
+		{
+			NewStopIterErr("err"),
+			"StopIterErr",
+		},
+		{
+			NewSyntaxErr("err"),
+			"SyntaxErr",
+		},
+		{
+			NewTypeErr("err"),
+			"TypeErr",
+		},
+		{
+			NewValueErr("err"),
+			"ValueErr",
+		},
+		{
+			NewZeroDivisionErr("err"),
+			"ZeroDivisionErr",
+		},
+	}
+
+	for _, tt := range tests {
+		if kind := tt.obj.Kind(); kind != tt.expected {
+			t.Errorf("Kind is not %s. got=%s", tt.expected, kind)
 		}
 	}
 }

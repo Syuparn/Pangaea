@@ -30,6 +30,16 @@ func (e *PanErr) Proto() PanObject {
 	return e.proto
 }
 
+// Message returns error message.
+func (e *PanErr) Message() string {
+	return e.Msg
+}
+
+// Kind returns kind of this err.
+func (e *PanErr) Kind() string {
+	return string(e.ErrKind)
+}
+
 // NewPanErr returns new err object.
 func NewPanErr(msg string) *PanErr {
 	return &PanErr{
