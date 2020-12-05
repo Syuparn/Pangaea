@@ -42,6 +42,8 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("Map"), BuiltInMapObj)
 	env.Set(GetSymHash("Diamond"), BuiltInDiamondObj)
 	env.Set(GetSymHash("Kernel"), BuiltInKernelObj)
+	env.Set(GetSymHash("Either"), BuiltInEitherObj)
+	env.Set(GetSymHash("Val"), BuiltInValObj)
 	env.Set(GetSymHash("true"), BuiltInTrue)
 	env.Set(GetSymHash("false"), BuiltInFalse)
 	env.Set(GetSymHash("nil"), BuiltInNil)

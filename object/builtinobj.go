@@ -58,6 +58,12 @@ var BuiltInIterableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 // BuiltInComparableObj is an object of Comparable, which is mixed-in comparable objects.
 var BuiltInComparableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
+// BuiltInEitherObj is an object of Either.
+var BuiltInEitherObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+
+// BuiltInValObj is an object of Val.
+var BuiltInValObj = NewPanObj(&map[SymHash]Pair{}, BuiltInEitherObj)
+
 // BuiltInOneInt is an int object `1`.
 var BuiltInOneInt = &PanInt{1}
 
@@ -74,7 +80,7 @@ var BuiltInFalse = &PanBool{false}
 var BuiltInNil = &PanNil{}
 
 // BuiltInErrObj is an object of Err (proto of all specific err types).
-var BuiltInErrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+var BuiltInErrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInEitherObj)
 
 // BuiltInAssertionErr is an object of AssertionErr (proto of each assertionErr).
 var BuiltInAssertionErr = NewPanObj(&map[SymHash]Pair{}, BuiltInErrObj)
