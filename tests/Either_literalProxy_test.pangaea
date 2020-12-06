@@ -1,0 +1,6 @@
+# Val
+assertEq(1.try.{\ + 2}, 1.try.fmap {\ + 2})
+assertEq(1.try.{\ + 2}.{\ + 3}, 1.try.fmap {\ + 2}.fmap {\ + 3})
+# Err
+assertEq(1.try.{\ / 0}, 1.try.fmap {\ / 0})
+assertEq(1.try.{\ / 0}.{\ + 3}, 1.try.fmap {\ / 0}.fmap {\ + 3})

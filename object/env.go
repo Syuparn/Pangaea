@@ -36,6 +36,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("Iter"), BuiltInIterObj)
 	env.Set(GetSymHash("Iterable"), BuiltInIterableObj)
 	env.Set(GetSymHash("Comparable"), BuiltInComparableObj)
+	env.Set(GetSymHash("Wrappable"), BuiltInWrappableObj)
 	env.Set(GetSymHash("Match"), BuiltInMatchObj)
 	env.Set(GetSymHash("Obj"), BuiltInObjObj)
 	env.Set(GetSymHash("BaseObj"), BuiltInBaseObj)

@@ -98,6 +98,7 @@ func TestEnvWithConsts(t *testing.T) {
 		{"Iter", BuiltInIterObj},
 		{"Iterable", BuiltInIterableObj},
 		{"Comparable", BuiltInComparableObj},
+		{"Wrappable", BuiltInWrappableObj},
 		{"Match", BuiltInMatchObj},
 		{"Obj", BuiltInObjObj},
 		{"BaseObj", BuiltInBaseObj},

@@ -58,6 +58,9 @@ var BuiltInIterableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 // BuiltInComparableObj is an object of Comparable, which is mixed-in comparable objects.
 var BuiltInComparableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
+// BuiltInWrappableObj is an object of Wrappable, which is mixed-in wrappable objects.
+var BuiltInWrappableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+
 // BuiltInEitherObj is an object of Either.
 var BuiltInEitherObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
