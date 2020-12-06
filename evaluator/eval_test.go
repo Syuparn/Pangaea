@@ -33,6 +33,7 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInArrObj, props.ArrProps, ctn)
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps, ctn)
 	injectProps(object.BuiltInDiamondObj, props.DiamondProps, ctn)
+	injectProps(object.BuiltInErrObj, props.ErrProps, ctn)
 	injectProps(object.BuiltInFloatObj, props.FloatProps, ctn)
 	injectProps(object.BuiltInFuncObj, props.FuncProps, ctn)
 	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
@@ -44,6 +45,7 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInObjObj, props.ObjProps, ctn)
 	injectProps(object.BuiltInRangeObj, props.RangeProps, ctn)
 	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
+	injectProps(object.BuiltInValObj, props.ValProps, ctn)
 }
 
 func injectProps(
@@ -4858,6 +4860,30 @@ func TestEvalLiteralCall(t *testing.T) {
 	}
 }
 
+func TestEvalLiteralCallLiteralProxy(t *testing.T) {
+	// _literalProxy prop works as proxy for literal chain
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// NOTE: do not use literal-chain(or var-chain) in _literalProxy! (infinite loop)
+		{
+			`3.bear({_literalProxy: m{|f| f(f(self))}}).{|i| i * 2}`,
+			object.NewPanInt(12),
+		},
+		// _literalProxy in proto can also work
+		{
+			`'hi.bear({_literalProxy: m{|f| f(f(self))}}).bear.{|i| i * 2}`,
+			object.NewPanStr("hihihihi"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalVarCall(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -5713,6 +5739,34 @@ func TestEvalInfixBuiltInFuncEq(t *testing.T) {
 	}
 }
 
+func TestEvalInfixErrEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// this is called only by errWrappers
+		{
+			`1.try.fmap {\/0}.A[1] == 1.try.fmap {\/0}.A[1]`,
+			object.BuiltInTrue,
+		},
+		{
+			`1.try.fmap {\/0}.A[1] == 1.try.fmap {a}.A[1]`,
+			object.BuiltInFalse,
+		},
+		// only message is different
+		{
+			`1.try.fmap {b}.A[1] == 1.try.fmap {c}.A[1]`,
+			object.BuiltInFalse,
+		},
+		// TODO: check case that only type is different
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixConstsEq(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -6015,6 +6069,118 @@ func TestEvalInfixIntMulErr(t *testing.T) {
 		{
 			`1.*`,
 			object.NewTypeErr("* requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntDiv(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 / 5`,
+			&object.PanFloat{Value: 2.0},
+		},
+		{
+			`-5 / 4`,
+			&object.PanFloat{Value: -1.25},
+		},
+		// decendant of int can be devided
+		{
+			`3 / true`,
+			&object.PanFloat{Value: 3.0},
+		},
+		// nil is treated as 1
+		{
+			`5 / nil`,
+			&object.PanFloat{Value: 5.0},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntDivErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 / []`,
+			object.NewTypeErr("`[]` cannot be treated as int"),
+		},
+		{
+			`1['/]({}, 2)`,
+			object.NewTypeErr("`{}` cannot be treated as int"),
+		},
+		{
+			`1./`,
+			object.NewTypeErr("/ requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntFloorDiv(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 // 5`,
+			object.NewPanInt(2),
+		},
+		{
+			`-5 // 2`,
+			object.NewPanInt(-3),
+		},
+		// decendant of int can be devided
+		{
+			`3 // true`,
+			object.NewPanInt(3),
+		},
+		// nil is treated as 1
+		{
+			`5 // nil`,
+			object.NewPanInt(5),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntFloorDivErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 // []`,
+			object.NewTypeErr("`[]` cannot be treated as int"),
+		},
+		{
+			`1['//]({}, 2)`,
+			object.NewTypeErr("`{}` cannot be treated as int"),
+		},
+		{
+			`1.//`,
+			object.NewTypeErr("// requires at least 2 args"),
 		},
 	}
 
@@ -6631,6 +6797,159 @@ func TestEvalAssertEq(t *testing.T) {
 	}
 }
 
+func TestEvalTry(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.try`,
+			toEitherVal([]object.Pair{
+				{Key: object.NewPanStr("_value"), Value: object.NewPanInt(1)},
+			}),
+		},
+		{
+			`"".try`,
+			toEitherVal([]object.Pair{
+				{Key: object.NewPanStr("_value"), Value: object.NewPanStr("")},
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalFmap(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// success
+		{
+			`1.try.fmap {\ + 2}`,
+			toEitherVal([]object.Pair{
+				{Key: object.NewPanStr("_value"), Value: object.NewPanInt(3)},
+			}),
+		},
+		{
+			`1.try.fmap {\ + 2}.fmap {\ + 4}`,
+			toEitherVal([]object.Pair{
+				{Key: object.NewPanStr("_value"), Value: object.NewPanInt(7)},
+			}),
+		},
+		// failure
+		{
+			`1.try.fmap {\ / 0}`,
+			object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
+		},
+		{
+			`1.try.fmap {\ / 0}.fmap {\ - 1}`,
+			object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
+		},
+		// raises errors (highly unrecommended because it is not caught)
+		{
+			`1.try.fmap`,
+			object.NewTypeErr("Val#fmap requires at least 2 args"),
+		},
+		{
+			`1.try.fmap {\ / 0}.fmap`,
+			object.NewTypeErr("Err#fmap requires at least 2 args"),
+		},
+		{
+			`1.try['fmap]({}) {\ + 1}`,
+			object.NewTypeErr("`{}` cannot be treated as Val"),
+		},
+		// return Val(nil) if f does not have prop `call`
+		{
+			`1.try.fmap(2)`,
+			toEitherVal([]object.Pair{
+				{Key: object.NewPanStr("_value"), Value: object.BuiltInNil},
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalEitherA(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// success
+		{
+			`1.try.fmap {\ + 2}.A`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(3),
+				object.BuiltInNil,
+			}},
+		},
+		// failure
+		{
+			`1.try.fmap {\ / 0}.A`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.BuiltInNil,
+				object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
+			}},
+		},
+		// raises errors (highly unrecommended because it is not caught)
+		{
+			`1.try.fmap {\ + 2}['A]()`,
+			object.NewTypeErr("Val#A requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ / 0}['A]()`,
+			object.NewTypeErr("Err#A requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ + 2}['A]({})`,
+			object.NewTypeErr("`{}` cannot be treated as Val"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalErrWrapperS(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// failure
+		{
+			`1.try.fmap {a}.S`,
+			object.NewPanStr("[NameErr: name `a` is not defined]"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func toEitherVal(pairs []object.Pair) *object.PanObj {
+	pairMap := map[object.SymHash]object.Pair{}
+
+	for _, pair := range pairs {
+		panStr, _ := pair.Key.(*object.PanStr)
+		symHash := object.GetSymHash(panStr.Value)
+		pairMap[symHash] = pair
+	}
+
+	obj := object.NewPanObj(&pairMap, object.BuiltInValObj)
+	return obj
+}
+
 func testPanInt(t *testing.T, actual object.PanObject, expected *object.PanInt) {
 	if actual == nil {
 		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
@@ -6988,6 +7307,39 @@ func testPanErr(t *testing.T, actual object.PanObject, expected *object.PanErr) 
 	}
 }
 
+func testPanErrWrapper(t *testing.T, actual object.PanObject, expected *object.PanErrWrapper) {
+	if actual == nil {
+		t.Fatalf("actual must not be nil. expected=%v(%T)", expected, expected)
+	}
+
+	if actual.Type() != object.ErrWrapperType {
+		t.Fatalf("Type must be ErrWrapperType(`%s`). got=%s(`%s`)",
+			expected.Inspect(), actual.Type(), actual.Inspect())
+		return
+	}
+
+	e, ok := actual.(*object.PanErrWrapper)
+	if !ok {
+		t.Fatalf("actual must be *object.PanErrWrapper. got=%T (%v)", actual, actual)
+		return
+	}
+
+	if e.ErrKind != expected.ErrKind {
+		t.Errorf("ErrKind must be %s. got=%s", expected.ErrKind, e.ErrKind)
+	}
+
+	if e.Inspect() != expected.Inspect() {
+		t.Errorf("wrong msg. expected=`\n%s\n`. got=`\n%s\n`",
+			expected.Inspect(), e.Inspect())
+	}
+
+	if e.Proto() != expected.Proto() {
+		t.Errorf("proto must be %v(%s). got=%v(%s)",
+			expected.Proto(), expected.Proto().Inspect(),
+			e.Proto(), e.Proto().Inspect())
+	}
+}
+
 func testValue(t *testing.T, actual object.PanObject, expected object.PanObject) {
 	// switch to test_XX functions by expected type
 	switch expected := expected.(type) {
@@ -7011,6 +7363,8 @@ func testValue(t *testing.T, actual object.PanObject, expected object.PanObject)
 		testPanMap(t, actual, expected)
 	case *object.PanErr:
 		testPanErr(t, actual, expected)
+	case *object.PanErrWrapper:
+		testPanErrWrapper(t, actual, expected)
 	case *object.PanFunc:
 		testPanFunc(t, actual, expected)
 	case *object.PanBuiltIn:

@@ -45,8 +45,8 @@ func TestInjectFrom(t *testing.T) {
 	value2 := NewPanInt(2)
 
 	obj := PanObjInstancePtr(&map[SymHash]Pair{
-		GetSymHash("a"): Pair{Key: NewPanStr("a"), Value: value1},
-		GetSymHash("b"): Pair{Key: NewPanStr("b"), Value: value2},
+		GetSymHash("a"): {Key: NewPanStr("a"), Value: value1},
+		GetSymHash("b"): {Key: NewPanStr("b"), Value: value2},
 	}).(*PanObj)
 
 	env := NewEnv()
@@ -97,12 +97,16 @@ func TestEnvWithConsts(t *testing.T) {
 		{"Func", BuiltInFuncObj},
 		{"Iter", BuiltInIterObj},
 		{"Iterable", BuiltInIterableObj},
+		{"Comparable", BuiltInComparableObj},
+		{"Wrappable", BuiltInWrappableObj},
 		{"Match", BuiltInMatchObj},
 		{"Obj", BuiltInObjObj},
 		{"BaseObj", BuiltInBaseObj},
 		{"Map", BuiltInMapObj},
 		{"Diamond", BuiltInDiamondObj},
 		{"Kernel", BuiltInKernelObj},
+		{"Either", BuiltInEitherObj},
+		{"Val", BuiltInValObj},
 		{"true", BuiltInTrue},
 		{"false", BuiltInFalse},
 		{"nil", BuiltInNil},

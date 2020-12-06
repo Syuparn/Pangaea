@@ -20,7 +20,7 @@ func TestEvalStrEvalEnv(t *testing.T) {
 		{
 			`"a := 1".evalEnv`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("a"),
 					Value: object.NewPanInt(1),
 				},
@@ -30,11 +30,11 @@ func TestEvalStrEvalEnv(t *testing.T) {
 		{
 			`"x := 3; y := x * 2".evalEnv`,
 			toPanObj([]object.Pair{
-				object.Pair{
+				{
 					Key:   object.NewPanStr("x"),
 					Value: object.NewPanInt(3),
 				},
-				object.Pair{
+				{
 					Key:   object.NewPanStr("y"),
 					Value: object.NewPanInt(6),
 				},

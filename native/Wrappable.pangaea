@@ -1,0 +1,12 @@
+{
+  # _missing provides syntax sugar to convert propcall to fmap.
+  _missing: m{|propName|
+    args := \0[2:]
+    kwargs := \_
+    .fmap {self._value[propName](self._value, *args, **kwargs)}
+  },
+  # _literalProxy provides syntax sugar to convert literalcall to fmap.
+  _literalProxy: m{|f| .fmap(f)},
+  # end is alias of A.
+  end: m{.A},
+}

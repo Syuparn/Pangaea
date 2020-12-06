@@ -775,3 +775,58 @@ func TestTraceProtoOfStrFailed(t *testing.T) {
 		}
 	}
 }
+
+func TestTraceProtoOfErrWrapper(t *testing.T) {
+	proto := WrapErr(NewPanErr("error"))
+
+	tests := []struct {
+		obj      PanObject
+		expected *PanErrWrapper
+	}{
+		// return proto
+		{
+			NewPanObj(&map[SymHash]Pair{}, proto),
+			proto,
+		},
+		// return itself
+		{
+			proto,
+			proto,
+		},
+	}
+
+	for _, tt := range tests {
+		actual, ok := TraceProtoOfErrWrapper(tt.obj)
+
+		if !ok {
+			t.Errorf("ok must be true (obj=%v)", tt.obj)
+		}
+
+		if actual != tt.expected {
+			t.Errorf("proto must be %+v(%T). got=%+v(%T)",
+				tt.expected, tt.expected, actual, actual)
+		}
+	}
+}
+
+func TestTraceProtoOfErrWrapperFailed(t *testing.T) {
+	tests := []struct {
+		obj PanObject
+	}{
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{}),
+		},
+	}
+
+	for _, tt := range tests {
+		actual, ok := TraceProtoOfErrWrapper(tt.obj)
+
+		if ok {
+			t.Errorf("ok must be false (obj=%v)", tt.obj)
+		}
+
+		if actual != nil {
+			t.Errorf("actual must be nil. got=%+v(%T)", actual, actual)
+		}
+	}
+}

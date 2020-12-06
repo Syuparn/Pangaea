@@ -56,6 +56,10 @@ func injectBuiltInProps(
 	go func() {
 		strNativesCh <- mustReadNativeCode("Str", env)
 	}()
+	wrappableNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		wrappableNativesCh <- mustReadNativeCode("Wrappable", env)
+	}()
 
 	arrNatives := <-arrNativesCh
 	comparableNatives := <-comparableNativesCh
@@ -63,16 +67,20 @@ func injectBuiltInProps(
 	iterableNatives := <-iterableNativesCh
 	objNatives := <-objNativesCh
 	strNatives := <-strNativesCh
+	wrappableNatives := <-wrappableNativesCh
 
 	// NOTE: injection order is important! (if same-named props appear, first one remains)
 	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), arrNatives, iterableNatives)
 	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)))
 	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)))
+	injectProps(object.BuiltInErrObj, toPairs(props.ErrProps(ctn)))
 	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)), comparableNatives)
 	injectProps(object.BuiltInFuncObj, toPairs(props.FuncProps(ctn)))
 	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), intNatives, iterableNatives, comparableNatives)
 	injectProps(object.BuiltInIterObj, toPairs(props.IterProps(ctn)))
 	injectProps(object.BuiltInIterableObj, iterableNatives)
+	injectProps(object.BuiltInComparableObj, comparableNatives)
+	injectProps(object.BuiltInWrappableObj, wrappableNatives)
 	injectProps(object.BuiltInKernelObj, toPairs(props.KernelProps(ctn)))
 	injectProps(object.BuiltInMapObj, toPairs(props.MapProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInNilObj, toPairs(props.NilProps(ctn)))
@@ -80,6 +88,8 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInObjObj, toPairs(props.ObjProps(ctn)), objNatives, iterableNatives)
 	injectProps(object.BuiltInRangeObj, toPairs(props.RangeProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInStrObj, toPairs(props.StrProps(ctn)), strNatives, iterableNatives, comparableNatives)
+	injectProps(object.BuiltInEitherObj, wrappableNatives)
+	injectProps(object.BuiltInValObj, toPairs(props.ValProps(ctn)))
 }
 
 func injectProps(

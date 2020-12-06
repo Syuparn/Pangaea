@@ -63,6 +63,12 @@ func evalScalarLiteralCall(
 		return recv
 	}
 
+	// if recv has _proxyLiteral, call it with f
+	// FIXME: enable to use proxy in other chains
+	if proxy, ok := findProxyLiteral(recv); ok {
+		return evalProxyLiteral(node, env, recv, f, proxy)
+	}
+
 	args := literalCallArgs(recv, f)
 	// prepend f itself to args
 	args = append([]object.PanObject{f}, args...)
