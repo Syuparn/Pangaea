@@ -4860,6 +4860,30 @@ func TestEvalLiteralCall(t *testing.T) {
 	}
 }
 
+func TestEvalLiteralCallLiteralProxy(t *testing.T) {
+	// _literalProxy prop works as proxy for literal chain
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// NOTE: do not use literal-chain(or var-chain) in _literalProxy! (infinite loop)
+		{
+			`3.bear({_literalProxy: m{|f| f(f(self))}}).{|i| i * 2}`,
+			object.NewPanInt(12),
+		},
+		// _literalProxy in proto can also work
+		{
+			`'hi.bear({_literalProxy: m{|f| f(f(self))}}).bear.{|i| i * 2}`,
+			object.NewPanStr("hihihihi"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalVarCall(t *testing.T) {
 	tests := []struct {
 		input    string
