@@ -26,218 +26,44 @@ func evalPropCall(node *ast.PropCallExpr, env *object.Env) object.PanObject {
 		return appendStackTrace(err, node.Source())
 	}
 
-	ignoresNil := node.Chain.Additional == ast.Lonely
-	recoversNil := node.Chain.Additional == ast.Thoughtful
-	squashesNil := node.Chain.Additional != ast.Strict
-
-	switch node.Chain.Main {
-	case ast.Scalar:
-		return evalScalarPropCall(
-			node, env, recv, args, kwargs, ignoresNil, recoversNil)
-	case ast.List:
-		return evalListPropCall(
-			node, env, recv, args, kwargs, ignoresNil, recoversNil, squashesNil)
-	case ast.Reduce:
-		return evalReducePropCall(
-			node, env, recv, chainArg, args, kwargs, ignoresNil, recoversNil)
-	default:
-		return nil
-	}
-}
-
-func evalListPropCall(
-	node *ast.PropCallExpr,
-	env *object.Env,
-	recv object.PanObject,
-	args []object.PanObject,
-	kwargs *object.PanObj,
-	ignoresNil bool,
-	recoversNil bool,
-	squashesNil bool,
-) object.PanObject {
-	iter, err := iterOf(env, recv)
-	if err != nil {
-		return appendStackTrace(err, node.Source())
-	}
-
-	// call `next` prop until StopIterErr raises
-	evaluatedElems := []object.PanObject{}
-	nextSym := object.NewPanStr("next")
-	for {
-		// call `(iter).next`
-		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
-			object.EmptyPanObjPtr(), iter, nextSym)
-
-		if isStopIter(nextRet) {
-			break
-		}
-
-		if err, ok := nextRet.(*object.PanErr); ok {
-			// thoughtful chain
-			if recoversNil {
-				continue
-			}
-			return appendStackTrace(err, node.Source())
-		}
-
-		// treat next value as recv
-		evaluatedElem := evalScalarPropCall(
-			node, env, nextRet, args, kwargs, ignoresNil, recoversNil)
-
-		if err, ok := evaluatedElem.(*object.PanErr); ok {
-			return appendStackTrace(err, node.Source())
-		}
-
-		// ignore nil
-		if squashesNil && evaluatedElem == object.BuiltInNil {
-			continue
-		}
-
-		evaluatedElems = append(evaluatedElems, evaluatedElem)
-	}
-
-	return &object.PanArr{Elems: evaluatedElems}
-}
-
-func evalReducePropCall(
-	node *ast.PropCallExpr,
-	env *object.Env,
-	recv object.PanObject,
-	chainArg object.PanObject,
-	args []object.PanObject,
-	kwargs *object.PanObj,
-	ignoresNil bool, // currently not used
-	recoversNil bool,
-) object.PanObject {
-	iter, err := iterOf(env, recv)
-	if err != nil {
-		return appendStackTrace(err, node.Source())
-	}
-
-	// call `next` prop until StopIterErr raises
-	acc := chainArg
-	nextSym := object.NewPanStr("next")
-	for {
-		// call `(iter).next`
-		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
-			object.EmptyPanObjPtr(), iter, nextSym)
-
-		if isStopIter(nextRet) {
-			break
-		}
-
-		if err, ok := nextRet.(*object.PanErr); ok {
-			// thoughtful chain
-			if recoversNil {
-				continue
-			}
-			return appendStackTrace(err, node.Source())
-		}
-
-		prop, isMissing := evalProp(node.Prop.Value, acc)
-		if err, ok := prop.(*object.PanErr); ok {
-			// thoughtful chain
-			if recoversNil {
-				continue
-			}
-			return appendStackTrace(err, node.Source())
-		}
-
-		// prepend iteration value to args
-		argsToPass := append([]object.PanObject{nextRet}, args...)
-		// prepend prop name to arg if _missing is called
-		if isMissing {
-			propName := object.NewPanStr(node.Prop.Value)
-			argsToPass = append([]object.PanObject{propName}, argsToPass...)
-		}
-		// reduce each iteration values
-		ret := evalCall(env, acc, prop, argsToPass, kwargs)
-
-		// thoughtful chain
-		if recoversNil && shouldRecover(ret) {
-			continue
-		}
-
-		if err, ok := ret.(*object.PanErr); ok {
-			return appendStackTrace(err, node.Source())
-		}
-		acc = ret
-	}
-
-	return acc
-}
-
-func shouldRecover(ret object.PanObject) bool {
-	switch ret.Type() {
-	case "ErrType":
-		return true
-	case "NilType":
-		return true
-	default:
-		return false
-	}
-}
-
-func iterOf(
-	env *object.Env,
-	obj object.PanObject,
-) (object.PanObject, *object.PanErr) {
-	iterSym := object.NewPanStr("_iter")
-	iter := builtInCallProp(env, object.EmptyPanObjPtr(),
-		object.EmptyPanObjPtr(), obj, iterSym)
-
-	if err, ok := iter.(*object.PanErr); ok {
-		return nil, err
-	}
-
-	if iter == object.BuiltInNil {
-		err := object.NewTypeErr("recv must have prop `_iter`")
-		return nil, err
-	}
-
-	return iter, nil
-}
-
-func evalScalarPropCall(
-	node *ast.PropCallExpr,
-	env *object.Env,
-	recv object.PanObject,
-	args []object.PanObject,
-	kwargs *object.PanObj,
-	ignoresNil bool,
-	recoversNil bool,
-) object.PanObject {
-	// lonely chain
-	if recv == object.BuiltInNil && ignoresNil {
-		return recv
-	}
-
-	prop, isMissing := evalProp(node.Prop.Value, recv)
-	if err, ok := prop.(*object.PanErr); ok {
-		if recoversNil {
-			return recv
-		}
-		return appendStackTrace(err, node.Source())
-	}
-
-	// prepend prop name to arg if _missing is called
-	if isMissing {
-		propName := object.NewPanStr(node.Prop.Value)
-		args = append([]object.PanObject{propName}, args...)
-	}
-
-	ret := evalCall(env, recv, prop, args, kwargs)
-
-	// thoughtful chain
-	if recoversNil && shouldRecover(ret) {
-		return recv
-	}
-
+	chainMiddleware := newChainMiddleware(*node.Chain)
+	ret := _evalPropCall(env, recv, chainArg, node.Prop.Value, args, kwargs,
+		chainMiddleware)
 	if err, ok := ret.(*object.PanErr); ok {
 		return appendStackTrace(err, node.Source())
 	}
 
 	return ret
+}
+
+func propCallHandler(
+	env *object.Env,
+	recv object.PanObject,
+	propName string,
+	prop object.PanObject,
+	chainArg object.PanObject,
+	args []object.PanObject,
+	kwargs *object.PanObj,
+) object.PanObject {
+	ret := evalCall(env, recv, prop, args, kwargs)
+	if err, ok := ret.(*object.PanErr); ok {
+		return err
+	}
+
+	return ret
+}
+
+func _evalPropCall(
+	env *object.Env,
+	recv object.PanObject,
+	chainArg object.PanObject,
+	propName string,
+	args []object.PanObject,
+	kwargs *object.PanObj,
+	middlewares ..._PropCallMiddleware,
+) object.PanObject {
+	handle := mergePropCallMiddlewares(middlewares...)(propCallHandler)
+	return handle(env, recv, propName, nil, chainArg, args, kwargs)
 }
 
 func evalProp(

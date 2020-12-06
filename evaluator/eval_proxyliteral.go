@@ -16,6 +16,28 @@ func findProxyLiteral(recv object.PanObject) (object.PanObject, bool) {
 	return proxy, true
 }
 
+func _evalProxyLiteral(
+	env *object.Env,
+	recv object.PanObject,
+	fObj object.PanObject,
+	proxy object.PanObject,
+) object.PanObject {
+	// TODO: duck typing (allow all objs with `call` prop)
+	f, ok := object.TraceProtoOfFunc(fObj)
+	if !ok {
+		return object.NewTypeErr("literal call must be func")
+	}
+
+	args := []object.PanObject{f}
+	kwargs := object.EmptyPanObjPtr()
+	ret := evalCall(env, recv, proxy, args, kwargs)
+	if err, ok := ret.(*object.PanErr); ok {
+		return err
+	}
+
+	return ret
+}
+
 func evalProxyLiteral(
 	node ast.Node,
 	env *object.Env,
