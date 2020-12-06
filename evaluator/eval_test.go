@@ -5739,6 +5739,34 @@ func TestEvalInfixBuiltInFuncEq(t *testing.T) {
 	}
 }
 
+func TestEvalInfixErrEq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// this is called only by errWrappers
+		{
+			`1.try.fmap {\/0}.A[1] == 1.try.fmap {\/0}.A[1]`,
+			object.BuiltInTrue,
+		},
+		{
+			`1.try.fmap {\/0}.A[1] == 1.try.fmap {a}.A[1]`,
+			object.BuiltInFalse,
+		},
+		// only message is different
+		{
+			`1.try.fmap {b}.A[1] == 1.try.fmap {c}.A[1]`,
+			object.BuiltInFalse,
+		},
+		// TODO: check case that only type is different
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixConstsEq(t *testing.T) {
 	tests := []struct {
 		input    string
