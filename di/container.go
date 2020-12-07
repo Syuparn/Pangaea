@@ -74,7 +74,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInAssertionErr, toPairs(props.AssertionErrProps(ctn)))
 	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)))
 	injectProps(object.BuiltInComparableObj, comparableNatives)
-	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)))
+	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInEitherObj, wrappableNatives)
 	injectProps(object.BuiltInErrObj, toPairs(props.ErrProps(ctn)))
 	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)), comparableNatives)
