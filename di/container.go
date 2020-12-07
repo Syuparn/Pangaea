@@ -36,6 +36,10 @@ func injectBuiltInProps(
 	go func() {
 		arrNativesCh <- mustReadNativeCode("Arr", env)
 	}()
+	baseObjNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		baseObjNativesCh <- mustReadNativeCode("BaseObj", env)
+	}()
 	comparableNativesCh := make(chan *map[object.SymHash]object.Pair)
 	go func() {
 		comparableNativesCh <- mustReadNativeCode("Comparable", env)
@@ -62,6 +66,7 @@ func injectBuiltInProps(
 	}()
 
 	arrNatives := <-arrNativesCh
+	baseObjNatives := <-baseObjNativesCh
 	comparableNatives := <-comparableNativesCh
 	intNatives := <-intNativesCh
 	iterableNatives := <-iterableNativesCh
@@ -72,9 +77,9 @@ func injectBuiltInProps(
 	// NOTE: injection order is important! (if same-named props appear, first one remains)
 	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), arrNatives, iterableNatives)
 	injectProps(object.BuiltInAssertionErr, toPairs(props.AssertionErrProps(ctn)))
-	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)))
+	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)), baseObjNatives)
 	injectProps(object.BuiltInComparableObj, comparableNatives)
-	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)))
+	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInEitherObj, wrappableNatives)
 	injectProps(object.BuiltInErrObj, toPairs(props.ErrProps(ctn)))
 	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)), comparableNatives)

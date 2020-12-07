@@ -1,2 +1,5 @@
 assertEq((1:10).any? {.odd?}, true)
 assertEq((2:10:2).any? {.odd?}, false)
+# if predicate returns non-bool, any? checks any value is truthy
+assertEq((0:3).any? {\}, true)
+assertEq((0:1).any? {\}, false)

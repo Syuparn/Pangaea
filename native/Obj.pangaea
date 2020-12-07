@@ -4,5 +4,7 @@
   # min returns the minimum value in self
   min: m{.values.min},
   # puts is an alias of p.
-  puts: m{|| .p},
+  puts: m{.p},
+  # tap calls f but returns self
+  tap: m{|f| .^f; self},
 }
