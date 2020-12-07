@@ -1,0 +1,7 @@
+assertEq({a: 1} != {a: 2}, true)
+assertEq({a: 1} != {b: 1}, true)
+assertEq({a: 1} != {a: 1}, false)
+assertEq([1, 2] != [1, 3], true)
+assertEq([1, 2] != [1, 2], false)
+assertEq((1:5) != (1:6), true)
+assertEq((1:5) != (1:5), false)
