@@ -5,7 +5,7 @@ import (
 )
 
 // ErrProps provides built-in props for Err.
-// NOTE: internally, these props are used for ErrWrappers
+// NOTE: internally, these props are also used for ErrWrappers
 // NOTE: Some Val props are defind by native code (not by this function).
 func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
@@ -49,6 +49,13 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}}
 			},
 		),
+		"call": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				return constructErr(propContainer, env, object.NewPanErr, args...)
+			},
+		),
 		"fmap": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -78,4 +85,33 @@ func compErrWrappers(
 	}
 
 	return object.BuiltInTrue
+}
+
+func constructErr(
+	propContainer map[string]object.PanObject,
+	env *object.Env,
+	newErr func(string) *object.PanErr,
+	args ...object.PanObject,
+) object.PanObject {
+	if len(args) < 2 {
+		// NOTE: not raising typeErr because constructor should not raise other type err
+		return newErr("nil")
+	}
+
+	str, ok := object.TraceProtoOfStr(args[1])
+	if ok {
+		return newErr(str.Value)
+	}
+
+	// get args[1].S instead
+	s := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+		env, object.EmptyPanObjPtr(),
+		object.EmptyPanObjPtr(), args[1], sSym,
+	)
+	convertedStr, ok := object.TraceProtoOfStr(s)
+	if ok {
+		return newErr(convertedStr.Value)
+	}
+
+	return newErr(args[1].Inspect())
 }
