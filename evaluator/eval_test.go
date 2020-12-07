@@ -30,6 +30,7 @@ func TestMain(m *testing.M) {
 }
 
 func injectBuiltInProps(ctn map[string]object.PanObject) {
+	injectProps(object.BuiltInAssertionErr, props.AssertionErrProps, ctn)
 	injectProps(object.BuiltInArrObj, props.ArrProps, ctn)
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps, ctn)
 	injectProps(object.BuiltInDiamondObj, props.DiamondProps, ctn)
@@ -40,12 +41,20 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInIterObj, props.IterProps, ctn)
 	injectProps(object.BuiltInKernelObj, props.KernelProps, ctn)
 	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
+	injectProps(object.BuiltInNameErr, props.NameErrProps, ctn)
 	injectProps(object.BuiltInNilObj, props.NilProps, ctn)
+	injectProps(object.BuiltInNoPropErr, props.NoPropErrProps, ctn)
+	injectProps(object.BuiltInNotImplementedErr, props.NotImplementedErrProps, ctn)
 	injectProps(object.BuiltInNumObj, props.NumProps, ctn)
 	injectProps(object.BuiltInObjObj, props.ObjProps, ctn)
 	injectProps(object.BuiltInRangeObj, props.RangeProps, ctn)
+	injectProps(object.BuiltInStopIterErr, props.StopIterErrProps, ctn)
 	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
+	injectProps(object.BuiltInSyntaxErr, props.SyntaxErrProps, ctn)
+	injectProps(object.BuiltInTypeErr, props.TypeErrProps, ctn)
 	injectProps(object.BuiltInValObj, props.ValProps, ctn)
+	injectProps(object.BuiltInValueErr, props.ValueErrProps, ctn)
+	injectProps(object.BuiltInZeroDivisionErr, props.ZeroDivisionErrProps, ctn)
 }
 
 func injectProps(
@@ -2286,7 +2295,10 @@ func TestEvalJumpStmt(t *testing.T) {
 			`{|i| return i}(2)`,
 			object.NewPanInt(2),
 		},
-		// TODO: raise
+		{
+			`{|i| raise Err("new error")}(2)`,
+			object.NewPanErr("new error"),
+		},
 	}
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
@@ -2316,7 +2328,14 @@ func TestEvalJumpIfStmt(t *testing.T) {
 			`{|i| return i if false; i * 2}(10)`,
 			object.NewPanInt(20),
 		},
-		// TODO: raise
+		{
+			`{|i| raise Err("new error") if true; i}(2)`,
+			object.NewPanErr("new error"),
+		},
+		{
+			`{|i| raise Err("new error") if false; i}(2)`,
+			object.NewPanInt(2),
+		},
 	}
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
@@ -2388,7 +2407,7 @@ func TestEvalJumpStmtJumpPrecedence(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
-		// jump precedence: last line < yield < return
+		// jump precedence: last line < yield < return = raise
 		{
 			`{|i| yield i; i * 2}(1)`,
 			object.NewPanInt(1),
@@ -2403,6 +2422,18 @@ func TestEvalJumpStmtJumpPrecedence(t *testing.T) {
 		},
 		{
 			`{|i| return i; i * 2}(4)`,
+			object.NewPanInt(4),
+		},
+		{
+			`{|i| yield i; raise i * 2}(1)`,
+			object.NewPanInt(2),
+		},
+		{
+			`{|i| raise i; yield i * 2}(3)`,
+			object.NewPanInt(3),
+		},
+		{
+			`{|i| raise i; i * 2}(4)`,
 			object.NewPanInt(4),
 		},
 	}
@@ -2478,6 +2509,60 @@ func TestEvalDefer(t *testing.T) {
 			t.Errorf("wrong output. expected=`%s`, got=`%s`",
 				tt.expectedStdOut, output)
 		}
+	}
+}
+
+func TestEvalRaise(t *testing.T) {
+	// raise works like return but unwraps errWrappers
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|i| raise 10; i}(5)`,
+			object.NewPanInt(10),
+		},
+		{
+			`{|i| raise Err("new error"); i}(5)`,
+			object.NewPanErr("new error"),
+		},
+		// err wrapped by Either is unwrapped by raise
+		{
+			`5.try.fmap {Err("new error")}.A.{|val, err| raise err; val}`,
+			object.NewPanErr("new error"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalRaiseIf(t *testing.T) {
+	// raise works like return but unwraps errWrappers
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|i| raise 10 if true; i}(5)`,
+			object.NewPanInt(10),
+		},
+		{
+			`{|i| raise Err("new error") if true; i}(5)`,
+			object.NewPanErr("new error"),
+		},
+		// err wrapped by Either is unwrapped by raise
+		{
+			`5.try.fmap {Err("new error")}.A.{|val, err| raise err if true; val}`,
+			object.NewPanErr("new error"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
 	}
 }
 
@@ -6712,6 +6797,306 @@ func TestEvalPrefixNot(t *testing.T) {
 		{
 			`!'a`,
 			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Err("new error")`,
+			object.NewPanErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`Err(1)`,
+			object.NewPanErr("1"),
+		},
+		{
+			`Err({a:1})`,
+			object.NewPanErr(`{"a": 1}`),
+		},
+		{
+			`Err()`,
+			object.NewPanErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalAssertionErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`AssertionErr("new error")`,
+			object.NewAssertionErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`AssertionErr(1)`,
+			object.NewAssertionErr("1"),
+		},
+		{
+			`AssertionErr({a:1})`,
+			object.NewAssertionErr(`{"a": 1}`),
+		},
+		{
+			`AssertionErr()`,
+			object.NewAssertionErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalNameErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`NameErr("new error")`,
+			object.NewNameErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`NameErr(1)`,
+			object.NewNameErr("1"),
+		},
+		{
+			`NameErr({a:1})`,
+			object.NewNameErr(`{"a": 1}`),
+		},
+		{
+			`NameErr()`,
+			object.NewNameErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalNoPropErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`NoPropErr("new error")`,
+			object.NewNoPropErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`NoPropErr(1)`,
+			object.NewNoPropErr("1"),
+		},
+		{
+			`NoPropErr({a:1})`,
+			object.NewNoPropErr(`{"a": 1}`),
+		},
+		{
+			`NoPropErr()`,
+			object.NewNoPropErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalNotImplementedErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`NotImplementedErr("new error")`,
+			object.NewNotImplementedErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`NotImplementedErr(1)`,
+			object.NewNotImplementedErr("1"),
+		},
+		{
+			`NotImplementedErr({a:1})`,
+			object.NewNotImplementedErr(`{"a": 1}`),
+		},
+		{
+			`NotImplementedErr()`,
+			object.NewNotImplementedErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStopIterErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`StopIterErr("new error")`,
+			object.NewStopIterErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`StopIterErr(1)`,
+			object.NewStopIterErr("1"),
+		},
+		{
+			`StopIterErr({a:1})`,
+			object.NewStopIterErr(`{"a": 1}`),
+		},
+		{
+			`StopIterErr()`,
+			object.NewStopIterErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalSyntaxErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`SyntaxErr("new error")`,
+			object.NewSyntaxErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`SyntaxErr(1)`,
+			object.NewSyntaxErr("1"),
+		},
+		{
+			`SyntaxErr({a:1})`,
+			object.NewSyntaxErr(`{"a": 1}`),
+		},
+		{
+			`SyntaxErr()`,
+			object.NewSyntaxErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalTypeErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`TypeErr("new error")`,
+			object.NewTypeErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`TypeErr(1)`,
+			object.NewTypeErr("1"),
+		},
+		{
+			`TypeErr({a:1})`,
+			object.NewTypeErr(`{"a": 1}`),
+		},
+		{
+			`TypeErr()`,
+			object.NewTypeErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalValueErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`ValueErr("new error")`,
+			object.NewValueErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`ValueErr(1)`,
+			object.NewValueErr("1"),
+		},
+		{
+			`ValueErr({a:1})`,
+			object.NewValueErr(`{"a": 1}`),
+		},
+		{
+			`ValueErr()`,
+			object.NewValueErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalZeroDivisionErrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`ZeroDivisionErr("new error")`,
+			object.NewZeroDivisionErr("new error"),
+		},
+		// args are converted to str by .S
+		{
+			`ZeroDivisionErr(1)`,
+			object.NewZeroDivisionErr("1"),
+		},
+		{
+			`ZeroDivisionErr({a:1})`,
+			object.NewZeroDivisionErr(`{"a": 1}`),
+		},
+		{
+			`ZeroDivisionErr()`,
+			object.NewZeroDivisionErr("nil"),
 		},
 	}
 

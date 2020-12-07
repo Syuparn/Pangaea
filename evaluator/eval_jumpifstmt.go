@@ -19,8 +19,9 @@ func evalJumpIfStmt(node *ast.JumpIfStmt, env *object.Env) object.PanObject {
 		return evalJumpIfYield(node, env, cond)
 	case ast.DeferJump:
 		return evalJumpIfDefer(node, env, cond)
+	case ast.RaiseJump:
+		return evalJumpIfRaise(node, env, cond)
 	default:
-		// TODO: handle raise
 		err := object.NewNotImplementedErr("the stmt is not implemented yet")
 		return appendStackTrace(err, node.Source())
 	}
@@ -85,4 +86,30 @@ func isTruthy(obj object.PanObject, env *object.Env) bool {
 	cond := builtInCallProp(env, object.EmptyPanObjPtr(),
 		object.EmptyPanObjPtr(), obj, bSym)
 	return cond == object.BuiltInTrue
+}
+
+func evalJumpIfRaise(
+	node *ast.JumpIfStmt,
+	env *object.Env,
+	cond object.PanObject,
+) object.PanObject {
+	if !isTruthy(cond, env) {
+		// do nothing and keep func evaluating
+		return object.BuiltInNil
+	}
+
+	// return if cond is truthy
+	// NOTE: wrap by ReturnObj to tell evalProgram to stop evaluation
+	ret := Eval(node.JumpStmt, env)
+	if err, ok := ret.(*object.PanErr); ok {
+		return appendStackTrace(err, node.Source())
+	}
+
+	// unwrap errWrapper to re-raise error
+	if w, ok := ret.(*object.PanErrWrapper); ok {
+		err := w.PanErr
+		return appendStackTrace(&err, node.Source())
+	}
+
+	return &object.ReturnObj{PanObject: ret}
 }
