@@ -11,15 +11,8 @@ func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObjec
 		return appendStackTrace(err, node.Source())
 	}
 
-	fObj := Eval(node.Func, env)
-	if err, ok := fObj.(*object.PanErr); ok {
-		return appendStackTrace(err, node.Source())
-	}
-
-	// TODO: duck typing (allow all objs with `call` prop)
-	f, ok := object.TraceProtoOfFunc(fObj)
-	if !ok {
-		err := object.NewTypeErr("literal call must be func")
+	f := Eval(node.Func, env)
+	if err, ok := f.(*object.PanErr); ok {
 		return appendStackTrace(err, node.Source())
 	}
 
@@ -31,194 +24,62 @@ func evalLiteralCall(node *ast.LiteralCallExpr, env *object.Env) object.PanObjec
 		return appendStackTrace(err, node.Source())
 	}
 
-	ignoresNil := node.Chain.Additional == ast.Lonely
-	recoversNil := node.Chain.Additional == ast.Thoughtful
-	squashesNil := node.Chain.Additional != ast.Strict
-
-	switch node.Chain.Main {
-	case ast.Scalar:
-		return evalScalarLiteralCall(
-			node, env, f, recv, ignoresNil, recoversNil)
-	case ast.List:
-		return evalListLiteralCall(
-			node, env, f, recv, ignoresNil, recoversNil, squashesNil)
-	case ast.Reduce:
-		return evalReduceLiteralCall(
-			node, env, f, recv, chainArg, ignoresNil, recoversNil)
-	default:
-		return nil
-	}
-}
-
-func evalScalarLiteralCall(
-	node ast.Node,
-	env *object.Env,
-	f *object.PanFunc,
-	recv object.PanObject,
-	ignoresNil bool,
-	recoversNil bool,
-) object.PanObject {
-	// lonely chain
-	if ignoresNil && recv == object.BuiltInNil {
-		return recv
-	}
-
-	// if recv has _proxyLiteral, call it with f
-	// FIXME: enable to use proxy in other chains
-	if proxy, ok := findProxyLiteral(recv); ok {
-		return evalProxyLiteral(node, env, recv, f, proxy)
-	}
-
-	args := literalCallArgs(recv, f)
-	// prepend f itself to args
-	args = append([]object.PanObject{f}, args...)
-
-	ret := _evalLiteralCall(node, env, f, args)
-
-	// thoughtful chain
-	if recoversNil && shouldRecover(ret) {
-		return recv
-	}
-
-	return ret
-}
-
-func evalListLiteralCall(
-	node ast.Node,
-	env *object.Env,
-	f *object.PanFunc,
-	recv object.PanObject,
-	ignoresNil bool,
-	recoversNil bool,
-	squashesNil bool,
-) object.PanObject {
-	iter, err := iterOf(env, recv)
-	if err != nil {
-		return appendStackTrace(err, node.Source())
-	}
-
-	// call `next` prop until StopIterErr raises
-	evaluatedElems := []object.PanObject{}
-	nextSym := object.NewPanStr("next")
-	for {
-		// call `(iter).next`
-		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
-			object.EmptyPanObjPtr(), iter, nextSym)
-
-		if isStopIter(nextRet) {
-			break
-		}
-
-		if err, ok := nextRet.(*object.PanErr); ok {
-			// thoughtful chain
-			if recoversNil {
-				evaluatedElems = append(evaluatedElems, nextRet)
-				continue
-			}
-			return appendStackTrace(err, node.Source())
-		}
-
-		args := literalCallArgs(nextRet, f)
-		// prepend f itself to args
-		args = append([]object.PanObject{f}, args...)
-
-		// treat next value as recv
-		evaluatedElem := _evalLiteralCall(node, env, f, args)
-
-		// thoughtful chain
-		if recoversNil && shouldRecover(evaluatedElem) {
-			evaluatedElems = append(evaluatedElems, nextRet)
-		}
-
-		if err, ok := evaluatedElem.(*object.PanErr); ok {
-			return appendStackTrace(err, node.Source())
-		}
-
-		// ignore nil
-		if squashesNil && evaluatedElem == object.BuiltInNil {
-			continue
-		}
-
-		evaluatedElems = append(evaluatedElems, evaluatedElem)
-	}
-
-	return &object.PanArr{Elems: evaluatedElems}
-}
-
-func isStopIter(obj object.PanObject) bool {
-	err, ok := obj.(*object.PanErr)
-	if !ok {
-		return false
-	}
-	return err.ErrKind == object.StopIterErr
-}
-
-func evalReduceLiteralCall(
-	node ast.Node,
-	env *object.Env,
-	f *object.PanFunc,
-	recv object.PanObject,
-	chainArg object.PanObject,
-	ignoresNil bool, // currently not used
-	recoversNil bool,
-) object.PanObject {
-	iter, err := iterOf(env, recv)
-	if err != nil {
-		return appendStackTrace(err, node.Source())
-	}
-
-	// call `next` prop until StopIterErr raises
-	acc := chainArg
-	nextSym := object.NewPanStr("next")
-	for {
-		// call `(iter).next`
-		nextRet := builtInCallProp(env, object.EmptyPanObjPtr(),
-			object.EmptyPanObjPtr(), iter, nextSym)
-
-		if isStopIter(nextRet) {
-			break
-		}
-
-		if err, ok := nextRet.(*object.PanErr); ok {
-			// thoughtful chain
-			if recoversNil {
-				continue
-			}
-			return appendStackTrace(err, node.Source())
-		}
-
-		// prepend iteration value to args
-		args := []object.PanObject{f, acc, nextRet}
-		// reduce each iteration values
-		ret := _evalLiteralCall(node, env, f, args)
-
-		// thoughtful chain
-		if recoversNil && shouldRecover(ret) {
-			continue
-		}
-
-		if err, ok := ret.(*object.PanErr); ok {
-			return appendStackTrace(err, node.Source())
-		}
-		acc = ret
-	}
-
-	return acc
-}
-
-func _evalLiteralCall(
-	node ast.Node,
-	env *object.Env,
-	f *object.PanFunc,
-	args []object.PanObject,
-) object.PanObject {
-	kwargs := object.EmptyPanObjPtr()
-	ret := evalFuncCall(env, kwargs, args...)
-
+	chainMiddleware := newLiteralCallChainMiddleware(*node.Chain)
+	ret := _evalLiteralCall(env, recv, chainArg, f,
+		chainMiddleware, literalProxyMiddleware)
 	if err, ok := ret.(*object.PanErr); ok {
 		return appendStackTrace(err, node.Source())
 	}
+
 	return ret
+}
+
+func literalProxyMiddleware(next _LiteralCallMiddlewareHandler) _LiteralCallMiddlewareHandler {
+	return func(
+		env *object.Env,
+		recv object.PanObject,
+		chainArg object.PanObject,
+		args []object.PanObject,
+		kwargs *object.PanObj,
+	) object.PanObject {
+		// if recv has _proxyLiteral, call it instead
+		if proxy, ok := findProxyLiteral(recv); ok {
+			return _evalProxyLiteral(env, recv, args[0], proxy)
+		}
+		return next(env, recv, chainArg, args, kwargs)
+	}
+}
+
+func literalCallHandler(
+	env *object.Env,
+	recv object.PanObject,
+	chainArg object.PanObject,
+	args []object.PanObject,
+	kwargs *object.PanObj,
+) object.PanObject {
+	// TODO: duck typing (allow all objs with `call` prop)
+	f, ok := object.TraceProtoOfFunc(args[0])
+	if !ok {
+		return object.NewTypeErr("literal call must be func")
+	}
+
+	// unpack recv for params
+	argsToPass := append([]object.PanObject{f}, literalCallArgs(recv, f)...)
+
+	return evalFuncCall(env, kwargs, argsToPass...)
+}
+
+func _evalLiteralCall(
+	env *object.Env,
+	recv object.PanObject,
+	chainArg object.PanObject,
+	f object.PanObject,
+	middlewares ..._LiteralCallMiddleware,
+) object.PanObject {
+	args := []object.PanObject{f}
+	kwargs := object.EmptyPanObjPtr()
+	handle := mergeLiteralCallMiddlewares(middlewares...)(literalCallHandler)
+	return handle(env, recv, chainArg, args, kwargs)
 }
 
 func literalCallArgs(recv object.PanObject, f *object.PanFunc) []object.PanObject {
