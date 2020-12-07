@@ -2295,7 +2295,10 @@ func TestEvalJumpStmt(t *testing.T) {
 			`{|i| return i}(2)`,
 			object.NewPanInt(2),
 		},
-		// TODO: raise
+		{
+			`{|i| raise Err("new error")}(2)`,
+			object.NewPanErr("new error"),
+		},
 	}
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
@@ -2325,7 +2328,14 @@ func TestEvalJumpIfStmt(t *testing.T) {
 			`{|i| return i if false; i * 2}(10)`,
 			object.NewPanInt(20),
 		},
-		// TODO: raise
+		{
+			`{|i| raise Err("new error") if true; i}(2)`,
+			object.NewPanErr("new error"),
+		},
+		{
+			`{|i| raise Err("new error") if false; i}(2)`,
+			object.NewPanInt(2),
+		},
 	}
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
@@ -2397,7 +2407,7 @@ func TestEvalJumpStmtJumpPrecedence(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
-		// jump precedence: last line < yield < return
+		// jump precedence: last line < yield < return = raise
 		{
 			`{|i| yield i; i * 2}(1)`,
 			object.NewPanInt(1),
@@ -2412,6 +2422,18 @@ func TestEvalJumpStmtJumpPrecedence(t *testing.T) {
 		},
 		{
 			`{|i| return i; i * 2}(4)`,
+			object.NewPanInt(4),
+		},
+		{
+			`{|i| yield i; raise i * 2}(1)`,
+			object.NewPanInt(2),
+		},
+		{
+			`{|i| raise i; yield i * 2}(3)`,
+			object.NewPanInt(3),
+		},
+		{
+			`{|i| raise i; i * 2}(4)`,
 			object.NewPanInt(4),
 		},
 	}
@@ -2487,6 +2509,60 @@ func TestEvalDefer(t *testing.T) {
 			t.Errorf("wrong output. expected=`%s`, got=`%s`",
 				tt.expectedStdOut, output)
 		}
+	}
+}
+
+func TestEvalRaise(t *testing.T) {
+	// raise works like return but unwraps errWrappers
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|i| raise 10; i}(5)`,
+			object.NewPanInt(10),
+		},
+		{
+			`{|i| raise Err("new error"); i}(5)`,
+			object.NewPanErr("new error"),
+		},
+		// err wrapped by Either is unwrapped by raise
+		{
+			`5.try.fmap {Err("new error")}.A.{|val, err| raise err; val}`,
+			object.NewPanErr("new error"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalRaiseIf(t *testing.T) {
+	// raise works like return but unwraps errWrappers
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|i| raise 10 if true; i}(5)`,
+			object.NewPanInt(10),
+		},
+		{
+			`{|i| raise Err("new error") if true; i}(5)`,
+			object.NewPanErr("new error"),
+		},
+		// err wrapped by Either is unwrapped by raise
+		{
+			`5.try.fmap {Err("new error")}.A.{|val, err| raise err if true; val}`,
+			object.NewPanErr("new error"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
 	}
 }
 

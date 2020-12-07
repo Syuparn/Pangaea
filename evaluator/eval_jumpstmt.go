@@ -23,8 +23,15 @@ func evalJumpStmt(node *ast.JumpStmt, env *object.Env) object.PanObject {
 		return &object.ReturnObj{PanObject: val}
 	case ast.YieldJump:
 		return &object.YieldObj{PanObject: val}
+	case ast.RaiseJump:
+		// unwrap ErrWrapper
+		if w, ok := val.(*object.PanErrWrapper); ok {
+			err := w.PanErr
+			return appendStackTrace(&err, node.Source())
+		}
+
+		return &object.ReturnObj{PanObject: val}
 	default:
-		// TODO: handle raise
 		err := object.NewNotImplementedErr("the stmt is not implemented yet")
 		return appendStackTrace(err, node.Source())
 	}
