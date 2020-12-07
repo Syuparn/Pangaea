@@ -2,9 +2,9 @@
   # A converts self into arr.
   A: m{|| @{\}},
   # all? returns whether all elements meet the predicate f
-  all?: m{|f| @^f.has?(false).!},
+  all?: m{|f| @^f@B.has?(false).!},
   # any? returns whether any element meets the predicate f
-  any?: m{|f| @^f.has?(true)},
+  any?: m{|f| @^f@B.has?(true)},
   # empty? returns whether self contains elements.
   empty?: m{|| .A.empty?},
   # exclude selects elements for which f returns false.

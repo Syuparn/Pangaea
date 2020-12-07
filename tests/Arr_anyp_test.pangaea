@@ -1,2 +1,5 @@
 assertEq([1, 2, 3].any? {.odd?}, true)
 assertEq([2, 4, 6].any? {.odd?}, false)
+# if predicate returns non-bool, any? checks any value is truthy
+assertEq([0, 1].any? {\}, true)
+assertEq([0, 0].any? {\}, false)

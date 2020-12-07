@@ -1,2 +1,5 @@
 assertEq({a: 1, b: 2}.any? {|k, v| v.even?}, true)
 assertEq({a: 1, b: 3}.any? {|k, v| v.even?}, false)
+# if predicate returns non-bool, any? checks any value is truthy
+assertEq({a: "a", b: ""}.any? {|k, v| v}, true)
+assertEq({a: "", b: ""}.any? {|k, v| v}, false)

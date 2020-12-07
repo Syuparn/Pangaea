@@ -1,2 +1,5 @@
 assertEq("abc".any? {\ == "a"}, true)
 assertEq("def".any? {\ == "a"}, false)
+# if predicate returns non-bool, any? checks any value is truthy
+assertEq("abb".any? {.sub("b", "")}, true)
+assertEq("bbb".any? {.sub("b", "")}, false)

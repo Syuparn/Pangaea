@@ -1,2 +1,5 @@
 assertEq((1:5:2).all? {.odd?}, true)
 assertEq((1:10).all? {.odd?}, false)
+# if predicate returns non-bool, all? checks all values are truthy
+assertEq((1:10).all? {\}, true)
+assertEq((0:10).all? {\}, false)

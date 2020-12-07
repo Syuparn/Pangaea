@@ -1,2 +1,5 @@
 assertEq("aaaaa".all? {\ == "a"}, true)
 assertEq("abc".all? {\ == "a"}, false)
+# if predicate returns non-bool, all? checks all values are truthy
+assertEq("aaaaa".all? {.sub("b", "")}, true)
+assertEq("aabaa".all? {.sub("b", "")}, false)

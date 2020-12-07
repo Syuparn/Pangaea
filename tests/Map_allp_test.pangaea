@@ -1,2 +1,5 @@
 assertEq(%{'a: 2, 'b: 4}.all? {|k, v| v.even?}, true)
 assertEq(%{'a: 2, 'b: 4}.all? {|k, v| k == 'a}, false)
+# if predicate returns non-bool, all? checks all values are truthy
+assertEq(%{'a: "a", 'b: "b"}.all? {|k, v| v}, true)
+assertEq(%{'a: "a", 'b: ""}.all? {|k, v| v}, false)
