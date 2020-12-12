@@ -49,13 +49,6 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}}
 			},
 		),
-		"call": f(
-			func(
-				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
-			) object.PanObject {
-				return constructErr(propContainer, env, object.NewPanErr, args...)
-			},
-		),
 		"fmap": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -65,6 +58,13 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return args[0]
+			},
+		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				return constructErr(propContainer, env, object.NewPanErr, args...)
 			},
 		),
 	}
