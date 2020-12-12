@@ -7176,6 +7176,37 @@ func TestEvalArrCall(t *testing.T) {
 	}
 }
 
+func TestEvalStrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Str.new('a)`,
+			object.NewPanStr("a"),
+		},
+		{
+			`Str.new('b.bear({child?: true}))`,
+			object.NewPanStr("b"),
+		},
+		// non-string arg is converted to str by .S
+		{
+			`Str.new({a: 1})`,
+			object.NewPanStr(`{"a": 1}`),
+		},
+		// errors
+		{
+			`Str.new`,
+			object.NewTypeErr("Str#new requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssert(t *testing.T) {
 	tests := []struct {
 		input    string
