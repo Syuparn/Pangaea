@@ -7106,6 +7106,76 @@ func TestEvalZeroDivisionErrConstructor(t *testing.T) {
 	}
 }
 
+func TestEvalArrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Arr.new([1])`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+			}},
+		},
+		{
+			`Arr.new([1, 2].bear({child?: true}))`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+			}},
+		},
+		// errors
+		{
+			`Arr.new`,
+			object.NewTypeErr("Arr#new requires at least 2 args"),
+		},
+		{
+			`Arr.new(2)`,
+			object.NewTypeErr("2 cannot be treated as arr"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalArrCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Arr()`,
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
+		{
+			`Arr(1)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+			}},
+		},
+		{
+			`Arr('a, true)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.BuiltInTrue,
+			}},
+		},
+		// errors
+		{
+			`Arr['call]()`,
+			object.NewTypeErr("Arr#call requires at least 1 arg"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalAssert(t *testing.T) {
 	tests := []struct {
 		input    string

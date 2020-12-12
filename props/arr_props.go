@@ -134,6 +134,17 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"call": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Arr#call requires at least 1 arg")
+				}
+
+				return &object.PanArr{Elems: args[1:]}
+			},
+		),
 		"has?": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -212,6 +223,22 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return object.NewPanInt(int64(len(self.Elems)))
+			},
+		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Arr#new requires at least 2 args")
+				}
+				arr, ok := object.TraceProtoOfArr(args[1])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as arr", args[1].Inspect()))
+				}
+
+				return arr
 			},
 		),
 	}
