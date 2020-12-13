@@ -7317,6 +7317,49 @@ func TestEvalNilConstructor(t *testing.T) {
 	}
 }
 
+func TestEvalObjConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Obj.new({a: 1})`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+			}),
+		},
+		// proto info is ignored
+		{
+			`Obj.new({a: 1}.bear({child?: true}))`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("child?"), Value: object.BuiltInTrue},
+			}),
+		},
+		// obj other than PanObj is converted to PanObj
+		{
+			`Obj.new(10)`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("_value"), Value: object.NewPanInt(10)},
+			}),
+		},
+		// if nil is passed, empty obj is returned
+		{
+			`Obj.new(nil)`,
+			toPanObj([]object.Pair{}),
+		},
+		// not error! (insufficient args are filled with nil)
+		{
+			`Obj.new`,
+			toPanObj([]object.Pair{}),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalRangeConstructor(t *testing.T) {
 	tests := []struct {
 		input    string

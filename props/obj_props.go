@@ -195,6 +195,30 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInNil
 			},
 		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					// NOTE: not error because insufficient args are filled with nil!
+					return object.EmptyPanObjPtr()
+				}
+				if o, ok := args[1].(*object.PanObj); ok {
+					// NOTE: proto info is ignored (the returned value is a child of Obj)
+					return object.PanObjInstancePtr(o.Pairs)
+				}
+
+				// if \2 is nil, return empty obj
+				if _, ok := object.TraceProtoOfNil(args[1]); ok {
+					return object.EmptyPanObjPtr()
+				}
+
+				// wrap by PanObj (return {_value: \2})
+				return object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+					object.GetSymHash("_value"): {Key: valueSym, Value: args[1]},
+				})
+			},
+		),
 		"repr": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
