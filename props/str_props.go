@@ -326,6 +326,25 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return &object.PanArr{Elems: elems}
 			},
 		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Str#new requires at least 2 args")
+				}
+				str, ok := object.TraceProtoOfStr(args[1])
+				if ok {
+					return str
+				}
+
+				// if \2 is not str, return \2.S
+				return propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), args[1], sSym,
+				)
+			},
+		),
 		"sub": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

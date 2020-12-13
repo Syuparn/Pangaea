@@ -2,8 +2,9 @@ package props
 
 import (
 	"fmt"
-	"github.com/Syuparn/pangaea/object"
 	"math"
+
+	"github.com/Syuparn/pangaea/object"
 )
 
 // FloatProps provides built-in props for Float.
@@ -141,6 +142,27 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
+			},
+		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Float#new requires at least 2 args")
+				}
+				f, ok := object.TraceProtoOfFloat(args[1])
+				if ok {
+					return f
+				}
+
+				i, ok := object.TraceProtoOfInt(args[1])
+				if ok {
+					return &object.PanFloat{Value: float64(i.Value)}
+				}
+
+				return object.NewTypeErr(
+					fmt.Sprintf("%s cannot be treated as float", args[1].Inspect()))
 			},
 		),
 	}

@@ -1,8 +1,9 @@
 package props
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"fmt"
+
+	"github.com/Syuparn/pangaea/object"
 )
 
 // FuncProps provides built-in props for Func.
@@ -61,6 +62,22 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 			},
 		),
 		"call": propContainer["Func_call"],
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Func#new requires at least 2 args")
+				}
+				f, ok := object.TraceProtoOfFunc(args[1])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as func", args[1].Inspect()))
+				}
+
+				return f
+			},
+		),
 	}
 }
 

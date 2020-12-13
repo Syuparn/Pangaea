@@ -2296,7 +2296,7 @@ func TestEvalJumpStmt(t *testing.T) {
 			object.NewPanInt(2),
 		},
 		{
-			`{|i| raise Err("new error")}(2)`,
+			`{|i| raise Err.new("new error")}(2)`,
 			object.NewPanErr("new error"),
 		},
 	}
@@ -2329,11 +2329,11 @@ func TestEvalJumpIfStmt(t *testing.T) {
 			object.NewPanInt(20),
 		},
 		{
-			`{|i| raise Err("new error") if true; i}(2)`,
+			`{|i| raise Err.new("new error") if true; i}(2)`,
 			object.NewPanErr("new error"),
 		},
 		{
-			`{|i| raise Err("new error") if false; i}(2)`,
+			`{|i| raise Err.new("new error") if false; i}(2)`,
 			object.NewPanInt(2),
 		},
 	}
@@ -2523,12 +2523,12 @@ func TestEvalRaise(t *testing.T) {
 			object.NewPanInt(10),
 		},
 		{
-			`{|i| raise Err("new error"); i}(5)`,
+			`{|i| raise Err.new("new error"); i}(5)`,
 			object.NewPanErr("new error"),
 		},
 		// err wrapped by Either is unwrapped by raise
 		{
-			`5.try.fmap {Err("new error")}.A.{|val, err| raise err; val}`,
+			`5.try.fmap {Err.new("new error")}.A.{|val, err| raise err; val}`,
 			object.NewPanErr("new error"),
 		},
 	}
@@ -2550,12 +2550,12 @@ func TestEvalRaiseIf(t *testing.T) {
 			object.NewPanInt(10),
 		},
 		{
-			`{|i| raise Err("new error") if true; i}(5)`,
+			`{|i| raise Err.new("new error") if true; i}(5)`,
 			object.NewPanErr("new error"),
 		},
 		// err wrapped by Either is unwrapped by raise
 		{
-			`5.try.fmap {Err("new error")}.A.{|val, err| raise err if true; val}`,
+			`5.try.fmap {Err.new("new error")}.A.{|val, err| raise err if true; val}`,
 			object.NewPanErr("new error"),
 		},
 	}
@@ -6812,20 +6812,20 @@ func TestEvalErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`Err("new error")`,
+			`Err.new("new error")`,
 			object.NewPanErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`Err(1)`,
+			`Err.new(1)`,
 			object.NewPanErr("1"),
 		},
 		{
-			`Err({a:1})`,
+			`Err.new({a:1})`,
 			object.NewPanErr(`{"a": 1}`),
 		},
 		{
-			`Err()`,
+			`Err.new()`,
 			object.NewPanErr("nil"),
 		},
 	}
@@ -6842,20 +6842,20 @@ func TestEvalAssertionErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`AssertionErr("new error")`,
+			`AssertionErr.new("new error")`,
 			object.NewAssertionErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`AssertionErr(1)`,
+			`AssertionErr.new(1)`,
 			object.NewAssertionErr("1"),
 		},
 		{
-			`AssertionErr({a:1})`,
+			`AssertionErr.new({a:1})`,
 			object.NewAssertionErr(`{"a": 1}`),
 		},
 		{
-			`AssertionErr()`,
+			`AssertionErr.new()`,
 			object.NewAssertionErr("nil"),
 		},
 	}
@@ -6872,20 +6872,20 @@ func TestEvalNameErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`NameErr("new error")`,
+			`NameErr.new("new error")`,
 			object.NewNameErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`NameErr(1)`,
+			`NameErr.new(1)`,
 			object.NewNameErr("1"),
 		},
 		{
-			`NameErr({a:1})`,
+			`NameErr.new({a:1})`,
 			object.NewNameErr(`{"a": 1}`),
 		},
 		{
-			`NameErr()`,
+			`NameErr.new()`,
 			object.NewNameErr("nil"),
 		},
 	}
@@ -6902,20 +6902,20 @@ func TestEvalNoPropErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`NoPropErr("new error")`,
+			`NoPropErr.new("new error")`,
 			object.NewNoPropErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`NoPropErr(1)`,
+			`NoPropErr.new(1)`,
 			object.NewNoPropErr("1"),
 		},
 		{
-			`NoPropErr({a:1})`,
+			`NoPropErr.new({a:1})`,
 			object.NewNoPropErr(`{"a": 1}`),
 		},
 		{
-			`NoPropErr()`,
+			`NoPropErr.new()`,
 			object.NewNoPropErr("nil"),
 		},
 	}
@@ -6932,20 +6932,20 @@ func TestEvalNotImplementedErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`NotImplementedErr("new error")`,
+			`NotImplementedErr.new("new error")`,
 			object.NewNotImplementedErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`NotImplementedErr(1)`,
+			`NotImplementedErr.new(1)`,
 			object.NewNotImplementedErr("1"),
 		},
 		{
-			`NotImplementedErr({a:1})`,
+			`NotImplementedErr.new({a:1})`,
 			object.NewNotImplementedErr(`{"a": 1}`),
 		},
 		{
-			`NotImplementedErr()`,
+			`NotImplementedErr.new()`,
 			object.NewNotImplementedErr("nil"),
 		},
 	}
@@ -6962,20 +6962,20 @@ func TestEvalStopIterErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`StopIterErr("new error")`,
+			`StopIterErr.new("new error")`,
 			object.NewStopIterErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`StopIterErr(1)`,
+			`StopIterErr.new(1)`,
 			object.NewStopIterErr("1"),
 		},
 		{
-			`StopIterErr({a:1})`,
+			`StopIterErr.new({a:1})`,
 			object.NewStopIterErr(`{"a": 1}`),
 		},
 		{
-			`StopIterErr()`,
+			`StopIterErr.new()`,
 			object.NewStopIterErr("nil"),
 		},
 	}
@@ -6992,20 +6992,20 @@ func TestEvalSyntaxErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`SyntaxErr("new error")`,
+			`SyntaxErr.new("new error")`,
 			object.NewSyntaxErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`SyntaxErr(1)`,
+			`SyntaxErr.new(1)`,
 			object.NewSyntaxErr("1"),
 		},
 		{
-			`SyntaxErr({a:1})`,
+			`SyntaxErr.new({a:1})`,
 			object.NewSyntaxErr(`{"a": 1}`),
 		},
 		{
-			`SyntaxErr()`,
+			`SyntaxErr.new()`,
 			object.NewSyntaxErr("nil"),
 		},
 	}
@@ -7022,20 +7022,20 @@ func TestEvalTypeErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`TypeErr("new error")`,
+			`TypeErr.new("new error")`,
 			object.NewTypeErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`TypeErr(1)`,
+			`TypeErr.new(1)`,
 			object.NewTypeErr("1"),
 		},
 		{
-			`TypeErr({a:1})`,
+			`TypeErr.new({a:1})`,
 			object.NewTypeErr(`{"a": 1}`),
 		},
 		{
-			`TypeErr()`,
+			`TypeErr.new()`,
 			object.NewTypeErr("nil"),
 		},
 	}
@@ -7052,20 +7052,20 @@ func TestEvalValueErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`ValueErr("new error")`,
+			`ValueErr.new("new error")`,
 			object.NewValueErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`ValueErr(1)`,
+			`ValueErr.new(1)`,
 			object.NewValueErr("1"),
 		},
 		{
-			`ValueErr({a:1})`,
+			`ValueErr.new({a:1})`,
 			object.NewValueErr(`{"a": 1}`),
 		},
 		{
-			`ValueErr()`,
+			`ValueErr.new()`,
 			object.NewValueErr("nil"),
 		},
 	}
@@ -7082,21 +7082,293 @@ func TestEvalZeroDivisionErrConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`ZeroDivisionErr("new error")`,
+			`ZeroDivisionErr.new("new error")`,
 			object.NewZeroDivisionErr("new error"),
 		},
 		// args are converted to str by .S
 		{
-			`ZeroDivisionErr(1)`,
+			`ZeroDivisionErr.new(1)`,
 			object.NewZeroDivisionErr("1"),
 		},
 		{
-			`ZeroDivisionErr({a:1})`,
+			`ZeroDivisionErr.new({a:1})`,
 			object.NewZeroDivisionErr(`{"a": 1}`),
 		},
 		{
-			`ZeroDivisionErr()`,
+			`ZeroDivisionErr.new()`,
 			object.NewZeroDivisionErr("nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalArrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Arr.new([1])`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+			}},
+		},
+		{
+			`Arr.new([1, 2].bear({child?: true}))`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+			}},
+		},
+		// errors
+		{
+			`Arr.new`,
+			object.NewTypeErr("Arr#new requires at least 2 args"),
+		},
+		{
+			`Arr.new(2)`,
+			object.NewTypeErr("2 cannot be treated as arr"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalArrCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Arr()`,
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
+		{
+			`Arr(1)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanInt(1),
+			}},
+		},
+		{
+			`Arr('a, true)`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.BuiltInTrue,
+			}},
+		},
+		// errors
+		{
+			`Arr['call]()`,
+			object.NewTypeErr("Arr#call requires at least 1 arg"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalFloatConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Float.new(1.5)`,
+			&object.PanFloat{Value: 1.5},
+		},
+		{
+			`Float.new(-2.5.bear({child?: true}))`,
+			&object.PanFloat{Value: -2.5},
+		},
+		{
+			`Float.new(2)`,
+			&object.PanFloat{Value: 2.0},
+		},
+		// errors
+		{
+			`Float.new`,
+			object.NewTypeErr("Float#new requires at least 2 args"),
+		},
+		{
+			`Float.new("a")`,
+			object.NewTypeErr(`"a" cannot be treated as float`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalFuncConstructor(t *testing.T) {
+	outerEnv := object.NewEnvWithConsts()
+
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Func.new({||})`,
+			toPanFunc(
+				[]string{},
+				[]object.Pair{},
+				`|| `,
+				outerEnv,
+			),
+		},
+		{
+			`Func.new({||}.bear({child?: true}))`,
+			toPanFunc(
+				[]string{},
+				[]object.Pair{},
+				`|| `,
+				outerEnv,
+			),
+		},
+		// errors
+		{
+			`Func.new`,
+			object.NewTypeErr("Func#new requires at least 2 args"),
+		},
+		{
+			`Func.new(2)`,
+			object.NewTypeErr("2 cannot be treated as func"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEvalInEnv(t, tt.input, outerEnv)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalIntConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Int.new(1)`,
+			object.NewPanInt(1),
+		},
+		{
+			`Int.new(false)`,
+			object.NewPanInt(0),
+		},
+		{
+			`Int.new(2.9)`,
+			object.NewPanInt(2),
+		},
+		{
+			`Int.new(-2.9)`,
+			object.NewPanInt(-2),
+		},
+		// errors
+		{
+			`Int.new`,
+			object.NewTypeErr("Int#new requires at least 2 args"),
+		},
+		{
+			`Int.new("a")`,
+			object.NewTypeErr(`"a" cannot be treated as int`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalNilConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Nil.new(nil)`,
+			object.BuiltInNil,
+		},
+		// NOTE: not error! (because insufficient args are filled with nil)
+		{
+			`Nil.new`,
+			object.BuiltInNil,
+		},
+		// errors
+		{
+			`Nil.new(2)`,
+			object.NewTypeErr("2 cannot be treated as nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalRangeConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Range.new(1)`,
+			toPanRange(1, nil, nil),
+		},
+		{
+			`Range.new(2, 5)`,
+			toPanRange(2, 5, nil),
+		},
+		{
+			`Range.new('e, 'a, -1)`,
+			toPanRange("e", "a", -1),
+		},
+		// errors
+		{
+			`Range.new`,
+			object.NewTypeErr("Range#new requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStrConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Str.new('a)`,
+			object.NewPanStr("a"),
+		},
+		{
+			`Str.new('b.bear({child?: true}))`,
+			object.NewPanStr("b"),
+		},
+		// non-string arg is converted to str by .S
+		{
+			`Str.new({a: 1})`,
+			object.NewPanStr(`{"a": 1}`),
+		},
+		// errors
+		{
+			`Str.new`,
+			object.NewTypeErr("Str#new requires at least 2 args"),
 		},
 	}
 

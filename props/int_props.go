@@ -304,6 +304,28 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInFalse
 			},
 		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Int#new requires at least 2 args")
+				}
+				i, ok := object.TraceProtoOfInt(args[1])
+				if ok {
+					return i
+				}
+
+				// float is rounded down
+				f, ok := object.TraceProtoOfFloat(args[1])
+				if ok {
+					return object.NewPanInt(int64(f.Value))
+				}
+
+				return object.NewTypeErr(
+					fmt.Sprintf("%s cannot be treated as int", args[1].Inspect()))
+			},
+		),
 	}
 }
 
