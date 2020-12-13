@@ -7176,6 +7176,48 @@ func TestEvalArrCall(t *testing.T) {
 	}
 }
 
+func TestEvalFuncConstructor(t *testing.T) {
+	outerEnv := object.NewEnvWithConsts()
+
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Func.new({||})`,
+			toPanFunc(
+				[]string{},
+				[]object.Pair{},
+				`|| `,
+				outerEnv,
+			),
+		},
+		{
+			`Func.new({||}.bear({child?: true}))`,
+			toPanFunc(
+				[]string{},
+				[]object.Pair{},
+				`|| `,
+				outerEnv,
+			),
+		},
+		// errors
+		{
+			`Func.new`,
+			object.NewTypeErr("Func#new requires at least 2 args"),
+		},
+		{
+			`Func.new(2)`,
+			object.NewTypeErr("2 cannot be treated as func"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEvalInEnv(t, tt.input, outerEnv)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalNilConstructor(t *testing.T) {
 	tests := []struct {
 		input    string
