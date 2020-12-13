@@ -7299,11 +7299,12 @@ func TestEvalNilConstructor(t *testing.T) {
 			`Nil.new(nil)`,
 			object.BuiltInNil,
 		},
-		// errors
+		// NOTE: not error! (because insufficient args are filled with nil)
 		{
 			`Nil.new`,
-			object.NewTypeErr("Nil#new requires at least 2 args"),
+			object.BuiltInNil,
 		},
+		// errors
 		{
 			`Nil.new(2)`,
 			object.NewTypeErr("2 cannot be treated as nil"),

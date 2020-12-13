@@ -64,7 +64,8 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
 				if len(args) < 2 {
-					return object.NewTypeErr("Nil#new requires at least 2 args")
+					// NOTE: not error because insufficient args are filled with nil!
+					return object.BuiltInNil
 				}
 				n, ok := object.TraceProtoOfNil(args[1])
 				if !ok {
