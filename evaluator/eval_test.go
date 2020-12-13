@@ -7176,6 +7176,40 @@ func TestEvalArrCall(t *testing.T) {
 	}
 }
 
+func TestEvalFloatConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Float.new(1.5)`,
+			&object.PanFloat{Value: 1.5},
+		},
+		{
+			`Float.new(-2.5.bear({child?: true}))`,
+			&object.PanFloat{Value: -2.5},
+		},
+		{
+			`Float.new(2)`,
+			&object.PanFloat{Value: 2.0},
+		},
+		// errors
+		{
+			`Float.new`,
+			object.NewTypeErr("Float#new requires at least 2 args"),
+		},
+		{
+			`Float.new("a")`,
+			object.NewTypeErr(`"a" cannot be treated as float`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalFuncConstructor(t *testing.T) {
 	outerEnv := object.NewEnvWithConsts()
 
