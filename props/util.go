@@ -6,6 +6,7 @@ import (
 
 var eqSym = object.NewPanStr("==")
 var sSym = object.NewPanStr("S")
+var valueSym = object.NewPanStr("_value")
 
 func propIn(obj *object.PanObj, propName string) (object.Pair, bool) {
 	propSym := object.GetSymHash(propName)
