@@ -7176,6 +7176,32 @@ func TestEvalArrCall(t *testing.T) {
 	}
 }
 
+func TestEvalNilConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Nil.new(nil)`,
+			object.BuiltInNil,
+		},
+		// errors
+		{
+			`Nil.new`,
+			object.NewTypeErr("Nil#new requires at least 2 args"),
+		},
+		{
+			`Nil.new(2)`,
+			object.NewTypeErr("2 cannot be treated as nil"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStrConstructor(t *testing.T) {
 	tests := []struct {
 		input    string

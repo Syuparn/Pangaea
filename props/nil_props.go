@@ -1,6 +1,8 @@
 package props
 
 import (
+	"fmt"
+
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -55,6 +57,22 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`\1 must be nil`)
 				}
 				return object.BuiltInFalse
+			},
+		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Nil#new requires at least 2 args")
+				}
+				n, ok := object.TraceProtoOfNil(args[1])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as nil", args[1].Inspect()))
+				}
+
+				return n
 			},
 		),
 	}
