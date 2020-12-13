@@ -7244,6 +7244,36 @@ func TestEvalNilConstructor(t *testing.T) {
 	}
 }
 
+func TestEvalRangeConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Range.new(1)`,
+			toPanRange(1, nil, nil),
+		},
+		{
+			`Range.new(2, 5)`,
+			toPanRange(2, 5, nil),
+		},
+		{
+			`Range.new('e, 'a, -1)`,
+			toPanRange("e", "a", -1),
+		},
+		// errors
+		{
+			`Range.new`,
+			object.NewTypeErr("Range#new requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStrConstructor(t *testing.T) {
 	tests := []struct {
 		input    string

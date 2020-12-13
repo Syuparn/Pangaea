@@ -109,6 +109,37 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				return object.BuiltInTrue
 			},
 		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Range#new requires at least 2 args")
+				}
+
+				// insufficient args are filled by nil (Pangaea call spec)
+				switch len(args) {
+				case 2:
+					return &object.PanRange{
+						Start: args[1],
+						Stop:  object.BuiltInNil,
+						Step:  object.BuiltInNil,
+					}
+				case 3:
+					return &object.PanRange{
+						Start: args[1],
+						Stop:  args[2],
+						Step:  object.BuiltInNil,
+					}
+				default:
+					return &object.PanRange{
+						Start: args[1],
+						Stop:  args[2],
+						Step:  args[3],
+					}
+				}
+			},
+		),
 	}
 }
 
