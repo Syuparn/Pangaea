@@ -7218,6 +7218,44 @@ func TestEvalFuncConstructor(t *testing.T) {
 	}
 }
 
+func TestEvalIntConstructor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Int.new(1)`,
+			object.NewPanInt(1),
+		},
+		{
+			`Int.new(false)`,
+			object.NewPanInt(0),
+		},
+		{
+			`Int.new(2.9)`,
+			object.NewPanInt(2),
+		},
+		{
+			`Int.new(-2.9)`,
+			object.NewPanInt(-2),
+		},
+		// errors
+		{
+			`Int.new`,
+			object.NewTypeErr("Int#new requires at least 2 args"),
+		},
+		{
+			`Int.new("a")`,
+			object.NewTypeErr(`"a" cannot be treated as int`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalNilConstructor(t *testing.T) {
 	tests := []struct {
 		input    string
