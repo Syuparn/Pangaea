@@ -6912,6 +6912,32 @@ func TestEvalErrType(t *testing.T) {
 	}
 }
 
+func TestEvalErrMsg(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.try.fmap {Err.new("new error")}.err.msg`,
+			object.NewPanStr("new error"),
+		},
+		// raise error
+		{
+			`{}.try.fmap {Err.new("new error")}.err['msg]()`,
+			object.NewTypeErr("Err#msg requires at least 1 arg"),
+		},
+		{
+			`{}.try.fmap {Err.new("new error")}.err['msg](1)`,
+			object.NewTypeErr("1 cannot be treated as err"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalErrConstructor(t *testing.T) {
 	tests := []struct {
 		input    string

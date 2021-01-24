@@ -1,6 +1,8 @@
 package props
 
 import (
+	"fmt"
+
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -33,6 +35,24 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return compErrWrappers(self, other, propContainer, env)
+			},
+		),
+		"msg": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Err#msg requires at least 1 arg")
+				}
+
+				err, ok := object.TraceProtoOfErrWrapper(args[0])
+
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as err", args[0].Inspect()))
+				}
+
+				return object.NewPanStr(err.PanErr.Msg)
 			},
 		),
 		"new": f(
