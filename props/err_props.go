@@ -42,6 +42,24 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return constructErr(propContainer, env, object.NewPanErr, args...)
 			},
 		),
+		"type": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Err#type requires at least 1 arg")
+				}
+
+				errObj, ok := object.TraceProtoOfObj(args[0])
+
+				if !ok {
+					// return default error type (never occurred)
+					return object.BuiltInErrObj
+				}
+
+				return errObj
+			},
+		),
 	}
 }
 
