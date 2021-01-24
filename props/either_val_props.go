@@ -37,6 +37,17 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				}}
 			},
 		),
+		"err": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("EitherVal#err requires at least 1 arg")
+				}
+
+				return object.BuiltInNil
+			},
+		),
 		"fmap": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

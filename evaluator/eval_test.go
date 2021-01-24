@@ -7681,6 +7681,46 @@ func TestEvalEitherVal(t *testing.T) {
 	}
 }
 
+func TestEvalEitherErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// success
+		{
+			`1.try.fmap {\ + 2}.err`,
+			object.BuiltInNil,
+		},
+		// failure
+		{
+			`1.try.fmap {\ / 0}.err`,
+			object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
+		},
+		// raises errors (highly unrecommended because it is not caught)
+		{
+			`1.try.fmap {\ + 2}['err]()`,
+			object.NewTypeErr("EitherVal#err requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ / 0}['err]()`,
+			object.NewTypeErr("EitherErr#err requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ / 0}['err]([])`,
+			object.NewTypeErr("`[]` cannot be treated as EitherErr"),
+		},
+		{
+			`1.try.fmap {\ / 0}['err]({})`,
+			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalErrWrapperS(t *testing.T) {
 	tests := []struct {
 		input    string
