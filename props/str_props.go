@@ -318,6 +318,10 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 						fmt.Sprintf("unexpectedly failed to find match: %s", err.Error()))
 				}
 
+				if match == nil {
+					return &object.PanArr{Elems: []object.PanObject{}}
+				}
+
 				elems := []object.PanObject{}
 				for _, group := range match.Groups() {
 					elems = append(elems, object.NewPanStr(group.String()))
