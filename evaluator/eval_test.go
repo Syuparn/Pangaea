@@ -52,7 +52,8 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
 	injectProps(object.BuiltInSyntaxErr, props.SyntaxErrProps, ctn)
 	injectProps(object.BuiltInTypeErr, props.TypeErrProps, ctn)
-	injectProps(object.BuiltInValObj, props.ValProps, ctn)
+	injectProps(object.BuiltInEitherValObj, props.EitherValProps, ctn)
+	injectProps(object.BuiltInEitherErrObj, props.EitherErrProps, ctn)
 	injectProps(object.BuiltInValueErr, props.ValueErrProps, ctn)
 	injectProps(object.BuiltInZeroDivisionErr, props.ZeroDivisionErrProps, ctn)
 }
@@ -7543,24 +7544,24 @@ func TestEvalFmap(t *testing.T) {
 		// failure
 		{
 			`1.try.fmap {\ / 0}`,
-			object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
+			toEitherErr(object.NewZeroDivisionErr("cannot be divided by 0")),
 		},
 		{
 			`1.try.fmap {\ / 0}.fmap {\ - 1}`,
-			object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
+			toEitherErr(object.NewZeroDivisionErr("cannot be divided by 0")),
 		},
 		// raises errors (highly unrecommended because it is not caught)
 		{
 			`1.try.fmap`,
-			object.NewTypeErr("Val#fmap requires at least 2 args"),
+			object.NewTypeErr("EitherVal#fmap requires at least 2 args"),
 		},
 		{
 			`1.try.fmap {\ / 0}.fmap`,
-			object.NewTypeErr("Err#fmap requires at least 2 args"),
+			object.NewTypeErr("EitherErr#fmap requires at least 2 args"),
 		},
 		{
 			`1.try['fmap]({}) {\ + 1}`,
-			object.NewTypeErr("`{}` cannot be treated as Val"),
+			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
 		},
 		// return Val(nil) if f does not have prop `call`
 		{
@@ -7601,15 +7602,31 @@ func TestEvalEitherA(t *testing.T) {
 		// raises errors (highly unrecommended because it is not caught)
 		{
 			`1.try.fmap {\ + 2}['A]()`,
-			object.NewTypeErr("Val#A requires at least 1 arg"),
+			object.NewTypeErr("EitherVal#A requires at least 1 arg"),
 		},
 		{
 			`1.try.fmap {\ / 0}['A]()`,
-			object.NewTypeErr("Err#A requires at least 1 arg"),
+			object.NewTypeErr("EitherErr#A requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ + 2}['A]([])`,
+			object.NewTypeErr("`[]` cannot be treated as EitherVal"),
 		},
 		{
 			`1.try.fmap {\ + 2}['A]({})`,
-			object.NewTypeErr("`{}` cannot be treated as Val"),
+			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+		},
+		{
+			`1.try.fmap {\ / 0}['A]()`,
+			object.NewTypeErr("EitherErr#A requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ / 0}['A]([])`,
+			object.NewTypeErr("`[]` cannot be treated as EitherErr"),
+		},
+		{
+			`1.try.fmap {\ / 0}['A]({})`,
+			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
 		},
 	}
 
@@ -7626,7 +7643,7 @@ func TestEvalErrWrapperS(t *testing.T) {
 	}{
 		// failure
 		{
-			`1.try.fmap {a}.S`,
+			`1.try.fmap {a}.A[1].S`,
 			object.NewPanStr("[NameErr: name `a` is not defined]"),
 		},
 	}
@@ -7646,7 +7663,21 @@ func toEitherVal(pairs []object.Pair) *object.PanObj {
 		pairMap[symHash] = pair
 	}
 
-	obj := object.NewPanObj(&pairMap, object.BuiltInValObj)
+	obj := object.NewPanObj(&pairMap, object.BuiltInEitherValObj)
+	return obj
+}
+
+func toEitherErr(e *object.PanErr) *object.PanObj {
+	pairMap := map[object.SymHash]object.Pair{}
+
+	const Key = "_error"
+	symHash := object.GetSymHash(Key)
+	pairMap[symHash] = object.Pair{
+		Key:   object.NewPanStr(Key),
+		Value: object.WrapErr(e),
+	}
+
+	obj := object.NewPanObj(&pairMap, object.BuiltInEitherErrObj)
 	return obj
 }
 
