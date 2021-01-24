@@ -1,0 +1,4 @@
+{
+  # val? returns whether self has value.
+  val?: m{.val != nil},
+}
