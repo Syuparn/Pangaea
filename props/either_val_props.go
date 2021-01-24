@@ -73,6 +73,29 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				return toEitherVal(result)
 			},
 		),
+		"val": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("EitherVal#val requires at least 1 arg")
+				}
+
+				valObj, ok := object.TraceProtoOfObj(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as EitherVal", args[0].Inspect()))
+				}
+
+				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as EitherVal", args[0].Inspect()))
+				}
+
+				return val.Value
+			},
+		),
 	}
 }
 

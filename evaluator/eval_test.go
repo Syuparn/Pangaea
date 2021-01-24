@@ -7641,6 +7641,46 @@ func TestEvalEitherA(t *testing.T) {
 	}
 }
 
+func TestEvalEitherVal(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// success
+		{
+			`1.try.fmap {\ + 2}.val`,
+			object.NewPanInt(3),
+		},
+		// failure
+		{
+			`1.try.fmap {\ / 0}.val`,
+			object.BuiltInNil,
+		},
+		// raises errors (highly unrecommended because it is not caught)
+		{
+			`1.try.fmap {\ + 2}['val]()`,
+			object.NewTypeErr("EitherVal#val requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ / 0}['val]()`,
+			object.NewTypeErr("EitherErr#val requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ + 2}['val]([])`,
+			object.NewTypeErr("`[]` cannot be treated as EitherVal"),
+		},
+		{
+			`1.try.fmap {\ + 2}['val]({})`,
+			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalErrWrapperS(t *testing.T) {
 	tests := []struct {
 		input    string
