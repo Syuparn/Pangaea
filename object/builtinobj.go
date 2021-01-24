@@ -64,8 +64,11 @@ var BuiltInWrappableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 // BuiltInEitherObj is an object of Either.
 var BuiltInEitherObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
-// BuiltInValObj is an object of Val.
-var BuiltInValObj = NewPanObj(&map[SymHash]Pair{}, BuiltInEitherObj)
+// BuiltInEitherValObj is an object of EitherVal.
+var BuiltInEitherValObj = NewPanObj(&map[SymHash]Pair{}, BuiltInEitherObj)
+
+// BuiltInEitherErrObj is an object of EitherErr.
+var BuiltInEitherErrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInEitherObj)
 
 // BuiltInOneInt is an int object `1`.
 var BuiltInOneInt = &PanInt{1}
@@ -83,7 +86,7 @@ var BuiltInFalse = &PanBool{false}
 var BuiltInNil = &PanNil{}
 
 // BuiltInErrObj is an object of Err (proto of all specific err types).
-var BuiltInErrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInEitherObj)
+var BuiltInErrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
 // BuiltInAssertionErr is an object of AssertionErr (proto of each assertionErr).
 var BuiltInAssertionErr = NewPanObj(&map[SymHash]Pair{}, BuiltInErrObj)

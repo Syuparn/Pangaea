@@ -35,31 +35,6 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return compErrWrappers(self, other, propContainer, env)
 			},
 		),
-		"A": f(
-			func(
-				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
-			) object.PanObject {
-				if len(args) < 1 {
-					return object.NewTypeErr("Err#A requires at least 1 arg")
-				}
-
-				return &object.PanArr{Elems: []object.PanObject{
-					object.BuiltInNil,
-					args[0],
-				}}
-			},
-		),
-		"fmap": f(
-			func(
-				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
-			) object.PanObject {
-				if len(args) < 2 {
-					return object.NewTypeErr("Err#fmap requires at least 2 args")
-				}
-
-				return args[0]
-			},
-		),
 		"new": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

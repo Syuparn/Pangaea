@@ -285,12 +285,12 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 }
 
 func toEitherVal(o object.PanObject) object.PanObject {
-	// wrap o by Val
+	// wrap o by EitherVal
 	pairMap := map[object.SymHash]object.Pair{
 		object.GetSymHash("_value"): {Key: object.NewPanStr("_value"), Value: o},
 	}
 
-	return object.NewPanObj(&pairMap, object.BuiltInValObj)
+	return object.NewPanObj(&pairMap, object.BuiltInEitherValObj)
 }
 
 func formattedStr(o object.PanObject) string {
