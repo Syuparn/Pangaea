@@ -1,0 +1,4 @@
+# Val
+assertEq(1.try.fmap {\ + 1}.err?, false)
+# Err
+assertEq(1.try.fmap {\ / 0}.err?, true)
