@@ -6854,6 +6854,90 @@ func TestEvalPrefixNot(t *testing.T) {
 	}
 }
 
+func TestEvalErrType(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.try.fmap {Err.new("err")}.err.type`,
+			object.BuiltInErrObj,
+		},
+		{
+			`{}.try.fmap {AssertionErr.new("err")}.err.type`,
+			object.BuiltInAssertionErr,
+		},
+		{
+			`{}.try.fmap {NameErr.new("err")}.err.type`,
+			object.BuiltInNameErr,
+		},
+		{
+			`{}.try.fmap {NoPropErr.new("err")}.err.type`,
+			object.BuiltInNoPropErr,
+		},
+		{
+			`{}.try.fmap {NotImplementedErr.new("err")}.err.type`,
+			object.BuiltInNotImplementedErr,
+		},
+		{
+			`{}.try.fmap {StopIterErr.new("err")}.err.type`,
+			object.BuiltInStopIterErr,
+		},
+		{
+			`{}.try.fmap {SyntaxErr.new("err")}.err.type`,
+			object.BuiltInSyntaxErr,
+		},
+		{
+			`{}.try.fmap {TypeErr.new("err")}.err.type`,
+			object.BuiltInTypeErr,
+		},
+		{
+			`{}.try.fmap {ValueErr.new("err")}.err.type`,
+			object.BuiltInValueErr,
+		},
+		{
+			`{}.try.fmap {ZeroDivisionErr.new("err")}.err.type`,
+			object.BuiltInZeroDivisionErr,
+		},
+		// raise error
+		{
+			`{}.try.fmap {Err.new("err")}.err['type]()`,
+			object.NewTypeErr("Err#type requires at least 1 arg"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalErrMsg(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.try.fmap {Err.new("new error")}.err.msg`,
+			object.NewPanStr("new error"),
+		},
+		// raise error
+		{
+			`{}.try.fmap {Err.new("new error")}.err['msg]()`,
+			object.NewTypeErr("Err#msg requires at least 1 arg"),
+		},
+		{
+			`{}.try.fmap {Err.new("new error")}.err['msg](1)`,
+			object.NewTypeErr("1 cannot be treated as err"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalErrConstructor(t *testing.T) {
 	tests := []struct {
 		input    string
