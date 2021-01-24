@@ -5420,6 +5420,48 @@ func TestEvalInfixIntEq(t *testing.T) {
 	}
 }
 
+func TestEvalInfixIntNeq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 != 10`,
+			object.BuiltInFalse,
+		},
+		{
+			`10 != 5`,
+			object.BuiltInTrue,
+		},
+		{
+			`1 != 1.0`,
+			object.BuiltInTrue,
+		},
+		{
+			`1 != "1"`,
+			object.BuiltInTrue,
+		},
+		// ancestor of int is also comparable
+		{
+			`1 != true`,
+			object.BuiltInFalse,
+		},
+		{
+			`0 != true`,
+			object.BuiltInTrue,
+		},
+		{
+			`2.bear != 2`,
+			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixFloatEq(t *testing.T) {
 	tests := []struct {
 		input    string

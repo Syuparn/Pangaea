@@ -81,11 +81,12 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				self, ok := object.TraceProtoOfInt(args[0])
 				if !ok {
+					// cannot be handled
 					return object.BuiltInFalse
 				}
 				other, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
-					return object.BuiltInFalse
+					return object.BuiltInTrue
 				}
 
 				if self.Value != other.Value {
