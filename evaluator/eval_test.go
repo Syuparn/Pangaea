@@ -501,6 +501,11 @@ func TestEvalStrMatch(t *testing.T) {
 				object.NewPanStr("yyyzz"),
 			}},
 		},
+		// no match
+		{
+			"`a`.match(`bc`)",
+			&object.PanArr{Elems: []object.PanObject{}},
+		},
 		// use descendant of str for recv
 		{
 			"`abbbc`.bear.match(`b+`)",
