@@ -1,9 +1,9 @@
 package evaluator
 
 import (
+	"bytes"
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
-	"bytes"
 )
 
 func evalEmbeddedStr(node *ast.EmbeddedStr, env *object.Env) object.PanObject {

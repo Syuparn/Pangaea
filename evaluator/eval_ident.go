@@ -1,9 +1,9 @@
 package evaluator
 
 import (
+	"fmt"
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
-	"fmt"
 )
 
 func evalIdent(ident *ast.Ident, env *object.Env) object.PanObject {

@@ -1,8 +1,8 @@
 package evaluator
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"fmt"
+	"github.com/Syuparn/pangaea/object"
 )
 
 // used for Func#call
