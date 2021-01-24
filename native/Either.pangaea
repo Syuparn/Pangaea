@@ -1,0 +1,6 @@
+{
+  # err? returns whether self has error.
+  err?: m{.err != nil},
+  # val? returns whether self has value.
+  val?: m{.val != nil},
+}

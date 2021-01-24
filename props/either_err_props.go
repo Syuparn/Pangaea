@@ -37,6 +37,29 @@ func EitherErrProps(propContainer map[string]object.PanObject) map[string]object
 				}}
 			},
 		),
+		"err": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("EitherErr#err requires at least 1 arg")
+				}
+
+				errObj, ok := object.TraceProtoOfObj(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as EitherErr", args[0].Inspect()))
+				}
+
+				err, ok := (*errObj.Pairs)[object.GetSymHash("_error")]
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("`%s` cannot be treated as EitherErr", args[0].Inspect()))
+				}
+
+				return err.Value
+			},
+		),
 		"fmap": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -46,6 +69,17 @@ func EitherErrProps(propContainer map[string]object.PanObject) map[string]object
 				}
 
 				return args[0]
+			},
+		),
+		"val": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("EitherErr#val requires at least 1 arg")
+				}
+
+				return object.BuiltInNil
 			},
 		),
 	}

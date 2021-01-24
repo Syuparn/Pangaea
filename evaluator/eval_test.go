@@ -5420,6 +5420,48 @@ func TestEvalInfixIntEq(t *testing.T) {
 	}
 }
 
+func TestEvalInfixIntNeq(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10 != 10`,
+			object.BuiltInFalse,
+		},
+		{
+			`10 != 5`,
+			object.BuiltInTrue,
+		},
+		{
+			`1 != 1.0`,
+			object.BuiltInTrue,
+		},
+		{
+			`1 != "1"`,
+			object.BuiltInTrue,
+		},
+		// ancestor of int is also comparable
+		{
+			`1 != true`,
+			object.BuiltInFalse,
+		},
+		{
+			`0 != true`,
+			object.BuiltInTrue,
+		},
+		{
+			`2.bear != 2`,
+			object.BuiltInFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixFloatEq(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -7631,6 +7673,86 @@ func TestEvalEitherA(t *testing.T) {
 		},
 		{
 			`1.try.fmap {\ / 0}['A]({})`,
+			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalEitherVal(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// success
+		{
+			`1.try.fmap {\ + 2}.val`,
+			object.NewPanInt(3),
+		},
+		// failure
+		{
+			`1.try.fmap {\ / 0}.val`,
+			object.BuiltInNil,
+		},
+		// raises errors (highly unrecommended because it is not caught)
+		{
+			`1.try.fmap {\ + 2}['val]()`,
+			object.NewTypeErr("EitherVal#val requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ / 0}['val]()`,
+			object.NewTypeErr("EitherErr#val requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ + 2}['val]([])`,
+			object.NewTypeErr("`[]` cannot be treated as EitherVal"),
+		},
+		{
+			`1.try.fmap {\ + 2}['val]({})`,
+			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalEitherErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// success
+		{
+			`1.try.fmap {\ + 2}.err`,
+			object.BuiltInNil,
+		},
+		// failure
+		{
+			`1.try.fmap {\ / 0}.err`,
+			object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
+		},
+		// raises errors (highly unrecommended because it is not caught)
+		{
+			`1.try.fmap {\ + 2}['err]()`,
+			object.NewTypeErr("EitherVal#err requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ / 0}['err]()`,
+			object.NewTypeErr("EitherErr#err requires at least 1 arg"),
+		},
+		{
+			`1.try.fmap {\ / 0}['err]([])`,
+			object.NewTypeErr("`[]` cannot be treated as EitherErr"),
+		},
+		{
+			`1.try.fmap {\ / 0}['err]({})`,
 			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
 		},
 	}
