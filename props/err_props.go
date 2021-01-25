@@ -20,8 +20,9 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
-				// necessary for Arr itself! (guarantee `Err == Err`)
-				if args[0] == object.BuiltInErrObj && args[1] == object.BuiltInErrObj {
+				// necessary for Err itself!
+				// (guarantee `Err == Err`, `TypeErr == TypeErr` and so on)
+				if args[0].Type() == object.ObjType && args[1] == args[0] {
 					return object.BuiltInTrue
 				}
 

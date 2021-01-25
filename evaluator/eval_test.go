@@ -5877,21 +5877,37 @@ func TestEvalInfixErrEq(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
-		// this is called only by errWrappers
 		{
-			`1.try.fmap {\/0}.A[1] == 1.try.fmap {\/0}.A[1]`,
+			`Err == Err`,
 			object.BuiltInTrue,
 		},
 		{
-			`1.try.fmap {\/0}.A[1] == 1.try.fmap {a}.A[1]`,
+			`AssertionErr == AssertionErr`,
+			object.BuiltInTrue,
+		},
+		{
+			`TypeErr == ValueErr`,
+			object.BuiltInFalse,
+		},
+		// this is called only by errWrappers
+		{
+			`1.try.fmap {\/0}.err == 1.try.fmap {\/0}.err`,
+			object.BuiltInTrue,
+		},
+		{
+			`1.try.fmap {\/0}.err == 1.try.fmap {a}.err`,
 			object.BuiltInFalse,
 		},
 		// only message is different
 		{
-			`1.try.fmap {b}.A[1] == 1.try.fmap {c}.A[1]`,
+			`1.try.fmap {raise Err.new("a")}.err == 1.try.fmap {raise Err.new("b")}.err`,
 			object.BuiltInFalse,
 		},
-		// TODO: check case that only type is different
+		// only type is different
+		{
+			`1.try.fmap {raise TypeErr.new("a")}.err == 1.try.fmap {raise ValueErr.new("a")}.err`,
+			object.BuiltInFalse,
+		},
 	}
 
 	for _, tt := range tests {
