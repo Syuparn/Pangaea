@@ -5,6 +5,19 @@
   all?: m{|f| @^f@B.has?(false).!},
   # any? returns whether any element meets the predicate f
   any?: m{|f| @^f@B.has?(true)},
+  # chain concatenates all iters in arguments.
+  chain: m{
+    iters := \0._iter
+    <{|it|
+      # NOTE: `yield if` cannot be used because it raises StopIterErr
+      return next.val if (next := it.try.next).val?
+      raise e if (e := next.err).type != StopIterErr
+      # if StopIterErr is raised, use another iter
+      nextIt := iters.next._iter
+      yield nextIt.next
+      recur(nextIt)
+    }>.new(iters.next._iter)
+  },
   # empty? returns whether self contains elements.
   empty?: m{|| .A.empty?},
   # exclude selects elements for which f returns false.
