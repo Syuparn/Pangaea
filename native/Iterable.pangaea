@@ -22,6 +22,8 @@
   empty?: m{|| .A.empty?},
   # exclude selects elements for which f returns false.
   exclude: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if !f(*\)}},
+  # lazyMap works similar to map but returns iter of elements instead.
+  lazyMap: m{|f| ._iter.{|it| <{yield it.next.^f}>}},
   # map is a wrapper of mapchain.
   map: m{|f| @^f},
   # max returns the maximum element in self
