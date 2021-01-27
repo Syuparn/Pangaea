@@ -7,6 +7,8 @@
   capital: m{self[0].uc + self[1:].lc},
   # kebab makes self kebab-case
   kebab: m{.sub(`_`, `-`).sub(`([A-Z])`, `-$1`).lc.sub(`^-`, ``)},
+  # lc? returns whether self is lowercased.
+  lc?: m{.lc == self},
   # pascal makes self PascalCase
   pascal: m{self[0].uc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
   # rev returns reversed string.
