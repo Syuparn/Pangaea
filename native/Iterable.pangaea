@@ -3,7 +3,7 @@
   A: m{|| @{\}},
   # acc returns each state of reducing process.
   acc: m{|f, init: nil|
-    _iter.{|it| <{|acc| yield f(acc, it.next) => res; recur(res)}>.new(init)}
+    ._iter.{|it| <{|acc| yield f(acc, it.next) => res; recur(res)}>.new(init)}
   },
   # all? returns whether all elements meet the predicate f
   all?: m{|f| @^f@B.has?(false).!},
@@ -40,6 +40,8 @@
   select: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if f(*\)}},
   # sum returns sum of elements in self.
   sum: m{|| $(nil)+},
+  # while returns elements that the condition cond? is true.
+  while: m{|cond?| ._iter.{|it| <{yield n if (n := it.next).^cond?}>}},
   # withI returns new iter of self with index.
   withI: m{._iter.{|it| <{|i| yield [i, it.next]; recur(i + 1)}>.new(0)}},
 }

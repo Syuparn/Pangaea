@@ -1,0 +1,6 @@
+assertEq("pangaea".while {\ != ?g}.A, [?p, ?a, ?n])
+# FIXME: replace with lc?
+assertEq("hello".while {\ == .uc}.A, [])
+assertEq("".while {\ == .uc}.A, [])
+# while returns iter (not arr)
+assertEq("".while {\ == .uc}.proto, Iter)
