@@ -3,6 +3,8 @@
   IA: m{|sep: `\s`| .split(sep: sep)@I},
   # camel makes self camelCase
   camel: m{self[0].lc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
+  # camel? returns whether self is camelCased.
+  camel?: m{.camel == self},
   # capital makes first letter of self uppercase and the others lowercase
   capital: m{self[0].uc + self[1:].lc},
   # kebab makes self kebab-case
