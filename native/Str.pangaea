@@ -23,4 +23,6 @@
   trim: m{.rm(`(^\s+|\s+$)`)},
   # truncate truncates self length to len
   truncate: m{|len, end: "..."| self if .len <= len else self[:len-end.len] + end},
+  # uc? returns whether self is uppercased.
+  uc?: m{.uc == self},
 }
