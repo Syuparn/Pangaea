@@ -1,0 +1,6 @@
+# NOTE: cannot test multiple elements because
+# order of map elements is not guaranteed.
+assertEq(%{"a": 1}.acc {|acc, i| acc + i[1]}.A, [1])
+assertEq(%{}.acc {|acc, i| acc + i}.A, [])
+# acc returns iter (not arr)
+assertEq(%{}.acc {|acc, i| acc + i}.proto, Iter)

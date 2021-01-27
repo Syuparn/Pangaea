@@ -1,0 +1,14 @@
+assertEq(
+  {a: 1, b: 2, c: 3}.acc {|acc, i| [acc[0] + i[0], acc[1] + i[1]]}.A,
+  [["a", 1], ["ab", 3], ["abc", 6]]
+)
+assertEq(
+  {}.acc {|acc, i| acc + i}.A,
+  []
+)
+assertEq(
+  {b: 2, c: 3}.acc(init: ['a, 1]) {|acc, i| [acc[0] + i[0], acc[1] + i[1]]}.A,
+  [["ab", 3], ["abc", 6]]
+)
+# acc returns iter (not arr)
+assertEq({}.acc {|acc, i| acc + i}.proto, Iter)

@@ -1,0 +1,5 @@
+assertEq([?a, ?b, ?c].acc {|acc, i| acc + i}.A, ["a", "ab", "abc"])
+assertEq([].acc {|acc, i| acc + i}.A, [])
+assertEq([?b, ?c].acc(init: ?a) {|acc, i| acc + i}.A, ["ab", "abc"])
+# acc returns iter (not arr)
+assertEq([].acc {|acc, i| acc + i}.proto, Iter)

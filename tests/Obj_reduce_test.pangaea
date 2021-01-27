@@ -1,3 +1,12 @@
-assertEq({a: 1, b: 2, c: 3}.reduce {|acc, i| [acc[0] + i[0], acc[1] + i[1]]}, ["abc", 6])
-assertEq({}.reduce {|acc, i| acc + i}, nil)
-assertEq({b: 2, c: 3}.reduce(init: ['a, 1]) {|acc, i| [acc[0] + i[0], acc[1] + i[1]]}, ["abc", 6])
+assertEq(
+  {a: 1, b: 2, c: 3}.reduce {|acc, i| [acc[0] + i[0], acc[1] + i[1]]},
+  ["abc", 6]
+)
+assertEq(
+  {}.reduce {|acc, i| acc + i},
+  nil
+)
+assertEq(
+  {b: 2, c: 3}.reduce(init: ['a, 1]) {|acc, i| [acc[0] + i[0], acc[1] + i[1]]},
+  ["abc", 6]
+)
