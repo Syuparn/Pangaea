@@ -1,6 +1,5 @@
 assertEq({a: 1, b: 2, c: 3}.while {|k, v| v.odd?}.A, [["a", 1]])
-# FIXME: replace with lc?
-assertEq({A: 1, B: 2}.while {|k, v| k.lc == k}.A, [])
+assertEq({A: 1, B: 2}.while {|k, v| k.lc?}.A, [])
 assertEq({}.while {|k, v| v.odd?}.A, [])
 # while returns iter (not arr)
 assertEq({}.while {|k, v| v.odd?}.proto, Iter)
