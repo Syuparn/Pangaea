@@ -23,6 +23,8 @@
   rm: m{|pattern| .sub(pattern, "")},
   # snake makes self snake_case
   snake: m{.sub(`-`, `_`).sub(`([A-Z])`, `_$1`).lc.sub(`^_`, ``)},
+  # snake? returns whether self is snake_cased.
+  snake?: m{.snake == self},
   # split splits self into arr by sep
   split: m{|sep: `\s`| self / sep},
   # trim trims both side of spaces in self
