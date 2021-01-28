@@ -1,0 +1,4 @@
+assertEq("kebab-case".kebab?, true)
+assertEq("PascalCase".kebab?, false)
+assertEq("camelCase".kebab?, false)
+assertEq("snake_case".kebab?, false)

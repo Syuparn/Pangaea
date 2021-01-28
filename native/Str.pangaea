@@ -9,6 +9,8 @@
   capital: m{self[0].uc + self[1:].lc},
   # kebab makes self kebab-case
   kebab: m{.sub(`_`, `-`).sub(`([A-Z])`, `-$1`).lc.sub(`^-`, ``)},
+  # kebab? returns whether self is kebab-cased.
+  kebab?: m{.kebab == self},
   # lc? returns whether self is lowercased.
   lc?: m{.lc == self},
   # pascal makes self PascalCase
