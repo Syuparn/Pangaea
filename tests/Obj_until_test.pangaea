@@ -1,0 +1,5 @@
+assertEq({a: 1, b: 2, c: 3}.until {|k, v| v.even?}.A, [["a", 1]])
+assertEq({A: 1, B: 2}.until {|k, v| k.uc?}.A, [])
+assertEq({}.until {|k, v| v.odd?}.A, [])
+# until returns iter (not arr)
+assertEq({}.until {|k, v| v.odd?}.proto, Iter)
