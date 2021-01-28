@@ -13,6 +13,8 @@
   lc?: m{.lc == self},
   # pascal makes self PascalCase
   pascal: m{self[0].uc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
+  # pascal? returns whether self is PascelCased.
+  pascal?: m{.pascal == self},
   # rev returns reversed string.
   rev: m{self[::-1]},
   # rm removes pattern in self.
