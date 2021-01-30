@@ -2908,7 +2908,19 @@ func TestEvalListChainPropCall(t *testing.T) {
 				object.NewPanStr("5"),
 			}},
 		},
-		// TODO: check obj/map
+		{
+			`{a: 1, b: 2}@at([0])`,
+			&object.PanArr{Elems: []object.PanObject{
+				object.NewPanStr("a"),
+				object.NewPanStr("b"),
+			}},
+		},
+		// TODO: check map
+		// if any element raises error, propagate it
+		{
+			`[1, 2, "str", 4]@+(1)`,
+			object.NewTypeErr("`1` cannot be treated as str"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -2990,6 +3002,11 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 				object.NewPanInt(6),
 			}},
 		},
+		// if any element raises error, propagate it
+		{
+			`[2, 0, 3]@{|n| 6/n}`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -3070,6 +3087,11 @@ func TestEvalListChainVarCall(t *testing.T) {
 				object.NewPanInt(4),
 				object.NewPanInt(6),
 			}},
+		},
+		// if any element raises error, propagate it
+		{
+			`f := {|n| 6/n}; [2, 0, 3]@^f`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
 		},
 	}
 

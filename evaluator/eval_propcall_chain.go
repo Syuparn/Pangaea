@@ -123,6 +123,10 @@ func squashNilPropCallListChainMiddleware(next _PropCallMiddlewareHandler) _Prop
 			}
 
 			elem := next(env, nextRecv, propName, nil, chainArg, args, kwargs)
+			if elem.Type() == object.ErrType {
+				// raise error
+				return elem
+			}
 			if elem.Type() == object.NilType {
 				continue
 			}
