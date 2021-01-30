@@ -1,0 +1,2 @@
+assertEq(3.last, 3)
+assertEq(0.last, nil)

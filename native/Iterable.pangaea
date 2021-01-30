@@ -46,6 +46,8 @@
   },
   # lazyMap works similar to map but returns iter of elements instead.
   lazyMap: m{|f| ._iter.{|it| <{yield it.next.^f}>}},
+  # last returns the last element in self without conversion to array.
+  last: m{${|_, i| i}},
   # map is a wrapper of mapchain.
   map: m{|f| @^f},
   # max returns the maximum element in self
