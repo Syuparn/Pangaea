@@ -26,6 +26,16 @@
   empty?: m{|| .A.empty?},
   # exclude selects elements for which f returns false.
   exclude: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if !f(*\)}},
+  # find returns the first element which cond? is true. (returns nil if not found)
+  find: m{|cond?|
+    ._iter
+      # generated iter is [..., found] or _iter itself (if not found)
+      |.{|it| <{|ok| yield (n := it.next) if !ok; recur(n.^cond?)}>.new(false)}
+      # last elem
+      |${|_, i| i}
+      # check whether the elem is found one or just the last one of original iter
+      |.{\ if &.^cond?}
+  },
   # lazyMap works similar to map but returns iter of elements instead.
   lazyMap: m{|f| ._iter.{|it| <{yield it.next.^f}>}},
   # map is a wrapper of mapchain.

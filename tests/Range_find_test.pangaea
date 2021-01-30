@@ -1,0 +1,5 @@
+assertEq((1:4).find {.even?}, 2)
+# return the element found first
+assertEq((1:5).find {.even?}, 2)
+# if not found, return nil
+assertEq((1:6:2).find {.even?}, nil)

@@ -1,0 +1,6 @@
+assertEq(%{"a": 1, "b": 2}.find {|k, v| v.even?}, ["b", 2])
+# NOTE: cannot test multiple elements because
+# order of map elements is not guaranteed.
+
+# if not found, return nil
+assertEq(%{"a": 1, "b": 3}.find {|k, v| v.even?}, nil)
