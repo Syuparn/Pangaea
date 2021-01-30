@@ -1,6 +1,6 @@
 {
   # A converts self into arr.
-  A: m{|| @{\}},
+  A: m{@{\}},
   # acc returns each state of reducing process.
   acc: m{|f, init: nil|
     ._iter.{|it| <{|acc| yield f(acc, it.next) => res; recur(res)}>.new(init)}
@@ -31,7 +31,7 @@
     ._iter.{|it| <{|ok| yield (n := it.next) if ok; recur(n.^cond?)}>.new(true)}
   },
   # empty? returns whether self contains elements.
-  empty?: m{|| .A.empty?},
+  empty?: m{.A.empty?},
   # exclude selects elements for which f returns false.
   exclude: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if !f(*\)}},
   # find returns the first element which cond? is true. (returns nil if not found)
@@ -51,7 +51,7 @@
   # select selects elements for which f returns true.
   select: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if f(*\)}},
   # sum returns sum of elements in self.
-  sum: m{|| $(nil)+},
+  sum: m{$(nil)+},
   # until returns elements while (element).^cond? is false.
   until: m{|cond?| ._iter.{|it| <{yield n if (n := it.next).^cond?.!}>}},
   # while returns elements while (element).^cond? is true.
