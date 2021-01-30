@@ -1,6 +1,8 @@
 package props
 
 import (
+	"fmt"
+
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -42,7 +44,21 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				if len(args) < 1 {
 					return object.NewTypeErr("Iter#_iter requires at least 1 arg")
 				}
-				return args[0]
+
+				self, ok := object.TraceProtoOfFunc(args[0])
+				if !ok || self.FuncKind != object.IterFunc {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as iter", args[0].Inspect()))
+				}
+
+				// return copied new iter not to share state(=env)
+				newEnv := object.NewCopiedEnv(self.Env)
+
+				return &object.PanFunc{
+					FuncWrapper: self.FuncWrapper,
+					FuncKind:    object.IterFunc,
+					Env:         newEnv,
+				}
 			},
 		),
 		"B": f(
