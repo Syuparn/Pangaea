@@ -42,7 +42,7 @@
   lazyMap: m{|f| ._iter.{|it| <{yield it.next.^f}>}},
   # last returns the last element in self without conversion to array.
   last: m{${|_, i| i}},
-  # map is a wrapper of mapchain.
+  # map is a wrapper of listchain.
   map: m{|f| @^f},
   # max returns the maximum element in self
   max: m{.A.{\[1:]$(\[0]){|max, i| i if i > max else max}}},
