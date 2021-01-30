@@ -62,4 +62,6 @@
   while: m{|cond?| ._iter.{|it| <{yield n if (n := it.next).^cond?}>}},
   # withI returns new iter of self with index.
   withI: m{._iter.{|it| <{|i| yield [i, it.next]; recur(i + 1)}>.new(0)}},
+  # zip returns iter that yields array of ith element in each iter.
+  zip: m{\0@_iter.{|iters| <{yield iters@next}>}},
 }
