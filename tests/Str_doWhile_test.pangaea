@@ -1,0 +1,5 @@
+assertEq("pangaea".doWhile {\ != ?g}.A, [?p, ?a, ?n, ?g])
+assertEq("hello".doWhile {.uc?}.A, [?h])
+assertEq("".doWhile {.uc?}.A, [])
+# doWhile returns iter (not arr)
+assertEq("".doWhile {.uc?}.proto, Iter)

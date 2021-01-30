@@ -1,0 +1,6 @@
+# NOTE: cannot test multiple elements because
+# order of map elements is not guaranteed.
+assertEq(%{"a": 1}.doWhile {|k, v| v.odd?}.A, [["a", 1]])
+assertEq(%{}.doWhile {|k, v| v.odd?}.A, [])
+# doWhile returns iter (not arr)
+assertEq(%{}.doWhile {|k, v| v.odd?}.proto, Iter)
