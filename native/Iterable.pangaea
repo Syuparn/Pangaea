@@ -1,6 +1,8 @@
 {
   # A converts self into arr.
   A: m{@{\}},
+  # append appends the elements at the end of self.
+  append: m{|i| .chain([i])},
   # acc returns each state of reducing process.
   acc: m{|f, init: nil|
     ._iter.{|it| <{|acc| yield f(acc, it.next) => res; recur(res)}>.new(init)}
