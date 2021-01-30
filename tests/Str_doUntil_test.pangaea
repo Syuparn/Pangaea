@@ -1,0 +1,5 @@
+assertEq("pangaea".doUntil {\ == ?g}.A, [?p, ?a, ?n, ?g])
+assertEq("hello".doUntil {.lc?}.A, [?h])
+assertEq("".doUntil {.lc?}.A, [])
+# doUntil returns iter (not arr)
+assertEq("".doUntil {.lc?}.proto, Iter)

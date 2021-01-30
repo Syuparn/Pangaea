@@ -22,6 +22,10 @@
       recur(nextIt)
     }>.new(iters.next._iter)
   },
+  # doUntil returns elements while (element_yielded_last).^cond? is false.
+  doUntil: m{|cond?|
+    ._iter.{|it| <{|ok| yield (n := it.next) if !ok; recur(n.^cond?)}>.new(false)}
+  },
   # doWhile returns elements while (element_yielded_last).^cond? is true.
   doWhile: m{|cond?|
     ._iter.{|it| <{|ok| yield (n := it.next) if ok; recur(n.^cond?)}>.new(true)}
