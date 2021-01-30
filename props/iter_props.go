@@ -45,20 +45,17 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 					return object.NewTypeErr("Iter#_iter requires at least 1 arg")
 				}
 
-				self, ok := object.TraceProtoOfFunc(args[0])
-				if !ok || self.FuncKind != object.IterFunc {
-					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as iter", args[0].Inspect()))
-				}
-
 				// return copied new iter not to share state(=env)
-				newEnv := object.NewCopiedEnv(self.Env)
-
-				return &object.PanFunc{
-					FuncWrapper: self.FuncWrapper,
-					FuncKind:    object.IterFunc,
-					Env:         newEnv,
+				if it, ok := object.TraceProtoOfFunc(args[0]); ok {
+					return copiedIterFromIter(it)
 				}
+
+				if builtInIt, ok := object.TraceProtoOfBuiltInIter(args[0]); ok {
+					return copiedIterFromBuiltInIter(builtInIt)
+				}
+
+				return object.NewTypeErr(
+					fmt.Sprintf("%s cannot be treated as iter", args[0].Inspect()))
 			},
 		),
 		"B": f(
@@ -77,5 +74,25 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 		),
 		"new":  propContainer["Iter_new"],
 		"next": propContainer["Iter_next"],
+	}
+}
+
+func copiedIterFromIter(self *object.PanFunc) object.PanObject {
+	if self.FuncKind != object.IterFunc {
+		return object.NewTypeErr(
+			fmt.Sprintf("%s cannot be treated as iter", self.Inspect()))
+	}
+
+	return &object.PanFunc{
+		FuncWrapper: self.FuncWrapper,
+		FuncKind:    object.IterFunc,
+		Env:         object.NewCopiedEnv(self.Env),
+	}
+}
+
+func copiedIterFromBuiltInIter(self *object.PanBuiltInIter) object.PanObject {
+	return &object.PanBuiltInIter{
+		Fn:  self.Fn,
+		Env: object.NewCopiedEnv(self.Env),
 	}
 }
