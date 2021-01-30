@@ -3,6 +3,8 @@
   max: m{.values.max},
   # min returns the minimum value in self
   min: m{.values.min},
+  # nil? returns whether self is nil.
+  nil?: m{self == nil},
   # puts is an alias of p.
   puts: m{.p},
   # tap calls f but returns self
