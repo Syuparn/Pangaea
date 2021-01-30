@@ -1,0 +1,3 @@
+assertEq("abc".prepend(?d).A, [?d, ?a, ?b, ?c])
+# prepend returns iter (not arr)
+assertEq("abc".prepend(?d).proto, Iter)

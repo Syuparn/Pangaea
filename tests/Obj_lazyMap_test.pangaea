@@ -1,0 +1,8 @@
+# NOTE: cannot test multiple elements because
+# order of map elements is not guaranteed.
+assertEq({a: 1, b: 2}.lazyMap {|k, v| [k, v * 2]}.A, [["a", 2], ["b", 4]])
+assertEq({}.lazyMap {|k, v| [k, v * 2]}.A, [])
+# lazyMap ignored nil elements the same as map
+assertEq({a: 1, b: 2}.lazyMap {|k, v| [k, v * 2] if v.odd?}.A, [["a", 2]])
+# lazyMap returns iter (not arr)
+assertEq({a: 1}.lazyMap {\}.proto, Iter)

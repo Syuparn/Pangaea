@@ -1,0 +1,5 @@
+assertEq([1, 3, 4, 5].while {.odd?}.A, [1, 3])
+assertEq([2, 4].while {.odd?}.A, [])
+assertEq([].while {.odd?}.A, [])
+# while returns iter (not arr)
+assertEq([].while {.odd?}.proto, Iter)

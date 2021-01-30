@@ -1,0 +1,11 @@
+# no args
+assertEq([1, 2].chain.A, [1, 2])
+# one arg
+assertEq([1, 2].chain([3, 4]).A, [1, 2, 3, 4])
+# two args
+assertEq([1, 2].chain([3, 4], [5, 6]).A, [1, 2, 3, 4, 5, 6])
+# chain of other iterables
+assertEq([1, 2].chain("abc").A, [1, 2, "a", "b", "c"])
+
+# chain returns iter (not arr)
+assertEq([1, 2].chain.proto, Iter)

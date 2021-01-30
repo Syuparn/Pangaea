@@ -1,0 +1,2 @@
+assertEq({a: 1, b: 2}.last, ["b", 2])
+assertEq({}.last, nil)

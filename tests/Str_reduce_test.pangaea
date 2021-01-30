@@ -1,0 +1,3 @@
+assertEq("abc".reduce {|acc, i| acc + i.uc}, "ABC")
+assertEq("".reduce {|acc, i| acc + i}, nil)
+assertEq("abc".reduce(init: "!") {|acc, i| acc + i.uc}, "!ABC")

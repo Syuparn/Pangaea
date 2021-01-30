@@ -1,0 +1,5 @@
+assertEq(5.until {\ == 4}.A, [1, 2, 3])
+assertEq(2.until {.odd?}.A, [])
+assertEq(0.until {.even?}.A, [])
+# until returns iter (not arr)
+assertEq(2.until {.odd?}.proto, Iter)

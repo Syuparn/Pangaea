@@ -1,0 +1,5 @@
+assertEq({a: 1, b: 2, c: 3}.doWhile {|k, v| v.odd?}.A, [["a", 1], ["b", 2]])
+assertEq({A: 1, B: 2}.doWhile {|k, v| k.lc?}.A, [["A", 1]])
+assertEq({}.doWhile {|k, v| v.odd?}.A, [])
+# doWhile returns iter (not arr)
+assertEq({}.doWhile {|k, v| v.odd?}.proto, Iter)

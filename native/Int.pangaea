@@ -1,6 +1,6 @@
 {
   # even? returns whether self is even number.
-  even?: m{|| !(self % 2)},
+  even?: m{!(self % 2)},
   # odd? returns whether self is odd number.
-  odd?: m{|| (self % 2).B},
+  odd?: m{(self % 2).B},
 }

@@ -1,0 +1,3 @@
+assertEq("abc".append(?d).A, [?a, ?b, ?c, ?d])
+# append returns iter (not arr)
+assertEq("abc".append(?d).proto, Iter)

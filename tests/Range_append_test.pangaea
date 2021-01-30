@@ -1,0 +1,3 @@
+assertEq((1:4).append(4).A, [1, 2, 3, 4])
+# append returns iter (not arr)
+assertEq((1:4).append(4).proto, Iter)

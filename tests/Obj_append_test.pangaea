@@ -1,0 +1,3 @@
+assertEq({a: 1, b: 2}.append(["c", 3]).A, [["a", 1], ["b", 2], ["c", 3]])
+# append returns iter (not arr)
+assertEq({}.append(["c", 3]).proto, Iter)

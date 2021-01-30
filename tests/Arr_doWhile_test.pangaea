@@ -1,0 +1,5 @@
+assertEq([1, 3, 4, 5].doWhile {.odd?}.A, [1, 3, 4])
+assertEq([2, 4].doWhile {.odd?}.A, [2])
+assertEq([].doWhile {.odd?}.A, [])
+# doWhile returns iter (not arr)
+assertEq([].doWhile {.odd?}.proto, Iter)

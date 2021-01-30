@@ -1,0 +1,5 @@
+assertEq("aBc".find {.uc?}, ?B)
+# return the element found first
+assertEq("aBcD".find {.uc?}, ?B)
+# if not found, return nil
+assertEq("abc".find {.uc?}, nil)

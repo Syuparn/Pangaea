@@ -1,0 +1,5 @@
+# NOTE: cannot test multiple elements because
+# order of map elements is not guaranteed.
+
+# zip returns iter (not arr)
+assertEq(%{}.zip("abc").proto, Iter)

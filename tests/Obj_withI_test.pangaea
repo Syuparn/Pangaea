@@ -1,0 +1,4 @@
+assertEq({a: 'A, b: 'B}.withI.A, [[0, ["a", "A"]], [1, ["b", "B"]]])
+assertEq({}.withI.A, [])
+# withI returns iter (not arr)
+assertEq({a: 1}.withI.proto, Iter)

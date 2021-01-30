@@ -1,0 +1,5 @@
+assertEq(3.acc {|acc, i| acc + i}.A, [1, 3, 6])
+assertEq(0.acc {|acc, i| acc + i}.A, [])
+assertEq(3.acc(init: 4) {|acc, i| acc + i}.A, [5, 7, 10])
+# acc returns iter (not arr)
+assertEq(2.acc {|acc, i| acc + i}.proto, Iter)

@@ -1,0 +1,5 @@
+assertEq((1:6).while {\ != 4}.A, [1, 2, 3])
+assertEq((1:6:2).while {.even?}.A, [])
+assertEq((0:0).while {.odd?}.A, [])
+# while returns iter (not arr)
+assertEq((0:2).while {.odd?}.proto, Iter)

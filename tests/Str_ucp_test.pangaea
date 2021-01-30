@@ -1,0 +1,2 @@
+assertEq("ABC".uc?, true)
+assertEq("AbC".uc?, false)

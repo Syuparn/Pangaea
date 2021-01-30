@@ -93,6 +93,10 @@ func squashNilLiteralCallListChainMiddleware(next _LiteralCallMiddlewareHandler)
 			}
 
 			elem := next(env, nextRecv, chainArg, args, kwargs)
+			if elem.Type() == object.ErrType {
+				// raise error
+				return elem
+			}
 			if elem.Type() == object.NilType {
 				continue
 			}

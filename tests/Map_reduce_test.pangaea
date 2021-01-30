@@ -1,0 +1,3 @@
+assertEq(%{"a": 1, "b": 2, "c": 3}.reduce {|acc, i| acc + i[1]}, 6)
+assertEq(%{}.reduce {|acc, i| acc + i}, nil)
+assertEq(%{"a": 1, "b": 2, "c": 3}.reduce(init: 4) {|acc, i| acc + i[1]}, 10)

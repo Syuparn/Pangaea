@@ -1,0 +1,5 @@
+assertEq({a: 1, b: 2, c: 3}.find {|k, v| v.even?}, ["b", 2])
+# return the element found first
+assertEq({a: 1, b: 2, d: 4}.find {|k, v| v.even?}, ["b", 2])
+# if not found, return nil
+assertEq({a: 1, b: 2, c: 3}.find {|k, v| k.uc?}, nil)

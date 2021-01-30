@@ -1,0 +1,3 @@
+assertEq(3.reduce {|acc, i| acc + i}, 6)
+assertEq(0.reduce {|acc, i| acc + i}, nil)
+assertEq(3.reduce(init: 4) {|acc, i| acc + i}, 10)

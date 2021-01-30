@@ -1,0 +1,3 @@
+assertEq([?a, ?b, ?c].reduce {|acc, i| acc + i}, "abc")
+assertEq([].reduce {|acc, i| acc + i}, nil)
+assertEq([?b, ?c].reduce(init: ?a) {|acc, i| acc + i}, "abc")
