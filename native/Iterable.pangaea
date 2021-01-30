@@ -48,6 +48,8 @@
   max: m{.A.{\[1:]$(\[0]){|max, i| i if i > max else max}}},
   # min returns the minimum element in self
   min: m{.A.{\[1:]$(\[0]){|min, i| i if i < min else min}}},
+  # prepend prepends the elements at first of self.
+  prepend: m{|i| [i].chain(self)},
   # reduce is a wrapper of reducechain.
   reduce: m{|f, init: nil| $(init)^f},
   # select selects elements for which f returns true.

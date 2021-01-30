@@ -1,0 +1,6 @@
+# NOTE: cannot test multiple elements because
+# order of map elements is not guaranteed.
+
+assertEq(%{}.prepend(["a", 1]).A, [["a", 1]])
+# prepend returns iter (not arr)
+assertEq(%{}.prepend(4).proto, Iter)
