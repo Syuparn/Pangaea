@@ -3433,9 +3433,21 @@ func TestEvalAssign(t *testing.T) {
 				},
 			}),
 		},
+		// right value is not assigned if error raises
+		{
+			`a := 0 / 0`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+			toPanObj([]object.Pair{}),
+		},
+		{
+			`0 / 0 => b`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+			toPanObj([]object.Pair{}),
+		},
 	}
 
 	for _, tt := range tests {
+		// NOTE: use empty env without consts to make tt simple
 		env := object.NewEnv()
 		actual := testEvalInEnv(t, tt.input, env)
 		testValue(t, actual, tt.expected)
