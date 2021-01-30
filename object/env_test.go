@@ -138,6 +138,38 @@ func TestEnvWithConsts(t *testing.T) {
 	}
 }
 
+func TestCopiedEnv(t *testing.T) {
+	env := NewEnv()
+	obj := &PanInt{100}
+	env.Set(GetSymHash("myInt"), obj)
+
+	copiedEnv := NewCopiedEnv(env)
+
+	got, ok := copiedEnv.Get(GetSymHash("myInt"))
+	if !ok {
+		t.Fatalf("element myInt must be set.")
+	}
+
+	if got != obj {
+		t.Errorf("wrong value. expected=%s, got=%s",
+			obj.Inspect(), got.Inspect())
+	}
+
+	if copiedEnv.Items().Inspect() != `{"myInt": 100}` {
+		t.Errorf("Items() are wrong. expected=%s, got=%s",
+			`{"myInt": 100}`, env.Items().Inspect())
+	}
+
+	// env and copiedEnv are independent
+	added := &PanInt{200}
+	env.Set(GetSymHash("addedInt"), added)
+
+	_, ok = copiedEnv.Get(GetSymHash("addedInt"))
+	if ok {
+		t.Fatalf("element added must not be in copiedEnv.")
+	}
+}
+
 func TestGetInOuter(t *testing.T) {
 	outer := NewEnv()
 	inner := NewEnclosedEnv(outer)

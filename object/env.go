@@ -64,6 +64,20 @@ func NewEnvWithConsts() *Env {
 	return env
 }
 
+// NewCopiedEnv makes copied environment of env, which is independent of original one.
+func NewCopiedEnv(env *Env) *Env {
+	newStore := map[SymHash]PanObject{}
+	// copy all variables to new store
+	for k, v := range env.Store {
+		newStore[k] = v
+	}
+
+	return &Env{
+		Store: newStore,
+		outer: env.outer,
+	}
+}
+
 // Env is an environment of variables.
 type Env struct {
 	Store map[SymHash]PanObject

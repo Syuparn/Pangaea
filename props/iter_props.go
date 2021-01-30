@@ -1,6 +1,8 @@
 package props
 
 import (
+	"fmt"
+
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -42,7 +44,18 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				if len(args) < 1 {
 					return object.NewTypeErr("Iter#_iter requires at least 1 arg")
 				}
-				return args[0]
+
+				// return copied new iter not to share state(=env)
+				if it, ok := object.TraceProtoOfFunc(args[0]); ok {
+					return copiedIterFromIter(it)
+				}
+
+				if builtInIt, ok := object.TraceProtoOfBuiltInIter(args[0]); ok {
+					return copiedIterFromBuiltInIter(builtInIt)
+				}
+
+				return object.NewTypeErr(
+					fmt.Sprintf("%s cannot be treated as iter", args[0].Inspect()))
 			},
 		),
 		"B": f(
@@ -61,5 +74,25 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 		),
 		"new":  propContainer["Iter_new"],
 		"next": propContainer["Iter_next"],
+	}
+}
+
+func copiedIterFromIter(self *object.PanFunc) object.PanObject {
+	if self.FuncKind != object.IterFunc {
+		return object.NewTypeErr(
+			fmt.Sprintf("%s cannot be treated as iter", self.Inspect()))
+	}
+
+	return &object.PanFunc{
+		FuncWrapper: self.FuncWrapper,
+		FuncKind:    object.IterFunc,
+		Env:         object.NewCopiedEnv(self.Env),
+	}
+}
+
+func copiedIterFromBuiltInIter(self *object.PanBuiltInIter) object.PanObject {
+	return &object.PanBuiltInIter{
+		Fn:  self.Fn,
+		Env: object.NewCopiedEnv(self.Env),
 	}
 }
