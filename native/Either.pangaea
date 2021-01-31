@@ -1,6 +1,8 @@
 {
   # err? returns whether self has error.
   err?: m{.err != nil},
+  # newVal returns new EitherVal object.
+  newVal: m{|v| EitherVal.bear({_value: v})},
   # val? returns whether self has value.
   val?: m{.val != nil},
 }

@@ -1,0 +1,4 @@
+assertEq(Either.newVal(2).proto, EitherVal)
+assertEq(Either.newVal(2).val, 2)
+assertEq(Either.newVal(2).err, nil)
+assertEq(Either.newVal(2), 1.try.+(1))
