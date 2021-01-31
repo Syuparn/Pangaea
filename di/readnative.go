@@ -47,8 +47,8 @@ func readNativeCode(
 	// NOTE: must pass EnclosedEnv otherwise outerenv of func literal cannot work
 	// (cannot call top-level consts for example)
 	result := eval(fp, object.NewEnclosedEnv(env))
-	if result.Type() == object.ErrType {
-		return nil, errors.New(result.Inspect())
+	if err, ok := result.(*object.PanErr); ok {
+		return nil, errors.New(err.Inspect() + "\n" + err.StackTrace)
 	}
 
 	obj, ok := result.(*object.PanObj)

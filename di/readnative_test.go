@@ -65,7 +65,11 @@ func TestReadNativeCodeFailed(t *testing.T) {
 		},
 		{
 			"testErr",
-			"NameErr: name `undefinedVar` is not defined",
+			"NameErr: name `undefinedVar` is not defined\n" +
+				"line: 2, col: 1\n" +
+				"undefinedVar\n" +
+				"line: 2, col: 13\n" +
+				"undefinedVar",
 		},
 		{
 			"testNotObj",
@@ -80,7 +84,7 @@ func TestReadNativeCodeFailed(t *testing.T) {
 		}
 
 		if err.Error() != tt.expectedErrMsg {
-			t.Errorf("err msg must be \n%s.\ngot=\n%s", tt.expectedErrMsg, err.Error())
+			t.Errorf("err msg must be `\n%s\n`. got=`\n%s\n`", tt.expectedErrMsg, err.Error())
 		}
 	}
 }
@@ -135,8 +139,8 @@ func TestMustReadNativeCodePanics(t *testing.T) {
 		expectedErrMsg string
 	}{
 		{
-			"testErr",
-			"NameErr: name `undefinedVar` is not defined",
+			"testNotObj",
+			"result must be ObjType. got=ArrType",
 		},
 	}
 
