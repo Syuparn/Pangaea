@@ -1,4 +1,6 @@
 {
+  # abandon raises captured error inside.
+  abandon: m{raise .err},
   # catch catches error of errType and converts to EitherVal by f.
   catch: m{|errType, f| Either.newVal(.err.^f) if .err.type == errType else self},
   # ignore ignores error of errType.
