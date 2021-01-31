@@ -621,6 +621,55 @@ func TestEvalStrSub(t *testing.T) {
 	}
 }
 
+func TestEvalStrSymp(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// symbol
+		{
+			`'mySymbol.sym?`,
+			object.BuiltInTrue,
+		},
+		// able to make from symbol
+		{
+			`"var".sym?`,
+			object.BuiltInTrue,
+		},
+		{
+			`"_private".sym?`,
+			object.BuiltInTrue,
+		},
+		{
+			`?+.sym?`,
+			object.BuiltInTrue,
+		},
+		// cannot be used as symbol
+		{
+			`"hello world".sym?`,
+			object.BuiltInFalse,
+		},
+		{
+			`"にほんご".sym?`,
+			object.BuiltInFalse,
+		},
+		{
+			`Str['sym?]()`,
+			object.NewTypeErr("Str#sym? requires at least 1 arg"),
+		},
+		// if \1 is not str, raise an error
+		{
+			`Str['sym?](1)`,
+			object.NewTypeErr("1 cannot be treated as str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStrUc(t *testing.T) {
 	tests := []struct {
 		input    string
