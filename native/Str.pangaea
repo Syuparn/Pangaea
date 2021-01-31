@@ -1,6 +1,8 @@
 {
   # IA converts self into int arr
   IA: m{|sep: `\s`| .split(sep: sep)@I},
+  # call calls prop of obj whose key is self
+  call: m{|obj| obj[self](obj) if .sym? else ValueErr.new("`#{self}` is not a symbol")},
   # camel makes self camelCase
   camel: m{self[0].lc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
   # camel? returns whether self is camelCased.
