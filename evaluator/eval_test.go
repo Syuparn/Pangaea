@@ -7887,6 +7887,49 @@ func TestEvalAssertEq(t *testing.T) {
 	}
 }
 
+func TestEvalAssertRaises(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// NOTE: do not pass receiver to assertRaises! (it is a function)
+		{
+			`assertRaises(ValueErr, "error") {raise ValueErr.new("error")}`,
+			object.BuiltInNil,
+		},
+		{
+			`assertRaises(ValueErr, "error") {1}`,
+			object.NewAssertionErr("error must be raised"),
+		},
+		{
+			`assertRaises(ValueErr, "error") {raise TypeErr.new("error")}`,
+			object.NewAssertionErr("wrong type: TypeErr != ValueErr"),
+		},
+		{
+			`assertRaises(ValueErr, "error") {raise ValueErr.new("hoge")}`,
+			object.NewAssertionErr(`wrong msg: "hoge" != "error"`),
+		},
+		{
+			`assertRaises(1)`,
+			object.NewTypeErr("assertRaises requires at least 3 args"),
+		},
+		{
+			`assertRaises(Err, 1) {raise Err.new("hoge")}`,
+			object.NewTypeErr("1 cannot be treated as str"),
+		},
+		// if args[2] is not callable
+		{
+			`assertRaises(Err, "msg", 1)`,
+			object.NewAssertionErr("error must be raised"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalTry(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -57,5 +57,53 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 					args[0].Inspect(), args[1].Inspect()))
 			},
 		),
+		"assertRaises": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 3 {
+					return object.NewTypeErr("assertRaises requires at least 3 args")
+				}
+
+				errType := args[0]
+
+				msg, ok := object.TraceProtoOfStr(args[1])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as str", ReprStr(args[1])))
+				}
+
+				funcObj := args[2]
+
+				callSym := object.NewPanStr("call")
+				errObj := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), funcObj, callSym,
+				)
+
+				err, ok := errObj.(*object.PanErr)
+				if !ok {
+					return object.NewAssertionErr("error must be raised")
+				}
+
+				typeSym := object.NewPanStr("type")
+				typeObj := propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), err, typeSym,
+				)
+
+				if typeObj != errType {
+					return object.NewAssertionErr(
+						fmt.Sprintf("wrong type: %s != %s", ReprStr(typeObj), ReprStr(errType)))
+				}
+
+				if err.Msg != msg.Value {
+					return object.NewAssertionErr(
+						fmt.Sprintf("wrong msg: \"%s\" != \"%s\"", err.Msg, msg.Value))
+				}
+
+				return object.BuiltInNil
+			},
+		),
 	}
 }
