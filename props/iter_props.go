@@ -31,9 +31,8 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				if args[0].Type() == object.BuiltInIterType && args[1].Type() == object.BuiltInIterType {
 					if args[0] == args[1] {
 						return object.BuiltInTrue
-					} else {
-						return object.BuiltInFalse
 					}
+					return object.BuiltInFalse
 				}
 
 				return object.BuiltInFalse
