@@ -59,6 +59,7 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 					fmt.Sprintf("%s cannot be treated as iter", args[0].Inspect()))
 			},
 		),
+		"_name": object.NewPanStr("Iter"),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

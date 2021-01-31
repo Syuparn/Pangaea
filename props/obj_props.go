@@ -52,6 +52,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 			},
 		),
+		"_name": object.NewPanStr("Obj"),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -226,7 +227,8 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 1 {
 					return object.NewTypeErr("Obj#repr requires at least 1 arg")
 				}
-				return object.NewPanStr(args[0].Inspect())
+
+				return reprStr(args[0])
 			},
 		),
 		"S": f(
@@ -336,4 +338,33 @@ func objIter(o *object.PanObj) object.BuiltInFunc {
 		yieldIdx++
 		return yielded
 	}
+}
+
+func reprStr(obj object.PanObject) *object.PanStr {
+	// if self has '_name and it is str, use it
+	// NOTE: only refer _name in self (NOT PROTO)!,
+	// otherwise all children are shown as _name
+	if name, ok := extractName(obj); ok {
+		return name
+	}
+
+	return object.NewPanStr(obj.Inspect())
+}
+
+func extractName(obj object.PanObject) (*object.PanStr, bool) {
+	o, ok := obj.(*object.PanObj)
+	if !ok {
+		return nil, false
+	}
+	pair, ok := (*o.Pairs)[object.GetSymHash("_name")]
+	if !ok {
+		return nil, false
+	}
+
+	name, ok := object.TraceProtoOfStr(pair.Value)
+	if !ok {
+		return nil, false
+	}
+
+	return name, true
 }

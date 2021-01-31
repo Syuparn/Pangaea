@@ -9,10 +9,11 @@ import (
 func EitherProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
-		"A":    object.BuiltInNotImplemented,
-		"err":  object.BuiltInNotImplemented,
-		"fmap": object.BuiltInNotImplemented,
-		"or":   object.BuiltInNotImplemented,
-		"val":  object.BuiltInNotImplemented,
+		"_name": object.NewPanStr("Either"),
+		"A":     object.BuiltInNotImplemented,
+		"err":   object.BuiltInNotImplemented,
+		"fmap":  object.BuiltInNotImplemented,
+		"or":    object.BuiltInNotImplemented,
+		"val":   object.BuiltInNotImplemented,
 	}
 }

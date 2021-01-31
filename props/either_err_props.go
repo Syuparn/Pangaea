@@ -11,6 +11,7 @@ import (
 func EitherErrProps(propContainer map[string]object.PanObject) map[string]object.PanObject {
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
+		"_name": object.NewPanStr("EitherErr"),
 		"A": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

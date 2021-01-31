@@ -33,13 +33,19 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInAssertionErr, props.AssertionErrProps, ctn)
 	injectProps(object.BuiltInArrObj, props.ArrProps, ctn)
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps, ctn)
+	injectProps(object.BuiltInComparableObj, props.ComparableProps, ctn)
 	injectProps(object.BuiltInDiamondObj, props.DiamondProps, ctn)
+	injectProps(object.BuiltInEitherObj, props.EitherProps, ctn)
+	injectProps(object.BuiltInEitherValObj, props.EitherValProps, ctn)
+	injectProps(object.BuiltInEitherErrObj, props.EitherErrProps, ctn)
 	injectProps(object.BuiltInErrObj, props.ErrProps, ctn)
 	injectProps(object.BuiltInFloatObj, props.FloatProps, ctn)
 	injectProps(object.BuiltInFuncObj, props.FuncProps, ctn)
 	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
 	injectProps(object.BuiltInIterObj, props.IterProps, ctn)
+	injectProps(object.BuiltInIterableObj, props.IterableProps, ctn)
 	injectProps(object.BuiltInKernelObj, props.KernelProps, ctn)
+	injectProps(object.BuiltInMatchObj, props.MatchProps, ctn)
 	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
 	injectProps(object.BuiltInNameErr, props.NameErrProps, ctn)
 	injectProps(object.BuiltInNilObj, props.NilProps, ctn)
@@ -52,10 +58,8 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
 	injectProps(object.BuiltInSyntaxErr, props.SyntaxErrProps, ctn)
 	injectProps(object.BuiltInTypeErr, props.TypeErrProps, ctn)
-	injectProps(object.BuiltInEitherObj, props.EitherProps, ctn)
-	injectProps(object.BuiltInEitherValObj, props.EitherValProps, ctn)
-	injectProps(object.BuiltInEitherErrObj, props.EitherErrProps, ctn)
 	injectProps(object.BuiltInValueErr, props.ValueErrProps, ctn)
+	injectProps(object.BuiltInWrappableObj, props.WrappableProps, ctn)
 	injectProps(object.BuiltInZeroDivisionErr, props.ZeroDivisionErrProps, ctn)
 }
 
@@ -4363,12 +4367,163 @@ func TestEvalRepr(t *testing.T) {
 			object.NewPanStr(`"a"`),
 		},
 		{
-			`true.S`,
+			`true.repr`,
 			object.NewPanStr("true"),
 		},
 		{
-			`false.S`,
+			`false.repr`,
 			object.NewPanStr("false"),
+		},
+		// return name instead if self has '_name and it is str
+		{
+			`{_name: "myObj"}.repr`,
+			object.NewPanStr("myObj"),
+		},
+		{
+			`{_name: 1}.repr`,
+			object.NewPanStr(`{"_name": 1}`),
+		},
+		// proto's _name is not referred
+		{
+			`{_name: "myObj"}.bear.repr`,
+			object.NewPanStr(`{}`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalNamesOfConsts(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Int._name`,
+			object.NewPanStr("Int"),
+		},
+		{
+			`Float._name`,
+			object.NewPanStr("Float"),
+		},
+		{
+			`Num._name`,
+			object.NewPanStr("Num"),
+		},
+		{
+			`Nil._name`,
+			object.NewPanStr("Nil"),
+		},
+		{
+			`Str._name`,
+			object.NewPanStr("Str"),
+		},
+		{
+			`Arr._name`,
+			object.NewPanStr("Arr"),
+		},
+		{
+			`Range._name`,
+			object.NewPanStr("Range"),
+		},
+		{
+			`Func._name`,
+			object.NewPanStr("Func"),
+		},
+		{
+			`Iter._name`,
+			object.NewPanStr("Iter"),
+		},
+		{
+			`Iterable._name`,
+			object.NewPanStr("Iterable"),
+		},
+		{
+			`Comparable._name`,
+			object.NewPanStr("Comparable"),
+		},
+		{
+			`Wrappable._name`,
+			object.NewPanStr("Wrappable"),
+		},
+		{
+			`Match._name`,
+			object.NewPanStr("Match"),
+		},
+		{
+			`Obj._name`,
+			object.NewPanStr("Obj"),
+		},
+		{
+			`BaseObj._name`,
+			object.NewPanStr("BaseObj"),
+		},
+		{
+			`Map._name`,
+			object.NewPanStr("Map"),
+		},
+		{
+			`Diamond._name`,
+			object.NewPanStr("Diamond"),
+		},
+		{
+			`Kernel._name`,
+			object.NewPanStr("Kernel"),
+		},
+		{
+			`Either._name`,
+			object.NewPanStr("Either"),
+		},
+		{
+			`EitherErr._name`,
+			object.NewPanStr("EitherErr"),
+		},
+		{
+			`EitherVal._name`,
+			object.NewPanStr("EitherVal"),
+		},
+		{
+			`Err._name`,
+			object.NewPanStr("Err"),
+		},
+		{
+			`AssertionErr._name`,
+			object.NewPanStr("AssertionErr"),
+		},
+		{
+			`NameErr._name`,
+			object.NewPanStr("NameErr"),
+		},
+		{
+			`NoPropErr._name`,
+			object.NewPanStr("NoPropErr"),
+		},
+		{
+			`NotImplementedErr._name`,
+			object.NewPanStr("NotImplementedErr"),
+		},
+		{
+			`StopIterErr._name`,
+			object.NewPanStr("StopIterErr"),
+		},
+		{
+			`SyntaxErr._name`,
+			object.NewPanStr("SyntaxErr"),
+		},
+		{
+			`TypeErr._name`,
+			object.NewPanStr("TypeErr"),
+		},
+		{
+			`ValueErr._name`,
+			object.NewPanStr("ValueErr"),
+		},
+		{
+			`ZeroDivisionErr._name`,
+			object.NewPanStr("ZeroDivisionErr"),
 		},
 	}
 

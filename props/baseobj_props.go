@@ -30,7 +30,8 @@ func BaseObjProps(propContainer map[string]object.PanObject) map[string]object.P
 				return compObjs(self, other, propContainer, env)
 			},
 		),
-		"at": propContainer["BaseObj_at"],
+		"_name": object.NewPanStr("BaseObj"),
+		"at":    propContainer["BaseObj_at"],
 		"bear": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

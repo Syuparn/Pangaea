@@ -93,7 +93,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInArrObj, toPairs(props.ArrProps(ctn)), arrNatives, iterableNatives)
 	injectProps(object.BuiltInAssertionErr, toPairs(props.AssertionErrProps(ctn)))
 	injectProps(object.BuiltInBaseObj, toPairs(props.BaseObjProps(ctn)), baseObjNatives)
-	injectProps(object.BuiltInComparableObj, comparableNatives)
+	injectProps(object.BuiltInComparableObj, toPairs(props.ComparableProps(ctn)), comparableNatives)
 	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInEitherObj, toPairs(props.EitherProps(ctn)), eitherNatives, wrappableNatives)
 	injectProps(object.BuiltInEitherErrObj, toPairs(props.EitherErrProps(ctn)), eitherErrNatives)
@@ -103,8 +103,9 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInFuncObj, toPairs(props.FuncProps(ctn)))
 	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), intNatives, iterableNatives, comparableNatives)
 	injectProps(object.BuiltInIterObj, toPairs(props.IterProps(ctn)))
-	injectProps(object.BuiltInIterableObj, iterableNatives)
+	injectProps(object.BuiltInIterableObj, toPairs(props.IterableProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInKernelObj, toPairs(props.KernelProps(ctn)))
+	injectProps(object.BuiltInMatchObj, toPairs(props.MatchProps(ctn)))
 	injectProps(object.BuiltInMapObj, toPairs(props.MapProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInNameErr, toPairs(props.NameErrProps(ctn)))
 	injectProps(object.BuiltInNilObj, toPairs(props.NilProps(ctn)))
@@ -118,7 +119,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInSyntaxErr, toPairs(props.SyntaxErrProps(ctn)))
 	injectProps(object.BuiltInTypeErr, toPairs(props.TypeErrProps(ctn)))
 	injectProps(object.BuiltInValueErr, toPairs(props.ValueErrProps(ctn)))
-	injectProps(object.BuiltInWrappableObj, wrappableNatives)
+	injectProps(object.BuiltInWrappableObj, toPairs(props.WrappableProps(ctn)), wrappableNatives)
 	injectProps(object.BuiltInZeroDivisionErr, toPairs(props.ZeroDivisionErrProps(ctn)))
 }
 
