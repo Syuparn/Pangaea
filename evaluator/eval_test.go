@@ -7949,6 +7949,46 @@ func TestEvalEitherErr(t *testing.T) {
 	}
 }
 
+func TestEvalEitherOr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// success
+		{
+			`1.try.fmap {\ + 2}.or("failed")`,
+			object.NewPanInt(3),
+		},
+		// failure
+		{
+			`1.try.fmap {\ / 0}.or("failed")`,
+			object.NewPanStr("failed"),
+		},
+		// raises errors (highly unrecommended because it is not caught)
+		{
+			`1.try.fmap {\ + 2}['or]()`,
+			object.NewTypeErr("EitherVal#or requires at least 2 args"),
+		},
+		{
+			`1.try.fmap {\ / 0}['or]()`,
+			object.NewTypeErr("EitherErr#or requires at least 2 args"),
+		},
+		{
+			`1.try.fmap {\ + 1}['or]([], "")`,
+			object.NewTypeErr("`[]` cannot be treated as EitherVal"),
+		},
+		{
+			`1.try.fmap {\ + 1}['or]({}, "")`,
+			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalErrWrapperS(t *testing.T) {
 	tests := []struct {
 		input    string
