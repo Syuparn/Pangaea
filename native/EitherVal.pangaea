@@ -1,4 +1,6 @@
 {
   # catch does nothing.
   catch: m{|errType, f| self},
+  # ignore does nothing.
+  ignore: m{|errType| self},
 }

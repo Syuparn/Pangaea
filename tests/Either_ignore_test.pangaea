@@ -1,0 +1,7 @@
+assertEq(2.try.{\ + 1}.ignore(ZeroDivisionErr).val, 3)
+assertEq(2.try.{\ / 0}.ignore(ZeroDivisionErr).val, nil)
+# other types of errors are not caught
+assertEq(
+  2.try.{raise Err.new("err")}.ignore(ZeroDivisionErr).err,
+  Either.newErr(Err, "err").err
+)
