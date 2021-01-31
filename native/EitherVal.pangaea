@@ -1,0 +1,4 @@
+{
+  # catch does nothing.
+  catch: m{|errType, f| self},
+}

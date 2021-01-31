@@ -48,6 +48,14 @@ func injectBuiltInProps(
 	go func() {
 		eitherNativesCh <- mustReadNativeCode("Either", env)
 	}()
+	eitherErrNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		eitherErrNativesCh <- mustReadNativeCode("EitherErr", env)
+	}()
+	eitherValNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		eitherValNativesCh <- mustReadNativeCode("EitherVal", env)
+	}()
 	intNativesCh := make(chan *map[object.SymHash]object.Pair)
 	go func() {
 		intNativesCh <- mustReadNativeCode("Int", env)
@@ -73,6 +81,8 @@ func injectBuiltInProps(
 	baseObjNatives := <-baseObjNativesCh
 	comparableNatives := <-comparableNativesCh
 	eitherNatives := <-eitherNativesCh
+	eitherErrNatives := <-eitherErrNativesCh
+	eitherValNatives := <-eitherValNativesCh
 	intNatives := <-intNativesCh
 	iterableNatives := <-iterableNativesCh
 	objNatives := <-objNativesCh
@@ -86,8 +96,8 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInComparableObj, comparableNatives)
 	injectProps(object.BuiltInDiamondObj, toPairs(props.DiamondProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInEitherObj, toPairs(props.EitherProps(ctn)), eitherNatives, wrappableNatives)
-	injectProps(object.BuiltInEitherErrObj, toPairs(props.EitherErrProps(ctn)))
-	injectProps(object.BuiltInEitherValObj, toPairs(props.EitherValProps(ctn)))
+	injectProps(object.BuiltInEitherErrObj, toPairs(props.EitherErrProps(ctn)), eitherErrNatives)
+	injectProps(object.BuiltInEitherValObj, toPairs(props.EitherValProps(ctn)), eitherValNatives)
 	injectProps(object.BuiltInErrObj, toPairs(props.ErrProps(ctn)))
 	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)), comparableNatives)
 	injectProps(object.BuiltInFuncObj, toPairs(props.FuncProps(ctn)))
