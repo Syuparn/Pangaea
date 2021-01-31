@@ -13,16 +13,10 @@
   any?: m{|f| @^f@B.has?(true)},
   # chain concatenates all iters in arguments.
   chain: m{
-    iters := \0._iter
-    <{|it|
-      # NOTE: `yield if` cannot be used because it raises StopIterErr
-      return next.val if (next := it.try.next).val?
-      raise e if (e := next.err).type != StopIterErr
-      # if StopIterErr is raised, use another iter
-      nextIt := iters.next._iter
-      yield nextIt.next
-      recur(nextIt)
-    }>.new(iters.next._iter)
+    is := \0@_iter._iter
+    <{|i|
+      yield i.try.next.catch(StopIterErr) {recur(is.next => i); i.next}.abandon
+    }>.new(is.next)
   },
   # doUntil returns elements while (element_yielded_last).^cond? is false.
   doUntil: m{|cond?|

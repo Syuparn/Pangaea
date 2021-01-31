@@ -38,6 +38,7 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return compErrWrappers(self, other, propContainer, env)
 			},
 		),
+		"_name": object.NewPanStr("Err"),
 		"msg": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

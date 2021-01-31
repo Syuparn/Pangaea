@@ -197,7 +197,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 			},
 		),
-		"at": propContainer["Str_at"],
+		"_name": object.NewPanStr("Str"),
+		"at":    propContainer["Str_at"],
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

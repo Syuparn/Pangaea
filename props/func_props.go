@@ -47,6 +47,7 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				return compBuiltInFuncs(builtIn, other)
 			},
 		),
+		"_name": object.NewPanStr("Func"),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

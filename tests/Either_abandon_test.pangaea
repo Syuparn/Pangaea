@@ -1,0 +1,2 @@
+assertRaises(ZeroDivisionErr, "cannot be divided by 0") {2.try./(0).abandon}
+assertEq(2.try.+(1).abandon, 3)

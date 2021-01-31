@@ -31,9 +31,8 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				if args[0].Type() == object.BuiltInIterType && args[1].Type() == object.BuiltInIterType {
 					if args[0] == args[1] {
 						return object.BuiltInTrue
-					} else {
-						return object.BuiltInFalse
 					}
+					return object.BuiltInFalse
 				}
 
 				return object.BuiltInFalse
@@ -60,6 +59,7 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 					fmt.Sprintf("%s cannot be treated as iter", args[0].Inspect()))
 			},
 		),
+		"_name": object.NewPanStr("Iter"),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

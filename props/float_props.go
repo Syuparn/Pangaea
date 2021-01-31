@@ -126,6 +126,7 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				return &object.PanFloat{Value: res}
 			},
 		),
+		"_name": object.NewPanStr("Float"),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

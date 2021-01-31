@@ -1,0 +1,8 @@
+{
+  # abandon returns value inside.
+  abandon: m{.val},
+  # catch does nothing.
+  catch: m{|errType, f| self},
+  # ignore does nothing.
+  ignore: m{|errType| self},
+}

@@ -28,6 +28,7 @@ func DiamondProps(propContainer map[string]object.PanObject) map[string]object.P
 				}
 			},
 		),
+		"_name": object.NewPanStr("Diamond"),
 		// <> can use all str props (call prop of read line)
 		"_missing": f(
 			func(

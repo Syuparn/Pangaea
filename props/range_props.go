@@ -95,6 +95,7 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 			},
 		),
+		"_name": object.NewPanStr("Range"),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

@@ -54,7 +54,8 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 			},
 		),
-		"at": propContainer["Map_at"],
+		"_name": object.NewPanStr("Map"),
+		"at":    propContainer["Map_at"],
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

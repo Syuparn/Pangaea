@@ -33,13 +33,19 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInAssertionErr, props.AssertionErrProps, ctn)
 	injectProps(object.BuiltInArrObj, props.ArrProps, ctn)
 	injectProps(object.BuiltInBaseObj, props.BaseObjProps, ctn)
+	injectProps(object.BuiltInComparableObj, props.ComparableProps, ctn)
 	injectProps(object.BuiltInDiamondObj, props.DiamondProps, ctn)
+	injectProps(object.BuiltInEitherObj, props.EitherProps, ctn)
+	injectProps(object.BuiltInEitherValObj, props.EitherValProps, ctn)
+	injectProps(object.BuiltInEitherErrObj, props.EitherErrProps, ctn)
 	injectProps(object.BuiltInErrObj, props.ErrProps, ctn)
 	injectProps(object.BuiltInFloatObj, props.FloatProps, ctn)
 	injectProps(object.BuiltInFuncObj, props.FuncProps, ctn)
 	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
 	injectProps(object.BuiltInIterObj, props.IterProps, ctn)
+	injectProps(object.BuiltInIterableObj, props.IterableProps, ctn)
 	injectProps(object.BuiltInKernelObj, props.KernelProps, ctn)
+	injectProps(object.BuiltInMatchObj, props.MatchProps, ctn)
 	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
 	injectProps(object.BuiltInNameErr, props.NameErrProps, ctn)
 	injectProps(object.BuiltInNilObj, props.NilProps, ctn)
@@ -52,9 +58,8 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
 	injectProps(object.BuiltInSyntaxErr, props.SyntaxErrProps, ctn)
 	injectProps(object.BuiltInTypeErr, props.TypeErrProps, ctn)
-	injectProps(object.BuiltInEitherValObj, props.EitherValProps, ctn)
-	injectProps(object.BuiltInEitherErrObj, props.EitherErrProps, ctn)
 	injectProps(object.BuiltInValueErr, props.ValueErrProps, ctn)
+	injectProps(object.BuiltInWrappableObj, props.WrappableProps, ctn)
 	injectProps(object.BuiltInZeroDivisionErr, props.ZeroDivisionErrProps, ctn)
 }
 
@@ -4362,12 +4367,163 @@ func TestEvalRepr(t *testing.T) {
 			object.NewPanStr(`"a"`),
 		},
 		{
-			`true.S`,
+			`true.repr`,
 			object.NewPanStr("true"),
 		},
 		{
-			`false.S`,
+			`false.repr`,
 			object.NewPanStr("false"),
+		},
+		// return name instead if self has '_name and it is str
+		{
+			`{_name: "myObj"}.repr`,
+			object.NewPanStr("myObj"),
+		},
+		{
+			`{_name: 1}.repr`,
+			object.NewPanStr(`{"_name": 1}`),
+		},
+		// proto's _name is not referred
+		{
+			`{_name: "myObj"}.bear.repr`,
+			object.NewPanStr(`{}`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalNamesOfConsts(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`Int._name`,
+			object.NewPanStr("Int"),
+		},
+		{
+			`Float._name`,
+			object.NewPanStr("Float"),
+		},
+		{
+			`Num._name`,
+			object.NewPanStr("Num"),
+		},
+		{
+			`Nil._name`,
+			object.NewPanStr("Nil"),
+		},
+		{
+			`Str._name`,
+			object.NewPanStr("Str"),
+		},
+		{
+			`Arr._name`,
+			object.NewPanStr("Arr"),
+		},
+		{
+			`Range._name`,
+			object.NewPanStr("Range"),
+		},
+		{
+			`Func._name`,
+			object.NewPanStr("Func"),
+		},
+		{
+			`Iter._name`,
+			object.NewPanStr("Iter"),
+		},
+		{
+			`Iterable._name`,
+			object.NewPanStr("Iterable"),
+		},
+		{
+			`Comparable._name`,
+			object.NewPanStr("Comparable"),
+		},
+		{
+			`Wrappable._name`,
+			object.NewPanStr("Wrappable"),
+		},
+		{
+			`Match._name`,
+			object.NewPanStr("Match"),
+		},
+		{
+			`Obj._name`,
+			object.NewPanStr("Obj"),
+		},
+		{
+			`BaseObj._name`,
+			object.NewPanStr("BaseObj"),
+		},
+		{
+			`Map._name`,
+			object.NewPanStr("Map"),
+		},
+		{
+			`Diamond._name`,
+			object.NewPanStr("Diamond"),
+		},
+		{
+			`Kernel._name`,
+			object.NewPanStr("Kernel"),
+		},
+		{
+			`Either._name`,
+			object.NewPanStr("Either"),
+		},
+		{
+			`EitherErr._name`,
+			object.NewPanStr("EitherErr"),
+		},
+		{
+			`EitherVal._name`,
+			object.NewPanStr("EitherVal"),
+		},
+		{
+			`Err._name`,
+			object.NewPanStr("Err"),
+		},
+		{
+			`AssertionErr._name`,
+			object.NewPanStr("AssertionErr"),
+		},
+		{
+			`NameErr._name`,
+			object.NewPanStr("NameErr"),
+		},
+		{
+			`NoPropErr._name`,
+			object.NewPanStr("NoPropErr"),
+		},
+		{
+			`NotImplementedErr._name`,
+			object.NewPanStr("NotImplementedErr"),
+		},
+		{
+			`StopIterErr._name`,
+			object.NewPanStr("StopIterErr"),
+		},
+		{
+			`SyntaxErr._name`,
+			object.NewPanStr("SyntaxErr"),
+		},
+		{
+			`TypeErr._name`,
+			object.NewPanStr("TypeErr"),
+		},
+		{
+			`ValueErr._name`,
+			object.NewPanStr("ValueErr"),
+		},
+		{
+			`ZeroDivisionErr._name`,
+			object.NewPanStr("ZeroDivisionErr"),
 		},
 	}
 
@@ -7731,6 +7887,49 @@ func TestEvalAssertEq(t *testing.T) {
 	}
 }
 
+func TestEvalAssertRaises(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// NOTE: do not pass receiver to assertRaises! (it is a function)
+		{
+			`assertRaises(ValueErr, "error") {raise ValueErr.new("error")}`,
+			object.BuiltInNil,
+		},
+		{
+			`assertRaises(ValueErr, "error") {1}`,
+			object.NewAssertionErr("error must be raised"),
+		},
+		{
+			`assertRaises(ValueErr, "error") {raise TypeErr.new("error")}`,
+			object.NewAssertionErr("wrong type: TypeErr != ValueErr"),
+		},
+		{
+			`assertRaises(ValueErr, "error") {raise ValueErr.new("hoge")}`,
+			object.NewAssertionErr(`wrong msg: "hoge" != "error"`),
+		},
+		{
+			`assertRaises(1)`,
+			object.NewTypeErr("assertRaises requires at least 3 args"),
+		},
+		{
+			`assertRaises(Err, 1) {raise Err.new("hoge")}`,
+			object.NewTypeErr("1 cannot be treated as str"),
+		},
+		// if args[2] is not callable
+		{
+			`assertRaises(Err, "msg", 1)`,
+			object.NewAssertionErr("error must be raised"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalTry(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -7795,6 +7994,11 @@ func TestEvalFmap(t *testing.T) {
 		{
 			`1.try['fmap]({}) {\ + 1}`,
 			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+		},
+		// Either['fmap] is abstract method
+		{
+			`Either.fmap {.keys}`,
+			object.BuiltInNotImplemented,
 		},
 		// return Val(nil) if f does not have prop `call`
 		{
@@ -7861,6 +8065,11 @@ func TestEvalEitherA(t *testing.T) {
 			`1.try.fmap {\ / 0}['A]({})`,
 			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
 		},
+		// Either['A] is abstract method
+		{
+			`Either.A`,
+			object.BuiltInNotImplemented,
+		},
 	}
 
 	for _, tt := range tests {
@@ -7901,6 +8110,11 @@ func TestEvalEitherVal(t *testing.T) {
 			`1.try.fmap {\ + 2}['val]({})`,
 			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
 		},
+		// Either['val] is abstract method
+		{
+			`Either.val`,
+			object.BuiltInNotImplemented,
+		},
 	}
 
 	for _, tt := range tests {
@@ -7940,6 +8154,56 @@ func TestEvalEitherErr(t *testing.T) {
 		{
 			`1.try.fmap {\ / 0}['err]({})`,
 			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
+		},
+		// Either['err] is abstract method
+		{
+			`Either.err`,
+			object.BuiltInNotImplemented,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalEitherOr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// success
+		{
+			`1.try.fmap {\ + 2}.or("failed")`,
+			object.NewPanInt(3),
+		},
+		// failure
+		{
+			`1.try.fmap {\ / 0}.or("failed")`,
+			object.NewPanStr("failed"),
+		},
+		// raises errors (highly unrecommended because it is not caught)
+		{
+			`1.try.fmap {\ + 2}['or]()`,
+			object.NewTypeErr("EitherVal#or requires at least 2 args"),
+		},
+		{
+			`1.try.fmap {\ / 0}['or]()`,
+			object.NewTypeErr("EitherErr#or requires at least 2 args"),
+		},
+		{
+			`1.try.fmap {\ + 1}['or]([], "")`,
+			object.NewTypeErr("`[]` cannot be treated as EitherVal"),
+		},
+		{
+			`1.try.fmap {\ + 1}['or]({}, "")`,
+			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+		},
+		// Either['or] is abstract method
+		{
+			`Either.or`,
+			object.BuiltInNotImplemented,
 		},
 	}
 

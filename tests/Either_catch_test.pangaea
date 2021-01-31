@@ -1,0 +1,7 @@
+assertEq(2.try.{\ + 1}.catch(ZeroDivisionErr) {|e| "divided by 0"}.val, 3)
+assertEq(2.try.{\ / 0}.catch(ZeroDivisionErr) {|e| "divided by 0"}.val, "divided by 0")
+# other types of errors are not caught
+assertEq(
+  2.try.{raise Err.new("err")}.catch(ZeroDivisionErr) {|e| "divided by 0"}.err,
+  Either.newErr(Err, "err").err
+)
