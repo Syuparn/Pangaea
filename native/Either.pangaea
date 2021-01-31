@@ -1,6 +1,8 @@
 {
   # err? returns whether self has error.
   err?: m{.err != nil},
+  # newErr returns new EitherErr object.
+  newErr: m{|E, msg| EitherErr.bear({_error: "".try.{raise E.new(msg)}.err})},
   # newVal returns new EitherVal object.
   newVal: m{|v| EitherVal.bear({_value: v})},
   # val? returns whether self has value.

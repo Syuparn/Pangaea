@@ -1,0 +1,4 @@
+assertEq(Either.newErr(TypeErr, "error").proto, EitherErr)
+assertEq(Either.newErr(TypeErr, "error").err, "".try.{raise TypeErr.new("error")}.err)
+assertEq(Either.newErr(TypeErr, "error").val, nil)
+assertEq(Either.newErr(TypeErr, "error"), 1.try.{raise TypeErr.new("error")})
