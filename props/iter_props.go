@@ -24,17 +24,19 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 					return object.BuiltInTrue
 				}
 
-				// same as func comparison
-				self, ok := object.TraceProtoOfFunc(args[0])
-				if !ok {
-					return object.BuiltInFalse
-				}
-				other, ok := object.TraceProtoOfFunc(args[1])
-				if !ok {
-					return object.BuiltInFalse
+				if args[0].Type() == object.FuncType && args[1].Type() == object.FuncType {
+					return compFuncs(args[0].(*object.PanFunc), args[1].(*object.PanFunc))
 				}
 
-				return compFuncs(self, other)
+				if args[0].Type() == object.BuiltInIterType && args[1].Type() == object.BuiltInIterType {
+					if args[0] == args[1] {
+						return object.BuiltInTrue
+					} else {
+						return object.BuiltInFalse
+					}
+				}
+
+				return object.BuiltInFalse
 			},
 		),
 		"_iter": f(
@@ -64,10 +66,6 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 			) object.PanObject {
 				if len(args) < 1 {
 					return object.NewTypeErr("Iter#B requires at least 1 arg")
-				}
-				_, ok := object.TraceProtoOfFunc(args[0])
-				if !ok {
-					return object.NewTypeErr(`\1 must be func`)
 				}
 				return object.BuiltInTrue
 			},
