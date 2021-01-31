@@ -52,6 +52,7 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInStrObj, props.StrProps, ctn)
 	injectProps(object.BuiltInSyntaxErr, props.SyntaxErrProps, ctn)
 	injectProps(object.BuiltInTypeErr, props.TypeErrProps, ctn)
+	injectProps(object.BuiltInEitherObj, props.EitherProps, ctn)
 	injectProps(object.BuiltInEitherValObj, props.EitherValProps, ctn)
 	injectProps(object.BuiltInEitherErrObj, props.EitherErrProps, ctn)
 	injectProps(object.BuiltInValueErr, props.ValueErrProps, ctn)
@@ -7796,6 +7797,11 @@ func TestEvalFmap(t *testing.T) {
 			`1.try['fmap]({}) {\ + 1}`,
 			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
 		},
+		// Either['fmap] is abstract method
+		{
+			`Either.fmap {.keys}`,
+			object.BuiltInNotImplemented,
+		},
 		// return Val(nil) if f does not have prop `call`
 		{
 			`1.try.fmap(2)`,
@@ -7861,6 +7867,11 @@ func TestEvalEitherA(t *testing.T) {
 			`1.try.fmap {\ / 0}['A]({})`,
 			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
 		},
+		// Either['A] is abstract method
+		{
+			`Either.A`,
+			object.BuiltInNotImplemented,
+		},
 	}
 
 	for _, tt := range tests {
@@ -7900,6 +7911,11 @@ func TestEvalEitherVal(t *testing.T) {
 		{
 			`1.try.fmap {\ + 2}['val]({})`,
 			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+		},
+		// Either['val] is abstract method
+		{
+			`Either.val`,
+			object.BuiltInNotImplemented,
 		},
 	}
 
@@ -7941,6 +7957,11 @@ func TestEvalEitherErr(t *testing.T) {
 			`1.try.fmap {\ / 0}['err]({})`,
 			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
 		},
+		// Either['err] is abstract method
+		{
+			`Either.err`,
+			object.BuiltInNotImplemented,
+		},
 	}
 
 	for _, tt := range tests {
@@ -7980,6 +8001,11 @@ func TestEvalEitherOr(t *testing.T) {
 		{
 			`1.try.fmap {\ + 1}['or]({}, "")`,
 			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+		},
+		// Either['or] is abstract method
+		{
+			`Either.or`,
+			object.BuiltInNotImplemented,
 		},
 	}
 
