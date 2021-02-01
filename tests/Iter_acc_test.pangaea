@@ -1,0 +1,8 @@
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).acc {|acc, i| acc + i}.A, [1, 3, 6])
+assertEq(<{yield 1 if false}>.acc {|acc, i| acc + i}.A, [])
+assertEq(
+  <{yield \ if \ < 4; recur(\ + 1)}>.new(1).acc(init: 10) {|acc, i| acc + i}.A,
+  [11, 13, 16]
+)
+# acc returns iter (not arr)
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).acc {|acc, i| acc + i}.proto, Iter)

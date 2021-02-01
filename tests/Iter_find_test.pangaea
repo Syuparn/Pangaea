@@ -1,0 +1,5 @@
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).find {.even?}, 2)
+# return the element found first
+assertEq(<{yield \ if \ < 5; recur(\ + 1)}>.new(1).find {.even?}, 2)
+# if not found, return nil
+assertEq(<{yield \ if \ < 6; recur(\ + 2)}>.new(1).find {.even?}, nil)

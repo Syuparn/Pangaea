@@ -1,0 +1,2 @@
+assertEq(<{yield 1 if false}>.new(1).empty?, true)
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).empty?, false)

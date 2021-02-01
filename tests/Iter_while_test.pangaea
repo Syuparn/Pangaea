@@ -1,0 +1,5 @@
+assertEq(<{yield \ if \ < 6; recur(\ + 1)}>.new(1).while {\ != 4}.A, [1, 2, 3])
+assertEq(<{yield \ if \ < 6; recur(\ + 2)}>.new(1).while {.even?}.A, [])
+assertEq(<{yield 1 if false}>.while {.odd?}.A, [])
+# while returns iter (not arr)
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).while {.odd?}.proto, Iter)

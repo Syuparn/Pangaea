@@ -1,0 +1,3 @@
+assertEq(<{yield 1 if false}>.sum, nil)
+assertEq(<{yield \ if \ < 2; recur(\ + 1)}>.new(1).sum, 1)
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).sum, 6)

@@ -102,7 +102,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInFloatObj, toPairs(props.FloatProps(ctn)), comparableNatives)
 	injectProps(object.BuiltInFuncObj, toPairs(props.FuncProps(ctn)))
 	injectProps(object.BuiltInIntObj, toPairs(props.IntProps(ctn)), intNatives, iterableNatives, comparableNatives)
-	injectProps(object.BuiltInIterObj, toPairs(props.IterProps(ctn)))
+	injectProps(object.BuiltInIterObj, toPairs(props.IterProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInIterableObj, toPairs(props.IterableProps(ctn)), iterableNatives)
 	injectProps(object.BuiltInKernelObj, toPairs(props.KernelProps(ctn)))
 	injectProps(object.BuiltInMatchObj, toPairs(props.MatchProps(ctn)))
