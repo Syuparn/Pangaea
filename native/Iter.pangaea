@@ -1,0 +1,5 @@
+{
+  # at returns elements of given indices.
+  # TODO: make it infinite-iter-safe
+  at: m{|i| v if (v := Obj['at](self, i)).nil?.! else .A.at(i)},
+}

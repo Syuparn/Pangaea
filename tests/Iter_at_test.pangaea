@@ -1,0 +1,6 @@
+assertEq(<{|i| yield i if i < ?g; recur(i._incBy(1))}>.new(?a)[0], ?a)
+assertEq(<{|i| yield i if i < ?g; recur(i._incBy(1))}>.new(?a)[-1], ?f)
+assertEq(<{|i| yield i if i < ?g; recur(i._incBy(1))}>.new(?a)[1:4], [?b, ?c, ?d])
+assertEq(<{|i| yield i if i < ?g; recur(i._incBy(1))}>.new(?a)[0:6:2], [?a, ?c, ?e])
+# regardless of yielded values, original Iter props can be obtained 
+assertEq(<{}>['next](<{yield 1}>), 1)
