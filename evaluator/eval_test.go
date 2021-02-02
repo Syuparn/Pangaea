@@ -4785,6 +4785,31 @@ func TestEvalScalarPropChain(t *testing.T) {
 	}
 }
 
+func TestEvalScalarPropChainWithIter(t *testing.T) {
+	env := object.NewEnv()
+
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// unlike func, iter is not called
+		{
+			`{a: <{1}>}.a`,
+			toPanIter(
+				[]string{},
+				[]object.Pair{},
+				"|| 1",
+				object.NewEnclosedEnv(env),
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEvalInEnv(t, tt.input, env)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalArgUnpack(t *testing.T) {
 	tests := []struct {
 		input    string

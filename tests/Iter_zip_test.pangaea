@@ -1,0 +1,19 @@
+assertEq(
+  <{yield \ if \ < 4; recur(\ + 1)}>.new(1).zip("abc").A,
+  [[1, ?a], [2, ?b], [3, ?c]]
+)
+assertEq(
+  <{yield \ if \ < 4; recur(\ + 1)}>.new(1).zip("abc", [4, 5, 6]).A,
+  [[1, ?a, 4], [2, ?b, 5], [3, ?c, 6]]
+)
+# length of returned iter is same as the shortest arg 
+assertEq(
+  <{yield \ if \ < 4; recur(\ + 1)}>.new(1).zip("ab").A,
+  [[1, ?a], [2, ?b]]
+)
+assertEq(
+  <{yield \ if \ < 3; recur(\ + 1)}>.new(1).zip("abc").A,
+  [[1, ?a], [2, ?b]]
+)
+# zip returns iter (not arr)
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).zip("abc").proto, Iter)

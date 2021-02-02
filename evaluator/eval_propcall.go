@@ -123,7 +123,11 @@ func evalCall(
 	case *object.PanBuiltIn:
 		return evalBuiltInFuncMethodCall(env, recv, prop, args, kwargs)
 	case *object.PanFunc:
-		return evalFuncMethodCall(env, recv, prop, args, kwargs)
+		if prop.FuncKind == object.FuncFunc {
+			return evalFuncMethodCall(env, recv, prop, args, kwargs)
+		}
+		// iter is not called
+		return prop
 	default:
 		return prop
 	}

@@ -1,0 +1,1 @@
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).A, [1, 2, 3])

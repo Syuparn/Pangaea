@@ -1,0 +1,5 @@
+assertEq(<{yield \ if \ < 6; recur(\ + 2)}>.new(1).all? {.odd?}, true)
+assertEq(<{yield \ if \ < 10; recur(\ + 1)}>.new(1).all? {.odd?}, false)
+# if predicate returns non-bool, all? checks all values are truthy
+assertEq(<{yield \ if \ < 10; recur(\ + 1)}>.new(1).all? {\}, true)
+assertEq(<{yield \ if \ < 10; recur(\ + 1)}>.new(0).all? {\}, false)

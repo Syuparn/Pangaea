@@ -1,0 +1,4 @@
+assertEq(<{yield \ if \ != 'c; recur(\._incBy(1))}>.new('a).withI.A, [[0, 'a], [1, 'b]])
+assertEq(<{yield 1 if false}>.withI.A, [])
+# withI returns iter (not arr)
+assertEq(<{yield 1 if false}>.withI.proto, Iter)
