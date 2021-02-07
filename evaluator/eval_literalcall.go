@@ -57,16 +57,48 @@ func literalCallHandler(
 	args []object.PanObject,
 	kwargs *object.PanObj,
 ) object.PanObject {
-	// TODO: duck typing (allow all objs with `call` prop)
 	f, ok := object.TraceProtoOfFunc(args[0])
-	if !ok {
-		return object.NewTypeErr("literal call must be func")
+	if ok {
+		// unpack recv for params
+		argsToPass := append([]object.PanObject{f}, literalCallArgs(recv, f)...)
+		return evalFuncCall(env, kwargs, argsToPass...)
 	}
 
-	// unpack recv for params
-	argsToPass := append([]object.PanObject{f}, literalCallArgs(recv, f)...)
+	builtIn, ok := object.TraceProtoOfBuiltInFunc(args[0])
+	if ok {
+		// TODO: extract elems if there are more than 1 params and recv is arr
+		return builtIn.Fn(env, kwargs, recv)
+	}
 
-	return evalFuncCall(env, kwargs, argsToPass...)
+	if call, ok := findCall(args[0]); ok {
+		return handleCallable(env, recv, args, kwargs, call)
+	}
+
+	return object.NewTypeErr("literal call must be func")
+}
+
+func handleCallable(
+	env *object.Env,
+	recv object.PanObject,
+	args []object.PanObject,
+	kwargs *object.PanObj,
+	call object.PanObject,
+) object.PanObject {
+	f, ok := object.TraceProtoOfFunc(call)
+	if ok {
+		// unpack recv for params
+		argsToPass := append([]object.PanObject{f}, literalCallArgs(recv, f)...)
+		return evalFuncCall(env, kwargs, argsToPass...)
+	}
+
+	builtIn, ok := object.TraceProtoOfBuiltInFunc(call)
+	if ok {
+		// TODO: extract elems if there are more than 1 params and recv is arr
+		return builtIn.Fn(env, kwargs, recv)
+	}
+
+	// NOTE: 'call prop in call is not searched to prevent infinite loop
+	return object.NewTypeErr("prop 'call in varcall must be func")
 }
 
 func _evalLiteralCall(
@@ -92,4 +124,15 @@ func literalCallArgs(recv object.PanObject, f *object.PanFunc) []object.PanObjec
 	}
 
 	return []object.PanObject{recv}
+}
+
+func findCall(funcSubstitute object.PanObject) (object.PanObject, bool) {
+	call, isMissing := evalProp("call", funcSubstitute)
+	if isMissing {
+		return nil, false
+	}
+	if _, ok := call.(*object.PanErr); ok {
+		return nil, false
+	}
+	return call, true
 }
