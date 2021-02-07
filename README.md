@@ -14,6 +14,9 @@ $ go get github.com/rakyll/statik
 
 # 2. Build (imported modules are installed automatically)
 $ make
+# or
+$ go generate
+$ go build
 
 # 3. Run
 
