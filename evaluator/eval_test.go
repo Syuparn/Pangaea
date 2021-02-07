@@ -3113,6 +3113,11 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 			`[2, 0, 3]@{|n| 6/n}`,
 			object.NewZeroDivisionErr("cannot be divided by 0"),
 		},
+		// if chainarg raises error, propagate it
+		{
+			`[1]@(_){|n| n + 1}`,
+			object.BuiltInNotImplemented,
+		},
 	}
 
 	for _, tt := range tests {
@@ -5309,6 +5314,20 @@ func TestEvalVarCall(t *testing.T) {
 				object.NewPanInt(2),
 			}},
 		},
+		// built-in func
+		{
+			`f := Int['-%]; 3.^f`,
+			object.NewPanInt(-3),
+		},
+		// error
+		{
+			`f := 2; 3.^f`,
+			object.NewTypeErr("literal call must be func"),
+		},
+		{
+			`3.^f`,
+			object.NewNameErr("name `f` is not defined"),
+		},
 		// if arity is more than 1, arr is extracted to each param
 		{
 			`f := {|i, j| i + j}; [1, 2].^f`,
@@ -5327,10 +5346,44 @@ func TestEvalVarCall(t *testing.T) {
 			`f := {|x, y| x + y}; [2, 3, "extra"].^f`,
 			object.NewPanInt(5),
 		},
-		// if descendant of func are passed, func proto is called
+		// if descendant of func is passed, its proto is called
 		{
 			`f := {|i| i * 2}.bear; 5.^f`,
 			object.NewPanInt(10),
+		},
+		// if descendant of built-in func is passed, its proto is called
+		{
+			`f := Int['-%].bear; 3.^f`,
+			object.NewPanInt(-3),
+		},
+		// if recv has call prop, use it
+		{
+			`f := {call: {|i| i + 4}}; 3.^f`,
+			object.NewPanInt(7),
+		},
+		{
+			`f := {call: Int['-%]}; 2.^f`,
+			object.NewPanInt(-2),
+		},
+		// if proto has call prop, use it
+		{
+			`f := {call: {|i| i + 6}}.bear; 3.^f`,
+			object.NewPanInt(9),
+		},
+		// if call is not func, raise error
+		{
+			`f := {call: 1}; 3.^f`,
+			object.NewTypeErr("prop 'call in varcall must be func"),
+		},
+		// if an error occurred while calling 'call, raise it
+		{
+			`f := {call: _}; 3.^f`,
+			object.BuiltInNotImplemented,
+		},
+		// _missing is not substitute of call
+		{
+			`f := {_missing: {|x| x * 2}}; 3.^f`,
+			object.NewTypeErr("literal call must be func"),
 		},
 	}
 
