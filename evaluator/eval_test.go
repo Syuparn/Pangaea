@@ -5264,6 +5264,11 @@ func TestEvalLiteralCall(t *testing.T) {
 			`[2, 3, "extra"].{|x, y| x + y}`,
 			object.NewPanInt(5),
 		},
+		// if error raises while kwarg evaluation, propagate it
+		{
+			`[1].{|x, y: 6 / 0| x + y}`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -5357,17 +5362,24 @@ func TestEvalVarCall(t *testing.T) {
 			object.NewPanInt(-3),
 		},
 		// if recv has call prop, use it
+		// NOTE: arguments [f, *args] are passed to 'call
+		// (self in 'call func is f itself)
 		{
-			`f := {call: {|i| i + 4}}; 3.^f`,
+			`f := {call: m{|i| i + 4}}; 3.^f`,
 			object.NewPanInt(7),
 		},
 		{
+			`f := {a: "A", call: m{|s| .a + s}}; "B".^f`,
+			object.NewPanStr("AB"),
+		},
+		// built-in cannot be used because signature is wrong (no addtional self)
+		{
 			`f := {call: Int['-%]}; 2.^f`,
-			object.NewPanInt(-2),
+			object.NewTypeErr("prop 'call in varcall must be func"),
 		},
 		// if proto has call prop, use it
 		{
-			`f := {call: {|i| i + 6}}.bear; 3.^f`,
+			`f := {call: m{|i| i + 6}}.bear; 3.^f`,
 			object.NewPanInt(9),
 		},
 		// if call is not func, raise error
@@ -5382,7 +5394,7 @@ func TestEvalVarCall(t *testing.T) {
 		},
 		// _missing is not substitute of call
 		{
-			`f := {_missing: {|x| x * 2}}; 3.^f`,
+			`f := {_missing: m{|propName, x| x * 2}}; 3.^f`,
 			object.NewTypeErr("literal call must be func"),
 		},
 	}

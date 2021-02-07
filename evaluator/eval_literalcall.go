@@ -71,7 +71,7 @@ func literalCallHandler(
 	}
 
 	if call, ok := findCall(args[0]); ok {
-		return handleCallable(env, recv, args, kwargs, call)
+		return handleCallable(env, recv, kwargs, args[0], call)
 	}
 
 	return object.NewTypeErr("literal call must be func")
@@ -80,23 +80,18 @@ func literalCallHandler(
 func handleCallable(
 	env *object.Env,
 	recv object.PanObject,
-	args []object.PanObject,
 	kwargs *object.PanObj,
+	callable object.PanObject,
 	call object.PanObject,
 ) object.PanObject {
 	f, ok := object.TraceProtoOfFunc(call)
 	if ok {
-		// unpack recv for params
-		argsToPass := append([]object.PanObject{f}, literalCallArgs(recv, f)...)
+		// callable is passed to call as self
+		argsToPass := append([]object.PanObject{f, callable}, literalCallArgs(recv, f)...)
 		return evalFuncCall(env, kwargs, argsToPass...)
 	}
 
-	builtIn, ok := object.TraceProtoOfBuiltInFunc(call)
-	if ok {
-		// TODO: extract elems if there are more than 1 params and recv is arr
-		return builtIn.Fn(env, kwargs, recv)
-	}
-
+	// NOTE: builtin func is not supported because it cannot recieve addtional self
 	// NOTE: 'call prop in call is not searched to prevent infinite loop
 	return object.NewTypeErr("prop 'call in varcall must be func")
 }
