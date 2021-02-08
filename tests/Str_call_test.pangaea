@@ -1,0 +1,3 @@
+assertEq('even?(2), true)
+assertEq("Ab".map('lc?), [false, true])
+assertRaises(ValueErr, "`hello, world!` is not a symbol") {"hello, world!"()}
