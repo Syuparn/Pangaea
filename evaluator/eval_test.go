@@ -807,6 +807,35 @@ func toPanRange(start, stop, step interface{}) *object.PanRange {
 	return &object.PanRange{Start: obj(start), Stop: obj(stop), Step: obj(step)}
 }
 
+func TestEvalRangeStart(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`(1:2:3).start`,
+			object.NewPanInt(1),
+		},
+		{
+			`(::'step).start`,
+			object.BuiltInNil,
+		},
+		{
+			`Range['start]()`,
+			object.NewTypeErr("Range#start requires at least 1 arg"),
+		},
+		{
+			`Range['start](1)`,
+			object.NewTypeErr("1 cannot be treated as range"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalArrLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
