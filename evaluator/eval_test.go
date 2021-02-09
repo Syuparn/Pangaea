@@ -865,6 +865,35 @@ func TestEvalRangeStop(t *testing.T) {
 	}
 }
 
+func TestEvalRangeStep(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`(1:2:3).step`,
+			object.NewPanInt(3),
+		},
+		{
+			`('start:'stop).step`,
+			object.BuiltInNil,
+		},
+		{
+			`Range['step]()`,
+			object.NewTypeErr("Range#step requires at least 1 arg"),
+		},
+		{
+			`Range['step](1)`,
+			object.NewTypeErr("1 cannot be treated as range"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalArrLiteral(t *testing.T) {
 	tests := []struct {
 		input    string

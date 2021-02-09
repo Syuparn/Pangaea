@@ -159,6 +159,22 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				return r.Start
 			},
 		),
+		"step": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Range#step requires at least 1 arg")
+				}
+				r, ok := object.TraceProtoOfRange(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as range", ReprStr(args[0])))
+				}
+
+				return r.Step
+			},
+		),
 		"stop": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
