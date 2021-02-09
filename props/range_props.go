@@ -1,6 +1,8 @@
 package props
 
 import (
+	"fmt"
+
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -139,6 +141,54 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 						Step:  args[3],
 					}
 				}
+			},
+		),
+		"start": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Range#start requires at least 1 arg")
+				}
+				r, ok := object.TraceProtoOfRange(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as range", ReprStr(args[0])))
+				}
+
+				return r.Start
+			},
+		),
+		"step": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Range#step requires at least 1 arg")
+				}
+				r, ok := object.TraceProtoOfRange(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as range", ReprStr(args[0])))
+				}
+
+				return r.Step
+			},
+		),
+		"stop": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Range#stop requires at least 1 arg")
+				}
+				r, ok := object.TraceProtoOfRange(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as range", ReprStr(args[0])))
+				}
+
+				return r.Stop
 			},
 		),
 	}

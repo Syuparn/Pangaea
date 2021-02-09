@@ -807,6 +807,93 @@ func toPanRange(start, stop, step interface{}) *object.PanRange {
 	return &object.PanRange{Start: obj(start), Stop: obj(stop), Step: obj(step)}
 }
 
+func TestEvalRangeStart(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`(1:2:3).start`,
+			object.NewPanInt(1),
+		},
+		{
+			`(::'step).start`,
+			object.BuiltInNil,
+		},
+		{
+			`Range['start]()`,
+			object.NewTypeErr("Range#start requires at least 1 arg"),
+		},
+		{
+			`Range['start](1)`,
+			object.NewTypeErr("1 cannot be treated as range"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalRangeStop(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`(1:2:3).stop`,
+			object.NewPanInt(2),
+		},
+		{
+			`('start::'step).stop`,
+			object.BuiltInNil,
+		},
+		{
+			`Range['stop]()`,
+			object.NewTypeErr("Range#stop requires at least 1 arg"),
+		},
+		{
+			`Range['stop](1)`,
+			object.NewTypeErr("1 cannot be treated as range"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalRangeStep(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`(1:2:3).step`,
+			object.NewPanInt(3),
+		},
+		{
+			`('start:'stop).step`,
+			object.BuiltInNil,
+		},
+		{
+			`Range['step]()`,
+			object.NewTypeErr("Range#step requires at least 1 arg"),
+		},
+		{
+			`Range['step](1)`,
+			object.NewTypeErr("1 cannot be treated as range"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalArrLiteral(t *testing.T) {
 	tests := []struct {
 		input    string
