@@ -51,7 +51,7 @@ func ErrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as err", args[0].Inspect()))
+						fmt.Sprintf("%s cannot be treated as err", object.ReprStr(args[0])))
 				}
 
 				return object.NewPanStr(err.PanErr.Msg)
@@ -128,5 +128,5 @@ func constructErr(
 		return newErr(convertedStr.Value)
 	}
 
-	return newErr(args[1].Inspect())
+	return newErr(object.ReprStr(args[1]))
 }

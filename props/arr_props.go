@@ -48,7 +48,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as arr", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as arr", object.ReprStr(args[0])))
 				}
 				other, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
@@ -59,7 +59,8 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					}
 
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as arr", args[1].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as arr",
+							object.ReprStr(args[1])))
 				}
 
 				// NOTE: no need to copy each elem because they are immutable
@@ -78,14 +79,15 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as arr", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as arr",
+							object.ReprStr(args[0])))
 				}
 				selfElems := self.Elems
 
 				other, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as int", object.ReprStr(args[0])))
 				}
 
 				// NOTE: no need to copy each elem because they are immutable
@@ -202,7 +204,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					if !ok {
 						return object.NewTypeErr(
 							fmt.Sprintf("%s.S returned non-str value %s",
-								elem.Inspect(), s.Inspect()))
+								object.ReprStr(elem), object.ReprStr(s)))
 					}
 					elemStrs = append(elemStrs, str.Value)
 				}
@@ -236,7 +238,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				arr, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as arr", args[1].Inspect()))
+						fmt.Sprintf("%s cannot be treated as arr", object.ReprStr(args[1])))
 				}
 
 				return arr

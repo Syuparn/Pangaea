@@ -13,8 +13,8 @@ import (
 	"strings"
 
 	"github.com/Syuparn/pangaea/evaluator"
+	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
-	"github.com/Syuparn/pangaea/props"
 )
 
 // StartREPL starts Pangaea interpreter.
@@ -43,7 +43,7 @@ func StartREPL(in io.Reader, out io.Writer) {
 
 		evaluated := evaluator.Eval(program, env)
 
-		io.WriteString(out, props.ReprStr(evaluated)+"\n")
+		io.WriteString(out, object.ReprStr(evaluated)+"\n")
 	}
 }
 

@@ -71,7 +71,7 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				n, ok := object.TraceProtoOfNil(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as nil", args[1].Inspect()))
+						fmt.Sprintf("%s cannot be treated as nil", object.ReprStr(args[1])))
 				}
 
 				return n

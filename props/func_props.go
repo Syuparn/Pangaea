@@ -73,7 +73,7 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				f, ok := object.TraceProtoOfFunc(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as func", args[1].Inspect()))
+						fmt.Sprintf("%s cannot be treated as func", object.ReprStr(args[1])))
 				}
 
 				return f
@@ -84,7 +84,7 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 
 func compFuncs(f1 *object.PanFunc, f2 *object.PanFunc) object.PanObject {
 	// if src is equivalent, return true
-	if f1.Inspect() == f2.Inspect() {
+	if object.ReprStr(f1) == object.ReprStr(f2) {
 		return object.BuiltInTrue
 	}
 	return object.BuiltInFalse
