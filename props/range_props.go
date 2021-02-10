@@ -153,7 +153,8 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				r, ok := object.TraceProtoOfRange(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as range", ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as range",
+							object.ReprStr(args[0])))
 				}
 
 				return r.Start
@@ -169,7 +170,8 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				r, ok := object.TraceProtoOfRange(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as range", ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as range",
+							object.ReprStr(args[0])))
 				}
 
 				return r.Step
@@ -185,7 +187,8 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				r, ok := object.TraceProtoOfRange(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as range", ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as range",
+							object.ReprStr(args[0])))
 				}
 
 				return r.Stop

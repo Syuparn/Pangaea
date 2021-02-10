@@ -228,7 +228,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Obj#repr requires at least 1 arg")
 				}
 
-				return object.NewPanStr(ReprStr(args[0]))
+				return object.NewPanStr(object.ReprStr(args[0]))
 			},
 		),
 		"S": f(
@@ -338,34 +338,4 @@ func objIter(o *object.PanObj) object.BuiltInFunc {
 		yieldIdx++
 		return yielded
 	}
-}
-
-// ReprStr generate prittified string description of obj.
-func ReprStr(obj object.PanObject) string {
-	// if self has '_name and it is str, use it
-	// NOTE: only refer _name in self (NOT PROTO)!,
-	// otherwise all children are shown as _name
-	if name, ok := extractName(obj); ok {
-		return name.Value
-	}
-
-	return obj.Inspect()
-}
-
-func extractName(obj object.PanObject) (*object.PanStr, bool) {
-	o, ok := obj.(*object.PanObj)
-	if !ok {
-		return nil, false
-	}
-	pair, ok := (*o.Pairs)[object.GetSymHash("_name")]
-	if !ok {
-		return nil, false
-	}
-
-	name, ok := object.TraceProtoOfStr(pair.Value)
-	if !ok {
-		return nil, false
-	}
-
-	return name, true
 }

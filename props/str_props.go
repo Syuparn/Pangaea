@@ -419,7 +419,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as str", ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as str",
+							object.ReprStr(args[0])))
 				}
 
 				if self.IsSym {
