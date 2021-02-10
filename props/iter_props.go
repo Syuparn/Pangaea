@@ -56,7 +56,7 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				}
 
 				return object.NewTypeErr(
-					fmt.Sprintf("%s cannot be treated as iter", args[0].Inspect()))
+					fmt.Sprintf("%s cannot be treated as iter", object.ReprStr(args[0])))
 			},
 		),
 		"_name": object.NewPanStr("Iter"),
@@ -78,7 +78,7 @@ func IterProps(propContainer map[string]object.PanObject) map[string]object.PanO
 func copiedIterFromIter(self *object.PanFunc) object.PanObject {
 	if self.FuncKind != object.IterFunc {
 		return object.NewTypeErr(
-			fmt.Sprintf("%s cannot be treated as iter", self.Inspect()))
+			fmt.Sprintf("%s cannot be treated as iter", object.ReprStr(self)))
 	}
 
 	return &object.PanFunc{

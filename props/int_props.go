@@ -325,7 +325,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return object.NewTypeErr(
-					fmt.Sprintf("%s cannot be treated as int", args[1].Inspect()))
+					fmt.Sprintf("%s cannot be treated as int", object.ReprStr(args[1])))
 			},
 		),
 	}
@@ -343,7 +343,7 @@ func checkIntInfixArgs(
 	self, ok := object.TraceProtoOfInt(args[0])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as int", args[0].Inspect()))
+			fmt.Sprintf("`%s` cannot be treated as int", object.ReprStr(args[0])))
 	}
 	other, ok := object.TraceProtoOfInt(args[1])
 	if !ok {
@@ -354,7 +354,7 @@ func checkIntInfixArgs(
 		}
 
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as int", args[1].Inspect()))
+			fmt.Sprintf("`%s` cannot be treated as int", object.ReprStr(args[1])))
 	}
 
 	return self, other, nil

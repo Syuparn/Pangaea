@@ -23,13 +23,13 @@ func EitherErrProps(propContainer map[string]object.PanObject) map[string]object
 				errObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherErr", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as EitherErr", object.ReprStr(args[0])))
 				}
 
 				err, ok := (*errObj.Pairs)[object.GetSymHash("_error")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherErr", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as EitherErr", object.ReprStr(args[0])))
 				}
 
 				return &object.PanArr{Elems: []object.PanObject{
@@ -49,13 +49,13 @@ func EitherErrProps(propContainer map[string]object.PanObject) map[string]object
 				errObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherErr", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as EitherErr", object.ReprStr(args[0])))
 				}
 
 				err, ok := (*errObj.Pairs)[object.GetSymHash("_error")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherErr", args[0].Inspect()))
+						fmt.Sprintf("`%s` cannot be treated as EitherErr", object.ReprStr(args[0])))
 				}
 
 				return err.Value

@@ -32,7 +32,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 				}
 
 				return object.NewAssertionErr(fmt.Sprintf("%s is not truthy",
-					args[0].Inspect()))
+					object.ReprStr(args[0])))
 			},
 		),
 		"assertEq": f(
@@ -54,7 +54,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 				}
 
 				return object.NewAssertionErr(fmt.Sprintf("%s != %s",
-					args[0].Inspect(), args[1].Inspect()))
+					object.ReprStr(args[0]), object.ReprStr(args[1])))
 			},
 		),
 		"assertRaises": f(
