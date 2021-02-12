@@ -55,11 +55,16 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 				if len(args) < 1 {
 					return object.NewTypeErr("Func#B requires at least 1 arg")
 				}
-				_, ok := object.TraceProtoOfFunc(args[0])
-				if !ok {
-					return object.NewTypeErr(`\1 must be func`)
+
+				if _, ok := object.TraceProtoOfFunc(args[0]); ok {
+					return object.BuiltInTrue
 				}
-				return object.BuiltInTrue
+				if _, ok := object.TraceProtoOfBuiltInFunc(args[0]); ok {
+					return object.BuiltInTrue
+				}
+
+				return object.NewTypeErr(
+					fmt.Sprintf("%s cannot be treated as func", object.ReprStr(args[0])))
 			},
 		),
 		"call": propContainer["Func_call"],
