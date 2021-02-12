@@ -1,6 +1,8 @@
 {
   # at returns elements of given indices.
   at: m{|i| ._iter.at(i)},
-  # inc? returns whether self is incresing range.
+  # dec? returns whether self is a decresing range.
+  dec?: m{0 > 1~.{self.step}},
+  # inc? returns whether self is an incresing range.
   inc?: m{0 < 1~.{self.step}},
 }
