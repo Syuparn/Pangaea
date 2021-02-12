@@ -1,0 +1,9 @@
+assertEq((2:5)[1], 3)
+assertEq((2:10)[-1], 9)
+assertEq((2:10)[10], nil)
+# range index
+assertEq((0:10:2)[1:3], [2, 4])
+assertEq((0:10:2)[4:1:-1], [8, 6, 4])
+assertEq((0:10:2)[0:0], [])
+assertEq((0:10:2)[4:], [8])
+assertEq((0:10:2)[:2], [0, 2])
