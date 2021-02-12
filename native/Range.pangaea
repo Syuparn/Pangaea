@@ -1,0 +1,4 @@
+{
+  # at returns elements of given indices.
+  at: m{|i| ._iter.at(i)},
+}
