@@ -3,4 +3,4 @@ assertEq((1:10:2).dec?, false)
 assertEq((10:1:-1).dec?, true)
 assertEq((10:1:0).dec?, false)
 
-assertRaises(TypeErr, "`"+`"a"`+"` cannot be treated as int") {(1:10:'a).dec?}
+assertRaises(TypeErr, `"a" cannot be treated as int`) {(1:10:'a).dec?}

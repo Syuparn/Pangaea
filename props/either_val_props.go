@@ -23,13 +23,13 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				valObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
 				}
 
 				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
 				}
 
 				return &object.PanArr{Elems: []object.PanObject{
@@ -60,13 +60,13 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				valObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
 				}
 
 				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
 				}
 
 				f := args[1]
@@ -96,13 +96,13 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				valObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
 				}
 
 				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
 				}
 
 				return val.Value
@@ -119,13 +119,13 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				valObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
 				}
 
 				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
 				}
 
 				return val.Value

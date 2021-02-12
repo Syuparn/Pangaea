@@ -102,19 +102,19 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as str", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[0])))
 				}
 
 				nInt, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as int", object.ReprStr(args[1])))
+						fmt.Sprintf("%s cannot be treated as int", object.ReprStr(args[1])))
 				}
 				n := nInt.Value
 
 				if n < 0 {
 					return object.NewValueErr(
-						fmt.Sprintf("`%s` is not positive", object.ReprStr(args[1])))
+						fmt.Sprintf("%s is not positive", object.ReprStr(args[1])))
 				}
 
 				return object.NewPanStr(strings.Repeat(self.Value, int(n)))
@@ -229,13 +229,13 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as str", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[0])))
 				}
 
 				f, err := strconv.ParseFloat(self.Value, 64)
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("`%s` cannot be converted into float", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be converted into float", object.ReprStr(args[0])))
 				}
 				return &object.PanFloat{Value: f}
 			},
@@ -250,13 +250,13 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as str", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[0])))
 				}
 
 				i, err := strconv.ParseInt(self.Value, 10, 64)
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("`%s` cannot be converted into int", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be converted into int", object.ReprStr(args[0])))
 				}
 				return object.NewPanInt(i)
 			},
@@ -458,7 +458,7 @@ func checkStrInfixArgs(
 	self, ok := object.TraceProtoOfStr(args[0])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as str", object.ReprStr(args[0])))
+			fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[0])))
 	}
 	other, ok := object.TraceProtoOfStr(args[1])
 	if !ok {
@@ -469,7 +469,7 @@ func checkStrInfixArgs(
 		}
 
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as str", object.ReprStr(args[1])))
+			fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[1])))
 	}
 
 	return self, other, nil

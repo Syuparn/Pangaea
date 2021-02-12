@@ -1954,7 +1954,7 @@ func TestEvalBuiltInFuncInvalidArgErr(t *testing.T) {
 	}{
 		{
 			`{call: {|x| x}['call]}.call(1)`,
-			object.NewTypeErr("`{\"call\": {|| [builtin]}}` is not callable."),
+			object.NewTypeErr("{\"call\": {|| [builtin]}} is not callable."),
 		},
 		{
 			`f := {||}['at]; f()`,
@@ -3112,7 +3112,7 @@ func TestEvalListChainPropCall(t *testing.T) {
 		// if any element raises error, propagate it
 		{
 			`[1, 2, "str", 4]@+(1)`,
-			object.NewTypeErr("`1` cannot be treated as str"),
+			object.NewTypeErr("1 cannot be treated as str"),
 		},
 	}
 
@@ -3350,7 +3350,7 @@ func TestEvalReduceChainPropCallRecvIsAcc(t *testing.T) {
 		// "a"['+] is called
 		{
 			`[1]$("a")+`,
-			object.NewTypeErr("`1` cannot be treated as str"),
+			object.NewTypeErr("1 cannot be treated as str"),
 		},
 	}
 
@@ -4389,11 +4389,11 @@ func TestEvalIntifyErr(t *testing.T) {
 		},
 		{
 			`"1"['I](1)`,
-			object.NewTypeErr("`1` cannot be treated as str"),
+			object.NewTypeErr("1 cannot be treated as str"),
 		},
 		{
 			`"-5a".I`,
-			object.NewValueErr("`\"-5a\"` cannot be converted into int"),
+			object.NewValueErr("\"-5a\" cannot be converted into int"),
 		},
 	}
 
@@ -4446,7 +4446,7 @@ func TestEvalFloatifyErr(t *testing.T) {
 		},
 		{
 			`1['F]("a")`,
-			object.NewTypeErr("`\"a\"` cannot be treated as num"),
+			object.NewTypeErr("\"a\" cannot be treated as num"),
 		},
 		{
 			`Str['F]()`,
@@ -4454,11 +4454,11 @@ func TestEvalFloatifyErr(t *testing.T) {
 		},
 		{
 			`"1"['F](2)`,
-			object.NewTypeErr("`2` cannot be treated as str"),
+			object.NewTypeErr("2 cannot be treated as str"),
 		},
 		{
 			`"-5.a".F`,
-			object.NewValueErr("`\"-5.a\"` cannot be converted into float"),
+			object.NewValueErr("\"-5.a\" cannot be converted into float"),
 		},
 	}
 
@@ -6573,11 +6573,11 @@ func TestEvalInfixIntAddErr(t *testing.T) {
 	}{
 		{
 			`1 + []`,
-			object.NewTypeErr("`[]` cannot be treated as int"),
+			object.NewTypeErr("[] cannot be treated as int"),
 		},
 		{
 			`1['+]({}, 2)`,
-			object.NewTypeErr("`{}` cannot be treated as int"),
+			object.NewTypeErr("{} cannot be treated as int"),
 		},
 		{
 			`1.+`,
@@ -6629,11 +6629,11 @@ func TestEvalInfixIntSubErr(t *testing.T) {
 	}{
 		{
 			`1 - []`,
-			object.NewTypeErr("`[]` cannot be treated as int"),
+			object.NewTypeErr("[] cannot be treated as int"),
 		},
 		{
 			`1['-]({}, 2)`,
-			object.NewTypeErr("`{}` cannot be treated as int"),
+			object.NewTypeErr("{} cannot be treated as int"),
 		},
 		{
 			`1.-`,
@@ -6681,11 +6681,11 @@ func TestEvalInfixIntMulErr(t *testing.T) {
 	}{
 		{
 			`1 * []`,
-			object.NewTypeErr("`[]` cannot be treated as int"),
+			object.NewTypeErr("[] cannot be treated as int"),
 		},
 		{
 			`1['*]({}, 2)`,
-			object.NewTypeErr("`{}` cannot be treated as int"),
+			object.NewTypeErr("{} cannot be treated as int"),
 		},
 		{
 			`1.*`,
@@ -6737,11 +6737,11 @@ func TestEvalInfixIntDivErr(t *testing.T) {
 	}{
 		{
 			`1 / []`,
-			object.NewTypeErr("`[]` cannot be treated as int"),
+			object.NewTypeErr("[] cannot be treated as int"),
 		},
 		{
 			`1['/]({}, 2)`,
-			object.NewTypeErr("`{}` cannot be treated as int"),
+			object.NewTypeErr("{} cannot be treated as int"),
 		},
 		{
 			`1./`,
@@ -6793,11 +6793,11 @@ func TestEvalInfixIntFloorDivErr(t *testing.T) {
 	}{
 		{
 			`1 // []`,
-			object.NewTypeErr("`[]` cannot be treated as int"),
+			object.NewTypeErr("[] cannot be treated as int"),
 		},
 		{
 			`1['//]({}, 2)`,
-			object.NewTypeErr("`{}` cannot be treated as int"),
+			object.NewTypeErr("{} cannot be treated as int"),
 		},
 		{
 			`1.//`,
@@ -6849,11 +6849,11 @@ func TestEvalInfixStrAddErr(t *testing.T) {
 	}{
 		{
 			`"a" + []`,
-			object.NewTypeErr("`[]` cannot be treated as str"),
+			object.NewTypeErr("[] cannot be treated as str"),
 		},
 		{
 			`""['+]({}, "b")`,
-			object.NewTypeErr("`{}` cannot be treated as str"),
+			object.NewTypeErr("{} cannot be treated as str"),
 		},
 		{
 			`"a".+`,
@@ -6891,15 +6891,15 @@ func TestEvalInfixStrMulErr(t *testing.T) {
 	}{
 		{
 			`"a" * -1`,
-			object.NewValueErr("`-1` is not positive"),
+			object.NewValueErr("-1 is not positive"),
 		},
 		{
 			`"w" * []`,
-			object.NewTypeErr("`[]` cannot be treated as int"),
+			object.NewTypeErr("[] cannot be treated as int"),
 		},
 		{
 			`'x['*]({}, 2)`,
-			object.NewTypeErr("`{}` cannot be treated as str"),
+			object.NewTypeErr("{} cannot be treated as str"),
 		},
 		{
 			`?y.*`,
@@ -6985,11 +6985,11 @@ func TestEvalInfixStrDivErr(t *testing.T) {
 	}{
 		{
 			`"w" / []`,
-			object.NewTypeErr("`[]` cannot be treated as str"),
+			object.NewTypeErr("[] cannot be treated as str"),
 		},
 		{
 			`'x['/]({}, "a")`,
-			object.NewTypeErr("`{}` cannot be treated as str"),
+			object.NewTypeErr("{} cannot be treated as str"),
 		},
 		{
 			`?y./`,
@@ -7041,11 +7041,11 @@ func TestEvalInfixFloatAddErr(t *testing.T) {
 	}{
 		{
 			`1.0 + []`,
-			object.NewTypeErr("`[]` cannot be treated as float"),
+			object.NewTypeErr("[] cannot be treated as float"),
 		},
 		{
 			`0.0['+]({}, 1.0)`,
-			object.NewTypeErr("`{}` cannot be treated as float"),
+			object.NewTypeErr("{} cannot be treated as float"),
 		},
 		{
 			`1.0.+`,
@@ -7097,11 +7097,11 @@ func TestEvalInfixFloatSubErr(t *testing.T) {
 	}{
 		{
 			`1.0 - []`,
-			object.NewTypeErr("`[]` cannot be treated as float"),
+			object.NewTypeErr("[] cannot be treated as float"),
 		},
 		{
 			`0.0['-]({}, 1.0)`,
-			object.NewTypeErr("`{}` cannot be treated as float"),
+			object.NewTypeErr("{} cannot be treated as float"),
 		},
 		{
 			`1.0.-`,
@@ -7157,11 +7157,11 @@ func TestEvalInfixArrAddErr(t *testing.T) {
 	}{
 		{
 			`[] + 1`,
-			object.NewTypeErr("`1` cannot be treated as arr"),
+			object.NewTypeErr("1 cannot be treated as arr"),
 		},
 		{
 			`[]['+]({}, [1])`,
-			object.NewTypeErr("`{}` cannot be treated as arr"),
+			object.NewTypeErr("{} cannot be treated as arr"),
 		},
 		{
 			`[].+`,
@@ -7261,11 +7261,11 @@ func TestEvalInfixIntModErr(t *testing.T) {
 		},
 		{
 			`1 % []`,
-			object.NewTypeErr("`[]` cannot be treated as int"),
+			object.NewTypeErr("[] cannot be treated as int"),
 		},
 		{
 			`1['%]({}, 2)`,
-			object.NewTypeErr("`{}` cannot be treated as int"),
+			object.NewTypeErr("{} cannot be treated as int"),
 		},
 		{
 			`1.%`,
@@ -8223,7 +8223,7 @@ func TestEvalFmap(t *testing.T) {
 		},
 		{
 			`1.try['fmap]({}) {\ + 1}`,
-			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+			object.NewTypeErr("{} cannot be treated as EitherVal"),
 		},
 		// Either['fmap] is abstract method
 		{
@@ -8277,11 +8277,11 @@ func TestEvalEitherA(t *testing.T) {
 		},
 		{
 			`1.try.fmap {\ + 2}['A]([])`,
-			object.NewTypeErr("`[]` cannot be treated as EitherVal"),
+			object.NewTypeErr("[] cannot be treated as EitherVal"),
 		},
 		{
 			`1.try.fmap {\ + 2}['A]({})`,
-			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+			object.NewTypeErr("{} cannot be treated as EitherVal"),
 		},
 		{
 			`1.try.fmap {\ / 0}['A]()`,
@@ -8289,11 +8289,11 @@ func TestEvalEitherA(t *testing.T) {
 		},
 		{
 			`1.try.fmap {\ / 0}['A]([])`,
-			object.NewTypeErr("`[]` cannot be treated as EitherErr"),
+			object.NewTypeErr("[] cannot be treated as EitherErr"),
 		},
 		{
 			`1.try.fmap {\ / 0}['A]({})`,
-			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
+			object.NewTypeErr("{} cannot be treated as EitherErr"),
 		},
 		// Either['A] is abstract method
 		{
@@ -8334,11 +8334,11 @@ func TestEvalEitherVal(t *testing.T) {
 		},
 		{
 			`1.try.fmap {\ + 2}['val]([])`,
-			object.NewTypeErr("`[]` cannot be treated as EitherVal"),
+			object.NewTypeErr("[] cannot be treated as EitherVal"),
 		},
 		{
 			`1.try.fmap {\ + 2}['val]({})`,
-			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+			object.NewTypeErr("{} cannot be treated as EitherVal"),
 		},
 		// Either['val] is abstract method
 		{
@@ -8379,11 +8379,11 @@ func TestEvalEitherErr(t *testing.T) {
 		},
 		{
 			`1.try.fmap {\ / 0}['err]([])`,
-			object.NewTypeErr("`[]` cannot be treated as EitherErr"),
+			object.NewTypeErr("[] cannot be treated as EitherErr"),
 		},
 		{
 			`1.try.fmap {\ / 0}['err]({})`,
-			object.NewTypeErr("`{}` cannot be treated as EitherErr"),
+			object.NewTypeErr("{} cannot be treated as EitherErr"),
 		},
 		// Either['err] is abstract method
 		{
@@ -8424,11 +8424,11 @@ func TestEvalEitherOr(t *testing.T) {
 		},
 		{
 			`1.try.fmap {\ + 1}['or]([], "")`,
-			object.NewTypeErr("`[]` cannot be treated as EitherVal"),
+			object.NewTypeErr("[] cannot be treated as EitherVal"),
 		},
 		{
 			`1.try.fmap {\ + 1}['or]({}, "")`,
-			object.NewTypeErr("`{}` cannot be treated as EitherVal"),
+			object.NewTypeErr("{} cannot be treated as EitherVal"),
 		},
 		// Either['or] is abstract method
 		{

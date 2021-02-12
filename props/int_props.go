@@ -343,7 +343,7 @@ func checkIntInfixArgs(
 	self, ok := object.TraceProtoOfInt(args[0])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as int", object.ReprStr(args[0])))
+			fmt.Sprintf("%s cannot be treated as int", object.ReprStr(args[0])))
 	}
 	other, ok := object.TraceProtoOfInt(args[1])
 	if !ok {
@@ -354,7 +354,7 @@ func checkIntInfixArgs(
 		}
 
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("`%s` cannot be treated as int", object.ReprStr(args[1])))
+			fmt.Sprintf("%s cannot be treated as int", object.ReprStr(args[1])))
 	}
 
 	return self, other, nil

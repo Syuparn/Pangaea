@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"fmt"
+
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -26,7 +27,7 @@ func evalFuncCall(
 		return f.Fn(env, kwargs, args...)
 	default:
 		err := object.NewTypeErr(
-			fmt.Sprintf("`%s` is not callable.", self.Inspect()))
+			fmt.Sprintf("%s is not callable.", self.Inspect()))
 		return err
 	}
 }

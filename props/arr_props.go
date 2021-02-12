@@ -48,7 +48,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as arr", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as arr", object.ReprStr(args[0])))
 				}
 				other, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
@@ -59,7 +59,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					}
 
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as arr",
+						fmt.Sprintf("%s cannot be treated as arr",
 							object.ReprStr(args[1])))
 				}
 
@@ -79,7 +79,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as arr",
+						fmt.Sprintf("%s cannot be treated as arr",
 							object.ReprStr(args[0])))
 				}
 				selfElems := self.Elems
@@ -87,7 +87,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				other, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("`%s` cannot be treated as int", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as int", object.ReprStr(args[0])))
 				}
 
 				// NOTE: no need to copy each elem because they are immutable
