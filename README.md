@@ -5,15 +5,24 @@
 
 A programming language for one-liner method chain lovers! (Under construction...)
 
-# Run
+# How to run
+
+## Download Binary
+
+See [Releases](https://github.com/Syuparn/Pangaea/releases).
+
+## Or custom install
 
 ```bash:
-# 1. Build (dependent tools are installed automatically)
+$ git clone https://github.com/Syuparn/Pangaea.git
+$ cd ./Pangaea
 $ go generate
 $ go build
+```
 
-# 2. Run
+## Run
 
+```bash
 # Run REPL
 # (Linux, Mac)
 $ ./pangaea
@@ -26,7 +35,7 @@ $ ./pangaea ./example/hello.pangaea
 # (Windows)
 $ ./pangaea.exe ./example/hello.pangaea
 
-# 4. Enjoy!
+# Enjoy!
 ```
 
 # Requirements
@@ -34,6 +43,8 @@ $ ./pangaea.exe ./example/hello.pangaea
 - Golang (1.15+)
 
 ## Packages
+
+They are installed automatically.
 
 - [goyacc](https://godoc.org/golang.org/x/tools/cmd/goyacc)
 - [simplexer](github.com/macrat/simplexer)
