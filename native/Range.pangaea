@@ -1,4 +1,6 @@
 {
   # at returns elements of given indices.
   at: m{|i| ._iter.at(i)},
+  # inc? returns whether self is incresing range.
+  inc?: m{0 < 1~.{self.step}},
 }
