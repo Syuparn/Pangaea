@@ -1,7 +1,7 @@
 package runscript
 
 // Version represents Pangaea version.
-const Version = "v0.2.0"
+const Version = "v0.2.1"
 
 const (
 	// ReadStdinLinesTemplate is a template src for one-liner option
