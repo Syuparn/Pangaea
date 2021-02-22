@@ -1853,11 +1853,10 @@ func toPanFunc(
 		body: &[]ast.Stmt{},
 	}
 
-	return &object.PanFunc{
-		FuncWrapper: funcWrapper,
-		FuncKind:    object.FuncFunc,
-		Env:         object.NewEnclosedEnv(env),
-	}
+	return object.NewPanFunc(
+		funcWrapper,
+		object.NewEnclosedEnv(env),
+	)
 }
 
 func TestEvalFuncCall(t *testing.T) {
@@ -2065,11 +2064,7 @@ func toPanIter(
 		body: &[]ast.Stmt{},
 	}
 
-	return &object.PanFunc{
-		FuncWrapper: funcWrapper,
-		FuncKind:    object.IterFunc,
-		Env:         env,
-	}
+	return object.NewPanIter(funcWrapper, env)
 }
 
 func TestEvalIterNew(t *testing.T) {

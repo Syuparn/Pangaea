@@ -23,9 +23,6 @@ func iterNew(
 	// locate env in same closure as self.Env
 	newEnv := object.NewEnclosedEnv(self.Env.Outer())
 	assignArgsToEnv(newEnv, self.Args().Elems, self.Kwargs(), args[1:], kwargs)
-	return &object.PanFunc{
-		FuncWrapper: self.FuncWrapper,
-		FuncKind:    object.IterFunc,
-		Env:         newEnv,
-	}
+
+	return object.NewPanIter(self.FuncWrapper, newEnv)
 }
