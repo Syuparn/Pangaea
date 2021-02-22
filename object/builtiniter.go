@@ -24,3 +24,8 @@ func (b *PanBuiltInIter) Inspect() string {
 func (b *PanBuiltInIter) Proto() PanObject {
 	return BuiltInIterObj
 }
+
+// NewPanBuiltInIter returns new BuiltInIter object.
+func NewPanBuiltInIter(f BuiltInFunc, env *Env) *PanBuiltInIter {
+	return &PanBuiltInIter{f, env}
+}
