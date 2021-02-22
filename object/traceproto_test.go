@@ -231,7 +231,7 @@ func TestTraceProtoOfBuiltInIterFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfFloat(t *testing.T) {
-	proto := &PanFloat{Value: 0.0}
+	proto := NewPanFloat(0.0)
 
 	tests := []struct {
 		obj      PanObject
