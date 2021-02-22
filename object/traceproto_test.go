@@ -286,7 +286,7 @@ func TestTraceProtoOfFloatFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfFunc(t *testing.T) {
-	proto := &PanFunc{}
+	proto := NewPanFunc(newMockFuncWrapper(), NewEnv())
 
 	tests := []struct {
 		obj      PanObject
