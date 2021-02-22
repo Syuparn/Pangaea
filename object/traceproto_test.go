@@ -728,7 +728,7 @@ func TestTraceProtoOfRangeFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfStr(t *testing.T) {
-	proto := &PanStr{Value: ""}
+	proto := NewPanStr("")
 
 	tests := []struct {
 		obj      PanObject
