@@ -17,7 +17,7 @@ func TestRangeInspect(t *testing.T) {
 		expected string
 	}{
 		{
-			PanRange{&PanNil{}, &PanNil{}, &PanNil{}},
+			PanRange{NewPanNil(), NewPanNil(), NewPanNil()},
 			"(nil:nil:nil)",
 		},
 		{
@@ -25,7 +25,7 @@ func TestRangeInspect(t *testing.T) {
 			"(1:2:3)",
 		},
 		{
-			PanRange{&PanNil{}, NewPanInt(20), NewPanInt(-1)},
+			PanRange{NewPanNil(), NewPanInt(20), NewPanInt(-1)},
 			"(nil:20:-1)",
 		},
 		{

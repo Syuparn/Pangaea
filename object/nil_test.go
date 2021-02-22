@@ -5,7 +5,7 @@ import (
 )
 
 func TestNilType(t *testing.T) {
-	nilObj := PanNil{}
+	nilObj := NewPanNil()
 	if nilObj.Type() != NilType {
 		t.Fatalf("wrong type: expected=%s, got=%s", NilType, nilObj.Type())
 	}
@@ -13,10 +13,10 @@ func TestNilType(t *testing.T) {
 
 func TestNilInspect(t *testing.T) {
 	tests := []struct {
-		obj      PanNil
+		obj      *PanNil
 		expected string
 	}{
-		{PanNil{}, "nil"},
+		{NewPanNil(), "nil"},
 	}
 
 	for _, tt := range tests {
@@ -28,7 +28,7 @@ func TestNilInspect(t *testing.T) {
 }
 
 func TestNilProto(t *testing.T) {
-	n := PanNil{}
+	n := NewPanNil()
 	if n.Proto() != BuiltInNilObj {
 		t.Fatalf("Proto is not BuiltInNilObj. got=%T (%+v)",
 			n.Proto(), n.Proto())
@@ -37,10 +37,10 @@ func TestNilProto(t *testing.T) {
 
 func TestNilHash(t *testing.T) {
 	tests := []struct {
-		obj      PanNil
+		obj      *PanNil
 		expected int
 	}{
-		{PanNil{}, 0},
+		{NewPanNil(), 0},
 	}
 
 	for _, tt := range tests {
@@ -59,11 +59,11 @@ func TestNilHash(t *testing.T) {
 
 // checked by compiler (this function works nothing)
 func testNilIsPanObject() {
-	var _ PanObject = &PanNil{}
+	var _ PanObject = NewPanNil()
 }
 
 func testNilIsScalarObject() {
-	var _ PanScalar = &PanNil{}
+	var _ PanScalar = NewPanNil()
 }
 
 func TestNewPanNil(t *testing.T) {
