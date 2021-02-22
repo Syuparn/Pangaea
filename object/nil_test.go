@@ -65,3 +65,11 @@ func testNilIsPanObject() {
 func testNilIsScalarObject() {
 	var _ PanScalar = &PanNil{}
 }
+
+func TestNewPanNil(t *testing.T) {
+	actual := NewPanNil()
+	if actual != BuiltInNil {
+		// NOTE: actual is *PanNil but not (golang) nil!
+		t.Errorf("actual must be BuiltInNil. got %#v", actual)
+	}
+}
