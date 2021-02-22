@@ -226,3 +226,17 @@ func TestNewPanMapWithNonScalarKeys(t *testing.T) {
 		}
 	}
 }
+
+func TestNewEmptyPanMap(t *testing.T) {
+	actual := NewEmptyPanMap()
+
+	if len(*actual.Pairs) != 0 {
+		t.Fatalf("wrong pair length. expected=%d, got=%d",
+			0, len(*actual.Pairs))
+	}
+
+	if len(*actual.NonHashablePairs) != 0 {
+		t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
+			0, len(*actual.NonHashablePairs))
+	}
+}

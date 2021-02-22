@@ -69,3 +69,11 @@ func NewPanMap(pairs ...Pair) *PanMap {
 
 	return &PanMap{&pairMap, &nonHashablePairs}
 }
+
+// NewEmptyPanMap returns new empty map object.
+func NewEmptyPanMap() *PanMap {
+	pairMap := map[HashKey]Pair{}
+	nonHashablePairs := []Pair{}
+
+	return &PanMap{&pairMap, &nonHashablePairs}
+}
