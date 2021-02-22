@@ -270,7 +270,7 @@ func TestEvalFloatLiteral(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
-		expected := &object.PanFloat{Value: tt.expected}
+		expected := object.NewPanFloat(tt.expected)
 		testPanFloat(t, actual, expected)
 	}
 }
@@ -4411,21 +4411,21 @@ func TestEvalFloatify(t *testing.T) {
 		// int
 		{
 			`1.F`,
-			&object.PanFloat{Value: 1.0},
+			object.NewPanFloat(1.0),
 		},
 		// float
 		{
 			`4.0.F`,
-			&object.PanFloat{Value: 4.0},
+			object.NewPanFloat(4.0),
 		},
 		// str
 		{
 			`"1.0".F`,
-			&object.PanFloat{Value: 1.0},
+			object.NewPanFloat(1.0),
 		},
 		{
 			`"-5.25".F`,
-			&object.PanFloat{Value: -5.25},
+			object.NewPanFloat(-5.25),
 		},
 	}
 
@@ -6706,21 +6706,21 @@ func TestEvalInfixIntDiv(t *testing.T) {
 	}{
 		{
 			`10 / 5`,
-			&object.PanFloat{Value: 2.0},
+			object.NewPanFloat(2.0),
 		},
 		{
 			`-5 / 4`,
-			&object.PanFloat{Value: -1.25},
+			object.NewPanFloat(-1.25),
 		},
 		// decendant of int can be devided
 		{
 			`3 / true`,
-			&object.PanFloat{Value: 3.0},
+			object.NewPanFloat(3.0),
 		},
 		// nil is treated as 1
 		{
 			`5 / nil`,
-			&object.PanFloat{Value: 5.0},
+			object.NewPanFloat(5.0),
 		},
 	}
 
@@ -7010,21 +7010,21 @@ func TestEvalInfixFloatAdd(t *testing.T) {
 	}{
 		{
 			`1.0 + 1.0`,
-			&object.PanFloat{Value: 2.0},
+			object.NewPanFloat(2.0),
 		},
 		{
 			`-5.0 + 10.0`,
-			&object.PanFloat{Value: 5.0},
+			object.NewPanFloat(5.0),
 		},
 		// decendant of int can be added
 		{
 			`3.0 + 1.0.bear`,
-			&object.PanFloat{Value: 4.0},
+			object.NewPanFloat(4.0),
 		},
 		// nil is treated as 0.0
 		{
 			`3.0 + nil`,
-			&object.PanFloat{Value: 3.0},
+			object.NewPanFloat(3.0),
 		},
 	}
 
@@ -7066,21 +7066,21 @@ func TestEvalInfixFloatSub(t *testing.T) {
 	}{
 		{
 			`3.0 - 1.0`,
-			&object.PanFloat{Value: 2.0},
+			object.NewPanFloat(2.0),
 		},
 		{
 			`5.0 - -10.0`,
-			&object.PanFloat{Value: 15.0},
+			object.NewPanFloat(15.0),
 		},
 		// decendant of int can be added
 		{
 			`4.0 - 1.0.bear`,
-			&object.PanFloat{Value: 3.0},
+			object.NewPanFloat(3.0),
 		},
 		// nil is treated as 0.0
 		{
 			`3.0 - nil`,
-			&object.PanFloat{Value: 3.0},
+			object.NewPanFloat(3.0),
 		},
 	}
 
@@ -7191,7 +7191,7 @@ func TestEvalInfixNilAdd(t *testing.T) {
 		},
 		{
 			`nil + 1.0`,
-			&object.PanFloat{Value: 1.0},
+			object.NewPanFloat(1.0),
 		},
 		{
 			`nil + [5]`,
@@ -7803,15 +7803,15 @@ func TestEvalFloatConstructor(t *testing.T) {
 	}{
 		{
 			`Float.new(1.5)`,
-			&object.PanFloat{Value: 1.5},
+			object.NewPanFloat(1.5),
 		},
 		{
 			`Float.new(-2.5.bear({child?: true}))`,
-			&object.PanFloat{Value: -2.5},
+			object.NewPanFloat(-2.5),
 		},
 		{
 			`Float.new(2)`,
-			&object.PanFloat{Value: 2.0},
+			object.NewPanFloat(2.0),
 		},
 		// errors
 		{

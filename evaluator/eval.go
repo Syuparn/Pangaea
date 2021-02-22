@@ -22,7 +22,7 @@ func Eval(node ast.Node, env *object.Env) object.PanObject {
 	case *ast.IntLiteral:
 		return evalInt(node, env)
 	case *ast.FloatLiteral:
-		return &object.PanFloat{Value: node.Value}
+		return object.NewPanFloat(node.Value)
 	case *ast.StrLiteral:
 		return object.NewPanStr(node.Value)
 	case *ast.SymLiteral:
