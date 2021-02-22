@@ -81,11 +81,7 @@ func copiedIterFromIter(self *object.PanFunc) object.PanObject {
 			fmt.Sprintf("%s cannot be treated as iter", object.ReprStr(self)))
 	}
 
-	return &object.PanFunc{
-		FuncWrapper: self.FuncWrapper,
-		FuncKind:    object.IterFunc,
-		Env:         object.NewCopiedEnv(self.Env),
-	}
+	return object.NewPanIter(self.FuncWrapper, object.NewCopiedEnv(self.Env))
 }
 
 func copiedIterFromBuiltInIter(self *object.PanBuiltInIter) object.PanObject {
