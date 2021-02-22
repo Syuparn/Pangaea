@@ -7,7 +7,7 @@ import (
 
 func TestBuiltInType(t *testing.T) {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
-	obj := PanBuiltIn{f}
+	obj := NewPanBuiltInFunc(f)
 	if obj.Type() != BuiltInType {
 		t.Fatalf("wrong type: expected=%s, got=%s", BuiltInType, obj.Type())
 	}
@@ -15,7 +15,7 @@ func TestBuiltInType(t *testing.T) {
 
 func TestBuiltInInspect(t *testing.T) {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
-	obj := PanBuiltIn{f}
+	obj := NewPanBuiltInFunc(f)
 	expected := `{|| [builtin]}`
 	if obj.Inspect() != expected {
 		t.Errorf("wrong output. expected=%s, got=%s",
@@ -25,7 +25,7 @@ func TestBuiltInInspect(t *testing.T) {
 
 func TestBuiltInProto(t *testing.T) {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
-	obj := PanBuiltIn{f}
+	obj := NewPanBuiltInFunc(f)
 	if obj.Proto() != BuiltInFuncObj {
 		t.Fatalf("Proto is not BuiltInFuncObj. got=%T (%+v)",
 			obj.Proto(), obj.Proto())
@@ -35,7 +35,7 @@ func TestBuiltInProto(t *testing.T) {
 // checked by compiler (this function works nothing)
 func testBuiltInIsPanObject() {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
-	var _ PanObject = &PanBuiltIn{f}
+	var _ PanObject = NewPanBuiltInFunc(f)
 }
 
 func TestNewPanBuiltInFunc(t *testing.T) {

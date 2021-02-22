@@ -115,7 +115,7 @@ func TestTraceProtoOfBoolFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfBuiltInFunc(t *testing.T) {
-	proto := &PanBuiltIn{}
+	proto := NewPanBuiltInFunc(newMockBuiltInFunc())
 
 	tests := []struct {
 		obj      PanObject
@@ -147,6 +147,12 @@ func TestTraceProtoOfBuiltInFunc(t *testing.T) {
 	}
 }
 
+func newMockBuiltInFunc() BuiltInFunc {
+	return func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject {
+		return nil
+	}
+}
+
 func TestTraceProtoOfBuiltInFuncFailed(t *testing.T) {
 	tests := []struct {
 		obj PanObject
@@ -170,7 +176,7 @@ func TestTraceProtoOfBuiltInFuncFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfBuiltInIter(t *testing.T) {
-	proto := &PanBuiltInIter{}
+	proto := NewPanBuiltInIter(newMockBuiltInFunc(), NewEnv())
 
 	tests := []struct {
 		obj      PanObject

@@ -133,7 +133,7 @@ func (e *Env) InjectIO(in io.Reader, out io.Writer) {
 // InjectRecur injects built-in func `recur`.
 func (e *Env) InjectRecur(recurFunc BuiltInFunc) {
 	// define const `recur` builtInFunc, which can only be used inside iter
-	recur := &PanBuiltIn{Fn: recurFunc}
+	recur := NewPanBuiltInFunc(recurFunc)
 	e.Set(GetSymHash("recur"), recur)
 }
 
