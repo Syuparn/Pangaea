@@ -48,10 +48,7 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`\1 must be map`)
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  mapIter(self),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(mapIter(self), env)
 			},
 		),
 		"_name": object.NewPanStr("Map"),

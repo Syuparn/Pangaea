@@ -253,10 +253,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("\\1 must be int")
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  intIter(self),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(intIter(self), env)
 			},
 		),
 		"_name": object.NewPanStr("Int"),

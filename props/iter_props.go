@@ -89,8 +89,8 @@ func copiedIterFromIter(self *object.PanFunc) object.PanObject {
 }
 
 func copiedIterFromBuiltInIter(self *object.PanBuiltInIter) object.PanObject {
-	return &object.PanBuiltInIter{
-		Fn:  self.Fn,
-		Env: object.NewCopiedEnv(self.Env),
-	}
+	return object.NewPanBuiltInIter(
+		self.Fn,
+		object.NewCopiedEnv(self.Env),
+	)
 }

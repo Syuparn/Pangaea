@@ -46,10 +46,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`Obj#_iter cannot be applied to \1`)
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  objIter(self),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(objIter(self), env)
 			},
 		),
 		"_name": object.NewPanStr("Obj"),

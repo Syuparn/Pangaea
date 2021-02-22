@@ -91,10 +91,7 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return resInt.Value != 1, nil
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  rangeIter(self, next, reachesStop),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(rangeIter(self, next, reachesStop), env)
 			},
 		),
 		"_name": object.NewPanStr("Range"),

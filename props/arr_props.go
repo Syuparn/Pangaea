@@ -111,10 +111,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("\\1 must be arr")
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  arrIter(self),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(arrIter(self), env)
 			},
 		),
 		"_name": object.NewPanStr("Arr"),
