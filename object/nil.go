@@ -25,3 +25,8 @@ func (n *PanNil) Proto() PanObject {
 func (n *PanNil) Hash() HashKey {
 	return HashKey{NilType, 0}
 }
+
+// NewPanNil returns new nil object.
+func NewPanNil() *PanNil {
+	return BuiltInNil
+}

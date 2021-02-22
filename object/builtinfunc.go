@@ -25,3 +25,8 @@ func (b *PanBuiltIn) Inspect() string {
 func (b *PanBuiltIn) Proto() PanObject {
 	return BuiltInFuncObj
 }
+
+// NewPanBuiltInFunc returns new BuiltInFunc object.
+func NewPanBuiltInFunc(f BuiltInFunc) *PanBuiltIn {
+	return &PanBuiltIn{f}
+}

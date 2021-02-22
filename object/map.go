@@ -52,3 +52,20 @@ func (m *PanMap) Inspect() string {
 func (m *PanMap) Proto() PanObject {
 	return BuiltInMapObj
 }
+
+// NewPanMap returns new map object.
+func NewPanMap(pairs ...Pair) *PanMap {
+	pairMap := map[HashKey]Pair{}
+	nonHashablePairs := []Pair{}
+
+	for _, pair := range pairs {
+		hashable, ok := pair.Key.(PanScalar)
+		if ok {
+			pairMap[hashable.Hash()] = pair
+		} else {
+			nonHashablePairs = append(nonHashablePairs, pair)
+		}
+	}
+
+	return &PanMap{&pairMap, &nonHashablePairs}
+}

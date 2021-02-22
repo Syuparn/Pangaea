@@ -1,6 +1,7 @@
 package object
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/Syuparn/pangaea/ast"
@@ -86,4 +87,80 @@ func TestFuncProto(t *testing.T) {
 // checked by compiler (this function works nothing)
 func testFuncIsPanObject() {
 	var _ PanObject = &PanFunc{&MockFuncWrapper{"|foo| foo"}, FuncFunc, nil}
+}
+
+func TestNewPanFunc(t *testing.T) {
+	tests := []struct {
+		f   FuncWrapper
+		env *Env
+	}{
+		{newMockFuncWrapper(), NewEnv()},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanFunc(tt.f, tt.env)
+		// NOTE: functions are not comparable
+		if fmt.Sprintf("%v", actual.FuncWrapper) != fmt.Sprintf("%v", tt.f) {
+			t.Errorf("wrong value. expected=%#v, got=%#v",
+				tt.f, actual.FuncWrapper)
+		}
+
+		if actual.FuncKind != FuncFunc {
+			t.Errorf("kind must be FuncFunc. got=%#v", actual.FuncKind)
+		}
+
+		if actual.Env != tt.env {
+			t.Errorf("wrong env. expected=%#v, got=%#v",
+				tt.env, actual.Env)
+		}
+	}
+}
+
+func TestNewPanIter(t *testing.T) {
+	tests := []struct {
+		f   FuncWrapper
+		env *Env
+	}{
+		{newMockFuncWrapper(), NewEnv()},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanIter(tt.f, tt.env)
+		// NOTE: functions are not comparable
+		if fmt.Sprintf("%v", actual.FuncWrapper) != fmt.Sprintf("%v", tt.f) {
+			t.Errorf("wrong value. expected=%#v, got=%#v",
+				tt.f, actual.FuncWrapper)
+		}
+
+		if actual.FuncKind != IterFunc {
+			t.Errorf("kind must be IterFunc. got=%#v", actual.FuncKind)
+		}
+
+		if actual.Env != tt.env {
+			t.Errorf("wrong env. expected=%#v, got=%#v",
+				tt.env, actual.Env)
+		}
+	}
+}
+
+func newMockFuncWrapper() *mockFuncWrapper {
+	return &mockFuncWrapper{}
+}
+
+type mockFuncWrapper struct{}
+
+func (m *mockFuncWrapper) String() string {
+	return "mock"
+}
+
+func (m *mockFuncWrapper) Args() *PanArr {
+	return NewPanArr()
+}
+
+func (m *mockFuncWrapper) Kwargs() *PanObj {
+	return EmptyPanObjPtr()
+}
+
+func (m *mockFuncWrapper) Body() *[]ast.Stmt {
+	return nil
 }

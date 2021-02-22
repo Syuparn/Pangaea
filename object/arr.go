@@ -36,3 +36,8 @@ func (a *PanArr) Inspect() string {
 func (a *PanArr) Proto() PanObject {
 	return BuiltInArrObj
 }
+
+// NewPanArr returns new arr object.
+func NewPanArr(elems ...PanObject) *PanArr {
+	return &PanArr{Elems: elems}
+}

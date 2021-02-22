@@ -62,3 +62,31 @@ func TestArrProto(t *testing.T) {
 func testArrIsPanObject() {
 	var _ PanObject = &PanArr{[]PanObject{&PanInt{1}}}
 }
+
+func TestNewPanArr(t *testing.T) {
+	tests := []struct {
+		elems []PanObject
+	}{
+		{[]PanObject{}},
+		{[]PanObject{
+			NewPanInt(2),
+			NewPanStr("foo"),
+		}},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanArr(tt.elems...)
+
+		if len(actual.Elems) != len(tt.elems) {
+			t.Fatalf("wrong length. expected=%d, got=%d",
+				len(actual.Elems), len(tt.elems))
+		}
+
+		for i, e := range actual.Elems {
+			if e != tt.elems[i] {
+				t.Errorf("elems[%d] is wrong. expected=%s, got=%s",
+					i, tt.elems[i].Inspect(), e.Inspect())
+			}
+		}
+	}
+}

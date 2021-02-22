@@ -1,6 +1,7 @@
 package object
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -35,4 +36,21 @@ func TestBuiltInProto(t *testing.T) {
 func testBuiltInIsPanObject() {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
 	var _ PanObject = &PanBuiltIn{f}
+}
+
+func TestNewPanBuiltInFunc(t *testing.T) {
+	tests := []struct {
+		f BuiltInFunc
+	}{
+		{func(*Env, *PanObj, ...PanObject) PanObject { return nil }},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanBuiltInFunc(tt.f)
+		// NOTE: functions are not comparable
+		if fmt.Sprintf("%v", actual.Fn) != fmt.Sprintf("%v", tt.f) {
+			t.Errorf("wrong value. expected=%#v, got=%#v",
+				tt.f, actual.Fn)
+		}
+	}
 }

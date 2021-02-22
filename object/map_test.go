@@ -145,3 +145,84 @@ func TestMapProto(t *testing.T) {
 func testMapIsPanObject() {
 	var _ PanObject = &PanMap{}
 }
+
+func TestNewPanMapWithScalarKeys(t *testing.T) {
+	tests := []struct {
+		pairs []Pair
+	}{
+		{[]Pair{}},
+		{[]Pair{
+			{NewPanStr("foo"), NewPanInt(2)},
+		}},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanMap(tt.pairs...)
+
+		if len(*actual.Pairs) != len(tt.pairs) {
+			t.Fatalf("wrong pair length. expected=%d, got=%d",
+				len(tt.pairs), len(*actual.Pairs))
+		}
+
+		if len(*actual.NonHashablePairs) != 0 {
+			t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
+				0, len(*actual.NonHashablePairs))
+		}
+
+		for _, pair := range tt.pairs {
+			h, _ := pair.Key.(PanScalar)
+			actualPair, ok := (*actual.Pairs)[h.Hash()]
+			if !ok {
+				t.Fatalf("key %s is not found.", pair.Key.Inspect())
+			}
+
+			if actualPair.Key != pair.Key {
+				t.Errorf("wrong key. expected=%s, got=%s",
+					pair.Key.Inspect(), actualPair.Key.Inspect())
+			}
+
+			if actualPair.Value != pair.Value {
+				t.Errorf("wrong value. expected=%s, got=%s",
+					pair.Value.Inspect(), actualPair.Value.Inspect())
+			}
+		}
+	}
+}
+
+func TestNewPanMapWithNonScalarKeys(t *testing.T) {
+	tests := []struct {
+		pairs []Pair
+	}{
+		{[]Pair{
+			{NewPanArr(), NewPanInt(2)},
+		}},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanMap(tt.pairs...)
+
+		if len(*actual.Pairs) != 0 {
+			t.Fatalf("wrong pair length. expected=%d, got=%d",
+				0, len(*actual.Pairs))
+		}
+
+		if len(*actual.NonHashablePairs) != len(tt.pairs) {
+			t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
+				len(tt.pairs), len(*actual.NonHashablePairs))
+		}
+
+		for i, pair := range tt.pairs {
+			actualPair := (*actual.NonHashablePairs)[i]
+
+			if actualPair.Key != pair.Key {
+				t.Errorf("wrong key. expected=%s, got=%s",
+					pair.Key.Inspect(), actualPair.Key.Inspect())
+			}
+
+			if actualPair.Value != pair.Value {
+				t.Errorf("wrong value. expected=%s, got=%s",
+					pair.Value.Inspect(), actualPair.Value.Inspect())
+			}
+		}
+	}
+}

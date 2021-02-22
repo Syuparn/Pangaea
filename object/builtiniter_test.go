@@ -1,6 +1,7 @@
 package object
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -35,4 +36,31 @@ func TestBuiltInIterProto(t *testing.T) {
 func testBuiltInIterIsPanObject() {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
 	var _ PanObject = &PanBuiltInIter{Fn: f, Env: NewEnv()}
+}
+
+func TestNewPanBuiltInIter(t *testing.T) {
+	tests := []struct {
+		f   BuiltInFunc
+		env *Env
+	}{
+		{
+			func(*Env, *PanObj, ...PanObject) PanObject { return nil },
+			NewEnv(),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanBuiltInIter(tt.f, tt.env)
+
+		// NOTE: functions are not comparable
+		if fmt.Sprintf("%v", actual.Fn) != fmt.Sprintf("%v", tt.f) {
+			t.Errorf("wrong func. expected=%#v, got=%#v",
+				tt.f, actual.Fn)
+		}
+
+		if actual.Env != tt.env {
+			t.Errorf("wrong env. expected=%#v, got=%#v",
+				tt.env, actual.Env)
+		}
+	}
 }
