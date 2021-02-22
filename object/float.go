@@ -33,3 +33,8 @@ func (f *PanFloat) Hash() HashKey {
 	// Float64bits convert float64 to uint64 with same bit pattern
 	return HashKey{FloatType, math.Float64bits(f.Value)}
 }
+
+// NewPanFloat returns new float object.
+func NewPanFloat(f float64) *PanFloat {
+	return &PanFloat{f}
+}

@@ -73,3 +73,20 @@ func testFloatIsPanObject() {
 func testFloatIsPanScalar() {
 	var _ PanScalar = &PanFloat{1.5}
 }
+
+func TestNewPanFloat(t *testing.T) {
+	tests := []struct {
+		f float64
+	}{
+		{1.5},
+		{5.0},
+		{-1.2},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanFloat(tt.f)
+		if actual.Value != tt.f {
+			t.Errorf("wrong value. expected=%f, got=%f", tt.f, actual.Value)
+		}
+	}
+}
