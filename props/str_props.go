@@ -234,7 +234,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewValueErr(
 						fmt.Sprintf("%s cannot be converted into float", object.ReprStr(args[0])))
 				}
-				return &object.PanFloat{Value: f}
+				return object.NewPanFloat(f)
 			},
 		),
 		"I": f(

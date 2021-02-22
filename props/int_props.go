@@ -183,7 +183,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				// truediv
 				res := float64(self.Value) / float64(other.Value)
-				return &object.PanFloat{Value: res}
+				return object.NewPanFloat(res)
 			},
 		),
 		"//": f(
