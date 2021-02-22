@@ -7,11 +7,11 @@ import (
 
 func evalRange(node *ast.RangeLiteral, env *object.Env) object.PanObject {
 	// NOTE: *ast.RangeLiteral has nil (not NilLiteral) if nothing is set
-	return &object.PanRange{
-		Start: evalOrNil(node.Start, env),
-		Stop:  evalOrNil(node.Stop, env),
-		Step:  evalOrNil(node.Step, env),
-	}
+	return object.NewPanRange(
+		evalOrNil(node.Start, env),
+		evalOrNil(node.Stop, env),
+		evalOrNil(node.Step, env),
+	)
 }
 
 func evalOrNil(node ast.Node, env *object.Env) object.PanObject {

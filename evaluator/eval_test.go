@@ -779,11 +779,11 @@ func TestEvalRangeLiteral(t *testing.T) {
 		// multiple types
 		{
 			`(3:"s":false)`,
-			&object.PanRange{
-				Start: object.NewPanInt(3),
-				Stop:  object.NewPanStr("s"),
-				Step:  object.BuiltInFalse,
-			},
+			object.NewPanRange(
+				object.NewPanInt(3),
+				object.NewPanStr("s"),
+				object.BuiltInFalse,
+			),
 		},
 	}
 
@@ -804,7 +804,7 @@ func toPanRange(start, stop, step interface{}) *object.PanRange {
 			return object.BuiltInNil
 		}
 	}
-	return &object.PanRange{Start: obj(start), Stop: obj(stop), Step: obj(step)}
+	return object.NewPanRange(obj(start), obj(stop), obj(step))
 }
 
 func TestEvalRangeStart(t *testing.T) {
