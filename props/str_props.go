@@ -149,7 +149,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					}
 				}
 
-				return &object.PanArr{Elems: strs}
+				return object.NewPanArr(strs...)
 			},
 		),
 		"_incBy": f(
@@ -320,7 +320,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				if match == nil {
-					return &object.PanArr{Elems: []object.PanObject{}}
+					return object.NewPanArr()
 				}
 
 				elems := []object.PanObject{}
@@ -328,7 +328,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					elems = append(elems, object.NewPanStr(group.String()))
 				}
 
-				return &object.PanArr{Elems: elems}
+				return object.NewPanArr(elems...)
 			},
 		),
 		"new": f(

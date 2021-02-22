@@ -86,24 +86,18 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
-					return &object.PanArr{Elems: []object.PanObject{}}
+					return object.NewPanArr()
 				}
 
 				items := []object.PanObject{}
 				for _, pair := range *self.Pairs {
-					items = append(items, &object.PanArr{Elems: []object.PanObject{
-						pair.Key,
-						pair.Value,
-					}})
+					items = append(items, object.NewPanArr(pair.Key, pair.Value))
 				}
 				for _, pair := range *self.NonHashablePairs {
-					items = append(items, &object.PanArr{Elems: []object.PanObject{
-						pair.Key,
-						pair.Value,
-					}})
+					items = append(items, object.NewPanArr(pair.Key, pair.Value))
 				}
 
-				return &object.PanArr{Elems: items}
+				return object.NewPanArr(items...)
 			},
 		),
 		"keys": f(
@@ -118,7 +112,7 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
-					return &object.PanArr{Elems: []object.PanObject{}}
+					return object.NewPanArr()
 				}
 
 				keys := []object.PanObject{}
@@ -129,7 +123,7 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					keys = append(keys, pair.Key)
 				}
 
-				return &object.PanArr{Elems: keys}
+				return object.NewPanArr(keys...)
 			},
 		),
 		"len": f(
@@ -160,7 +154,7 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
-					return &object.PanArr{Elems: []object.PanObject{}}
+					return object.NewPanArr()
 				}
 
 				values := []object.PanObject{}
@@ -171,7 +165,7 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					values = append(values, pair.Value)
 				}
 
-				return &object.PanArr{Elems: values}
+				return object.NewPanArr(values...)
 			},
 		),
 	}
@@ -275,10 +269,8 @@ func mapIter(m *object.PanMap) object.BuiltInFunc {
 			return object.NewValueErr("pair data in map somehow got changed")
 		}
 
-		yielded := &object.PanArr{Elems: []object.PanObject{
-			pair.Key,
-			pair.Value,
-		}}
+		yielded := object.NewPanArr(pair.Key, pair.Value)
+
 		scalarYieldIdx++
 		return yielded
 	}
@@ -290,8 +282,5 @@ func yieldNonScalar(m *object.PanMap, i int) object.PanObject {
 	}
 
 	pair := (*m.NonHashablePairs)[i]
-	return &object.PanArr{Elems: []object.PanObject{
-		pair.Key,
-		pair.Value,
-	}}
+	return object.NewPanArr(pair.Key, pair.Value)
 }

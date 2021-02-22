@@ -32,10 +32,7 @@ func EitherErrProps(propContainer map[string]object.PanObject) map[string]object
 						fmt.Sprintf("%s cannot be treated as EitherErr", object.ReprStr(args[0])))
 				}
 
-				return &object.PanArr{Elems: []object.PanObject{
-					object.BuiltInNil,
-					err.Value,
-				}}
+				return object.NewPanArr(object.BuiltInNil, err.Value)
 			},
 		),
 		"err": f(
