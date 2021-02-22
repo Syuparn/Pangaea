@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"bytes"
+
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -230,7 +231,7 @@ func valRange(
 		canBeUsedForRange(r.Step)
 	if !ok {
 		// empty array
-		return &object.PanArr{Elems: []object.PanObject{}}
+		return object.NewPanArr()
 	}
 
 	// default step
@@ -257,7 +258,7 @@ func valRange(
 		elems = append(elems, valIndex(i))
 	}
 
-	return &object.PanArr{Elems: elems}
+	return object.NewPanArr(elems...)
 }
 
 func canBeUsedForRange(o object.PanObject) bool {

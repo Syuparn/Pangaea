@@ -134,7 +134,7 @@ func squashNilPropCallListChainMiddleware(next _PropCallMiddlewareHandler) _Prop
 			elems = append(elems, elem)
 		}
 
-		return &object.PanArr{Elems: elems}
+		return object.NewPanArr(elems...)
 	}
 }
 
@@ -168,7 +168,7 @@ func keepNilPropCallListChainMiddleware(next _PropCallMiddlewareHandler) _PropCa
 			elems = append(elems, elem)
 		}
 
-		return &object.PanArr{Elems: elems}
+		return object.NewPanArr(elems...)
 	}
 }
 

@@ -1,8 +1,9 @@
 package evaluator
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"testing"
+
+	"github.com/Syuparn/pangaea/object"
 )
 
 func TestFuncCall(t *testing.T) {
@@ -33,10 +34,10 @@ func TestFuncCall(t *testing.T) {
 				object.NewPanStr("x"),
 				object.NewPanStr("y"),
 			},
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("x"),
 				object.NewPanStr("y"),
-			}},
+			),
 		},
 	}
 

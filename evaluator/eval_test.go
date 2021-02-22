@@ -143,11 +143,11 @@ func TestEvalIntAt(t *testing.T) {
 		{`5[3]`, object.NewPanInt(0)},
 		{
 			`6[0:3]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(0),
 				object.NewPanInt(1),
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		// use descendant of arr for arg
 		{
@@ -162,10 +162,10 @@ func TestEvalIntAt(t *testing.T) {
 		// use descendant of range for index
 		{
 			`5[(0:2).bear]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(0),
-			}},
+			),
 		},
 		// if \1 is not int, return nil
 		{
@@ -493,30 +493,30 @@ func TestEvalStrMatch(t *testing.T) {
 	}{
 		{
 			"`hello`.match(`l+`)",
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("ll"),
-			}},
+			),
 		},
 		{
 			"`--aabcbcbcxyyyzz--`.match(`a+((bc)*)x([yz]+)`)",
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("aabcbcbcxyyyzz"),
 				object.NewPanStr("bcbcbc"),
 				object.NewPanStr("bc"),
 				object.NewPanStr("yyyzz"),
-			}},
+			),
 		},
 		// no match
 		{
 			"`a`.match(`bc`)",
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		// use descendant of str for recv
 		{
 			"`abbbc`.bear.match(`b+`)",
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("bbb"),
-			}},
+			),
 		},
 		// if no args are passed, raise an error
 		{
@@ -901,68 +901,68 @@ func TestEvalArrLiteral(t *testing.T) {
 	}{
 		{
 			`[]`,
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		{
 			`[1]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		{
 			`[2, 3]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		// arr can contain different type elements
 		{
 			`["a", 4]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanInt(4),
-			}},
+			),
 		},
 		// nested
 		{
 			`[[10]]`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.NewPanInt(10),
-				}},
-			}},
+				),
+			),
 		},
 		// embedded
 		{
 			`[*[1]]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		{
 			`[*[1], 2]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 		{
 			`[1, *[2, 3], 4]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
 				object.NewPanInt(3),
 				object.NewPanInt(4),
-			}},
+			),
 		},
 		// embed descendant of arr (arr proto is embedded)
 		{
 			`[1, *([2].bear)]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 	}
 
@@ -1049,97 +1049,97 @@ func TestEvalArrAtWithRange(t *testing.T) {
 	}{
 		{
 			`[0, 1, 2][0:1]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(0),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2][0:]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(0),
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2][:2]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(0),
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2][::-1]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(1),
 				object.NewPanInt(0),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2][1::-1]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(0),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2, 3, 4][:2:-1]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(4),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2, 3, 4, 5][1::2]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(3),
 				object.NewPanInt(5),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2, 3, 4][:3:2]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(0),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2, 3, 4, 5][1:5:2]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		// use descendant of range for index
 		{
 			`[1, 2, 3][(0:2).bear]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 		// range is fixed even if start or step is out of range
 		{
 			`[0, 1, 2][-3:-2]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(0),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2][-100:2]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(0),
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		{
 			`[0, 1, 2][-2:10000]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 	}
 
@@ -1437,11 +1437,11 @@ func TestEvalBuiltInCallProp(t *testing.T) {
 		},
 		{
 			`{}.callProp({a: m{|x, y, z: 1| [x, y, z]}}, 'a, 4, 5, z: 6)`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(4),
 				object.NewPanInt(5),
 				object.NewPanInt(6),
-			}},
+			),
 		},
 	}
 
@@ -1646,10 +1646,10 @@ func TestEvalMapLiteral(t *testing.T) {
 				},
 				[]object.Pair{
 					{
-						Key: &object.PanArr{Elems: []object.PanObject{
+						Key: object.NewPanArr(
 							object.NewPanInt(1),
 							object.NewPanInt(2),
-						}},
+						),
 						Value: object.NewPanInt(3),
 					},
 					{
@@ -1674,10 +1674,10 @@ func TestEvalMapLiteral(t *testing.T) {
 				[]object.Pair{},
 				[]object.Pair{
 					{
-						Key: &object.PanArr{Elems: []object.PanObject{
+						Key: object.NewPanArr(
 							object.NewPanInt(1),
 							object.NewPanInt(2),
-						}},
+						),
 						Value: object.NewPanInt(3),
 					},
 				},
@@ -1847,7 +1847,7 @@ func toPanFunc(
 
 	funcWrapper := &FuncWrapperImpl{
 		codeStr: str,
-		args:    &object.PanArr{Elems: argArr},
+		args:    object.NewPanArr(argArr...),
 		kwargs:  toPanObj(kwargs),
 		// empty stmt (body is not tested)
 		body: &[]ast.Stmt{},
@@ -1875,18 +1875,18 @@ func TestEvalFuncCall(t *testing.T) {
 		},
 		{
 			`{|x, y| [x, y]}("x", "y")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("x"),
 				object.NewPanStr("y"),
-			}},
+			),
 		},
 		{
 			`{|foo, bar: "bar", baz| [foo, bar, baz]}("FOO", "BAZ")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("FOO"),
 				object.NewPanStr("bar"),
 				object.NewPanStr("BAZ"),
-			}},
+			),
 		},
 	}
 
@@ -2059,7 +2059,7 @@ func toPanIter(
 
 	funcWrapper := &FuncWrapperImpl{
 		codeStr: str,
-		args:    &object.PanArr{Elems: argArr},
+		args:    object.NewPanArr(argArr...),
 		kwargs:  toPanObj(kwargs),
 		// empty stmt (body is not tested)
 		body: &[]ast.Stmt{},
@@ -2160,7 +2160,7 @@ func toEnv(
 	for _, pair := range argPairs {
 		argValues = append(argValues, pair.Value)
 	}
-	env.Set(object.GetSymHash(`\0`), &object.PanArr{Elems: argValues})
+	env.Set(object.GetSymHash(`\0`), object.NewPanArr(argValues...))
 	// \
 	if len(argValues) > 0 {
 		env.Set(object.GetSymHash("\\"), argValues[0])
@@ -2308,20 +2308,20 @@ func TestEvalDiamondIter(t *testing.T) {
 		{
 			"hoge\nfuga\npiyo",
 			`<>@{\}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("hoge"),
 				object.NewPanStr("fuga"),
 				object.NewPanStr("piyo"),
-			}},
+			),
 		},
 		{
 			"hoge\nfuga\npiyo\n",
 			`<>@{\}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("hoge"),
 				object.NewPanStr("fuga"),
 				object.NewPanStr("piyo"),
-			}},
+			),
 		},
 	}
 	for _, tt := range tests {
@@ -2370,10 +2370,10 @@ func TestEvalYield(t *testing.T) {
 			 it.next
 			 it.next
 			`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(3),
 				object.NewPanInt(8),
-			}},
+			),
 		},
 	}
 
@@ -2834,37 +2834,37 @@ func TestEvalObjIter(t *testing.T) {
 		{
 			`it := {a: "A", b: "B"}._iter
 			 it.next`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanStr("A"),
-			}},
+			),
 		},
 		{
 			`it := {a: "A", b: "B"}._iter
 			 it.next
 			 it.next`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("b"),
 				object.NewPanStr("B"),
-			}},
+			),
 		},
 		// sorted in alphabetical order of keys
 		{
 			`it := {b: "B", a: "A"}._iter
 			 it.next`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanStr("A"),
-			}},
+			),
 		},
 		{
 			`it := {b: "B", a: "A"}._iter
 			 it.next
 			 it.next`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("b"),
 				object.NewPanStr("B"),
-			}},
+			),
 		},
 		{
 			`it := {a: "A", b: "B"}._iter
@@ -2900,10 +2900,10 @@ func TestEvalMapIter(t *testing.T) {
 		{
 			`it := %{true: 1}._iter
 			 it.next`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.BuiltInTrue,
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		{
 			`it := %{true: 1}._iter
@@ -2915,12 +2915,12 @@ func TestEvalMapIter(t *testing.T) {
 		{
 			`it := %{[0]: 1}._iter
 			 it.next`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.NewPanInt(0),
-				}},
+				),
 				object.NewPanInt(1),
-			}},
+			),
 		},
 	}
 
@@ -3063,50 +3063,50 @@ func TestEvalListChainPropCall(t *testing.T) {
 	}{
 		{
 			`[1, 2]@+(1)`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		{
 			`3@S`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("1"),
 				object.NewPanStr("2"),
 				object.NewPanStr("3"),
-			}},
+			),
 		},
 		{
 			`"日本語"@S`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("日"),
 				object.NewPanStr("本"),
 				object.NewPanStr("語"),
-			}},
+			),
 		},
 		// NOTE: must new() to init params
 		{
 			`<{|i| yield i if i != 3; recur(i+1)}>.new(0)@S`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("0"),
 				object.NewPanStr("1"),
 				object.NewPanStr("2"),
-			}},
+			),
 		},
 		{
 			`(1:6:2)@S`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("1"),
 				object.NewPanStr("3"),
 				object.NewPanStr("5"),
-			}},
+			),
 		},
 		{
 			`{a: 1, b: 2}@at([0])`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanStr("b"),
-			}},
+			),
 		},
 		// TODO: check map
 		// if any element raises error, propagate it
@@ -3129,10 +3129,10 @@ func TestEvalListChainPropCallIgnoresNil(t *testing.T) {
 	}{
 		{
 			`[{name: 'Taro}, {name: nil}, {name: 'Jiro}]@name`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("Taro"),
 				object.NewPanStr("Jiro"),
-			}},
+			),
 		},
 	}
 
@@ -3149,51 +3149,51 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 	}{
 		{
 			`[1, 2]@{|i| i + 1}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		{
 			`3@{|i| i.S}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("1"),
 				object.NewPanStr("2"),
 				object.NewPanStr("3"),
-			}},
+			),
 		},
 		{
 			`"日本語"@{|c| c + "!"}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("日!"),
 				object.NewPanStr("本!"),
 				object.NewPanStr("語!"),
-			}},
+			),
 		},
 		{
 			`{a: 1, b: 2}@{|k, v| "#{k}: #{v}"}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a: 1"),
 				object.NewPanStr("b: 2"),
-			}},
+			),
 		},
 		// NOTE: order of map elems is not guaranteed
 		{
 			`%{true: "yes"}@{|k, v| [k, v]}`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanStr("yes"),
-				}},
-			}},
+				),
+			),
 		},
 		{
 			`(1:6:2)@{|n| n+1}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(4),
 				object.NewPanInt(6),
-			}},
+			),
 		},
 		// if any element raises error, propagate it
 		{
@@ -3220,10 +3220,10 @@ func TestEvalListChainLiteralCallIgnoresNil(t *testing.T) {
 	}{
 		{
 			`[{name: 'Taro}, {name: nil}, {name: 'Jiro}]@{|o| o.name}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("Taro"),
 				object.NewPanStr("Jiro"),
-			}},
+			),
 		},
 	}
 
@@ -3240,51 +3240,51 @@ func TestEvalListChainVarCall(t *testing.T) {
 	}{
 		{
 			`f := {|i| i + 1}; [1, 2]@^f`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		{
 			`f := {|i| i.S}; 3@^f`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("1"),
 				object.NewPanStr("2"),
 				object.NewPanStr("3"),
-			}},
+			),
 		},
 		{
 			`f := {|c| c + "!"}; "日本語"@^f`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("日!"),
 				object.NewPanStr("本!"),
 				object.NewPanStr("語!"),
-			}},
+			),
 		},
 		{
 			`f := {|k, v| "#{k}: #{v}"}; {a: 1, b: 2}@^f`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a: 1"),
 				object.NewPanStr("b: 2"),
-			}},
+			),
 		},
 		// NOTE: order of map elems is not guaranteed
 		{
 			`f := {|k, v| [k, v]}; %{true: "yes"}@^f`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanStr("yes"),
-				}},
-			}},
+				),
+			),
 		},
 		{
 			`f := {|n| n+1}; (1:6:2)@^f`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(4),
 				object.NewPanInt(6),
-			}},
+			),
 		},
 		// if any element raises error, propagate it
 		{
@@ -3306,10 +3306,10 @@ func TestEvalListChainVarCallIgnoresNil(t *testing.T) {
 	}{
 		{
 			`f := {|o| o.name}; [{name: 'Taro}, {name: nil}, {name: 'Jiro}]@^f`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("Taro"),
 				object.NewPanStr("Jiro"),
-			}},
+			),
 		},
 	}
 
@@ -3594,10 +3594,10 @@ func TestEvalAssign(t *testing.T) {
 		},
 		{
 			`a := 5; b := 10; [a, b]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(5),
 				object.NewPanInt(10),
-			}},
+			),
 			toPanObj([]object.Pair{
 				{
 					Key:   object.NewPanStr("a"),
@@ -3611,10 +3611,10 @@ func TestEvalAssign(t *testing.T) {
 		},
 		{
 			`a := b := 2; [a, b]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(2),
-			}},
+			),
 			toPanObj([]object.Pair{
 				{
 					Key:   object.NewPanStr("a"),
@@ -3638,10 +3638,10 @@ func TestEvalAssign(t *testing.T) {
 		},
 		{
 			`3 => c => d; [c, d]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(3),
 				object.NewPanInt(3),
-			}},
+			),
 			toPanObj([]object.Pair{
 				{
 					Key:   object.NewPanStr("c"),
@@ -3718,17 +3718,17 @@ func TestEvalArgVars(t *testing.T) {
 		// `\0` is arr of all args
 		{
 			`{\0}("one", "two")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("one"),
 				object.NewPanStr("two"),
-			}},
+			),
 		},
 		// NOTE: \0 does not contain kwargs
 		{
 			`{\0}("arg", kwarg: "kwarg")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("arg"),
-			}},
+			),
 		},
 	}
 
@@ -3773,9 +3773,9 @@ func TestEvalKwargVars(t *testing.T) {
 		// NOTE: \0 does not contain kwargs
 		{
 			`{\0}("arg", kwarg: "kwarg")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("arg"),
-			}},
+			),
 		},
 	}
 
@@ -3914,38 +3914,38 @@ func TestEvalObjKeys(t *testing.T) {
 	}{
 		{
 			`{}.keys`,
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		{
 			`{a: 1, b: 2}.keys`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanStr("b"),
-			}},
+			),
 		},
 		// private keys are ignored
 		{
 			`{a: 1, _b: 2, '+: 3, "with space": 4}.keys`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
-			}},
+			),
 		},
 		// with private keys (private keys follow public keys)
 		{
 			`{a: 1, _b: 2, '+: 3, "with space": 4}.keys(private?: true)`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanStr("+"),
 				object.NewPanStr("_b"),
 				object.NewPanStr("with space"),
-			}},
+			),
 		},
 		// child of obj
 		{
 			`{a: 1}.bear({b: 2}).keys`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("b"),
-			}},
+			),
 		},
 	}
 
@@ -3962,14 +3962,14 @@ func TestEvalObjValues(t *testing.T) {
 	}{
 		{
 			`{}.values`,
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		{
 			`{a: "A", b: "B"}.values`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("A"),
 				object.NewPanStr("B"),
-			}},
+			),
 		},
 		// private keys are ignored
 		{
@@ -3979,9 +3979,9 @@ func TestEvalObjValues(t *testing.T) {
 			   '+: "PLUS",
 			   "with space": "WITH SPACE",
 			 }.values`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("A"),
-			}},
+			),
 		},
 		// with private keys (private keys follow public keys)
 		{
@@ -3991,19 +3991,19 @@ func TestEvalObjValues(t *testing.T) {
 			   '+: "PLUS",
 			   "with space": "WITH SPACE",
 			 }.values(private?: true)`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("A"),
 				object.NewPanStr("PLUS"),
 				object.NewPanStr("_B"),
 				object.NewPanStr("WITH SPACE"),
-			}},
+			),
 		},
 		// child of obj
 		{
 			`{a: 1}.bear({b: 2}).values`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
-			}},
+			),
 		},
 	}
 
@@ -4020,20 +4020,20 @@ func TestEvalObjItems(t *testing.T) {
 	}{
 		{
 			`{}.items`,
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		{
 			`{a: "A", b: "B"}.items`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.NewPanStr("a"),
 					object.NewPanStr("A"),
-				}},
-				&object.PanArr{Elems: []object.PanObject{
+				),
+				object.NewPanArr(
 					object.NewPanStr("b"),
 					object.NewPanStr("B"),
-				}},
-			}},
+				),
+			),
 		},
 		// private keys are ignored
 		{
@@ -4043,12 +4043,12 @@ func TestEvalObjItems(t *testing.T) {
 			   '+: "PLUS",
 			   "with space": "WITH SPACE",
 			 }.items`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.NewPanStr("a"),
 					object.NewPanStr("A"),
-				}},
-			}},
+				),
+			),
 		},
 		// with private keys (private keys follow public keys)
 		{
@@ -4058,34 +4058,34 @@ func TestEvalObjItems(t *testing.T) {
 			   '+: "PLUS",
 			   "with space": "WITH SPACE",
 			 }.items(private?: true)`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.NewPanStr("a"),
 					object.NewPanStr("A"),
-				}},
-				&object.PanArr{Elems: []object.PanObject{
+				),
+				object.NewPanArr(
 					object.NewPanStr("+"),
 					object.NewPanStr("PLUS"),
-				}},
-				&object.PanArr{Elems: []object.PanObject{
+				),
+				object.NewPanArr(
 					object.NewPanStr("_b"),
 					object.NewPanStr("_B"),
-				}},
-				&object.PanArr{Elems: []object.PanObject{
+				),
+				object.NewPanArr(
 					object.NewPanStr("with space"),
 					object.NewPanStr("WITH SPACE"),
-				}},
-			}},
+				),
+			),
 		},
 		// child of obj
 		{
 			`{a: 1}.bear({b: 2}).items`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.NewPanStr("b"),
 					object.NewPanInt(2),
-				}},
-			}},
+				),
+			),
 		},
 	}
 
@@ -4102,22 +4102,22 @@ func TestEvalMapKeys(t *testing.T) {
 	}{
 		{
 			`%{}.keys`,
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.keys`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.BuiltInTrue,
-			}},
+			),
 		},
 		{
 			`%{[0]: "zero"}.keys`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.NewPanInt(0),
-				}},
-			}},
+				),
+			),
 		},
 	}
 
@@ -4134,20 +4134,20 @@ func TestEvalMapValues(t *testing.T) {
 	}{
 		{
 			`%{}.values`,
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.values`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		{
 			`%{[0]: "zero"}.values`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("zero"),
-			}},
+			),
 		},
 	}
 
@@ -4164,28 +4164,28 @@ func TestEvalMapItems(t *testing.T) {
 	}{
 		{
 			`%{}.items`,
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.items`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanInt(1),
-				}},
-			}},
+				),
+			),
 		},
 		{
 			`%{[0]: "zero"}.items`,
-			&object.PanArr{Elems: []object.PanObject{
-				&object.PanArr{Elems: []object.PanObject{
-					&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
 						object.NewPanInt(0),
-					}},
+					),
 					object.NewPanStr("zero"),
-				}},
-			}},
+				),
+			),
 		},
 	}
 
@@ -4841,32 +4841,32 @@ func TestEvalScalarPropChain(t *testing.T) {
 		},
 		{
 			`{a: m{|x, y| [x, y]}}.a("one", "two")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("one"),
 				object.NewPanStr("two"),
-			}},
+			),
 		},
 		{
 			`{a: m{|x, y: "y"| [x, y]}}.a("x")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("x"),
 				object.NewPanStr("y"),
-			}},
+			),
 		},
 		{
 			`{a: m{|x, y: "y"| [x, y]}}.a("x", y: "Y")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("x"),
 				object.NewPanStr("Y"),
-			}},
+			),
 		},
 		// if args are insufficient, they are padded by nil
 		{
 			`{a: m{|x, y| [x, y]}}.a("X")`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("X"),
 				object.BuiltInNil,
-			}},
+			),
 		},
 		// if too many args are passed, they are just ignored
 		{
@@ -4913,20 +4913,20 @@ func TestEvalArgUnpack(t *testing.T) {
 	}{
 		{
 			`{|i, j, k| [i, j, k]}(*[1, 2, 3])`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		// with other prefix
 		{
 			`{|i, j, k| [i, j, k]}(*[1, 2], !3)`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
 				object.BuiltInFalse,
-			}},
+			),
 		},
 	}
 
@@ -4943,17 +4943,17 @@ func TestEvalKwargUnpack(t *testing.T) {
 	}{
 		{
 			`{|a: 1, b: 2| [a, b]}(**{a: 5, b: 10})`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(5),
 				object.NewPanInt(10),
-			}},
+			),
 		},
 		{
 			`{|a: 1, b: 2| [a, b]}(a: 3, **{a: 6, b: 9})`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(3),
 				object.NewPanInt(9),
-			}},
+			),
 		},
 	}
 
@@ -5003,11 +5003,11 @@ func TestEvalAnonPropChain(t *testing.T) {
 		},
 		{
 			`{|x| @a}([{a: 1}, {a: 2}, {a: 3}])`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		{
 			`{|x| $(0)+}([1, 2, 3])`,
@@ -5036,11 +5036,11 @@ func TestEvalAnonLiteralChain(t *testing.T) {
 		},
 		{
 			`{|nums| @{|n| n.S}}([1, 2, 3])`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("1"),
 				object.NewPanStr("2"),
 				object.NewPanStr("3"),
-			}},
+			),
 		},
 		{
 			`{|nums| $(0){|acc, i| acc + i}}([1, 2, 3])`,
@@ -5178,10 +5178,10 @@ func TestEvalMissing(t *testing.T) {
 		},
 		{
 			`[{_missing: 'a}, {_missing: 'b}]@hoge`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanStr("b"),
-			}},
+			),
 		},
 		{
 			`['A, 'B]$({_missing: m{|name, i| "#{name} not found"+i}})+`,
@@ -5190,10 +5190,10 @@ func TestEvalMissing(t *testing.T) {
 		// prop name and args are passed
 		{
 			`{_missing: m{|name, arg| [name, arg]}}.hoge(1)`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("hoge"),
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		// proto _missing works
 		{
@@ -5325,12 +5325,12 @@ func TestEvalLiteralCall(t *testing.T) {
 		},
 		{
 			`[1, 2].{|i| i * 2}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 		// if arity is more than 1, arr is extracted to each param
 		{
@@ -5345,10 +5345,10 @@ func TestEvalLiteralCall(t *testing.T) {
 		// if args are insufficient, they are padded by nil
 		{
 			`'X.{|i, j| [i, j]}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("X"),
 				object.BuiltInNil,
-			}},
+			),
 		},
 		// if too many args are passed, they are just ignored
 		{
@@ -5403,12 +5403,12 @@ func TestEvalVarCall(t *testing.T) {
 		},
 		{
 			`f := {|i| i * 2}; [1, 2].^f`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 		// built-in func
 		{
@@ -5432,10 +5432,10 @@ func TestEvalVarCall(t *testing.T) {
 		// if args are insufficient, they are padded by nil
 		{
 			`f := {|i, j| [i, j]}; "X".^f`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("X"),
 				object.BuiltInNil,
-			}},
+			),
 		},
 		// if too many args are passed, they are just ignored
 		{
@@ -5508,9 +5508,9 @@ func TestEvalLonelyChain(t *testing.T) {
 		},
 		{
 			`[nil, {a: 1}]&@a`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		// literalcall
 		{
@@ -5519,10 +5519,10 @@ func TestEvalLonelyChain(t *testing.T) {
 		},
 		{
 			`[1, nil, 3]&@{|x| x * 2}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(2),
 				object.NewPanInt(6),
-			}},
+			),
 		},
 	}
 
@@ -5544,10 +5544,10 @@ func TestEvalThoughtfulChain(t *testing.T) {
 		},
 		{
 			`['a, 'b]~@{|x| {a: 1}[x]}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanStr("b"),
-			}},
+			),
 		},
 		{
 			`[2, 'a, 3, 'b, 4]~$(1){|acc, i| acc * i}`,
@@ -5565,7 +5565,7 @@ func TestEvalThoughtfulChain(t *testing.T) {
 		},
 		{
 			`[{a: 1}, {a: nil}]~@a`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				toPanObj([]object.Pair{
 					{
@@ -5573,7 +5573,7 @@ func TestEvalThoughtfulChain(t *testing.T) {
 						Value: object.BuiltInNil,
 					},
 				}),
-			}},
+			),
 		},
 		{
 			`[2, nil, 3, nil, 4]~$(1)*`,
@@ -5600,18 +5600,18 @@ func TestEvalStrictChain(t *testing.T) {
 		// literalcall
 		{
 			`[1, nil]=@{|i| i}`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.BuiltInNil,
-			}},
+			),
 		},
 		// propcall
 		{
 			`[{a: 1}, {a: nil}]=@a`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.BuiltInNil,
-			}},
+			),
 		},
 	}
 
@@ -6920,50 +6920,50 @@ func TestEvalInfixStrDiv(t *testing.T) {
 	}{
 		{
 			`"hello world" / " "`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("hello"),
 				object.NewPanStr("world"),
-			}},
+			),
 		},
 		{
 			`"a  b    c " / " "`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanStr("b"),
 				object.NewPanStr("c"),
-			}},
+			),
 		},
 		// use regex
 		{
 			"`abc1de23f` / `\\d`",
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("abc"),
 				object.NewPanStr("de"),
 				object.NewPanStr("f"),
-			}},
+			),
 		},
 		{
 			"`123 \n45  \t6` / `\\s`",
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("123"),
 				object.NewPanStr("45"),
 				object.NewPanStr("6"),
-			}},
+			),
 		},
 		// if no separators found, return whole string
 		{
 			"`a` / `x`",
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
-			}},
+			),
 		},
 		// decendant of str can be added
 		{
 			`"a,b" / ",".bear`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.NewPanStr("b"),
-			}},
+			),
 		},
 		// if \2 is illegal for regex syntax, raise an error
 		{
@@ -7122,25 +7122,25 @@ func TestEvalInfixArrAdd(t *testing.T) {
 	}{
 		{
 			`[1] + [2]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 		// decendant of arr can be added
 		{
 			`[1] + [3].bear`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(3),
-			}},
+			),
 		},
 		// nil is treated as []
 		{
 			`[5] + nil`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(5),
-			}},
+			),
 		},
 	}
 
@@ -7195,9 +7195,9 @@ func TestEvalInfixNilAdd(t *testing.T) {
 		},
 		{
 			`nil + [5]`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(5),
-			}},
+			),
 		},
 	}
 
@@ -7733,16 +7733,16 @@ func TestEvalArrConstructor(t *testing.T) {
 	}{
 		{
 			`Arr.new([1])`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		{
 			`Arr.new([1, 2].bear({child?: true}))`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
 				object.NewPanInt(2),
-			}},
+			),
 		},
 		// errors
 		{
@@ -7768,20 +7768,20 @@ func TestEvalArrCall(t *testing.T) {
 	}{
 		{
 			`Arr()`,
-			&object.PanArr{Elems: []object.PanObject{}},
+			object.NewPanArr(),
 		},
 		{
 			`Arr(1)`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(1),
-			}},
+			),
 		},
 		{
 			`Arr('a, true)`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanStr("a"),
 				object.BuiltInTrue,
-			}},
+			),
 		},
 		// errors
 		{
@@ -8253,18 +8253,18 @@ func TestEvalEitherA(t *testing.T) {
 		// success
 		{
 			`1.try.fmap {\ + 2}.A`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.NewPanInt(3),
 				object.BuiltInNil,
-			}},
+			),
 		},
 		// failure
 		{
 			`1.try.fmap {\ / 0}.A`,
-			&object.PanArr{Elems: []object.PanObject{
+			object.NewPanArr(
 				object.BuiltInNil,
 				object.WrapErr(object.NewZeroDivisionErr("cannot be divided by 0")),
-			}},
+			),
 		},
 		// raises errors (highly unrecommended because it is not caught)
 		{

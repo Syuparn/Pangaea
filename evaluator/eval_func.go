@@ -35,7 +35,7 @@ func evalCallable(
 
 	wrapper := &FuncWrapperImpl{
 		codeStr: component.String(),
-		args:    &object.PanArr{Elems: args},
+		args:    object.NewPanArr(args...),
 		kwargs:  kwargs,
 		body:    &component.Body,
 	}
