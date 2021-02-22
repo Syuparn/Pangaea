@@ -81,7 +81,7 @@ func TestMapInspect(t *testing.T) {
 			PanMap{
 				&map[HashKey]Pair{},
 				&[]Pair{
-					{&PanArr{[]PanObject{&PanInt{1}}}, &PanInt{1}},
+					{NewPanArr(NewPanInt(1)), NewPanInt(1)},
 				},
 			},
 			"%{[1]: 1}",
@@ -90,7 +90,7 @@ func TestMapInspect(t *testing.T) {
 			PanMap{
 				&map[HashKey]Pair{},
 				&[]Pair{
-					{&PanArr{[]PanObject{&PanInt{1}, &PanInt{2}}}, &PanInt{1}},
+					{NewPanArr(NewPanInt(1), NewPanInt(2)), NewPanInt(1)},
 					{
 						&PanMap{
 							&map[HashKey]Pair{

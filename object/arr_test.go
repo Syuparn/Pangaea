@@ -5,7 +5,7 @@ import (
 )
 
 func TestArrType(t *testing.T) {
-	obj := PanArr{}
+	obj := NewPanArr()
 	if obj.Type() != ArrType {
 		t.Fatalf("wrong type: expected=%s, got=%s", ArrType, obj.Type())
 	}
@@ -13,31 +13,31 @@ func TestArrType(t *testing.T) {
 
 func TestArrInspect(t *testing.T) {
 	tests := []struct {
-		obj      PanArr
+		obj      *PanArr
 		expected string
 	}{
 		{
-			PanArr{},
+			NewPanArr(),
 			`[]`,
 		},
 		{
-			PanArr{[]PanObject{&PanInt{1}}},
+			NewPanArr(NewPanInt(1)),
 			`[1]`,
 		},
 		{
-			PanArr{[]PanObject{NewPanStr("foo")}},
+			NewPanArr(NewPanStr("foo")),
 			`["foo"]`,
 		},
 		{
-			PanArr{[]PanObject{&PanFloat{1.0}}},
+			NewPanArr(NewPanFloat(1.0)),
 			`[1.000000]`,
 		},
 		{
-			PanArr{[]PanObject{&PanInt{1}, &PanInt{-10}}},
+			NewPanArr(NewPanInt(1), NewPanInt(-10)),
 			`[1, -10]`,
 		},
 		{
-			PanArr{[]PanObject{&PanInt{1}, NewPanStr("foo"), &PanBool{false}}},
+			NewPanArr(NewPanInt(1), NewPanStr("foo"), BuiltInFalse),
 			`[1, "foo", false]`,
 		},
 	}
@@ -51,7 +51,7 @@ func TestArrInspect(t *testing.T) {
 }
 
 func TestArrProto(t *testing.T) {
-	a := PanArr{}
+	a := NewPanArr()
 	if a.Proto() != BuiltInArrObj {
 		t.Fatalf("Proto is not BuiltInArrObj. got=%T (%+v)",
 			a.Proto(), a.Proto())
@@ -60,7 +60,7 @@ func TestArrProto(t *testing.T) {
 
 // checked by compiler (this function works nothing)
 func testArrIsPanObject() {
-	var _ PanObject = &PanArr{[]PanObject{&PanInt{1}}}
+	var _ PanObject = NewPanArr()
 }
 
 func TestNewPanArr(t *testing.T) {

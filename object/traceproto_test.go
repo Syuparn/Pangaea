@@ -5,7 +5,7 @@ import (
 )
 
 func TestTraceProtoOfArr(t *testing.T) {
-	proto := &PanArr{Elems: []PanObject{}}
+	proto := NewPanArr()
 
 	tests := []struct {
 		obj      PanObject

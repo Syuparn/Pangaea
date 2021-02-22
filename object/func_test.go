@@ -24,7 +24,7 @@ func (m *MockFuncWrapper) String() string {
 
 func (m *MockFuncWrapper) Args() *PanArr {
 	// return empty arr
-	return &PanArr{}
+	return NewPanArr()
 }
 
 func (m *MockFuncWrapper) Kwargs() *PanObj {
