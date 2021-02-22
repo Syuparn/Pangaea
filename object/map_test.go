@@ -5,7 +5,7 @@ import (
 )
 
 func TestMapType(t *testing.T) {
-	obj := PanMap{}
+	obj := NewEmptyPanMap()
 	if obj.Type() != MapType {
 		t.Fatalf("wrong type: expected=%s, got=%s", MapType, obj.Type())
 	}
@@ -13,64 +13,51 @@ func TestMapType(t *testing.T) {
 
 func TestMapInspect(t *testing.T) {
 	tests := []struct {
-		obj      PanMap
+		obj      *PanMap
 		expected string
 	}{
 		// keys are sorted so that Inspect() always returns same output
 		{
-			PanMap{&map[HashKey]Pair{}, &[]Pair{}},
+			NewEmptyPanMap(),
 			`%{}`,
 		},
 		{
-			PanMap{&map[HashKey]Pair{
-				(NewPanStr("a")).Hash(): {NewPanStr("a"), NewPanInt(1)},
-			}, &[]Pair{}},
+			NewPanMap(
+				Pair{NewPanStr("a"), NewPanInt(1)},
+			),
 			`%{"a": 1}`,
 		},
 		{
-			PanMap{&map[HashKey]Pair{
-				(NewPanStr("a")).Hash():  {NewPanStr("a"), NewPanStr("A")},
-				(NewPanStr("_b")).Hash(): {NewPanStr("_b"), NewPanStr("B")},
-			}, &[]Pair{}},
+			NewPanMap(
+				Pair{NewPanStr("a"), NewPanStr("A")},
+				Pair{NewPanStr("_b"), NewPanStr("B")},
+			),
 			`%{"_b": "B", "a": "A"}`,
 		},
 		{
-			PanMap{&map[HashKey]Pair{
-				(NewPanStr("foo?")).Hash(): {NewPanStr("foo?"), &PanBool{true}},
-				(NewPanStr("b")).Hash():    {NewPanStr("b"), NewPanStr("B")},
-			}, &[]Pair{}},
+			NewPanMap(
+				Pair{NewPanStr("foo?"), BuiltInTrue},
+				Pair{NewPanStr("b"), NewPanStr("B")},
+			),
 			`%{"b": "B", "foo?": true}`,
 		},
 		{
-			PanMap{&map[HashKey]Pair{
-				(NewPanInt(1)).Hash():   {NewPanInt(1), NewPanStr("a")},
-				(&PanBool{true}).Hash(): {&PanBool{true}, NewPanStr("B")},
-			}, &[]Pair{}},
+			NewPanMap(
+				Pair{NewPanInt(1), NewPanStr("a")},
+				Pair{BuiltInTrue, NewPanStr("B")},
+			),
 			`%{1: "a", true: "B"}`,
 		},
 		{
-			PanMap{&map[HashKey]Pair{
-				(NewPanStr("foo?")).Hash(): {NewPanStr("foo?"), &PanBool{true}},
-				(NewPanStr("b")).Hash(): {
+			NewPanMap(
+				Pair{NewPanStr("foo?"), &PanBool{true}},
+				Pair{
 					NewPanStr("b"),
-					// NOTE: `&(NewPanObjInstance(...))` is syntax error
-					PanObjInstancePtr(&map[SymHash]Pair{
-						(NewPanStr("c")).SymHash(): {NewPanStr("c"), NewPanStr("C")},
-					}),
+					NewPanMap(
+						Pair{NewPanStr("c"), NewPanStr("C")},
+					),
 				},
-			}, &[]Pair{}},
-			`%{"b": {"c": "C"}, "foo?": true}`,
-		},
-		{
-			PanMap{&map[HashKey]Pair{
-				(NewPanStr("foo?")).Hash(): {NewPanStr("foo?"), &PanBool{true}},
-				(NewPanStr("b")).Hash(): {
-					NewPanStr("b"),
-					&PanMap{&map[HashKey]Pair{
-						(NewPanStr("c")).Hash(): {NewPanStr("c"), NewPanStr("C")},
-					}, &[]Pair{}},
-				},
-			}, &[]Pair{}},
+			),
 			`%{"b": %{"c": "C"}, "foo?": true}`,
 		},
 		// Map can use non-hashable object as key
@@ -78,49 +65,36 @@ func TestMapInspect(t *testing.T) {
 		// one-by-one `==` method comparizon)
 		// order of non-hashable pairs is same as struct initialization
 		{
-			PanMap{
-				&map[HashKey]Pair{},
-				&[]Pair{
-					{NewPanArr(NewPanInt(1)), NewPanInt(1)},
-				},
-			},
+			NewPanMap(
+				Pair{NewPanArr(NewPanInt(1)), NewPanInt(1)},
+			),
 			"%{[1]: 1}",
 		},
 		{
-			PanMap{
-				&map[HashKey]Pair{},
-				&[]Pair{
-					{NewPanArr(NewPanInt(1), NewPanInt(2)), NewPanInt(1)},
-					{
-						&PanMap{
-							&map[HashKey]Pair{
-								(NewPanStr("a")).Hash(): {NewPanStr("a"), NewPanStr("b")},
-							},
-							&[]Pair{},
-						},
-						&PanBool{false},
-					},
+			NewPanMap(
+				Pair{NewPanArr(NewPanInt(1), NewPanInt(2)), NewPanInt(1)},
+				Pair{
+					NewPanMap(
+						Pair{NewPanStr("a"), NewPanStr("b")},
+					),
+					BuiltInFalse,
 				},
-			},
+			),
 			`%{[1, 2]: 1, %{"a": "b"}: false}`,
 		},
 		// order: hashable (sorted by key Inspect), non-hashable
 		{
-			PanMap{
-				&map[HashKey]Pair{
-					(NewPanInt(-2)).Hash():  {NewPanInt(-2), NewPanStr("minus two")},
-					(NewPanStr("a")).Hash(): {NewPanStr("a"), NewPanStr("A")},
-					(NewPanStr("z")).Hash(): {NewPanStr("z"), NewPanStr("Z")},
+			NewPanMap(
+				Pair{NewPanInt(-2), NewPanStr("minus two")},
+				Pair{NewPanStr("a"), NewPanStr("A")},
+				Pair{NewPanStr("z"), NewPanStr("Z")},
+				Pair{
+					PanObjInstancePtr(&map[SymHash]Pair{
+						(NewPanStr("foo")).SymHash(): {NewPanStr("foo"), NewPanInt(1)},
+					}),
+					NewPanNil(),
 				},
-				&[]Pair{
-					{
-						PanObjInstancePtr(&map[SymHash]Pair{
-							(NewPanStr("foo")).SymHash(): {NewPanStr("foo"), NewPanInt(1)},
-						}),
-						&PanNil{},
-					},
-				},
-			},
+			),
 			`%{"a": "A", "z": "Z", -2: "minus two", {"foo": 1}: nil}`,
 		},
 	}
@@ -134,7 +108,7 @@ func TestMapInspect(t *testing.T) {
 }
 
 func TestMapProto(t *testing.T) {
-	m := PanMap{}
+	m := NewEmptyPanMap()
 	if m.Proto() != BuiltInMapObj {
 		t.Fatalf("Proto is not BuiltInMapObj. got=%T (%+v)",
 			m.Proto(), m.Proto())
@@ -143,7 +117,7 @@ func TestMapProto(t *testing.T) {
 
 // checked by compiler (this function works nothing)
 func testMapIsPanObject() {
-	var _ PanObject = &PanMap{}
+	var _ PanObject = NewEmptyPanMap()
 }
 
 func TestNewPanMapWithScalarKeys(t *testing.T) {

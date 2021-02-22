@@ -451,7 +451,7 @@ func TestTraceProtoOfIOFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfMap(t *testing.T) {
-	proto := &PanMap{}
+	proto := NewEmptyPanMap()
 
 	tests := []struct {
 		obj      PanObject
