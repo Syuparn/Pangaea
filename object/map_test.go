@@ -170,6 +170,12 @@ func TestNewPanMapWithNonScalarKeys(t *testing.T) {
 		{[]Pair{
 			{NewPanArr(), NewPanInt(2)},
 		}},
+		// if same keys are passed, set only first one
+
+		{[]Pair{
+			{NewPanStr("a"), NewPanInt(1)},
+			{NewPanStr("a"), NewPanInt(2)},
+		}},
 	}
 
 	for _, tt := range tests {
@@ -212,5 +218,72 @@ func TestNewEmptyPanMap(t *testing.T) {
 	if len(*actual.NonHashablePairs) != 0 {
 		t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
 			0, len(*actual.NonHashablePairs))
+	}
+}
+
+func TestNewPanMapWithDuplicatedKeys(t *testing.T) {
+	tests := []struct {
+		pairs                    []Pair
+		expectedPairs            map[HashKey]Pair
+		expectedNonHashablePairs []Pair
+	}{
+		// if same keys are passed, set only first one
+
+		{
+			[]Pair{
+				{NewPanStr("a"), NewPanInt(1)},
+				{NewPanStr("a"), NewPanInt(2)},
+			},
+			map[HashKey]Pair{
+				NewPanStr("a").Hash(): {NewPanStr("a"), NewPanInt(1)},
+			},
+			[]Pair{},
+		},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanMap(tt.pairs...)
+
+		if len(*actual.Pairs) != len(tt.expectedPairs) {
+			t.Fatalf("wrong pair length. expected=%d, got=%d",
+				len(tt.expectedPairs), len(*actual.Pairs))
+		}
+
+		if len(*actual.NonHashablePairs) != len(tt.expectedNonHashablePairs) {
+			t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
+				len(tt.expectedNonHashablePairs), len(*actual.NonHashablePairs))
+		}
+
+		for hash, pair := range tt.expectedPairs {
+			actualPair, ok := (*actual.Pairs)[hash]
+
+			if !ok {
+				t.Fatalf("key %s is not found in pair", pair.Key.Inspect())
+			}
+
+			if actualPair.Key.(PanScalar).Hash() != pair.Key.(PanScalar).Hash() {
+				t.Errorf("wrong key. expected=%s, got=%s",
+					pair.Key.Inspect(), actualPair.Key.Inspect())
+			}
+
+			if actualPair.Value != pair.Value {
+				t.Errorf("wrong value. expected=%s, got=%s",
+					pair.Value.Inspect(), actualPair.Value.Inspect())
+			}
+		}
+
+		for i, pair := range tt.expectedNonHashablePairs {
+			actualPair := (*actual.NonHashablePairs)[i]
+
+			if actualPair.Key != pair.Key {
+				t.Errorf("wrong key. expected=%s, got=%s",
+					pair.Key.Inspect(), actualPair.Key.Inspect())
+			}
+
+			if actualPair.Value != pair.Value {
+				t.Errorf("wrong value. expected=%s, got=%s",
+					pair.Value.Inspect(), actualPair.Value.Inspect())
+			}
+		}
 	}
 }

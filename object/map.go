@@ -61,7 +61,9 @@ func NewPanMap(pairs ...Pair) *PanMap {
 	for _, pair := range pairs {
 		hashable, ok := pair.Key.(PanScalar)
 		if ok {
-			pairMap[hashable.Hash()] = pair
+			if _, exists := pairMap[hashable.Hash()]; !exists {
+				pairMap[hashable.Hash()] = pair
+			}
 		} else {
 			nonHashablePairs = append(nonHashablePairs, pair)
 		}
