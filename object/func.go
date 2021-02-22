@@ -79,3 +79,8 @@ type FuncWrapper interface {
 func NewPanFunc(f FuncWrapper, env *Env) *PanFunc {
 	return &PanFunc{f, FuncFunc, env}
 }
+
+// NewPanIter returns new func object.
+func NewPanIter(f FuncWrapper, env *Env) *PanFunc {
+	return &PanFunc{f, IterFunc, env}
+}

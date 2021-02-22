@@ -106,7 +106,34 @@ func TestNewPanFunc(t *testing.T) {
 		}
 
 		if actual.FuncKind != FuncFunc {
-			t.Errorf("kind must be actual.FuncKind. got=%#v", actual.FuncKind)
+			t.Errorf("kind must be FuncFunc. got=%#v", actual.FuncKind)
+		}
+
+		if actual.Env != tt.env {
+			t.Errorf("wrong env. expected=%#v, got=%#v",
+				tt.env, actual.Env)
+		}
+	}
+}
+
+func TestNewPanIter(t *testing.T) {
+	tests := []struct {
+		f   FuncWrapper
+		env *Env
+	}{
+		{newMockFuncWrapper(), NewEnv()},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanIter(tt.f, tt.env)
+		// NOTE: functions are not comparable
+		if fmt.Sprintf("%v", actual.FuncWrapper) != fmt.Sprintf("%v", tt.f) {
+			t.Errorf("wrong value. expected=%#v, got=%#v",
+				tt.f, actual.FuncWrapper)
+		}
+
+		if actual.FuncKind != IterFunc {
+			t.Errorf("kind must be IterFunc. got=%#v", actual.FuncKind)
 		}
 
 		if actual.Env != tt.env {
