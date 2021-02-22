@@ -38,3 +38,8 @@ func (r *PanRange) Inspect() string {
 func (r *PanRange) Proto() PanObject {
 	return BuiltInRangeObj
 }
+
+// NewPanRange returns new range object.
+func NewPanRange(start, stop, step PanObject) *PanRange {
+	return &PanRange{start, stop, step}
+}
