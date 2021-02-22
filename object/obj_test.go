@@ -23,7 +23,7 @@ func TestObjInspect(t *testing.T) {
 		},
 		{
 			PanObjInstance(&map[SymHash]Pair{
-				(NewPanStr("a")).SymHash(): {NewPanStr("a"), &PanInt{1}},
+				(NewPanStr("a")).SymHash(): {NewPanStr("a"), NewPanInt(1)},
 			}),
 			`{"a": 1}`,
 		},

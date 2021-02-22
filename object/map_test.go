@@ -23,7 +23,7 @@ func TestMapInspect(t *testing.T) {
 		},
 		{
 			PanMap{&map[HashKey]Pair{
-				(NewPanStr("a")).Hash(): {NewPanStr("a"), &PanInt{1}},
+				(NewPanStr("a")).Hash(): {NewPanStr("a"), NewPanInt(1)},
 			}, &[]Pair{}},
 			`%{"a": 1}`,
 		},
@@ -43,7 +43,7 @@ func TestMapInspect(t *testing.T) {
 		},
 		{
 			PanMap{&map[HashKey]Pair{
-				(&PanInt{1}).Hash():     {&PanInt{1}, NewPanStr("a")},
+				(NewPanInt(1)).Hash():   {NewPanInt(1), NewPanStr("a")},
 				(&PanBool{true}).Hash(): {&PanBool{true}, NewPanStr("B")},
 			}, &[]Pair{}},
 			`%{1: "a", true: "B"}`,
@@ -108,14 +108,14 @@ func TestMapInspect(t *testing.T) {
 		{
 			PanMap{
 				&map[HashKey]Pair{
-					(&PanInt{-2}).Hash():    {&PanInt{-2}, NewPanStr("minus two")},
+					(NewPanInt(-2)).Hash():  {NewPanInt(-2), NewPanStr("minus two")},
 					(NewPanStr("a")).Hash(): {NewPanStr("a"), NewPanStr("A")},
 					(NewPanStr("z")).Hash(): {NewPanStr("z"), NewPanStr("Z")},
 				},
 				&[]Pair{
 					{
 						PanObjInstancePtr(&map[SymHash]Pair{
-							(NewPanStr("foo")).SymHash(): {NewPanStr("foo"), &PanInt{1}},
+							(NewPanStr("foo")).SymHash(): {NewPanStr("foo"), NewPanInt(1)},
 						}),
 						&PanNil{},
 					},

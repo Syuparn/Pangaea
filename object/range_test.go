@@ -21,15 +21,15 @@ func TestRangeInspect(t *testing.T) {
 			"(nil:nil:nil)",
 		},
 		{
-			PanRange{&PanInt{1}, &PanInt{2}, &PanInt{3}},
+			PanRange{NewPanInt(1), NewPanInt(2), NewPanInt(3)},
 			"(1:2:3)",
 		},
 		{
-			PanRange{&PanNil{}, &PanInt{20}, &PanInt{-1}},
+			PanRange{&PanNil{}, NewPanInt(20), NewPanInt(-1)},
 			"(nil:20:-1)",
 		},
 		{
-			PanRange{NewPanStr("a"), NewPanStr("z"), &PanInt{-1}},
+			PanRange{NewPanStr("a"), NewPanStr("z"), NewPanInt(-1)},
 			`("a":"z":-1)`,
 		},
 	}
@@ -52,7 +52,7 @@ func TestRangeProto(t *testing.T) {
 
 // checked by compiler (this function works nothing)
 func testRangeIsPanObject() {
-	var _ PanObject = &PanRange{&PanInt{1}, &PanInt{2}, &PanInt{3}}
+	var _ PanObject = &PanRange{NewPanInt(1), NewPanInt(2), NewPanInt(3)}
 }
 
 func TestNewPanRange(t *testing.T) {

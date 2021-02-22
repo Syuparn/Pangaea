@@ -5,7 +5,7 @@ import (
 )
 
 func TestIntType(t *testing.T) {
-	intObj := PanInt{10}
+	intObj := NewPanInt(10)
 	if intObj.Type() != IntType {
 		t.Fatalf("wrong type: expected=%s, got=%s", IntType, intObj.Type())
 	}
@@ -13,13 +13,13 @@ func TestIntType(t *testing.T) {
 
 func TestIntInspect(t *testing.T) {
 	tests := []struct {
-		obj      PanInt
+		obj      *PanInt
 		expected string
 	}{
-		{PanInt{10}, "10"},
-		{PanInt{1}, "1"},
-		{PanInt{-4}, "-4"},
-		{PanInt{12345}, "12345"},
+		{NewPanInt(10), "10"},
+		{NewPanInt(1), "1"},
+		{NewPanInt(-4), "-4"},
+		{NewPanInt(12345), "12345"},
 	}
 
 	for _, tt := range tests {
@@ -31,7 +31,7 @@ func TestIntInspect(t *testing.T) {
 }
 
 func TestIntProto(t *testing.T) {
-	i := PanInt{10}
+	i := NewPanInt(10)
 	if i.Proto() != BuiltInIntObj {
 		t.Fatalf("Proto is not BuiltInIntObj. got=%T (%+v)",
 			i.Proto(), i.Proto())
@@ -40,12 +40,12 @@ func TestIntProto(t *testing.T) {
 
 func TestIntHash(t *testing.T) {
 	tests := []struct {
-		obj      PanInt
+		obj      *PanInt
 		expected int
 	}{
-		{PanInt{10}, 10},
-		{PanInt{-2}, -2},
-		{PanInt{12345678901}, 12345678901},
+		{NewPanInt(10), 10},
+		{NewPanInt(-2), -2},
+		{NewPanInt(12345678901), 12345678901},
 	}
 
 	for _, tt := range tests {
@@ -64,11 +64,11 @@ func TestIntHash(t *testing.T) {
 
 // checked by compiler (this function works nothing)
 func testIntIsPanObject() {
-	var _ PanObject = &PanInt{10}
+	var _ PanObject = NewPanInt(10)
 }
 
 func testIntIsPanScalar() {
-	var _ PanScalar = &PanInt{10}
+	var _ PanScalar = NewPanInt(10)
 }
 
 func TestNewPanInt(t *testing.T) {
