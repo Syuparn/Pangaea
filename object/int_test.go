@@ -70,3 +70,20 @@ func testIntIsPanObject() {
 func testIntIsPanScalar() {
 	var _ PanScalar = &PanInt{10}
 }
+
+func TestNewPanInt(t *testing.T) {
+	tests := []struct {
+		i int64
+	}{
+		{1},
+		{5},
+		{-1},
+	}
+
+	for _, tt := range tests {
+		actual := NewPanInt(tt.i)
+		if actual.Value != tt.i {
+			t.Errorf("wrong value. expected=%d, got=%d", tt.i, actual.Value)
+		}
+	}
+}
