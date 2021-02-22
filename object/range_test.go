@@ -5,7 +5,7 @@ import (
 )
 
 func TestRangeType(t *testing.T) {
-	obj := PanRange{}
+	obj := NewPanRange(NewPanNil(), NewPanNil(), NewPanNil())
 	if obj.Type() != RangeType {
 		t.Fatalf("wrong type: expected=%s, got=%s", RangeType, obj.Type())
 	}
@@ -13,23 +13,23 @@ func TestRangeType(t *testing.T) {
 
 func TestRangeInspect(t *testing.T) {
 	tests := []struct {
-		obj      PanRange
+		obj      *PanRange
 		expected string
 	}{
 		{
-			PanRange{NewPanNil(), NewPanNil(), NewPanNil()},
+			NewPanRange(NewPanNil(), NewPanNil(), NewPanNil()),
 			"(nil:nil:nil)",
 		},
 		{
-			PanRange{NewPanInt(1), NewPanInt(2), NewPanInt(3)},
+			NewPanRange(NewPanInt(1), NewPanInt(2), NewPanInt(3)),
 			"(1:2:3)",
 		},
 		{
-			PanRange{NewPanNil(), NewPanInt(20), NewPanInt(-1)},
+			NewPanRange(NewPanNil(), NewPanInt(20), NewPanInt(-1)),
 			"(nil:20:-1)",
 		},
 		{
-			PanRange{NewPanStr("a"), NewPanStr("z"), NewPanInt(-1)},
+			NewPanRange(NewPanStr("a"), NewPanStr("z"), NewPanInt(-1)),
 			`("a":"z":-1)`,
 		},
 	}
@@ -43,7 +43,7 @@ func TestRangeInspect(t *testing.T) {
 }
 
 func TestRangeProto(t *testing.T) {
-	r := PanRange{}
+	r := NewPanRange(NewPanNil(), NewPanNil(), NewPanNil())
 	if r.Proto() != BuiltInRangeObj {
 		t.Fatalf("Proto is not BuiltInRangeObj. got=%T (%+v)",
 			r.Proto(), r.Proto())
@@ -52,7 +52,7 @@ func TestRangeProto(t *testing.T) {
 
 // checked by compiler (this function works nothing)
 func testRangeIsPanObject() {
-	var _ PanObject = &PanRange{NewPanInt(1), NewPanInt(2), NewPanInt(3)}
+	var _ PanObject = NewPanRange(NewPanInt(1), NewPanInt(2), NewPanInt(3))
 }
 
 func TestNewPanRange(t *testing.T) {

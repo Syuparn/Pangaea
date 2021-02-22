@@ -673,7 +673,7 @@ func TestTraceProtoOfObjFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfRange(t *testing.T) {
-	proto := &PanRange{}
+	proto := NewPanRange(NewPanNil(), NewPanNil(), NewPanNil())
 
 	tests := []struct {
 		obj      PanObject
