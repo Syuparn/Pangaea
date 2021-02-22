@@ -74,3 +74,8 @@ type FuncWrapper interface {
 	Kwargs() *PanObj
 	Body() *[]ast.Stmt
 }
+
+// NewPanFunc returns new func object.
+func NewPanFunc(f FuncWrapper, env *Env) *PanFunc {
+	return &PanFunc{f, FuncFunc, env}
+}
