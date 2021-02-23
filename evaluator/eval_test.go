@@ -1601,6 +1601,24 @@ func TestEvalMapLiteral(t *testing.T) {
 				[]object.Pair{},
 			),
 		},
+		// embedded non-scalar
+		{
+			`%{'a: 1, **%{[]: 2}}`,
+			toPanMap(
+				[]object.Pair{
+					{
+						Key:   object.NewPanStr("a"),
+						Value: object.NewPanInt(1),
+					},
+				},
+				[]object.Pair{
+					{
+						Key:   object.NewPanArr(),
+						Value: object.NewPanInt(2),
+					},
+				},
+			),
+		},
 		{
 			`%{**%{'a: 1}, **%{'b: 2}}`,
 			toPanMap(
