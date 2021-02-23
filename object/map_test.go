@@ -170,12 +170,6 @@ func TestNewPanMapWithNonScalarKeys(t *testing.T) {
 		{[]Pair{
 			{NewPanArr(), NewPanInt(2)},
 		}},
-		// if same keys are passed, set only first one
-
-		{[]Pair{
-			{NewPanStr("a"), NewPanInt(1)},
-			{NewPanStr("a"), NewPanInt(2)},
-		}},
 	}
 
 	for _, tt := range tests {
@@ -228,7 +222,6 @@ func TestNewPanMapWithDuplicatedKeys(t *testing.T) {
 		expectedNonHashablePairs []Pair
 	}{
 		// if same keys are passed, set only first one
-
 		{
 			[]Pair{
 				{NewPanStr("a"), NewPanInt(1)},
@@ -239,6 +232,8 @@ func TestNewPanMapWithDuplicatedKeys(t *testing.T) {
 			},
 			[]Pair{},
 		},
+		// NOTE: duplication of non-hashable keys is not checked!
+		// (because '== method comparison is required)
 	}
 
 	for _, tt := range tests {
