@@ -65,7 +65,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				// NOTE: no need to copy each elem because they are immutable
 				elems := append(self.Elems, other.Elems...)
-				return &object.PanArr{Elems: elems}
+				return object.NewPanArr(elems...)
 			},
 		),
 		"*": f(
@@ -95,7 +95,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				for i := int64(0); i < other.Value; i++ {
 					elems = append(elems, selfElems...)
 				}
-				return &object.PanArr{Elems: elems}
+				return object.NewPanArr(elems...)
 			},
 		),
 		"_iter": f(
@@ -111,10 +111,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("\\1 must be arr")
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  arrIter(self),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(arrIter(self), env)
 			},
 		),
 		"_name": object.NewPanStr("Arr"),
@@ -145,7 +142,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Arr#call requires at least 1 arg")
 				}
 
-				return &object.PanArr{Elems: args[1:]}
+				return object.NewPanArr(args[1:]...)
 			},
 		),
 		"has?": f(

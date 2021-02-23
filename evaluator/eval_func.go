@@ -35,14 +35,14 @@ func evalCallable(
 
 	wrapper := &FuncWrapperImpl{
 		codeStr: component.String(),
-		args:    &object.PanArr{Elems: args},
+		args:    object.NewPanArr(args...),
 		kwargs:  kwargs,
 		body:    &component.Body,
 	}
 
-	return &object.PanFunc{
-		FuncWrapper: wrapper,
-		FuncKind:    funcKind,
-		Env:         object.NewEnclosedEnv(env),
+	if funcKind == object.FuncFunc {
+		return object.NewPanFunc(wrapper, object.NewEnclosedEnv(env))
 	}
+
+	return object.NewPanIter(wrapper, object.NewEnclosedEnv(env))
 }

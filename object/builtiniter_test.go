@@ -35,7 +35,7 @@ func TestBuiltInIterProto(t *testing.T) {
 // checked by compiler (this function works nothing)
 func testBuiltInIterIsPanObject() {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
-	var _ PanObject = &PanBuiltInIter{Fn: f, Env: NewEnv()}
+	var _ PanObject = NewPanBuiltInIter(f, NewEnv())
 }
 
 func TestNewPanBuiltInIter(t *testing.T) {

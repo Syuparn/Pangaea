@@ -91,10 +91,7 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return resInt.Value != 1, nil
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  rangeIter(self, next, reachesStop),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(rangeIter(self, next, reachesStop), env)
 			},
 		),
 		"_name": object.NewPanStr("Range"),
@@ -123,23 +120,23 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				// insufficient args are filled by nil (Pangaea call spec)
 				switch len(args) {
 				case 2:
-					return &object.PanRange{
-						Start: args[1],
-						Stop:  object.BuiltInNil,
-						Step:  object.BuiltInNil,
-					}
+					return object.NewPanRange(
+						args[1],
+						object.BuiltInNil,
+						object.BuiltInNil,
+					)
 				case 3:
-					return &object.PanRange{
-						Start: args[1],
-						Stop:  args[2],
-						Step:  object.BuiltInNil,
-					}
+					return object.NewPanRange(
+						args[1],
+						args[2],
+						object.BuiltInNil,
+					)
 				default:
-					return &object.PanRange{
-						Start: args[1],
-						Stop:  args[2],
-						Step:  args[3],
-					}
+					return object.NewPanRange(
+						args[1],
+						args[2],
+						args[3],
+					)
 				}
 			},
 		),

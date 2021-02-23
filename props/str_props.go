@@ -149,7 +149,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					}
 				}
 
-				return &object.PanArr{Elems: strs}
+				return object.NewPanArr(strs...)
 			},
 		),
 		"_incBy": f(
@@ -191,10 +191,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("\\1 must be int")
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  strIter(self),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(strIter(self), env)
 			},
 		),
 		"_name": object.NewPanStr("Str"),
@@ -237,7 +234,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewValueErr(
 						fmt.Sprintf("%s cannot be converted into float", object.ReprStr(args[0])))
 				}
-				return &object.PanFloat{Value: f}
+				return object.NewPanFloat(f)
 			},
 		),
 		"I": f(
@@ -320,7 +317,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				if match == nil {
-					return &object.PanArr{Elems: []object.PanObject{}}
+					return object.NewPanArr()
 				}
 
 				elems := []object.PanObject{}
@@ -328,7 +325,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					elems = append(elems, object.NewPanStr(group.String()))
 				}
 
-				return &object.PanArr{Elems: elems}
+				return object.NewPanArr(elems...)
 			},
 		),
 		"new": f(

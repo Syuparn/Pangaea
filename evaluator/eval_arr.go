@@ -26,5 +26,5 @@ func evalArr(node *ast.ArrLiteral, env *object.Env) object.PanObject {
 			elems = append(elems, elem)
 		}
 	}
-	return &object.PanArr{Elems: elems}
+	return object.NewPanArr(elems...)
 }

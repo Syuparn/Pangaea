@@ -8,44 +8,20 @@ import (
 )
 
 func TestFuncKind(t *testing.T) {
-	obj := PanFunc{}
+	obj := NewPanFunc(newMockFuncWrapper(), nil)
 	if obj.Type() != FuncType {
 		t.Fatalf("wrong type: expected=%s, got=%s", FuncType, obj.Type())
 	}
 }
 
-type MockFuncWrapper struct {
-	str string
-}
-
-func (m *MockFuncWrapper) String() string {
-	return m.str
-}
-
-func (m *MockFuncWrapper) Args() *PanArr {
-	// return empty arr
-	return &PanArr{}
-}
-
-func (m *MockFuncWrapper) Kwargs() *PanObj {
-	// return empty obj
-	obj, _ := PanObjInstancePtr(&map[SymHash]Pair{}).(*PanObj)
-	return obj
-}
-
-func (m *MockFuncWrapper) Body() *[]ast.Stmt {
-	// return empty stmt
-	return &[]ast.Stmt{}
-}
-
 func TestFuncInspect(t *testing.T) {
 	tests := []struct {
-		obj      PanFunc
+		obj      *PanFunc
 		expected string
 	}{
 		// AstFuncWrapper delegates to FuncComponent.String(), which works same as below
-		{PanFunc{&MockFuncWrapper{"|a| a + 1"}, FuncFunc, nil}, "{|a| a + 1}"},
-		{PanFunc{&MockFuncWrapper{"|a| a + 1"}, IterFunc, nil}, "<{|a| a + 1}>"},
+		{NewPanFunc(newMockFuncWrapperWithBody("|a| a + 1"), nil), "{|a| a + 1}"},
+		{NewPanIter(newMockFuncWrapperWithBody("|a| a + 1"), nil), "<{|a| a + 1}>"},
 	}
 
 	for _, tt := range tests {
@@ -58,17 +34,17 @@ func TestFuncInspect(t *testing.T) {
 
 func TestFuncProto(t *testing.T) {
 	tests := []struct {
-		f            PanFunc
+		f            *PanFunc
 		expected     PanObject
 		expectedName string
 	}{
 		{
-			PanFunc{&MockFuncWrapper{"|foo| foo"}, FuncFunc, nil},
+			NewPanFunc(newMockFuncWrapperWithBody("|foo| foo"), NewEnv()),
 			BuiltInFuncObj,
 			"BuiltInFuncObj",
 		},
 		{
-			PanFunc{&MockFuncWrapper{"|foo| foo"}, IterFunc, nil},
+			NewPanIter(newMockFuncWrapperWithBody("|foo| foo"), NewEnv()),
 			BuiltInIterObj,
 			"BuiltInIterObj",
 		},
@@ -86,7 +62,7 @@ func TestFuncProto(t *testing.T) {
 
 // checked by compiler (this function works nothing)
 func testFuncIsPanObject() {
-	var _ PanObject = &PanFunc{&MockFuncWrapper{"|foo| foo"}, FuncFunc, nil}
+	var _ PanObject = NewPanFunc(newMockFuncWrapper(), nil)
 }
 
 func TestNewPanFunc(t *testing.T) {
@@ -147,10 +123,16 @@ func newMockFuncWrapper() *mockFuncWrapper {
 	return &mockFuncWrapper{}
 }
 
-type mockFuncWrapper struct{}
+func newMockFuncWrapperWithBody(b string) *mockFuncWrapper {
+	return &mockFuncWrapper{body: b}
+}
+
+type mockFuncWrapper struct {
+	body string
+}
 
 func (m *mockFuncWrapper) String() string {
-	return "mock"
+	return m.body
 }
 
 func (m *mockFuncWrapper) Args() *PanArr {

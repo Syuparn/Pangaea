@@ -74,7 +74,7 @@ func assignArgsToEnv(
 		env.Set(object.GetSymHash(argVar), arg)
 	}
 	// `\0`
-	env.Set(object.GetSymHash(`\0`), &object.PanArr{Elems: args})
+	env.Set(object.GetSymHash(`\0`), object.NewPanArr(args...))
 	// `\`
 	if len(args) > 0 {
 		env.Set(object.GetSymHash(`\`), args[0])

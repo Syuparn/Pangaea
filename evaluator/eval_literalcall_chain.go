@@ -104,7 +104,7 @@ func squashNilLiteralCallListChainMiddleware(next _LiteralCallMiddlewareHandler)
 			elems = append(elems, elem)
 		}
 
-		return &object.PanArr{Elems: elems}
+		return object.NewPanArr(elems...)
 	}
 }
 
@@ -136,7 +136,7 @@ func keepNilLiteralCallListChainMiddleware(next _LiteralCallMiddlewareHandler) _
 			elems = append(elems, elem)
 		}
 
-		return &object.PanArr{Elems: elems}
+		return object.NewPanArr(elems...)
 	}
 }
 
@@ -163,7 +163,7 @@ func literalCallReduceChainMiddleware(next _LiteralCallMiddlewareHandler) _Liter
 				}
 				return err
 			}
-			nextRecv := &object.PanArr{Elems: []object.PanObject{acc, nextRet}}
+			nextRecv := object.NewPanArr(acc, nextRet)
 
 			evaluated := next(env, nextRecv, chainArg, args, kwargs)
 			if evaluated.Type() == object.ErrType {
@@ -199,7 +199,7 @@ func literalCallThoughtfulReduceChainMiddleware(next _LiteralCallMiddlewareHandl
 				}
 				return err
 			}
-			nextRecv := &object.PanArr{Elems: []object.PanObject{acc, nextRet}}
+			nextRecv := object.NewPanArr(acc, nextRet)
 
 			evaluated := next(env, nextRecv, chainArg, args, kwargs)
 			if evaluated.Type() == object.ErrType {

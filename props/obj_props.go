@@ -46,10 +46,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`Obj#_iter cannot be applied to \1`)
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  objIter(self),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(objIter(self), env)
 			},
 		),
 		"_name": object.NewPanStr("Obj"),
@@ -87,29 +84,23 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				self, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
-					return &object.PanArr{Elems: []object.PanObject{}}
+					return object.NewPanArr()
 				}
 
 				items := []object.PanObject{}
 				for _, keyHash := range *self.Keys {
 					pair, _ := (*self.Pairs)[keyHash]
-					items = append(items, &object.PanArr{Elems: []object.PanObject{
-						pair.Key,
-						pair.Value,
-					}})
+					items = append(items, object.NewPanArr(pair.Key, pair.Value))
 				}
 
 				if withPrivate {
 					for _, keyHash := range *self.PrivateKeys {
 						pair, _ := (*self.Pairs)[keyHash]
-						items = append(items, &object.PanArr{Elems: []object.PanObject{
-							pair.Key,
-							pair.Value,
-						}})
+						items = append(items, object.NewPanArr(pair.Key, pair.Value))
 					}
 				}
 
-				return &object.PanArr{Elems: items}
+				return object.NewPanArr(items...)
 			},
 		),
 		"keys": f(
@@ -127,7 +118,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				self, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
-					return &object.PanArr{Elems: []object.PanObject{}}
+					return object.NewPanArr()
 				}
 
 				keys := []object.PanObject{}
@@ -141,7 +132,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					}
 				}
 
-				return &object.PanArr{Elems: keys}
+				return object.NewPanArr(keys...)
 			},
 		),
 		"p": f(
@@ -266,7 +257,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				self, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
-					return &object.PanArr{Elems: []object.PanObject{}}
+					return object.NewPanArr()
 				}
 
 				values := []object.PanObject{}
@@ -280,7 +271,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					}
 				}
 
-				return &object.PanArr{Elems: values}
+				return object.NewPanArr(values...)
 			},
 		),
 	}
@@ -331,10 +322,8 @@ func objIter(o *object.PanObj) object.BuiltInFunc {
 			return object.NewValueErr("pair data in obj somehow got changed")
 		}
 
-		yielded := &object.PanArr{Elems: []object.PanObject{
-			pair.Key,
-			pair.Value,
-		}}
+		yielded := object.NewPanArr(pair.Key, pair.Value)
+
 		yieldIdx++
 		return yielded
 	}

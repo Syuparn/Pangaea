@@ -22,10 +22,7 @@ func DiamondProps(propContainer map[string]object.PanObject) map[string]object.P
 					return err
 				}
 
-				return &object.PanBuiltInIter{
-					Fn:  diamondIter(ioObj),
-					Env: env, // not used
-				}
+				return object.NewPanBuiltInIter(diamondIter(ioObj), env)
 			},
 		),
 		"_name": object.NewPanStr("Diamond"),

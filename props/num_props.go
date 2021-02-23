@@ -25,7 +25,7 @@ func NumProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				if i, ok := object.TraceProtoOfInt(args[0]); ok {
-					return &object.PanFloat{Value: float64(i.Value)}
+					return object.NewPanFloat(float64(i.Value))
 				}
 
 				return object.NewTypeErr(fmt.Sprintf("%s cannot be treated as num",

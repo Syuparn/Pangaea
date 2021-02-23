@@ -5,7 +5,7 @@ import (
 )
 
 func TestTraceProtoOfArr(t *testing.T) {
-	proto := &PanArr{Elems: []PanObject{}}
+	proto := NewPanArr()
 
 	tests := []struct {
 		obj      PanObject
@@ -115,7 +115,7 @@ func TestTraceProtoOfBoolFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfBuiltInFunc(t *testing.T) {
-	proto := &PanBuiltIn{}
+	proto := NewPanBuiltInFunc(newMockBuiltInFunc())
 
 	tests := []struct {
 		obj      PanObject
@@ -147,6 +147,12 @@ func TestTraceProtoOfBuiltInFunc(t *testing.T) {
 	}
 }
 
+func newMockBuiltInFunc() BuiltInFunc {
+	return func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject {
+		return nil
+	}
+}
+
 func TestTraceProtoOfBuiltInFuncFailed(t *testing.T) {
 	tests := []struct {
 		obj PanObject
@@ -170,7 +176,7 @@ func TestTraceProtoOfBuiltInFuncFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfBuiltInIter(t *testing.T) {
-	proto := &PanBuiltInIter{}
+	proto := NewPanBuiltInIter(newMockBuiltInFunc(), NewEnv())
 
 	tests := []struct {
 		obj      PanObject
@@ -225,7 +231,7 @@ func TestTraceProtoOfBuiltInIterFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfFloat(t *testing.T) {
-	proto := &PanFloat{Value: 0.0}
+	proto := NewPanFloat(0.0)
 
 	tests := []struct {
 		obj      PanObject
@@ -280,7 +286,7 @@ func TestTraceProtoOfFloatFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfFunc(t *testing.T) {
-	proto := &PanFunc{}
+	proto := NewPanFunc(newMockFuncWrapper(), NewEnv())
 
 	tests := []struct {
 		obj      PanObject
@@ -445,7 +451,7 @@ func TestTraceProtoOfIOFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfMap(t *testing.T) {
-	proto := &PanMap{}
+	proto := NewEmptyPanMap()
 
 	tests := []struct {
 		obj      PanObject
@@ -667,7 +673,7 @@ func TestTraceProtoOfObjFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfRange(t *testing.T) {
-	proto := &PanRange{}
+	proto := NewPanRange(NewPanNil(), NewPanNil(), NewPanNil())
 
 	tests := []struct {
 		obj      PanObject
@@ -722,7 +728,7 @@ func TestTraceProtoOfRangeFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfStr(t *testing.T) {
-	proto := &PanStr{Value: ""}
+	proto := NewPanStr("")
 
 	tests := []struct {
 		obj      PanObject

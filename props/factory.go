@@ -6,5 +6,5 @@ import (
 
 // PanBuiltIn factory
 func f(fn object.BuiltInFunc) object.PanObject {
-	return &object.PanBuiltIn{Fn: fn}
+	return object.NewPanBuiltInFunc(fn)
 }

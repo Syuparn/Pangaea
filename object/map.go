@@ -61,11 +61,23 @@ func NewPanMap(pairs ...Pair) *PanMap {
 	for _, pair := range pairs {
 		hashable, ok := pair.Key.(PanScalar)
 		if ok {
-			pairMap[hashable.Hash()] = pair
+			if _, exists := pairMap[hashable.Hash()]; !exists {
+				pairMap[hashable.Hash()] = pair
+			}
 		} else {
+			// NOTE: this method DOES NOT check duplicated nonhashable keys
+			// because they should be compared by '== method
 			nonHashablePairs = append(nonHashablePairs, pair)
 		}
 	}
+
+	return &PanMap{&pairMap, &nonHashablePairs}
+}
+
+// NewEmptyPanMap returns new empty map object.
+func NewEmptyPanMap() *PanMap {
+	pairMap := map[HashKey]Pair{}
+	nonHashablePairs := []Pair{}
 
 	return &PanMap{&pairMap, &nonHashablePairs}
 }

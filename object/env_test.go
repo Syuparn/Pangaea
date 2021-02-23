@@ -21,7 +21,7 @@ func TestNewEnv(t *testing.T) {
 
 func TestEnvGetAndSet(t *testing.T) {
 	env := NewEnv()
-	obj := &PanInt{100}
+	obj := NewPanInt(100)
 	env.Set(GetSymHash("myInt"), obj)
 
 	got, ok := env.Get(GetSymHash("myInt"))
@@ -140,7 +140,7 @@ func TestEnvWithConsts(t *testing.T) {
 
 func TestCopiedEnv(t *testing.T) {
 	env := NewEnv()
-	obj := &PanInt{100}
+	obj := NewPanInt(100)
 	env.Set(GetSymHash("myInt"), obj)
 
 	copiedEnv := NewCopiedEnv(env)
@@ -161,7 +161,7 @@ func TestCopiedEnv(t *testing.T) {
 	}
 
 	// env and copiedEnv are independent
-	added := &PanInt{200}
+	added := NewPanInt(200)
 	env.Set(GetSymHash("addedInt"), added)
 
 	_, ok = copiedEnv.Get(GetSymHash("addedInt"))
@@ -174,7 +174,7 @@ func TestGetInOuter(t *testing.T) {
 	outer := NewEnv()
 	inner := NewEnclosedEnv(outer)
 
-	obj := &PanInt{100}
+	obj := NewPanInt(100)
 	outer.Set(GetSymHash("myInt"), obj)
 
 	found, ok := inner.Get(GetSymHash("myInt"))

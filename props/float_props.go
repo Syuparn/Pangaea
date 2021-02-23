@@ -16,7 +16,7 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkFloatInfixArgs(args, "<=>", &object.PanFloat{Value: 0.0})
+				self, other, err := checkFloatInfixArgs(args, "<=>", object.NewPanFloat(0.0))
 				if err != nil {
 					return err
 				}
@@ -78,7 +78,7 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				res := -self.Value
-				return &object.PanFloat{Value: res}
+				return object.NewPanFloat(res)
 			},
 		),
 		"/~": f(
@@ -97,33 +97,33 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				v := self.Value
 				// NOTE: go cannot invert float bits directly
 				res := math.Float64frombits(^math.Float64bits(v))
-				return &object.PanFloat{Value: res}
+				return object.NewPanFloat(res)
 			},
 		),
 		"+": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkFloatInfixArgs(args, "+", &object.PanFloat{Value: 0.0})
+				self, other, err := checkFloatInfixArgs(args, "+", object.NewPanFloat(0.0))
 				if err != nil {
 					return err
 				}
 
 				res := self.Value + other.Value
-				return &object.PanFloat{Value: res}
+				return object.NewPanFloat(res)
 			},
 		),
 		"-": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				self, other, err := checkFloatInfixArgs(args, "-", &object.PanFloat{Value: 0.0})
+				self, other, err := checkFloatInfixArgs(args, "-", object.NewPanFloat(0.0))
 				if err != nil {
 					return err
 				}
 
 				res := self.Value - other.Value
-				return &object.PanFloat{Value: res}
+				return object.NewPanFloat(res)
 			},
 		),
 		"_name": object.NewPanStr("Float"),
@@ -159,7 +159,7 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 
 				i, ok := object.TraceProtoOfInt(args[1])
 				if ok {
-					return &object.PanFloat{Value: float64(i.Value)}
+					return object.NewPanFloat(float64(i.Value))
 				}
 
 				return object.NewTypeErr(
