@@ -65,6 +65,8 @@ func NewPanMap(pairs ...Pair) *PanMap {
 				pairMap[hashable.Hash()] = pair
 			}
 		} else {
+			// NOTE: this method DOES NOT check duplicated nonhashable keys
+			// because they should be compared by '== method
 			nonHashablePairs = append(nonHashablePairs, pair)
 		}
 	}

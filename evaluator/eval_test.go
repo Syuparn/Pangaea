@@ -1692,18 +1692,7 @@ func TestEvalMapLiteral(t *testing.T) {
 }
 
 func toPanMap(pairs []object.Pair, nonHashablePairs []object.Pair) *object.PanMap {
-	pairMap := map[object.HashKey]object.Pair{}
-
-	for _, pair := range pairs {
-		panScalar, _ := pair.Key.(object.PanScalar)
-		hash := panScalar.Hash()
-		pairMap[hash] = pair
-	}
-
-	return &object.PanMap{
-		Pairs:            &pairMap,
-		NonHashablePairs: &nonHashablePairs,
-	}
+	return object.NewPanMap(append(pairs, nonHashablePairs...)...)
 }
 
 func TestEvalPinnedMapKey(t *testing.T) {

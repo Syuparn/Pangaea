@@ -2,13 +2,15 @@ package evaluator
 
 import (
 	"fmt"
+
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
 )
 
 func evalMap(node *ast.MapLiteral, env *object.Env) object.PanObject {
-	pairMap := map[object.HashKey]object.Pair{}
-	// non-scalar objects are stored in array instead of map
+	pairs := []object.Pair{}
+	// stored for duplicate key check
+	// (NOTE: hashable keys duplication is checked in NewPanMap)
 	nonHashablePairs := []object.Pair{}
 
 	for _, pairNode := range node.Pairs {
@@ -18,68 +20,69 @@ func evalMap(node *ast.MapLiteral, env *object.Env) object.PanObject {
 			return appendStackTrace(err, node.Source())
 		}
 
-		if s, ok := pair.Key.(object.PanScalar); ok {
-			// NOTE: ignore duplicated keys (`%{'a: 1, 'a: 2}` is same as `%{'a: 1}`)
-			if _, exists := pairMap[s.Hash()]; !exists {
-				pairMap[s.Hash()] = pair
-			}
+		if _, ok := pair.Key.(object.PanScalar); ok {
+			pairs = append(pairs, pair)
 		} else {
 			if !existsNonHashableKey(env, nonHashablePairs, pair) {
+				// stored only if key does not exist
+				pairs = append(pairs, pair)
 				nonHashablePairs = append(nonHashablePairs, pair)
 			}
 		}
 	}
 
 	// unpack objExpansion elements (like `**a`)
-	panErr := appendEmbeddedElems(node, env, pairMap, nonHashablePairs)
+	embeddedPairs, panErr := extractEmbeddedElems(node, env, nonHashablePairs)
 
 	if panErr != nil {
 		return appendStackTrace(panErr, node.Source())
 	}
+	pairs = append(pairs, embeddedPairs...)
 
-	return &object.PanMap{
-		Pairs:            &pairMap,
-		NonHashablePairs: &nonHashablePairs,
-	}
+	return object.NewPanMap(pairs...)
 }
 
-func appendEmbeddedElems(
+func extractEmbeddedElems(
 	node *ast.MapLiteral,
 	env *object.Env,
-	pairMap map[object.HashKey]object.Pair,
 	nonHashablePairs []object.Pair,
-) *object.PanErr {
+) ([]object.Pair, *object.PanErr) {
+	pairs := []object.Pair{}
+
 	for _, expElem := range node.EmbeddedExprs {
 		evaluated := Eval(expElem, env)
 
 		if err, ok := evaluated.(*object.PanErr); ok {
-			return appendStackTrace(err, expElem.Source())
+			return nil, appendStackTrace(err, expElem.Source())
 		}
 
 		switch e := evaluated.(type) {
 		case *object.PanMap:
-			for hash, pair := range *e.Pairs {
-				pairMap[hash] = pair
+			for _, pair := range *e.Pairs {
+				pairs = append(pairs, pair)
 			}
 			for _, nPair := range *e.NonHashablePairs {
-				nonHashablePairs = append(nonHashablePairs, nPair)
+				if !existsNonHashableKey(env, nonHashablePairs, nPair) {
+					// stored only if key does not exist
+					pairs = append(pairs, nPair)
+					nonHashablePairs = append(nonHashablePairs, nPair)
+				}
 			}
 
 		case *object.PanObj:
 			for _, pair := range *e.Pairs {
-				s, _ := pair.Key.(object.PanScalar)
-				pairMap[s.Hash()] = pair
+				pairs = append(pairs, pair)
 			}
 
 		default:
 			err := object.NewTypeErr(
 				fmt.Sprintf("cannot use `**` unpacking for `%s`",
 					evaluated.Inspect()))
-			return appendStackTrace(err, expElem.Source())
+			return nil, appendStackTrace(err, expElem.Source())
 		}
 	}
 
-	return nil
+	return pairs, nil
 }
 
 func existsNonHashableKey(
