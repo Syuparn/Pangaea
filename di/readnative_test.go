@@ -61,7 +61,7 @@ func TestReadNativeCodeFailed(t *testing.T) {
 		{
 			"testNotExist",
 			"failed to read native testdata/testNotExist props in " +
-				"native/testdata/testNotExist.pangaea (zipped in statik/)",
+				"native/testdata/testNotExist.pangaea",
 		},
 		{
 			"testErr",
