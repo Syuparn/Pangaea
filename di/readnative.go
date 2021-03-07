@@ -4,11 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/rakyll/statik/fs"
-
+	"github.com/Syuparn/pangaea/native"
 	"github.com/Syuparn/pangaea/object"
-	// neccessary to read embedded native source files
-	_ "github.com/Syuparn/pangaea/statik"
 )
 
 func mustReadNativeCode(
@@ -27,18 +24,11 @@ func readNativeCode(
 	srcName string,
 	env *object.Env,
 ) (*map[object.SymHash]object.Pair, error) {
-	fileName := fmt.Sprintf("/%s.pangaea", srcName)
+	fileName := fmt.Sprintf("%s.pangaea", srcName)
 
-	// NOTE: instead of native source files, open embedded statik file system
-	// (in /statik directory)
-	statikFS, err := fs.New()
+	fp, err := native.FS.Open(fileName)
 	if err != nil {
-		return nil, err
-	}
-
-	fp, err := statikFS.Open(fileName)
-	if err != nil {
-		e := fmt.Errorf("failed to read native %s props in native%s (zipped in statik/)",
+		e := fmt.Errorf("failed to read native %s props in native/%s",
 			srcName, fileName)
 		return nil, e
 	}

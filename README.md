@@ -49,7 +49,6 @@ They are installed automatically.
 - [goyacc](https://godoc.org/golang.org/x/tools/cmd/goyacc)
 - [simplexer](github.com/macrat/simplexer)
 - [dtoa](github.com/tanaton/dtoa)
-- [statik](github.com/rakyll/statik)
 
 # Progress
 
