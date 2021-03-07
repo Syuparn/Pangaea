@@ -40,7 +40,7 @@ $ ./pangaea.exe ./example/hello.pangaea
 
 # Requirements
 ## Host language
-- Golang (1.15+)
+- Golang (1.16+)
 
 ## Packages
 
