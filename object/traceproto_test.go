@@ -247,7 +247,7 @@ func TestTraceProtoOfFloat(t *testing.T) {
 			proto,
 			proto,
 		},
-		// Int returns zero value 0.0 so that Float itself can be used as float object
+		// Float returns zero value 0.0 so that Float itself can be used as float object
 		{
 			BuiltInFloatObj,
 			zeroFloat,
