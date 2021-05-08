@@ -101,8 +101,6 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				// NOTE: order is not guaranteed!
-
 				if len(args) < 1 {
 					return object.NewTypeErr("Map#keys requires at least 1 arg")
 				}
@@ -113,8 +111,9 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				keys := []object.PanObject{}
-				for _, pair := range *self.Pairs {
-					keys = append(keys, pair.Key)
+				for _, h := range *self.HashKeys {
+					// NOTE: pair must be found
+					keys = append(keys, (*self.Pairs)[h].Key)
 				}
 				for _, pair := range *self.NonHashablePairs {
 					keys = append(keys, pair.Key)

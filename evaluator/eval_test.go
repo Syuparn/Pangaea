@@ -4106,7 +4106,6 @@ func TestEvalMapKeys(t *testing.T) {
 			`%{}.keys`,
 			object.NewPanArr(),
 		},
-		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.keys`,
 			object.NewPanArr(
@@ -4118,6 +4117,38 @@ func TestEvalMapKeys(t *testing.T) {
 			object.NewPanArr(
 				object.NewPanArr(
 					object.NewPanInt(0),
+				),
+			),
+		},
+		{
+			`%{true: 1, "false": 2}.keys`,
+			object.NewPanArr(
+				object.BuiltInTrue,
+				object.NewPanStr("false"),
+			),
+		},
+		{
+			`%{[0]: "zero", [1]: "one"}.keys`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanInt(0),
+				),
+				object.NewPanArr(
+					object.NewPanInt(1),
+				),
+			),
+		},
+		// non-hashables follow hashables
+		{
+			`%{[0]: "zero", 1: "one", "2": "two", [3]: "three"}.keys`,
+			object.NewPanArr(
+				object.NewPanInt(1),
+				object.NewPanStr("2"),
+				object.NewPanArr(
+					object.NewPanInt(0),
+				),
+				object.NewPanArr(
+					object.NewPanInt(3),
 				),
 			),
 		},
