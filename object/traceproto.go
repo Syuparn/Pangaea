@@ -42,6 +42,11 @@ func TraceProtoOfBuiltInIter(obj PanObject) (*PanBuiltInIter, bool) {
 
 // TraceProtoOfFloat traces proto chain of obj and returns float proto.
 func TraceProtoOfFloat(obj PanObject) (*PanFloat, bool) {
+	// HACK: proto of Float is zero value 0.0 so that Float itself can be used as float object
+	if obj == BuiltInFloatObj {
+		return zeroFloat, true
+	}
+
 	for o := obj; o.Proto() != nil; o = o.Proto() {
 		if v, ok := o.(*PanFloat); ok {
 			return v, true

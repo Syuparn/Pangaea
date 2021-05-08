@@ -247,6 +247,11 @@ func TestTraceProtoOfFloat(t *testing.T) {
 			proto,
 			proto,
 		},
+		// Int returns zero value 0.0 so that Float itself can be used as float object
+		{
+			BuiltInFloatObj,
+			zeroFloat,
+		},
 	}
 
 	for _, tt := range tests {

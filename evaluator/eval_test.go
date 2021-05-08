@@ -7203,6 +7203,15 @@ func TestEvalInfixFloatAdd(t *testing.T) {
 			`3.0 + nil`,
 			object.NewPanFloat(3.0),
 		},
+		// Float is treated as 0
+		{
+			`3.0 + Float`,
+			object.NewPanFloat(3.0),
+		},
+		{
+			`Float + 3.0`,
+			object.NewPanFloat(3.0),
+		},
 	}
 
 	for _, tt := range tests {
@@ -7258,6 +7267,15 @@ func TestEvalInfixFloatSub(t *testing.T) {
 		{
 			`3.0 - nil`,
 			object.NewPanFloat(3.0),
+		},
+		// Float is treated as 0
+		{
+			`3.0 - Float`,
+			object.NewPanFloat(3.0),
+		},
+		{
+			`Float - 3.0`,
+			object.NewPanFloat(-3.0),
 		},
 	}
 
