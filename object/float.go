@@ -8,6 +8,9 @@ import (
 // FloatType is a type of PanFloat.
 const FloatType = "FloatType"
 
+// used as zero value
+var zeroFloat = NewPanFloat(0.0)
+
 // PanFloat is object of float literal.
 type PanFloat struct {
 	Value float64
