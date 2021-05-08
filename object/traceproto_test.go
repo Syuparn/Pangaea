@@ -341,21 +341,24 @@ func TestTraceProtoOfFuncFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfInt(t *testing.T) {
-	proto := BuiltInOneInt
-
 	tests := []struct {
 		obj      PanObject
 		expected *PanInt
 	}{
 		// return proto
 		{
-			NewPanObj(&map[SymHash]Pair{}, proto),
-			proto,
+			NewPanObj(&map[SymHash]Pair{}, BuiltInOneInt),
+			BuiltInOneInt,
 		},
 		// return itself
 		{
-			proto,
-			proto,
+			BuiltInOneInt,
+			BuiltInOneInt,
+		},
+		// Int returns zero value 0 so that Int itself can be used as int object
+		{
+			BuiltInIntObj,
+			BuiltInZeroInt,
 		},
 	}
 

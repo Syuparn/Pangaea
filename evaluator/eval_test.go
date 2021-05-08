@@ -6690,6 +6690,15 @@ func TestEvalInfixIntAdd(t *testing.T) {
 			`3 + nil`,
 			object.NewPanInt(3),
 		},
+		// Int is treated as 0
+		{
+			`3 + Int`,
+			object.NewPanInt(3),
+		},
+		{
+			`Int + 3`,
+			object.NewPanInt(3),
+		},
 	}
 
 	for _, tt := range tests {
@@ -6746,6 +6755,15 @@ func TestEvalInfixIntSub(t *testing.T) {
 			`3 - nil`,
 			object.NewPanInt(3),
 		},
+		// Int is treated as 0
+		{
+			`3 - Int`,
+			object.NewPanInt(3),
+		},
+		{
+			`Int - 3`,
+			object.NewPanInt(-3),
+		},
 	}
 
 	for _, tt := range tests {
@@ -6797,6 +6815,15 @@ func TestEvalInfixIntMul(t *testing.T) {
 		{
 			`3 * nil`,
 			object.NewPanInt(3),
+		},
+		// Int is treated as 0
+		{
+			`3 * Int`,
+			object.NewPanInt(0),
+		},
+		{
+			`Int * 3`,
+			object.NewPanInt(0),
 		},
 	}
 
@@ -6854,6 +6881,11 @@ func TestEvalInfixIntDiv(t *testing.T) {
 			`5 / nil`,
 			object.NewPanFloat(5.0),
 		},
+		// Int is treated as 0
+		{
+			`Int / 3`,
+			object.NewPanFloat(0.0),
+		},
 	}
 
 	for _, tt := range tests {
@@ -6878,6 +6910,10 @@ func TestEvalInfixIntDivErr(t *testing.T) {
 		{
 			`1./`,
 			object.NewTypeErr("/ requires at least 2 args"),
+		},
+		{
+			`1 / 0`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
 		},
 	}
 
@@ -6910,6 +6946,11 @@ func TestEvalInfixIntFloorDiv(t *testing.T) {
 			`5 // nil`,
 			object.NewPanInt(5),
 		},
+		// Int is treated as 0
+		{
+			`Int // 3`,
+			object.NewPanInt(0),
+		},
 	}
 
 	for _, tt := range tests {
@@ -6934,6 +6975,10 @@ func TestEvalInfixIntFloorDivErr(t *testing.T) {
 		{
 			`1.//`,
 			object.NewTypeErr("// requires at least 2 args"),
+		},
+		{
+			`1 // 0`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
 		},
 	}
 

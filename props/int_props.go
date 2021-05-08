@@ -45,11 +45,6 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
-				// necessary for Int itself! (guarantee `Int == Int`)
-				if args[0] == object.BuiltInIntObj && args[1] == object.BuiltInIntObj {
-					return object.BuiltInTrue
-				}
-
 				self, ok := object.TraceProtoOfInt(args[0])
 				if !ok {
 					return object.BuiltInFalse
@@ -72,11 +67,6 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			) object.PanObject {
 				if len(args) < 2 {
 					return object.NewTypeErr("== requires at least 2 args")
-				}
-
-				// necessary for Int itself! (guarantee `Int == Int`)
-				if args[0] == object.BuiltInIntObj && args[1] == object.BuiltInIntObj {
-					return object.BuiltInTrue
 				}
 
 				self, ok := object.TraceProtoOfInt(args[0])
