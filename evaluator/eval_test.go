@@ -8704,6 +8704,22 @@ func testPanMap(t *testing.T, actual object.PanObject, expected *object.PanMap) 
 		return
 	}
 
+	if len(*obj.HashKeys) != len(*expected.HashKeys) {
+		t.Fatalf("length must be %d (%s). got=%d (%s)",
+			len(*expected.HashKeys), expected.Inspect(),
+			len(*obj.HashKeys), obj.Inspect())
+		return
+	}
+
+	for i, h := range *expected.HashKeys {
+		actHash := (*obj.HashKeys)[i]
+
+		if actHash != h {
+			t.Errorf("wrong hashkeys[%d]. expected=%v, got=%v",
+				i, h, actHash)
+		}
+	}
+
 	if len(*obj.Pairs) != len(*expected.Pairs) {
 		t.Fatalf("length must be %d (%s). got=%d (%s)",
 			len(*expected.Pairs), expected.Inspect(),

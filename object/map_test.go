@@ -128,6 +128,10 @@ func TestNewPanMapWithScalarKeys(t *testing.T) {
 		{[]Pair{
 			{NewPanStr("foo"), NewPanInt(2)},
 		}},
+		{[]Pair{
+			{NewPanStr("foo"), NewPanInt(2)},
+			{NewPanStr("bar"), BuiltInNil},
+		}},
 	}
 
 	for _, tt := range tests {
@@ -143,8 +147,21 @@ func TestNewPanMapWithScalarKeys(t *testing.T) {
 				0, len(*actual.NonHashablePairs))
 		}
 
-		for _, pair := range tt.pairs {
+		if len(*actual.HashKeys) != len(tt.pairs) {
+			t.Fatalf("wrong HashKeys length. expected=%d, got=%d",
+				len(tt.pairs), len(*actual.HashKeys))
+		}
+
+		for i, pair := range tt.pairs {
 			h, _ := pair.Key.(PanScalar)
+
+			// hashkey order check
+			if actualHash := (*actual.HashKeys)[i]; actualHash != h.Hash() {
+				t.Errorf("wrong HashKeys[%d]. expected=%v, got=%v",
+					i, h.Hash(), actualHash)
+			}
+
+			// pair existence check
 			actualPair, ok := (*actual.Pairs)[h.Hash()]
 			if !ok {
 				t.Fatalf("key %s is not found.", pair.Key.Inspect())
@@ -180,6 +197,11 @@ func TestNewPanMapWithNonScalarKeys(t *testing.T) {
 				0, len(*actual.Pairs))
 		}
 
+		if len(*actual.HashKeys) != 0 {
+			t.Fatalf("wrong HashKeys length. expected=%d, got=%d",
+				0, len(*actual.HashKeys))
+		}
+
 		if len(*actual.NonHashablePairs) != len(tt.pairs) {
 			t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
 				len(tt.pairs), len(*actual.NonHashablePairs))
@@ -213,11 +235,17 @@ func TestNewEmptyPanMap(t *testing.T) {
 		t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
 			0, len(*actual.NonHashablePairs))
 	}
+
+	if len(*actual.HashKeys) != 0 {
+		t.Fatalf("wrong HashKeys length. expected=%d, got=%d",
+			0, len(*actual.HashKeys))
+	}
 }
 
 func TestNewPanMapWithDuplicatedKeys(t *testing.T) {
 	tests := []struct {
 		pairs                    []Pair
+		expectedHashKeys         []HashKey
 		expectedPairs            map[HashKey]Pair
 		expectedNonHashablePairs []Pair
 	}{
@@ -226,6 +254,9 @@ func TestNewPanMapWithDuplicatedKeys(t *testing.T) {
 			[]Pair{
 				{NewPanStr("a"), NewPanInt(1)},
 				{NewPanStr("a"), NewPanInt(2)},
+			},
+			[]HashKey{
+				NewPanStr("a").Hash(),
 			},
 			map[HashKey]Pair{
 				NewPanStr("a").Hash(): {NewPanStr("a"), NewPanInt(1)},
@@ -239,6 +270,11 @@ func TestNewPanMapWithDuplicatedKeys(t *testing.T) {
 	for _, tt := range tests {
 		actual := NewPanMap(tt.pairs...)
 
+		if len(*actual.HashKeys) != len(tt.expectedHashKeys) {
+			t.Fatalf("wrong hashKey length. expected=%d, got=%d",
+				len(tt.expectedHashKeys), len(*actual.HashKeys))
+		}
+
 		if len(*actual.Pairs) != len(tt.expectedPairs) {
 			t.Fatalf("wrong pair length. expected=%d, got=%d",
 				len(tt.expectedPairs), len(*actual.Pairs))
@@ -247,6 +283,15 @@ func TestNewPanMapWithDuplicatedKeys(t *testing.T) {
 		if len(*actual.NonHashablePairs) != len(tt.expectedNonHashablePairs) {
 			t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
 				len(tt.expectedNonHashablePairs), len(*actual.NonHashablePairs))
+		}
+
+		for i, h := range tt.expectedHashKeys {
+			actualHash := (*actual.HashKeys)[i]
+
+			if actualHash != h {
+				t.Errorf("wrong hashkeys[%d]. expected=%v, got=%v",
+					i, h, actualHash)
+			}
 		}
 
 		for hash, pair := range tt.expectedPairs {
