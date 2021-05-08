@@ -9,6 +9,9 @@ import (
 // StrType is a type of PanStr.
 const StrType = "StrType"
 
+// used as zero value
+var zeroStr = NewPanStr("")
+
 // PanStr is object of str literal.
 type PanStr struct {
 	Value    string

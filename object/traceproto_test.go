@@ -247,9 +247,14 @@ func TestTraceProtoOfFloat(t *testing.T) {
 			proto,
 			proto,
 		},
-		// Int returns zero value 0.0 so that Float itself can be used as float object
+		// Float returns zero value 0.0 so that Float itself can be used as float object
 		{
 			BuiltInFloatObj,
+			zeroFloat,
+		},
+		// child of Float
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInFloatObj),
 			zeroFloat,
 		},
 	}
@@ -363,6 +368,11 @@ func TestTraceProtoOfInt(t *testing.T) {
 		// Int returns zero value 0 so that Int itself can be used as int object
 		{
 			BuiltInIntObj,
+			BuiltInZeroInt,
+		},
+		// child of Int
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInIntObj),
 			BuiltInZeroInt,
 		},
 	}
@@ -751,6 +761,16 @@ func TestTraceProtoOfStr(t *testing.T) {
 		{
 			proto,
 			proto,
+		},
+		// Str returns zero value "" so that Str itself can be used as str object
+		{
+			BuiltInStrObj,
+			zeroStr,
+		},
+		// child of Str
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInStrObj),
+			zeroStr,
 		},
 	}
 

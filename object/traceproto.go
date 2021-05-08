@@ -42,12 +42,12 @@ func TraceProtoOfBuiltInIter(obj PanObject) (*PanBuiltInIter, bool) {
 
 // TraceProtoOfFloat traces proto chain of obj and returns float proto.
 func TraceProtoOfFloat(obj PanObject) (*PanFloat, bool) {
-	// HACK: proto of Float is zero value 0.0 so that Float itself can be used as float object
-	if obj == BuiltInFloatObj {
-		return zeroFloat, true
-	}
-
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Float is zero value 0.0 so that Float itself can be used as float object
+		if o == BuiltInFloatObj {
+			return zeroFloat, true
+		}
+
 		if v, ok := o.(*PanFloat); ok {
 			return v, true
 		}
@@ -67,12 +67,12 @@ func TraceProtoOfFunc(obj PanObject) (*PanFunc, bool) {
 
 // TraceProtoOfInt traces proto chain of obj and returns int proto.
 func TraceProtoOfInt(obj PanObject) (*PanInt, bool) {
-	// HACK: proto of Int is zero value 0 so that Int itself can be used as int object
-	if obj == BuiltInIntObj {
-		return BuiltInZeroInt, true
-	}
-
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Int is zero value 0 so that Int itself can be used as int object
+		if o == BuiltInIntObj {
+			return BuiltInZeroInt, true
+		}
+
 		if v, ok := o.(*PanInt); ok {
 			return v, true
 		}
@@ -143,6 +143,11 @@ func TraceProtoOfRange(obj PanObject) (*PanRange, bool) {
 // TraceProtoOfStr traces proto chain of obj and returns str proto.
 func TraceProtoOfStr(obj PanObject) (*PanStr, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Str is zero value "" so that Str itself can be used as str object
+		if o == BuiltInStrObj {
+			return zeroStr, true
+		}
+
 		if v, ok := o.(*PanStr); ok {
 			return v, true
 		}
