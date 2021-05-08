@@ -1,4 +1,3 @@
-# NOTE: cannot test multiple elements because
-# order of map elements is not guaranteed.
 assertEq(%{"a": 1}.last, ["a", 1])
+assertEq(%{"a": 1, "b": 2}.last, ["b", 2])
 assertEq(%{}.last, nil)
