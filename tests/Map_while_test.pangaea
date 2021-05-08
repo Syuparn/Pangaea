@@ -1,6 +1,5 @@
-# NOTE: cannot test multiple elements because
-# order of map elements is not guaranteed.
 assertEq(%{"a": 1}.while {|k, v| v.odd?}.A, [["a", 1]])
+assertEq(%{"a": 1, "b": 2}.while {|k, v| v.odd?}.A, [["a", 1]])
 assertEq(%{}.while {|k, v| v.odd?}.A, [])
 # while returns iter (not arr)
 assertEq(%{}.while {|k, v| v.odd?}.proto, Iter)

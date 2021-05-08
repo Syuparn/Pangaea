@@ -1,6 +1,5 @@
-# NOTE: cannot test multiple elements because
-# order of map elements is not guaranteed.
 assertEq(%{"a": 1}.doUntil {|k, v| v.even?}.A, [["a", 1]])
+assertEq(%{"a": 1, "b": 2, "c": 3}.doUntil {|k, v| v.even?}.A, [["a", 1], ["b", 2]])
 assertEq(%{}.doUntil {|k, v| v.odd?}.A, [])
 # doUntil returns iter (not arr)
 assertEq(%{}.doUntil {|k, v| v.odd?}.proto, Iter)

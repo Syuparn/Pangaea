@@ -75,8 +75,6 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				// NOTE: order is not guaranteed!
-
 				if len(args) < 1 {
 					return object.NewTypeErr("Map#items requires at least 1 arg")
 				}
@@ -87,7 +85,9 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				items := []object.PanObject{}
-				for _, pair := range *self.Pairs {
+				for _, h := range *self.HashKeys {
+					// NOTE: pair must be found
+					pair, _ := (*self.Pairs)[h]
 					items = append(items, object.NewPanArr(pair.Key, pair.Value))
 				}
 				for _, pair := range *self.NonHashablePairs {
@@ -101,8 +101,6 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				// NOTE: order is not guaranteed!
-
 				if len(args) < 1 {
 					return object.NewTypeErr("Map#keys requires at least 1 arg")
 				}
@@ -113,8 +111,9 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				keys := []object.PanObject{}
-				for _, pair := range *self.Pairs {
-					keys = append(keys, pair.Key)
+				for _, h := range *self.HashKeys {
+					// NOTE: pair must be found
+					keys = append(keys, (*self.Pairs)[h].Key)
 				}
 				for _, pair := range *self.NonHashablePairs {
 					keys = append(keys, pair.Key)
@@ -143,8 +142,6 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				// NOTE: order is not guaranteed!
-
 				if len(args) < 1 {
 					return object.NewTypeErr("Map#values requires at least 1 arg")
 				}
@@ -155,8 +152,9 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				values := []object.PanObject{}
-				for _, pair := range *self.Pairs {
-					values = append(values, pair.Value)
+				for _, h := range *self.HashKeys {
+					// NOTE: value must be found
+					values = append(values, (*self.Pairs)[h].Value)
 				}
 				for _, pair := range *self.NonHashablePairs {
 					values = append(values, pair.Value)
@@ -245,22 +243,17 @@ func containsKey(
 
 func mapIter(m *object.PanMap) object.BuiltInFunc {
 	scalarYieldIdx := 0
-	hashes := []object.HashKey{}
-	for hash := range *m.Pairs {
-		hashes = append(hashes, hash)
-	}
-
 	nonScalarYieldIdx := 0
 
 	return func(
 		env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 	) object.PanObject {
-		if scalarYieldIdx >= len(hashes) {
+		if scalarYieldIdx >= len(*m.HashKeys) {
 			yielded := yieldNonScalar(m, nonScalarYieldIdx)
 			nonScalarYieldIdx++
 			return yielded
 		}
-		pair, ok := (*m.Pairs)[hashes[scalarYieldIdx]]
+		pair, ok := (*m.Pairs)[(*m.HashKeys)[scalarYieldIdx]]
 		// must be ok
 		if !ok {
 			return object.NewValueErr("pair data in map somehow got changed")

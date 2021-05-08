@@ -10,6 +10,8 @@ const MapType = "MapType"
 
 // PanMap is object of map literal.
 type PanMap struct {
+	// used to keep map order
+	HashKeys         *[]HashKey
 	Pairs            *map[HashKey]Pair
 	NonHashablePairs *[]Pair
 }
@@ -55,6 +57,7 @@ func (m *PanMap) Proto() PanObject {
 
 // NewPanMap returns new map object.
 func NewPanMap(pairs ...Pair) *PanMap {
+	hashKeys := []HashKey{}
 	pairMap := map[HashKey]Pair{}
 	nonHashablePairs := []Pair{}
 
@@ -62,6 +65,7 @@ func NewPanMap(pairs ...Pair) *PanMap {
 		hashable, ok := pair.Key.(PanScalar)
 		if ok {
 			if _, exists := pairMap[hashable.Hash()]; !exists {
+				hashKeys = append(hashKeys, hashable.Hash())
 				pairMap[hashable.Hash()] = pair
 			}
 		} else {
@@ -71,13 +75,18 @@ func NewPanMap(pairs ...Pair) *PanMap {
 		}
 	}
 
-	return &PanMap{&pairMap, &nonHashablePairs}
+	return &PanMap{
+		HashKeys:         &hashKeys,
+		Pairs:            &pairMap,
+		NonHashablePairs: &nonHashablePairs,
+	}
 }
 
 // NewEmptyPanMap returns new empty map object.
 func NewEmptyPanMap() *PanMap {
-	pairMap := map[HashKey]Pair{}
-	nonHashablePairs := []Pair{}
-
-	return &PanMap{&pairMap, &nonHashablePairs}
+	return &PanMap{
+		HashKeys:         &[]HashKey{},
+		Pairs:            &map[HashKey]Pair{},
+		NonHashablePairs: &[]Pair{},
+	}
 }

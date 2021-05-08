@@ -2898,13 +2898,21 @@ func TestEvalMapIter(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
-		// NOTE: order is not guaranteed!
 		{
-			`it := %{true: 1}._iter
+			`it := %{true: 1, false: 2}._iter
 			 it.next`,
 			object.NewPanArr(
 				object.BuiltInTrue,
 				object.NewPanInt(1),
+			),
+		},
+		{
+			`it := %{true: 1, false: 2}._iter
+			 it.next
+			 it.next`,
+			object.NewPanArr(
+				object.BuiltInFalse,
+				object.NewPanInt(2),
 			),
 		},
 		{
@@ -3110,7 +3118,14 @@ func TestEvalListChainPropCall(t *testing.T) {
 				object.NewPanStr("b"),
 			),
 		},
-		// TODO: check map
+		{
+			`%{"a": 1, "b": 2, "c": 3}@at([0])`,
+			object.NewPanArr(
+				object.NewPanStr("a"),
+				object.NewPanStr("b"),
+				object.NewPanStr("c"),
+			),
+		},
 		// if any element raises error, propagate it
 		{
 			`[1, 2, "str", 4]@+(1)`,
@@ -3179,13 +3194,16 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 				object.NewPanStr("b: 2"),
 			),
 		},
-		// NOTE: order of map elems is not guaranteed
 		{
-			`%{true: "yes"}@{|k, v| [k, v]}`,
+			`%{true: "yes", false: "no"}@{|k, v| [k, v]}`,
 			object.NewPanArr(
 				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanStr("yes"),
+				),
+				object.NewPanArr(
+					object.BuiltInFalse,
+					object.NewPanStr("no"),
 				),
 			),
 		},
@@ -3270,13 +3288,16 @@ func TestEvalListChainVarCall(t *testing.T) {
 				object.NewPanStr("b: 2"),
 			),
 		},
-		// NOTE: order of map elems is not guaranteed
 		{
-			`f := {|k, v| [k, v]}; %{true: "yes"}@^f`,
+			`f := {|k, v| [k, v]}; %{true: "yes", false: "no"}@^f`,
 			object.NewPanArr(
 				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanStr("yes"),
+				),
+				object.NewPanArr(
+					object.BuiltInFalse,
+					object.NewPanStr("no"),
 				),
 			),
 		},
@@ -4106,7 +4127,6 @@ func TestEvalMapKeys(t *testing.T) {
 			`%{}.keys`,
 			object.NewPanArr(),
 		},
-		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.keys`,
 			object.NewPanArr(
@@ -4118,6 +4138,38 @@ func TestEvalMapKeys(t *testing.T) {
 			object.NewPanArr(
 				object.NewPanArr(
 					object.NewPanInt(0),
+				),
+			),
+		},
+		{
+			`%{true: 1, "false": 2}.keys`,
+			object.NewPanArr(
+				object.BuiltInTrue,
+				object.NewPanStr("false"),
+			),
+		},
+		{
+			`%{[0]: "zero", [1]: "one"}.keys`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanInt(0),
+				),
+				object.NewPanArr(
+					object.NewPanInt(1),
+				),
+			),
+		},
+		// non-hashables follow hashables
+		{
+			`%{[0]: "zero", 1: "one", "2": "two", [3]: "three"}.keys`,
+			object.NewPanArr(
+				object.NewPanInt(1),
+				object.NewPanStr("2"),
+				object.NewPanArr(
+					object.NewPanInt(0),
+				),
+				object.NewPanArr(
+					object.NewPanInt(3),
 				),
 			),
 		},
@@ -4138,7 +4190,6 @@ func TestEvalMapValues(t *testing.T) {
 			`%{}.values`,
 			object.NewPanArr(),
 		},
-		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.values`,
 			object.NewPanArr(
@@ -4146,9 +4197,33 @@ func TestEvalMapValues(t *testing.T) {
 			),
 		},
 		{
+			`%{true: 1, false: 0}.values`,
+			object.NewPanArr(
+				object.NewPanInt(1),
+				object.NewPanInt(0),
+			),
+		},
+		{
 			`%{[0]: "zero"}.values`,
 			object.NewPanArr(
 				object.NewPanStr("zero"),
+			),
+		},
+		{
+			`%{[0]: "zero", [1]: "one"}.values`,
+			object.NewPanArr(
+				object.NewPanStr("zero"),
+				object.NewPanStr("one"),
+			),
+		},
+		// non-hashables follow hashables
+		{
+			`%{[0]: "zero", 1: "one", "2": "two", [3]: "three"}.values`,
+			object.NewPanArr(
+				object.NewPanStr("one"),
+				object.NewPanStr("two"),
+				object.NewPanStr("zero"),
+				object.NewPanStr("three"),
 			),
 		},
 	}
@@ -4168,13 +4243,25 @@ func TestEvalMapItems(t *testing.T) {
 			`%{}.items`,
 			object.NewPanArr(),
 		},
-		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.items`,
 			object.NewPanArr(
 				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanInt(1),
+				),
+			),
+		},
+		{
+			`%{true: 1, false: 0}.items`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.BuiltInTrue,
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.BuiltInFalse,
+					object.NewPanInt(0),
 				),
 			),
 		},
@@ -4186,6 +4273,49 @@ func TestEvalMapItems(t *testing.T) {
 						object.NewPanInt(0),
 					),
 					object.NewPanStr("zero"),
+				),
+			),
+		},
+		{
+			`%{[0]: "zero", [1]: "one"}.items`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("zero"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+					),
+					object.NewPanStr("one"),
+				),
+			),
+		},
+		// non-hashables follow hashables
+		{
+			`%{[0]: "zero", 1: "one", "2": "two", [3]: "three"}.items`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanInt(1),
+					object.NewPanStr("one"),
+				),
+				object.NewPanArr(
+					object.NewPanStr("2"),
+					object.NewPanStr("two"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("zero"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(3),
+					),
+					object.NewPanStr("three"),
 				),
 			),
 		},
@@ -8702,6 +8832,22 @@ func testPanMap(t *testing.T, actual object.PanObject, expected *object.PanMap) 
 	if !ok {
 		t.Fatalf("actual must be *object.PanMap. got=%T (%v)", actual, actual)
 		return
+	}
+
+	if len(*obj.HashKeys) != len(*expected.HashKeys) {
+		t.Fatalf("length must be %d (%s). got=%d (%s)",
+			len(*expected.HashKeys), expected.Inspect(),
+			len(*obj.HashKeys), obj.Inspect())
+		return
+	}
+
+	for i, h := range *expected.HashKeys {
+		actHash := (*obj.HashKeys)[i]
+
+		if actHash != h {
+			t.Errorf("wrong hashkeys[%d]. expected=%v, got=%v",
+				i, h, actHash)
+		}
 	}
 
 	if len(*obj.Pairs) != len(*expected.Pairs) {
