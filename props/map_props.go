@@ -154,8 +154,9 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				values := []object.PanObject{}
-				for _, pair := range *self.Pairs {
-					values = append(values, pair.Value)
+				for _, h := range *self.HashKeys {
+					// NOTE: value must be found
+					values = append(values, (*self.Pairs)[h].Value)
 				}
 				for _, pair := range *self.NonHashablePairs {
 					values = append(values, pair.Value)

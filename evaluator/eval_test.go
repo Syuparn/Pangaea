@@ -4169,7 +4169,6 @@ func TestEvalMapValues(t *testing.T) {
 			`%{}.values`,
 			object.NewPanArr(),
 		},
-		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.values`,
 			object.NewPanArr(
@@ -4177,9 +4176,33 @@ func TestEvalMapValues(t *testing.T) {
 			),
 		},
 		{
+			`%{true: 1, false: 0}.values`,
+			object.NewPanArr(
+				object.NewPanInt(1),
+				object.NewPanInt(0),
+			),
+		},
+		{
 			`%{[0]: "zero"}.values`,
 			object.NewPanArr(
 				object.NewPanStr("zero"),
+			),
+		},
+		{
+			`%{[0]: "zero", [1]: "one"}.values`,
+			object.NewPanArr(
+				object.NewPanStr("zero"),
+				object.NewPanStr("one"),
+			),
+		},
+		// non-hashables follow hashables
+		{
+			`%{[0]: "zero", 1: "one", "2": "two", [3]: "three"}.values`,
+			object.NewPanArr(
+				object.NewPanStr("one"),
+				object.NewPanStr("two"),
+				object.NewPanStr("zero"),
+				object.NewPanStr("three"),
 			),
 		},
 	}
