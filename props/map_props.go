@@ -87,7 +87,9 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				items := []object.PanObject{}
-				for _, pair := range *self.Pairs {
+				for _, h := range *self.HashKeys {
+					// NOTE: pair must be found
+					pair, _ := (*self.Pairs)[h]
 					items = append(items, object.NewPanArr(pair.Key, pair.Value))
 				}
 				for _, pair := range *self.NonHashablePairs {

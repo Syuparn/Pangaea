@@ -4222,13 +4222,25 @@ func TestEvalMapItems(t *testing.T) {
 			`%{}.items`,
 			object.NewPanArr(),
 		},
-		// NOTE: order is not guaranteed
 		{
 			`%{true: 1}.items`,
 			object.NewPanArr(
 				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanInt(1),
+				),
+			),
+		},
+		{
+			`%{true: 1, false: 0}.items`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.BuiltInTrue,
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.BuiltInFalse,
+					object.NewPanInt(0),
 				),
 			),
 		},
@@ -4240,6 +4252,49 @@ func TestEvalMapItems(t *testing.T) {
 						object.NewPanInt(0),
 					),
 					object.NewPanStr("zero"),
+				),
+			),
+		},
+		{
+			`%{[0]: "zero", [1]: "one"}.items`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("zero"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+					),
+					object.NewPanStr("one"),
+				),
+			),
+		},
+		// non-hashables follow hashables
+		{
+			`%{[0]: "zero", 1: "one", "2": "two", [3]: "three"}.items`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanInt(1),
+					object.NewPanStr("one"),
+				),
+				object.NewPanArr(
+					object.NewPanStr("2"),
+					object.NewPanStr("two"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("zero"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(3),
+					),
+					object.NewPanStr("three"),
 				),
 			),
 		},
