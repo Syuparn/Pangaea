@@ -752,6 +752,16 @@ func TestTraceProtoOfStr(t *testing.T) {
 			proto,
 			proto,
 		},
+		// Str returns zero value "" so that Str itself can be used as str object
+		{
+			BuiltInStrObj,
+			zeroStr,
+		},
+		// child of Str
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInStrObj),
+			zeroStr,
+		},
 	}
 
 	for _, tt := range tests {
