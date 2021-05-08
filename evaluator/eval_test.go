@@ -2898,13 +2898,21 @@ func TestEvalMapIter(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
-		// NOTE: order is not guaranteed!
 		{
-			`it := %{true: 1}._iter
+			`it := %{true: 1, false: 2}._iter
 			 it.next`,
 			object.NewPanArr(
 				object.BuiltInTrue,
 				object.NewPanInt(1),
+			),
+		},
+		{
+			`it := %{true: 1, false: 2}._iter
+			 it.next
+			 it.next`,
+			object.NewPanArr(
+				object.BuiltInFalse,
+				object.NewPanInt(2),
 			),
 		},
 		{
@@ -3110,7 +3118,14 @@ func TestEvalListChainPropCall(t *testing.T) {
 				object.NewPanStr("b"),
 			),
 		},
-		// TODO: check map
+		{
+			`%{"a": 1, "b": 2, "c": 3}@at([0])`,
+			object.NewPanArr(
+				object.NewPanStr("a"),
+				object.NewPanStr("b"),
+				object.NewPanStr("c"),
+			),
+		},
 		// if any element raises error, propagate it
 		{
 			`[1, 2, "str", 4]@+(1)`,
@@ -3179,13 +3194,16 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 				object.NewPanStr("b: 2"),
 			),
 		},
-		// NOTE: order of map elems is not guaranteed
 		{
-			`%{true: "yes"}@{|k, v| [k, v]}`,
+			`%{true: "yes", false: "no"}@{|k, v| [k, v]}`,
 			object.NewPanArr(
 				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanStr("yes"),
+				),
+				object.NewPanArr(
+					object.BuiltInFalse,
+					object.NewPanStr("no"),
 				),
 			),
 		},
@@ -3270,13 +3288,16 @@ func TestEvalListChainVarCall(t *testing.T) {
 				object.NewPanStr("b: 2"),
 			),
 		},
-		// NOTE: order of map elems is not guaranteed
 		{
-			`f := {|k, v| [k, v]}; %{true: "yes"}@^f`,
+			`f := {|k, v| [k, v]}; %{true: "yes", false: "no"}@^f`,
 			object.NewPanArr(
 				object.NewPanArr(
 					object.BuiltInTrue,
 					object.NewPanStr("yes"),
+				),
+				object.NewPanArr(
+					object.BuiltInFalse,
+					object.NewPanStr("no"),
 				),
 			),
 		},
