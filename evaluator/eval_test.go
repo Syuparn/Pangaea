@@ -6198,6 +6198,15 @@ func TestEvalInfixArrEq(t *testing.T) {
 			`[2].bear == [2]`,
 			object.BuiltInTrue,
 		},
+		// Arr is treated as []
+		{
+			`[] == Arr`,
+			object.BuiltInTrue,
+		},
+		{
+			`Arr == Arr`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -7333,6 +7342,13 @@ func TestEvalInfixArrAdd(t *testing.T) {
 		// nil is treated as []
 		{
 			`[5] + nil`,
+			object.NewPanArr(
+				object.NewPanInt(5),
+			),
+		},
+		// Arr is treated as []
+		{
+			`[5] + Arr`,
 			object.NewPanArr(
 				object.NewPanInt(5),
 			),

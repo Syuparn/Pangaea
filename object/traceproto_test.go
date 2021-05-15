@@ -21,6 +21,16 @@ func TestTraceProtoOfArr(t *testing.T) {
 			proto,
 			proto,
 		},
+		// Arr returns zero value [] so that Arr itself can be used as arr object
+		{
+			BuiltInArrObj,
+			zeroArr,
+		},
+		// child of Arr
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInArrObj),
+			zeroArr,
+		},
 	}
 
 	for _, tt := range tests {
