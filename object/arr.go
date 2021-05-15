@@ -8,6 +8,9 @@ import (
 // ArrType is a type of PanArr.
 const ArrType = "ArrType"
 
+// used as zero value
+var zeroArr = NewPanArr()
+
 // PanArr is object of arr literal.
 type PanArr struct {
 	Elems []PanObject
