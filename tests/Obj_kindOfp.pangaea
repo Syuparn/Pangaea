@@ -1,0 +1,9 @@
+assertEq({a: 1}.kindOf?(Obj), true)
+assertEq({a: 1}.kindOf?(BaseObj), true)
+assertEq({a: 1}.kindOf?(Arr), false)
+assertEq({a: 1}.kindOf?({a: 2}), false)
+
+assertEq(true.kindOf?(1), true)
+assertEq(true.kindOf?(true), true)
+assertEq(true.kindOf?(Num), true)
+
