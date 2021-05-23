@@ -1365,6 +1365,25 @@ func TestEvalObjLiteral(t *testing.T) {
 				},
 			}),
 		},
+		// dangling keys in embedded obj are also ignored
+		{
+			`{x: 1, **{x: 2}}`,
+			toPanObj([]object.Pair{
+				{
+					Key:   object.NewPanStr("x"),
+					Value: object.NewPanInt(1),
+				},
+			}),
+		},
+		{
+			`{**{y: 1}, **{y: 2}}`,
+			toPanObj([]object.Pair{
+				{
+					Key:   object.NewPanStr("y"),
+					Value: object.NewPanInt(1),
+				},
+			}),
+		},
 		// enable to use descendant of str for key (str proto is set)
 		{
 			`{"hoge".bear: 1}`,
