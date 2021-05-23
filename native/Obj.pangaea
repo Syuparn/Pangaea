@@ -1,6 +1,8 @@
 {
   # ancestors returns all ancestors along the proto chain of self.
   ancestors: m{<{yield \ if \ != nil; recur(.proto)}>.new(self).A[1:]},
+  # kindOf? returns whether other appears in self's proto chain.
+  kindOf?: m{|other| self == other || .ancestors.has?(other)},
   # max returns the maximum value in self
   max: m{.values.max},
   # min returns the minimum value in self
