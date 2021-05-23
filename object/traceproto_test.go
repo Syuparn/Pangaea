@@ -737,6 +737,16 @@ func TestTraceProtoOfRange(t *testing.T) {
 			proto,
 			proto,
 		},
+		// Range returns zero value (nil:nil) so that Range itself can be used as range object
+		{
+			BuiltInRangeObj,
+			zeroRange,
+		},
+		// child of Range
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInRangeObj),
+			zeroRange,
+		},
 	}
 
 	for _, tt := range tests {

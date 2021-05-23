@@ -6263,6 +6263,15 @@ func TestEvalInfixRangeEq(t *testing.T) {
 			`(1:2).bear == (1:2)`,
 			object.BuiltInTrue,
 		},
+		// Range is treated as (nil:nil)
+		{
+			`(nil:nil) == Range`,
+			object.BuiltInTrue,
+		},
+		{
+			`Range == Range`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {

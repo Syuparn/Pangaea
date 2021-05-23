@@ -148,6 +148,11 @@ func TraceProtoOfObj(obj PanObject) (*PanObj, bool) {
 // TraceProtoOfRange traces proto chain of obj and returns range proto.
 func TraceProtoOfRange(obj PanObject) (*PanRange, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Range is zero value (nil:nil) so that Range itself can be used as range object
+		if o == BuiltInRangeObj {
+			return zeroRange, true
+		}
+
 		if v, ok := o.(*PanRange); ok {
 			return v, true
 		}

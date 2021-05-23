@@ -19,11 +19,6 @@ func RangeProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
-				// necessary for Range itself! (guarantee `Range == Range`)
-				if args[0] == object.BuiltInRangeObj && args[1] == object.BuiltInRangeObj {
-					return object.BuiltInTrue
-				}
-
 				self, ok := object.TraceProtoOfRange(args[0])
 				if !ok {
 					return object.BuiltInFalse
