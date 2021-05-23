@@ -2,10 +2,12 @@
   # _init provides initializing constructor.
   _init: {
     params := \0
+    defaultKwargs := \_
     m{
       args := \0[1:]
       raise TypeErr.new("arity must be #{params.len}") if args.len != params.len
-      .bear(params.zip(args).A.O)
+      kwargs := \_@{|k, v| [k, v] if defaultKwargs.keys.has?(k)}.A.O
+      .bear({**params.zip(args).A.O, **kwargs, **defaultKwargs})
     }
   },
 }
