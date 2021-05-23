@@ -6455,6 +6455,15 @@ func TestEvalInfixMapEq(t *testing.T) {
 			`%{'a: 0}.bear == %{'a: 0}`,
 			object.BuiltInTrue,
 		},
+		// Map is treated as %{}
+		{
+			`%{} == Map`,
+			object.BuiltInTrue,
+		},
+		{
+			`Map == Map`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {

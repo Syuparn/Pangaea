@@ -495,6 +495,16 @@ func TestTraceProtoOfMap(t *testing.T) {
 			proto,
 			proto,
 		},
+		// Map returns zero value %{} so that Map itself can be used as map object
+		{
+			BuiltInMapObj,
+			zeroMap,
+		},
+		// child of Map
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInMapObj),
+			zeroMap,
+		},
 	}
 
 	for _, tt := range tests {

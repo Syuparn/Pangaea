@@ -98,6 +98,11 @@ func TraceProtoOfIO(obj PanObject) (*PanIO, bool) {
 // TraceProtoOfMap traces proto chain of obj and returns map proto.
 func TraceProtoOfMap(obj PanObject) (*PanMap, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Map is zero value %{} so that Map itself can be used as map object
+		if o == BuiltInMapObj {
+			return zeroMap, true
+		}
+
 		if v, ok := o.(*PanMap); ok {
 			return v, true
 		}
