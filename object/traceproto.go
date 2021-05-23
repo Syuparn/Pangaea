@@ -98,6 +98,11 @@ func TraceProtoOfIO(obj PanObject) (*PanIO, bool) {
 // TraceProtoOfMap traces proto chain of obj and returns map proto.
 func TraceProtoOfMap(obj PanObject) (*PanMap, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Map is zero value %{} so that Map itself can be used as map object
+		if o == BuiltInMapObj {
+			return zeroMap, true
+		}
+
 		if v, ok := o.(*PanMap); ok {
 			return v, true
 		}
@@ -118,6 +123,11 @@ func TraceProtoOfMatch(obj PanObject) (*PanMatch, bool) {
 // TraceProtoOfNil traces proto chain of obj and returns nil proto.
 func TraceProtoOfNil(obj PanObject) (*PanNil, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Nil is zero value nil so that Nil itself can be used as nil object
+		if o == BuiltInNilObj {
+			return BuiltInNil, true
+		}
+
 		if v, ok := o.(*PanNil); ok {
 			return v, true
 		}
@@ -138,6 +148,11 @@ func TraceProtoOfObj(obj PanObject) (*PanObj, bool) {
 // TraceProtoOfRange traces proto chain of obj and returns range proto.
 func TraceProtoOfRange(obj PanObject) (*PanRange, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Range is zero value (nil:nil) so that Range itself can be used as range object
+		if o == BuiltInRangeObj {
+			return zeroRange, true
+		}
+
 		if v, ok := o.(*PanRange); ok {
 			return v, true
 		}

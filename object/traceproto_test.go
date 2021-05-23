@@ -322,6 +322,7 @@ func TestTraceProtoOfFunc(t *testing.T) {
 			proto,
 			proto,
 		},
+		// TODO: enable to use Func as func (besides 0 value, Func#call must handle PanObj Func)
 	}
 
 	for _, tt := range tests {
@@ -495,6 +496,16 @@ func TestTraceProtoOfMap(t *testing.T) {
 			proto,
 			proto,
 		},
+		// Map returns zero value %{} so that Map itself can be used as map object
+		{
+			BuiltInMapObj,
+			zeroMap,
+		},
+		// child of Map
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInMapObj),
+			zeroMap,
+		},
 	}
 
 	for _, tt := range tests {
@@ -604,6 +615,16 @@ func TestTraceProtoOfNil(t *testing.T) {
 		{
 			proto,
 			proto,
+		},
+		// Nil returns zero value nil so that Nil itself can be used as nil object
+		{
+			BuiltInNilObj,
+			BuiltInNil,
+		},
+		// child of Nil
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInNilObj),
+			BuiltInNil,
 		},
 	}
 
@@ -716,6 +737,16 @@ func TestTraceProtoOfRange(t *testing.T) {
 		{
 			proto,
 			proto,
+		},
+		// Range returns zero value (nil:nil) so that Range itself can be used as range object
+		{
+			BuiltInRangeObj,
+			zeroRange,
+		},
+		// child of Range
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInRangeObj),
+			zeroRange,
 		},
 	}
 

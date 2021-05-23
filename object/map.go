@@ -8,6 +8,9 @@ import (
 // MapType is a type of PanMap.
 const MapType = "MapType"
 
+// used as zero value
+var zeroMap = NewEmptyPanMap()
+
 // PanMap is object of map literal.
 type PanMap struct {
 	// used to keep map order

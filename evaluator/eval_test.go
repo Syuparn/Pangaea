@@ -6114,6 +6114,15 @@ func TestEvalInfixNilEq(t *testing.T) {
 			`nil.bear == nil`,
 			object.BuiltInTrue,
 		},
+		// Nil is treated as nil
+		{
+			`nil == Nil`,
+			object.BuiltInTrue,
+		},
+		{
+			`Nil == Nil`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -6252,6 +6261,15 @@ func TestEvalInfixRangeEq(t *testing.T) {
 		// ancestors are also comparable
 		{
 			`(1:2).bear == (1:2)`,
+			object.BuiltInTrue,
+		},
+		// Range is treated as (nil:nil)
+		{
+			`(nil:nil) == Range`,
+			object.BuiltInTrue,
+		},
+		{
+			`Range == Range`,
 			object.BuiltInTrue,
 		},
 	}
@@ -6453,6 +6471,15 @@ func TestEvalInfixMapEq(t *testing.T) {
 		// ancestors are also comparable
 		{
 			`%{'a: 0}.bear == %{'a: 0}`,
+			object.BuiltInTrue,
+		},
+		// Map is treated as %{}
+		{
+			`%{} == Map`,
+			object.BuiltInTrue,
+		},
+		{
+			`Map == Map`,
 			object.BuiltInTrue,
 		},
 	}

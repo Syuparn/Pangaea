@@ -18,11 +18,6 @@ func MapProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("== requires at least 2 args")
 				}
 
-				// necessary for Map itself! (guarantee `Map == Map`)
-				if args[0] == object.BuiltInMapObj && args[1] == object.BuiltInMapObj {
-					return object.BuiltInTrue
-				}
-
 				self, ok := object.TraceProtoOfMap(args[0])
 				if !ok {
 					return object.BuiltInFalse

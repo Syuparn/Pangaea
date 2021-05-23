@@ -8,6 +8,9 @@ import (
 // RangeType is a type of PanRange.
 const RangeType = "RangeType"
 
+// used as zero value
+var zeroRange = NewPanRange(BuiltInNil, BuiltInNil, BuiltInNil)
+
 // PanRange is object of range literal.
 type PanRange struct {
 	Start PanObject
