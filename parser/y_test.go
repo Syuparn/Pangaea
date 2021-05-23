@@ -7,11 +7,12 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Syuparn/pangaea/ast"
 	"math"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/Syuparn/pangaea/ast"
 )
 
 // CAUTION: Capitalize test function names!
@@ -159,6 +160,8 @@ func TestInfixExpr(t *testing.T) {
 		{`5 <=> 2`, 5, "<=>", 2},
 		{`5 == 2`, 5, "==", 2},
 		{`5 != 2`, 5, "!=", 2},
+		{`5 === 2`, 5, "===", 2},
+		{`5 !== 2`, 5, "!==", 2},
 		{`5 <= 2`, 5, "<=", 2},
 		{`5 >= 2`, 5, ">=", 2},
 		{`5 > 2`, 5, ">", 2},
@@ -210,8 +213,10 @@ func TestInfixPrecedence(t *testing.T) {
 		{`3*2 <=> 2-2`, `((3 * 2) <=> (2 - 2))`},
 		{`3+2 == 2*2`, `((3 + 2) == (2 * 2))`},
 		{`3+2 == 2**2`, `((3 + 2) == (2 ** 2))`},
+		{`3+2 === 2*2`, `((3 + 2) === (2 * 2))`},
 		{`3 == 4 && 5 != 6`, `((3 == 4) && (5 != 6))`},
 		{`3 == 4 || 5 != 6`, `((3 == 4) || (5 != 6))`},
+		{`3 === 4 || 5 !== 6`, `((3 === 4) || (5 !== 6))`},
 		{`3 && 4 + 2`, `(3 && (4 + 2))`},
 		// NOTE: "&&" has higher precedence than "||" (same as other languages)
 		// because "&&" is boolean mul, while "||" is boolean add
@@ -453,6 +458,8 @@ func TestSymLiteral(t *testing.T) {
 		{`'<=>`, "<=>"},
 		{`'==`, "=="},
 		{`'!=`, "!="},
+		{`'===`, "==="},
+		{`'!==`, "!=="},
 		{`'<=`, "<="},
 		{`'>=`, ">="},
 		{`'<`, "<"},
