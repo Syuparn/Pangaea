@@ -68,7 +68,7 @@ import (
 %token<token> SYMBOL CHAR_STR BACKQUOTE_STR DOUBLEQUOTE_STR
 %token<token> HEAD_STR_PIECE MID_STR_PIECE TAIL_STR_PIECE
 %token<token> DOUBLE_STAR PLUS MINUS STAR SLASH BANG DOUBLE_SLASH PERCENT
-%token<token> SPACESHIP EQ NEQ LT LE GT GE
+%token<token> SPACESHIP EQ NEQ TOPIC_EQ LT LE GT GE
 %token<token> BIT_LSHIFT BIT_RSHIFT BIT_AND BIT_OR BIT_XOR BIT_NOT
 %token<token> AND OR IADD ISUB
 %token<token> ADD_CHAIN MAIN_CHAIN MULTILINE_ADD_CHAIN MULTILINE_MAIN_CHAIN
@@ -88,7 +88,7 @@ import (
 %right ASSIGN COMPOUND_ASSIGN
 %left OR
 %left AND
-%left SPACESHIP EQ NEQ LT LE GT GE
+%left SPACESHIP EQ NEQ TOPIC_EQ LT LE GT GE
 %left BIT_OR BIT_XOR
 %left BIT_AND
 %left BIT_LSHIFT BIT_RSHIFT
@@ -656,6 +656,17 @@ infixExpr
 			Src: yylex.(*Lexer).Source,
 		}
 		yylex.(*Lexer).curRule = "infixExpr -> expr NEQ expr"
+	}
+	| expr TOPIC_EQ expr
+	{
+		$$ = &ast.InfixExpr{
+			Token: $2.Literal,
+			Left: $1,
+			Operator: $2.Literal,
+			Right: $3,
+			Src: yylex.(*Lexer).Source,
+		}
+		yylex.(*Lexer).curRule = "infixExpr -> expr TOPIC_EQ expr"
 	}
 	| expr LT expr
 	{
@@ -2119,6 +2130,7 @@ func tokenTypes() []simplexer.TokenType{
 		"spaceship": `<=>`,
 		"eq": `==`,
 		"neq": `!=`,
+		"topicEq": `===`,
 		"ge": `>=`,
 		"le": `<=`,
 		"gt": `>`,
@@ -2211,6 +2223,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(DOUBLE_SLASH, methodOps["doubleSlash"]),
 		t(BIT_LSHIFT, methodOps["bitLShift"]),
 		t(BIT_RSHIFT, methodOps["bitRShift"]),
+		t(TOPIC_EQ, methodOps["topicEq"]),
 		t(EQ, methodOps["eq"]),
 		t(NEQ, methodOps["neq"]),
 		t(GE, methodOps["ge"]),

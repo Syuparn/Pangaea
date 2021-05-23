@@ -7,11 +7,12 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Syuparn/pangaea/ast"
 	"math"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/Syuparn/pangaea/ast"
 )
 
 // CAUTION: Capitalize test function names!
@@ -159,6 +160,7 @@ func TestInfixExpr(t *testing.T) {
 		{`5 <=> 2`, 5, "<=>", 2},
 		{`5 == 2`, 5, "==", 2},
 		{`5 != 2`, 5, "!=", 2},
+		{`5 === 2`, 5, "===", 2},
 		{`5 <= 2`, 5, "<=", 2},
 		{`5 >= 2`, 5, ">=", 2},
 		{`5 > 2`, 5, ">", 2},
@@ -453,6 +455,7 @@ func TestSymLiteral(t *testing.T) {
 		{`'<=>`, "<=>"},
 		{`'==`, "=="},
 		{`'!=`, "!="},
+		{`'===`, "==="},
 		{`'<=`, "<="},
 		{`'>=`, ">="},
 		{`'<`, "<"},
