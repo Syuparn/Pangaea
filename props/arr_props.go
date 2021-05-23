@@ -236,6 +236,48 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return arr
 			},
 		),
+		"O": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Arr#O requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfArr(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as arr", object.ReprStr(args[0])))
+				}
+
+				pairs := map[object.SymHash]object.Pair{}
+
+				for _, e := range self.Elems {
+					arr, ok := object.TraceProtoOfArr(e)
+					if !ok {
+						return object.NewValueErr(
+							fmt.Sprintf(`element %s cannot be treated as arr`, object.ReprStr(e)))
+					}
+
+					if len(arr.Elems) != 2 {
+						return object.NewValueErr(
+							fmt.Sprintf(`element %s must have two elements`, object.ReprStr(arr)))
+					}
+
+					k, ok := object.TraceProtoOfStr(arr.Elems[0])
+					if !ok {
+						return object.NewValueErr(
+							fmt.Sprintf(`element key %s cannot be treated as str`, object.ReprStr(arr.Elems[0])))
+					}
+
+					pairs[object.GetSymHash(k.Value)] = object.Pair{
+						Key:   k,
+						Value: arr.Elems[1],
+					}
+				}
+
+				return object.PanObjInstancePtr(&pairs)
+			},
+		),
 	}
 }
 

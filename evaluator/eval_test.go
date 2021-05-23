@@ -4600,6 +4600,69 @@ func TestEvalFloatifyErr(t *testing.T) {
 	}
 }
 
+func TestEvalObjectify(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[].O`,
+			toPanObj([]object.Pair{}),
+		},
+		{
+			`[['a, 1]].O`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+			}),
+		},
+		{
+			`[['a, 1], ['b, "2"]].O`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+				{Key: object.NewPanStr("b"), Value: object.NewPanStr("2")},
+			}),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalObjectifyErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[]['O]()`,
+			object.NewTypeErr("Arr#O requires at least 1 arg"),
+		},
+		{
+			`[]['O]("a")`,
+			object.NewTypeErr("\"a\" cannot be treated as arr"),
+		},
+		{
+			`[['a, 1], 2].O`,
+			object.NewValueErr("element 2 cannot be treated as arr"),
+		},
+		{
+			`[['a, 1], ['b]].O`,
+			object.NewValueErr("element [\"b\"] must have two elements"),
+		},
+		{
+			`[['a, 1], [2, 3]].O`,
+			object.NewValueErr("element key 2 cannot be treated as str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalRepr(t *testing.T) {
 	tests := []struct {
 		input    string
