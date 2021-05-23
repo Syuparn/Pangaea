@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"fmt"
+
 	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
 )
@@ -51,8 +52,11 @@ func evalObj(node *ast.ObjLiteral, env *object.Env) object.PanObject {
 			return appendStackTrace(e, expElem.Source())
 		}
 
+		// NOTE: ignore duplicated keys
 		for symHash, pair := range *obj.Pairs {
-			pairMap[symHash] = pair
+			if _, exists := pairMap[symHash]; !exists {
+				pairMap[symHash] = pair
+			}
 		}
 	}
 

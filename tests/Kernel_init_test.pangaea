@@ -1,0 +1,16 @@
+MyObj := {
+  new: _init('a, 'b, c: 3),
+}
+
+assertEq(MyObj.new(1, 2), MyObj.bear({a: 1, b: 2, c: 3}))
+assertEq(MyObj.new(1, 2).proto, MyObj)
+
+# if arity is wrong
+assertRaises(TypeErr, "arity must be 2") {MyObj.new(1)}
+assertRaises(TypeErr, "arity must be 2") {MyObj.new(1, 2, 3)}
+
+# with kwargs
+assertEq(MyObj.new(1, 2, c: 4), MyObj.bear({a: 1, b: 2, c: 4}))
+# kwargs not contained in _init are ignored
+assertEq(MyObj.new(1, 2, other: 5), MyObj.bear({a: 1, b: 2, c: 3}))
+
