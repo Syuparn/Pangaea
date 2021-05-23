@@ -322,6 +322,7 @@ func TestTraceProtoOfFunc(t *testing.T) {
 			proto,
 			proto,
 		},
+		// TODO: enable to use Func as func (besides 0 value, Func#call must handle PanObj Func)
 	}
 
 	for _, tt := range tests {
