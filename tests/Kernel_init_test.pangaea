@@ -1,0 +1,10 @@
+MyObj := {
+  new: _init('a, 'b),
+}
+
+assertEq(MyObj.new(1, 2), MyObj.bear({a: 1, b: 2}))
+assertEq(MyObj.new(1, 2).proto, MyObj)
+
+# if arity is wrong
+assertRaises(TypeErr, "arity must be 2") {MyObj.new(1)}
+assertRaises(TypeErr, "arity must be 2") {MyObj.new(1, 2, 3)}
