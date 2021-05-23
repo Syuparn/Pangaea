@@ -1,0 +1,3 @@
+myObj := {a: 1}
+assertEq(myObj.bear.ancestors, [myObj, Obj, BaseObj])
+assertEq(true.ancestors, [1, Int, Num, Obj, BaseObj])
