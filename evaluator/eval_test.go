@@ -6114,6 +6114,15 @@ func TestEvalInfixNilEq(t *testing.T) {
 			`nil.bear == nil`,
 			object.BuiltInTrue,
 		},
+		// Nil is treated as nil
+		{
+			`nil == Nil`,
+			object.BuiltInTrue,
+		},
+		{
+			`Nil == Nil`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {

@@ -123,6 +123,11 @@ func TraceProtoOfMatch(obj PanObject) (*PanMatch, bool) {
 // TraceProtoOfNil traces proto chain of obj and returns nil proto.
 func TraceProtoOfNil(obj PanObject) (*PanNil, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
+		// HACK: proto of Nil is zero value nil so that Nil itself can be used as nil object
+		if o == BuiltInNilObj {
+			return BuiltInNil, true
+		}
+
 		if v, ok := o.(*PanNil); ok {
 			return v, true
 		}

@@ -1,2 +1,3 @@
 assertEq({a: 1}.nil?, false)
 assertEq(nil.nil?, true)
+assertEq(Nil.nil?, true)

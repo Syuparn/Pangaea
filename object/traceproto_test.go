@@ -615,6 +615,16 @@ func TestTraceProtoOfNil(t *testing.T) {
 			proto,
 			proto,
 		},
+		// Nil returns zero value nil so that Nil itself can be used as nil object
+		{
+			BuiltInNilObj,
+			BuiltInNil,
+		},
+		// child of Nil
+		{
+			NewPanObj(&map[SymHash]Pair{}, BuiltInNilObj),
+			BuiltInNil,
+		},
 	}
 
 	for _, tt := range tests {
