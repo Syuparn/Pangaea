@@ -1,6 +1,8 @@
 {
   # A converts self into arr.
   A: m{self},
+  # asFor? returns whether predicate self is true as for o.
+  asFor?: m{|o| .has?(o)},
   # empty? returns whether self contains elements.
   empty?: m{.len.!},
   # rev returns arr with reversed elements.

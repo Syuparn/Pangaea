@@ -1,0 +1,4 @@
+assertEq("ab+".asFor?("abb"), true)
+assertEq("ab+".asFor?("abbc"), true)
+assertEq("^ab+$".asFor?("abc"), false)
+assertEq("a".asFor?("a"), true)
