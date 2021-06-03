@@ -1,0 +1,4 @@
+assertEq((1:10:2).asFor?(7), true)
+assertEq((1:10:2).asFor?(6), false)
+assertEq(('a:'e).asFor?('c), true)
+assertEq(('a:'e).asFor?('e), false)

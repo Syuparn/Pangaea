@@ -1,4 +1,6 @@
 {
+  # asFor? returns whether predicate self is true as for o.
+  asFor?: m{|o| .find {\ == o}.nil?.!},
   # at returns elements of given indices.
   at: m{|i| ._iter.at(i)},
   # counter? returns whether all of start, stop, and step are int.
