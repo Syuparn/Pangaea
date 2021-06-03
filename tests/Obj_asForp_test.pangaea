@@ -1,0 +1,6 @@
+assertEq(Obj.asFor?({a: 1}), true)
+assertEq({a: 1}.asFor?({a: 1}), true)
+assertEq({a: 1}.asFor?({a: 2}), false)
+assertEq({a: 1}.asFor?(Obj), false)
+assertEq((o := {a: 1}).asFor?(o.bear({b: 2})), true)
+
