@@ -1,0 +1,2 @@
+assertEq({|x| x.even?}.asFor?(2), true)
+assertEq({|x| x.even?}.asFor?(3), false)
