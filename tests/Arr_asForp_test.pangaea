@@ -1,0 +1,3 @@
+assertEq([1, 2].asFor?(1), true)
+assertEq([1, 2].asFor?(3), false)
+assertEq([].asFor?(3), false)
