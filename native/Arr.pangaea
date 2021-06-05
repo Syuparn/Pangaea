@@ -5,6 +5,8 @@
   asFor?: m{|o| .has?(o)},
   # empty? returns whether self contains elements.
   empty?: m{.len.!},
+  # grep filters elements by === match.
+  grep: m{|o| @{\ if \ === o}},
   # rev returns arr with reversed elements.
   rev: m{self[::-1]},
   # unwrap extracts element if there is only one element.
