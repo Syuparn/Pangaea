@@ -7,3 +7,6 @@ assertEq((0:10:2)[4:1:-1], [8, 6, 4])
 assertEq((0:10:2)[0:0], [])
 assertEq((0:10:2)[4:], [8])
 assertEq((0:10:2)[:2], [0, 2])
+# props can be also referred
+assertEq((0:10:2)['_name], Obj['at](Range, ['_name]))
+assertEq((0:10:2)['at], Obj['at](Range, ['at]))
