@@ -1,0 +1,21 @@
+assertEq(1.case(%{1: 'one}), 'one)
+
+# first match
+assertEq(2.case(%{
+  1: 'one,
+  2: 'two,
+  3: 'three,
+}), 'two)
+
+# kindOf match
+assertEq(1.case(%{
+  Str: 'str,
+  Int: 'int,
+}), 'int)
+
+# asFor? match
+assertEq("ABBC".case(%{
+  {.lc?}: 'lowercase,
+  "AB+": 'withAB,
+  Obj: 'others,
+}), 'withAB)
