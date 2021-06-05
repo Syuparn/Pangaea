@@ -1,0 +1,4 @@
+assertEq(['a, 'b, 'c, 'a].grep('a), ['a, 'a])
+# === match
+assertEq(['Pangaea, 'Ruby, 'Golang, 'Python].grep("P"), ['Pangaea, 'Python])
+assertEq((1:6).A.grep({.odd?}), [1, 3, 5])
