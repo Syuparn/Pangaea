@@ -1,0 +1,16 @@
+# false if a == b
+assertEq({a: 1} !== {a: 1}, false)
+# false if a.kindOf?(b)
+assertEq([1, 2, 3] !== Arr, false)
+# false if b.asFor?(a)
+assertEq(1 !== [1, 2], false)
+assertEq("abbbc" !== "ab+", false)
+assertEq(2 !== {.even?}, false)
+assertEq('c !== ('a:'e), false)
+assertEq({} !== {'asFor?: m{|_| true}}, false)
+# true otherwise
+assertEq(1 !== [2, 3], true)
+assertEq("abc" !== "^ab+$", true)
+assertEq(2 !== {.odd?}, true)
+assertEq('f !== ('a:'e), true)
+assertEq({} !== {'asFor?: m{|_| false}}, true)
