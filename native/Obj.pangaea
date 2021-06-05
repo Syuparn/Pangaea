@@ -1,6 +1,8 @@
 {
   # === returns whether predicate other is true as for the topic self.
   '===: m{|other| self == other || .kindOf?(other) || other.asFor?(self)},
+  # !== returns whether predicate other is false as for the topic self.
+  '!==: m{|other| !(self === other)},
   # ancestors returns all ancestors along the proto chain of self.
   ancestors: m{<{yield \ if \ != nil; recur(.proto)}>.new(self).A[1:]},
   # asFor? returns whether predicate self is true as for o.
