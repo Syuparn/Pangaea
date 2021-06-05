@@ -2,7 +2,7 @@
   # IA converts self into int arr
   IA: m{|sep: `\s`| .split(sep: sep)@I},
   # asFor? returns whether predicate self is true as for o.
-  asFor?: m{|o| o.match(self).B},
+  asFor?: m{|o| nil~.{o.match(self)}.B},
   # call calls prop of obj whose key is self
   call: m{|obj| obj[self](obj) if .sym? else ValueErr.new("`#{self}` is not a symbol")},
   # camel makes self camelCase
