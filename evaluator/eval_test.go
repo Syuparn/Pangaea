@@ -4676,6 +4676,74 @@ func TestEvalObjectify(t *testing.T) {
 	}
 }
 
+func TestEvalArrM(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`[].M`,
+			toPanMap(
+				[]object.Pair{},
+				[]object.Pair{},
+			),
+		},
+		{
+			`[['a, 1]].M`,
+			toPanMap(
+				[]object.Pair{
+					{Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+				},
+				[]object.Pair{},
+			),
+		},
+		{
+			`[["hi", 1], [4, "2"]].M`,
+			toPanMap(
+				[]object.Pair{
+					{Key: object.NewPanStr("hi"), Value: object.NewPanInt(1)},
+					{Key: object.NewPanInt(4), Value: object.NewPanStr("2")},
+				},
+				[]object.Pair{},
+			),
+		},
+		{
+			`[["hi", 'str], [[], 'arr], [4, 'int], [{}, 'obj]].M`,
+			toPanMap(
+				[]object.Pair{
+					{Key: object.NewPanStr("hi"), Value: object.NewPanStr("str")},
+					{Key: object.NewPanInt(4), Value: object.NewPanStr("int")},
+				},
+				[]object.Pair{
+					{Key: object.NewPanArr(), Value: object.NewPanStr("arr")},
+					{Key: object.EmptyPanObjPtr(), Value: object.NewPanStr("obj")},
+				},
+			),
+		},
+		{
+			`Arr['M]()`,
+			object.NewTypeErr("Arr#M requires at least 1 arg"),
+		},
+		{
+			`Arr['M](1)`,
+			object.NewTypeErr("1 cannot be treated as arr"),
+		},
+		{
+			`[2].M`,
+			object.NewValueErr("element 2 cannot be treated as arr"),
+		},
+		{
+			`[[3]].M`,
+			object.NewValueErr("element [3] must have two elements"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalObjectifyErr(t *testing.T) {
 	tests := []struct {
 		input    string
