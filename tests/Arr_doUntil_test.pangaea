@@ -3,3 +3,6 @@ assertEq([2, 4].doUntil {.even?}.A, [2])
 assertEq([].doUntil {.even?}.A, [])
 # doUntil returns iter (not arr)
 assertEq([].doUntil {.even?}.proto, Iter)
+
+# nested call
+assertEq(["abc", "def", "ghi"].doUntil {.doUntil {\ == ?e}.A == [?d, ?e]}.A, ["abc", "def"])

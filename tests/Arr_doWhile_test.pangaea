@@ -3,3 +3,6 @@ assertEq([2, 4].doWhile {.odd?}.A, [2])
 assertEq([].doWhile {.odd?}.A, [])
 # doWhile returns iter (not arr)
 assertEq([].doWhile {.odd?}.proto, Iter)
+
+# nested call
+assertEq(["abc", "def", "ghi"].doWhile {.doWhile {\ != ?e}.A != [?d, ?e]}.A, ["abc", "def"])
