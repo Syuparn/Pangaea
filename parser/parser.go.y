@@ -1653,6 +1653,11 @@ callArgs
 		$$ = $2
 		yylex.(*Lexer).curRule = "callArgs -> lParen argList RET RPAREN"
 	}
+	| lParen argList comma RPAREN %prec GROUPING
+	{
+		$$ = $2
+		yylex.(*Lexer).curRule = "callArgs -> lParen argList comma RPAREN"
+	}
 	| lParen kwargExpansionList RPAREN %prec GROUPING
 	{
 		expansionList := []ast.Expr{}
