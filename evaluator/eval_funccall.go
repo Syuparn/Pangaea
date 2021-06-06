@@ -38,8 +38,10 @@ func evalPanFuncCall(
 	kwargs *object.PanObj,
 	args ...object.PanObject,
 ) object.PanObject {
-	assignArgsToEnv(f.Env, f.Args().Elems, f.Kwargs(), args, kwargs)
-	retVal := evalStmts(*f.Body(), f.Env)
+	// NOTE: copy is necessary otherwise recurred call breaks outer env! (see TestEvalRecurredFuncCall)
+	e := object.NewCopiedEnv(f.Env)
+	assignArgsToEnv(e, f.Args().Elems, f.Kwargs(), args, kwargs)
+	retVal := evalStmts(*f.Body(), e)
 
 	if err, ok := retVal.(*object.PanErr); ok {
 		return appendStackTrace(err, (*f.Body())[0].Source())

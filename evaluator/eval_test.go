@@ -1955,6 +1955,28 @@ func TestEvalMultiLineFuncCall(t *testing.T) {
 	}
 }
 
+func TestEvalRecurredFuncCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`
+			func := {|f| f(); f}
+			inner := {|| 1}
+			outer := {func(inner)}
+			func(outer) == outer
+			`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalBuiltInFuncCall(t *testing.T) {
 	tests := []struct {
 		input    string
