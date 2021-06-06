@@ -55,9 +55,9 @@ They are installed automatically.
 - [x] Lexer
 - [x] Parser
 - [x] Evaluator
-- [ ] Methods/Properties (about 20%)
+- [ ] Methods/Properties (about 50%)
 
-# language features (Let's run your REPL!)
+# Introduction (Let's run your REPL!)
 
 ## One-way!
 This language is tuned for a one-liner method chain!
@@ -145,3 +145,14 @@ This is useful only in list context, which removes returned `nil`.
 (1:10)@{|i| i if i.even?}.puts # [2, 4, 6, 8]
 (1:10)=@{|i| i if i.even?}.puts # [nil, 2, nil, 4, nil, 6, nil, 8, nil]
 ```
+
+# Language Features
+
+- **Readable one-liner**
+- Interpreted
+- Prototype-based object oriented
+- Everything is object
+- Immutable objects
+- First-class functions with lexical scopes
+- Method chains with context (see above for details)
+- Metaprogramming with magic methods (e.g: `_missing`, `asFor?`)
