@@ -3,3 +3,6 @@ assertEq([2, 4].while {.odd?}.A, [])
 assertEq([].while {.odd?}.A, [])
 # while returns iter (not arr)
 assertEq([].while {.odd?}.proto, Iter)
+
+# nested call
+assertEq(["abc", "def", "ghi"].while {.while {\ != ?e}.A != [?d]}.A, ["abc"])

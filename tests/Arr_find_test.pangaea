@@ -3,3 +3,6 @@ assertEq([1, 2, 3].find {.even?}, 2)
 assertEq([3, 4, 6].find {.even?}, 4)
 # if not found, return nil
 assertEq([1].find {.even?}, nil)
+
+# nested call
+assertEq(["abc", "def", "ghi"].find {.find {\ == ?e}}, "def")

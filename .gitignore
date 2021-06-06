@@ -8,3 +8,6 @@ pangaea
 # benchmark results
 runscript/cpu.out
 runscript/runscript.test*
+# vscode setting files
+.vscode/*
+__debug_bin
