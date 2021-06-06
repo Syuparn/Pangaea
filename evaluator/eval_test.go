@@ -2173,6 +2173,11 @@ func TestEvalIterNew(t *testing.T) {
 				),
 			),
 		},
+		// builtinIter cannot handle new because it cannot hold the received args
+		{
+			`[1, 2, 3]._iter.new(2)`,
+			object.NewValueErr("Iter#new cannot handle builtinIter (use _iter instead)"),
+		},
 	}
 
 	for _, tt := range tests {

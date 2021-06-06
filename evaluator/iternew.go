@@ -14,6 +14,10 @@ func iterNew(
 		return object.NewTypeErr("Iter#new requires at least 1 arg")
 	}
 
+	if _, ok := object.TraceProtoOfBuiltInIter(args[0]); ok {
+		return object.NewValueErr("Iter#new cannot handle builtinIter (use _iter instead)")
+	}
+
 	// allow descendant of iter
 	self, ok := object.TraceProtoOfFunc(args[0])
 	if !ok {
