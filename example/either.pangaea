@@ -1,0 +1,8 @@
+# catch errors
+10.try.{\ // 0}.A.{|val, err| err.p} # [ZeroDivisionErr: cannot be divided by 0]
+10.try.{\ // 0}.or(1).p # 1
+10.try.{\ // 0}.err?.p # true
+10.try.{\ // 5}.{\ // 2}.p # {_value: 1}
+10.try.{\ // 0}.{\ // 2}.p # {"_error": [ZeroDivisionErr: cannot be divided by 0]}
+10.try.{\ // 5}.{\ // 2}.val.p # 1
+10.try.{\ // 0}.{\ // 2}.val.p # nil

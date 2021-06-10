@@ -1,0 +1,8 @@
+QuusInt := Int.bear({
+  new: _init('n),
+  '+: m{|other| 5 if [self, other].any? {.n >= 57} else .n + other.n},
+})
+
+m := QuusInt.new(60)
+n := QuusInt.new(40)
+(m + n).p # 5

@@ -50,13 +50,6 @@ They are installed automatically.
 - [simplexer](github.com/macrat/simplexer)
 - [dtoa](github.com/tanaton/dtoa)
 
-# Progress
-
-- [x] Lexer
-- [x] Parser
-- [x] Evaluator
-- [ ] Methods/Properties (about 50%)
-
 # Introduction (Let's run your REPL!)
 
 ## One-way!

@@ -1,0 +1,11 @@
+scores := {
+  "taro": 70,
+  "jiro": 95,
+  "saburo": 55,
+}
+
+scores@{|k, v| [k, v.case(%{
+  {\ >= 90}: "great!",
+  (60:90): "ok.",
+  Int: "try harder...",
+})]}.O.p

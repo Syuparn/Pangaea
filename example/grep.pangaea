@@ -1,0 +1,3 @@
+# this is convenient for you to search for props!
+# props starts with a
+Arr.keys.grep("^a").p

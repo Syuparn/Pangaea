@@ -1,0 +1,3 @@
+# parse csv with header row to list
+# "cat sample.csv | pangaea csv.pangaea"
+<>@{\/?,}.{[\[0], \[1:]]}.{|header, rows| rows@{header.zip(\).A.O}}.p

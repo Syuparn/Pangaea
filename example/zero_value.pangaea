@@ -1,0 +1,4 @@
+# proto can be used as zero value
+(Int + 3).p
+(Float + 2.0).p
+(Str + "abc").p

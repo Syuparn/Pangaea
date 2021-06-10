@@ -1,0 +1,11 @@
+# short-hand constructor
+
+Person := {
+  new: _init('name, 'age)
+}
+
+taro := Person.new("Taro", 22)
+taro.name.p # Taro
+taro.age.p # 22
+
+# jiro := Person.new("Jiro") # TypeErr: arity must be 2
