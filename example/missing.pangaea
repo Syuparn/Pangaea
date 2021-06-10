@@ -1,0 +1,5 @@
+obj := {
+  _missing: m{|key| "I'm not familiar with #{key}".p; self},
+}
+
+obj.foo.bar.not.exist.props.but.obj.can.handle.it

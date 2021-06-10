@@ -1,0 +1,17 @@
+# === is intended to be used as topic equality like Japanese particle "wa"
+Menu := {
+  new: _init('name),
+  asFor?: m{|o| o.order == self},
+}
+
+menus := ['eel, 'katsu, 'tempura, 'beaf]@{[\, Menu.new(\)]}.O
+
+Customer := {
+  new: _init('order),
+}
+
+eel := menus['eel]
+taro := Customer.new(eel)
+
+(taro == eel).p # false
+(taro === eel).p # true
