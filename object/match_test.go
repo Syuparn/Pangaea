@@ -36,6 +36,23 @@ func TestMatchInspect(t *testing.T) {
 	}
 }
 
+func TestMatchRepr(t *testing.T) {
+	tests := []struct {
+		obj      PanMatch
+		expected string
+	}{
+		// AstFuncWrapper delegates to FuncComponent.String(), which works same as below
+		{PanMatch{&MockMatchWrapper{"%{|1| 2 |a| a * 2}"}}, "%{|1| 2 |a| a * 2}"},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestMatchProto(t *testing.T) {
 	m := PanMatch{&MockMatchWrapper{"%{}"}}
 	if m.Proto() != BuiltInMatchObj {

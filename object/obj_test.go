@@ -64,6 +64,85 @@ func TestObjInspect(t *testing.T) {
 	}
 }
 
+func TestObjRepr(t *testing.T) {
+	tests := []struct {
+		obj      PanObject
+		expected string
+	}{
+		// keys are sorted so that Inspect() always returns same output
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{}),
+			`{}`,
+		},
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				(NewPanStr("a")).SymHash(): {NewPanStr("a"), NewPanInt(1)},
+			}),
+			`{"a": 1}`,
+		},
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				(NewPanStr("a")).SymHash():  {NewPanStr("a"), NewPanStr("A")},
+				(NewPanStr("_b")).SymHash(): {NewPanStr("_b"), NewPanStr("B")},
+			}),
+			`{"_b": "B", "a": "A"}`,
+		},
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				(NewPanStr("foo?")).SymHash(): {NewPanStr("foo?"), &PanBool{true}},
+				(NewPanStr("b")).SymHash():    {NewPanStr("b"), NewPanStr("B")},
+			}),
+			`{"b": "B", "foo?": true}`,
+		},
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				(NewPanStr("foo?")).SymHash(): {NewPanStr("foo?"), &PanBool{true}},
+				(NewPanStr("b")).SymHash(): {
+					NewPanStr("b"),
+					// NOTE: `&(NewPanObjInstance(...))` is syntax error
+					PanObjInstancePtr(&map[SymHash]Pair{
+						(NewPanStr("c")).SymHash(): {NewPanStr("c"), NewPanStr("C")},
+					}),
+				},
+			}),
+			`{"b": {"c": "C"}, "foo?": true}`,
+		},
+		// if object has prop _name and its value is str, show it instead
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("foo")},
+			}),
+			`foo`,
+		},
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("_name"): {NewPanStr("_name"), NewPanInt(10)},
+			}),
+			`{"_name": 10}`,
+		},
+		// check child _name
+		{
+			PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("a"): {
+					NewPanStr("a"),
+					PanObjInstancePtr(&map[SymHash]Pair{
+						GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("foo")},
+					}),
+				},
+			}),
+			`{"a": foo}`,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := tt.obj.Repr()
+		if actual != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, actual)
+		}
+	}
+}
+
 func TestObjProto(t *testing.T) {
 	tests := []struct {
 		obj          PanObject

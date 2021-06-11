@@ -35,6 +35,20 @@ func (a *PanArr) Inspect() string {
 	return out.String()
 }
 
+// Repr returns pritty-printed string of this object.
+func (a *PanArr) Repr() string {
+	var out bytes.Buffer
+	elems := []string{}
+	for _, e := range a.Elems {
+		elems = append(elems, e.Repr())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elems, ", "))
+	out.WriteString("]")
+	return out.String()
+}
+
 // Proto returns proto of this object.
 func (a *PanArr) Proto() PanObject {
 	return BuiltInArrObj

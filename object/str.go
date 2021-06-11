@@ -29,6 +29,11 @@ func (s *PanStr) Inspect() string {
 	return `"` + s.Value + `"`
 }
 
+// Repr returns pritty-printed string of this object.
+func (s *PanStr) Repr() string {
+	return s.Inspect()
+}
+
 // Proto returns proto of this object.
 func (s *PanStr) Proto() PanObject {
 	return BuiltInStrObj

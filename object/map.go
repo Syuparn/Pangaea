@@ -53,6 +53,35 @@ func (m *PanMap) Inspect() string {
 	return out.String()
 }
 
+// Repr returns pritty-printed string of this object.
+func (m *PanMap) Repr() string {
+	var out bytes.Buffer
+	pairs := []Pair{}
+
+	// NOTE: refer map because range cannot treat map pointer
+	for _, p := range *m.Pairs {
+		pairs = append(pairs, p)
+	}
+
+	out.WriteString("%{")
+	// NOTE: sort by key order otherwise output changes randomly
+	// depending on inner map structure
+	out.WriteString(sortedPairsRepr(pairs))
+
+	ps := []string{}
+	for _, p := range *m.NonHashablePairs {
+		ps = append(ps, p.Key.Repr()+": "+p.Value.Repr())
+	}
+	if len(ps) > 0 && len(pairs) > 0 {
+		out.WriteString(", ")
+	}
+	out.WriteString(strings.Join(ps, ", "))
+
+	out.WriteString("}")
+
+	return out.String()
+}
+
 // Proto returns proto of this object.
 func (m *PanMap) Proto() PanObject {
 	return BuiltInMapObj

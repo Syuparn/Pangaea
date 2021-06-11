@@ -34,6 +34,11 @@ func (io *PanIO) Inspect() string {
 	return "IO"
 }
 
+// Repr returns pritty-printed string of this object.
+func (i *PanIO) Repr() string {
+	return i.Inspect()
+}
+
 // Proto returns proto of this object.
 func (io *PanIO) Proto() PanObject {
 	return BuiltInIOObj

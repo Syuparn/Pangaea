@@ -32,6 +32,24 @@ func TestFuncInspect(t *testing.T) {
 	}
 }
 
+func TestFuncRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanFunc
+		expected string
+	}{
+		// AstFuncWrapper delegates to FuncComponent.String(), which works same as below
+		{NewPanFunc(newMockFuncWrapperWithBody("|a| a + 1"), nil), "{|a| a + 1}"},
+		{NewPanIter(newMockFuncWrapperWithBody("|a| a + 1"), nil), "<{|a| a + 1}>"},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestFuncProto(t *testing.T) {
 	tests := []struct {
 		f            *PanFunc

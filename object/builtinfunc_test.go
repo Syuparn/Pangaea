@@ -23,6 +23,16 @@ func TestBuiltInInspect(t *testing.T) {
 	}
 }
 
+func TestBuiltInRepr(t *testing.T) {
+	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
+	obj := NewPanBuiltInFunc(f)
+	expected := `{|| [builtin]}`
+	if obj.Repr() != expected {
+		t.Errorf("wrong output. expected=%s, got=%s",
+			expected, obj.Inspect())
+	}
+}
+
 func TestBuiltInProto(t *testing.T) {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
 	obj := NewPanBuiltInFunc(f)

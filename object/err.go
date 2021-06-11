@@ -25,6 +25,11 @@ func (e *PanErr) Inspect() string {
 	return fmt.Sprintf("%s: %s", e.ErrKind, e.Msg)
 }
 
+// Repr returns pritty-printed string of this object.
+func (e *PanErr) Repr() string {
+	return e.Inspect()
+}
+
 // Proto returns proto of this object.
 func (e *PanErr) Proto() PanObject {
 	return e.proto

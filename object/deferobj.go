@@ -22,6 +22,11 @@ func (o *DeferObj) Inspect() string {
 	return "deferObj"
 }
 
+// Repr returns pritty-printed string of this object.
+func (o *DeferObj) Repr() string {
+	return o.Inspect()
+}
+
 // Proto returns proto of this object.
 func (o *DeferObj) Proto() PanObject {
 	// never called

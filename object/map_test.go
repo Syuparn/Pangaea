@@ -107,6 +107,126 @@ func TestMapInspect(t *testing.T) {
 	}
 }
 
+func TestMapRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanMap
+		expected string
+	}{
+		// keys are sorted so that Repr() always returns same output
+		{
+			NewEmptyPanMap(),
+			`%{}`,
+		},
+		{
+			NewPanMap(
+				Pair{NewPanStr("a"), NewPanInt(1)},
+			),
+			`%{"a": 1}`,
+		},
+		{
+			NewPanMap(
+				Pair{NewPanStr("a"), NewPanStr("A")},
+				Pair{NewPanStr("_b"), NewPanStr("B")},
+			),
+			`%{"_b": "B", "a": "A"}`,
+		},
+		{
+			NewPanMap(
+				Pair{NewPanStr("foo?"), BuiltInTrue},
+				Pair{NewPanStr("b"), NewPanStr("B")},
+			),
+			`%{"b": "B", "foo?": true}`,
+		},
+		{
+			NewPanMap(
+				Pair{NewPanInt(1), NewPanStr("a")},
+				Pair{BuiltInTrue, NewPanStr("B")},
+			),
+			`%{1: "a", true: "B"}`,
+		},
+		{
+			NewPanMap(
+				Pair{NewPanStr("foo?"), &PanBool{true}},
+				Pair{
+					NewPanStr("b"),
+					NewPanMap(
+						Pair{NewPanStr("c"), NewPanStr("C")},
+					),
+				},
+			),
+			`%{"b": %{"c": "C"}, "foo?": true}`,
+		},
+		// Map can use non-hashable object as key
+		// (indexing non-hashable is implemented by
+		// one-by-one `==` method comparizon)
+		// order of non-hashable pairs is same as struct initialization
+		{
+			NewPanMap(
+				Pair{NewPanArr(NewPanInt(1)), NewPanInt(1)},
+			),
+			"%{[1]: 1}",
+		},
+		{
+			NewPanMap(
+				Pair{NewPanArr(NewPanInt(1), NewPanInt(2)), NewPanInt(1)},
+				Pair{
+					NewPanMap(
+						Pair{NewPanStr("a"), NewPanStr("b")},
+					),
+					BuiltInFalse,
+				},
+			),
+			`%{[1, 2]: 1, %{"a": "b"}: false}`,
+		},
+		// order: hashable (sorted by key Inspect), non-hashable
+		{
+			NewPanMap(
+				Pair{NewPanInt(-2), NewPanStr("minus two")},
+				Pair{NewPanStr("a"), NewPanStr("A")},
+				Pair{NewPanStr("z"), NewPanStr("Z")},
+				Pair{
+					PanObjInstancePtr(&map[SymHash]Pair{
+						(NewPanStr("foo")).SymHash(): {NewPanStr("foo"), NewPanInt(1)},
+					}),
+					NewPanNil(),
+				},
+			),
+			`%{"a": "A", "z": "Z", -2: "minus two", {"foo": 1}: nil}`,
+		},
+		// if key or value has prop _name, show it instead
+		{
+			NewPanMap(
+				Pair{
+					PanObjInstancePtr(&map[SymHash]Pair{
+						GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("foo")},
+					}),
+					NewPanInt(1),
+				},
+			),
+			`%{foo: 1}`,
+		},
+		{
+			NewPanMap(
+				Pair{
+					NewPanInt(2),
+					PanObjInstancePtr(&map[SymHash]Pair{
+						GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("bar")},
+					}),
+				},
+			),
+			`%{2: bar}`,
+		},
+	}
+
+	for _, tt := range tests {
+		actual := tt.obj.Repr()
+		if actual != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, actual)
+		}
+	}
+}
+
 func TestMapProto(t *testing.T) {
 	m := NewEmptyPanMap()
 	if m.Proto() != BuiltInMapObj {

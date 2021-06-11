@@ -22,6 +22,11 @@ func (b *PanBool) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
 }
 
+// Repr returns pritty-printed string of this object.
+func (b *PanBool) Repr() string {
+	return b.Inspect()
+}
+
 // Proto returns proto of this object.
 func (b *PanBool) Proto() PanObject {
 	if b.Value {

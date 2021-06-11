@@ -30,6 +30,25 @@ func TestIntInspect(t *testing.T) {
 	}
 }
 
+func TestIntRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanInt
+		expected string
+	}{
+		{NewPanInt(10), "10"},
+		{NewPanInt(1), "1"},
+		{NewPanInt(-4), "-4"},
+		{NewPanInt(12345), "12345"},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestIntProto(t *testing.T) {
 	i := NewPanInt(10)
 	if i.Proto() != BuiltInIntObj {

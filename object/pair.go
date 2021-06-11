@@ -35,3 +35,28 @@ func sortedPairsString(pairs []Pair) string {
 
 	return strings.Join(sortedStrs, ", ")
 }
+
+func sortedPairsRepr(pairs []Pair) string {
+	type PairStr struct {
+		k string
+		v string
+	}
+
+	pairStrs := []PairStr{}
+	for _, p := range pairs {
+		pairStr := PairStr{k: p.Key.Repr(), v: p.Value.Repr()}
+		pairStrs = append(pairStrs, pairStr)
+	}
+
+	sort.Slice(
+		pairStrs,
+		func(i, j int) bool { return pairStrs[i].k < pairStrs[j].k },
+	)
+
+	sortedStrs := []string{}
+	for _, p := range pairStrs {
+		sortedStrs = append(sortedStrs, p.k+": "+p.v)
+	}
+
+	return strings.Join(sortedStrs, ", ")
+}
