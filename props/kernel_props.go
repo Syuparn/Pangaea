@@ -32,7 +32,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 				}
 
 				return object.NewAssertionErr(fmt.Sprintf("%s is not truthy",
-					object.ReprStr(args[0])))
+					args[0].Repr()))
 			},
 		),
 		"assertEq": f(
@@ -54,7 +54,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 				}
 
 				return object.NewAssertionErr(fmt.Sprintf("%s != %s",
-					object.ReprStr(args[0]), object.ReprStr(args[1])))
+					args[0].Repr(), args[1].Repr()))
 			},
 		),
 		"assertRaises": f(
@@ -70,7 +70,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 				msg, ok := object.TraceProtoOfStr(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[1])))
+						fmt.Sprintf("%s cannot be treated as str", args[1].Repr()))
 				}
 
 				funcObj := args[2]
@@ -95,7 +95,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 				if typeObj != errType {
 					return object.NewAssertionErr(
 						fmt.Sprintf("wrong type: %s != %s",
-							object.ReprStr(typeObj), object.ReprStr(errType)))
+							typeObj.Repr(), errType.Repr()))
 				}
 
 				if err.Msg != msg.Value {

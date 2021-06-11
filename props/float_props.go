@@ -158,7 +158,7 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				return object.NewTypeErr(
-					fmt.Sprintf("%s cannot be treated as float", object.ReprStr(args[1])))
+					fmt.Sprintf("%s cannot be treated as float", args[1].Repr()))
 			},
 		),
 	}
@@ -176,7 +176,7 @@ func checkFloatInfixArgs(
 	self, ok := object.TraceProtoOfFloat(args[0])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("%s cannot be treated as float", object.ReprStr(args[0])))
+			fmt.Sprintf("%s cannot be treated as float", args[0].Repr()))
 	}
 	other, ok := object.TraceProtoOfFloat(args[1])
 	if !ok {
@@ -187,7 +187,7 @@ func checkFloatInfixArgs(
 		}
 
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("%s cannot be treated as float", object.ReprStr(args[1])))
+			fmt.Sprintf("%s cannot be treated as float", args[1].Repr()))
 	}
 
 	return self, other, nil

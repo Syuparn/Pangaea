@@ -29,7 +29,7 @@ func NumProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return object.NewTypeErr(fmt.Sprintf("%s cannot be treated as num",
-					object.ReprStr(args[0])))
+					args[0].Repr()))
 			},
 		),
 	}

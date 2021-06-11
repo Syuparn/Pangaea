@@ -102,19 +102,19 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
 				}
 
 				nInt, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as int", object.ReprStr(args[1])))
+						fmt.Sprintf("%s cannot be treated as int", args[1].Repr()))
 				}
 				n := nInt.Value
 
 				if n < 0 {
 					return object.NewValueErr(
-						fmt.Sprintf("%s is not positive", object.ReprStr(args[1])))
+						fmt.Sprintf("%s is not positive", args[1].Repr()))
 				}
 
 				return object.NewPanStr(strings.Repeat(self.Value, int(n)))
@@ -132,7 +132,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				p, cerr := regexp2.Compile(sep.Value, 0)
 				if cerr != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("%s is invalid regex pattern", object.ReprStr(sep)))
+						fmt.Sprintf("%s is invalid regex pattern", sep.Repr()))
 				}
 				// TODO: replace to Split() function when regexp2 implements it
 				splitted, serr := splitBySep(p, self.Value)
@@ -226,13 +226,13 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
 				}
 
 				f, err := strconv.ParseFloat(self.Value, 64)
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("%s cannot be converted into float", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be converted into float", args[0].Repr()))
 				}
 				return object.NewPanFloat(f)
 			},
@@ -247,13 +247,13 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfStr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
 				}
 
 				i, err := strconv.ParseInt(self.Value, 10, 64)
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("%s cannot be converted into int", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be converted into int", args[0].Repr()))
 				}
 				return object.NewPanInt(i)
 			},
@@ -308,7 +308,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				p, err := regexp2.Compile(pattern.Value, 0)
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("%s is invalid regex pattern", object.ReprStr(pattern)))
+						fmt.Sprintf("%s is invalid regex pattern", pattern.Repr()))
 				}
 				match, err := p.FindStringMatch(self.Value)
 				if err != nil {
@@ -371,13 +371,13 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				p, err := regexp2.Compile(pattern.Value, 0)
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("%s is invalid regex pattern", object.ReprStr(pattern)))
+						fmt.Sprintf("%s is invalid regex pattern", pattern.Repr()))
 				}
 
 				replaced, err := p.Replace(self.Value, sub.Value, -1, -1)
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("%s is invalid regex pattern", object.ReprStr(sub)))
+						fmt.Sprintf("%s is invalid regex pattern", sub.Repr()))
 				}
 				// HACK: handle \U...\E (uppercase) and \L...E (lowercase)
 				// TODO: remain (\U|\L)...\E in original string
@@ -389,7 +389,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("%s is invalid regex pattern", object.ReprStr(sub)))
+						fmt.Sprintf("%s is invalid regex pattern", sub.Repr()))
 				}
 
 				lcPattern := regexp2.MustCompile(`\\L(.*?)\\E`, 0)
@@ -400,7 +400,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				if err != nil {
 					return object.NewValueErr(
-						fmt.Sprintf("%s is invalid regex pattern", object.ReprStr(sub)))
+						fmt.Sprintf("%s is invalid regex pattern", sub.Repr()))
 				}
 
 				return object.NewPanStr(lcReplaced)
@@ -417,7 +417,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if !ok {
 					return object.NewTypeErr(
 						fmt.Sprintf("%s cannot be treated as str",
-							object.ReprStr(args[0])))
+							args[0].Repr()))
 				}
 
 				if self.IsSym {
@@ -455,7 +455,7 @@ func checkStrInfixArgs(
 	self, ok := object.TraceProtoOfStr(args[0])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[0])))
+			fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
 	}
 	other, ok := object.TraceProtoOfStr(args[1])
 	if !ok {
@@ -466,7 +466,7 @@ func checkStrInfixArgs(
 		}
 
 		return nil, nil, object.NewTypeErr(
-			fmt.Sprintf("%s cannot be treated as str", object.ReprStr(args[1])))
+			fmt.Sprintf("%s cannot be treated as str", args[1].Repr()))
 	}
 
 	return self, other, nil
