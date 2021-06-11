@@ -2,7 +2,7 @@ package runscript
 
 // Version represents Pangaea version.
 // NOTE: this version is patched by GoReleaser
-const Version = "master (unstable)"
+var Version = "master (unstable)"
 
 const (
 	// ReadStdinLinesTemplate is a template src for one-liner option
