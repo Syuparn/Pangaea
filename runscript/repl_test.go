@@ -14,7 +14,7 @@ func TestStartREPL(t *testing.T) {
 	in := strings.NewReader("a := 2\na * 2\n")
 	out := &bytes.Buffer{}
 	expected := strings.Join([]string{
-		fmt.Sprintf("Pangaea %s (alpha)", Version),
+		fmt.Sprintf("Pangaea %s", Version),
 		"multi : multi-line mode",
 		"single: single-line mode (default)",
 		"",

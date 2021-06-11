@@ -18,7 +18,7 @@ import (
 
 // StartREPL starts Pangaea interpreter.
 func StartREPL(in io.Reader, out io.Writer) {
-	io.WriteString(out, fmt.Sprintf("Pangaea %s (alpha)\n", Version))
+	io.WriteString(out, fmt.Sprintf("Pangaea %s\n", Version))
 	io.WriteString(out, fmt.Sprintln("multi : multi-line mode"))
 	io.WriteString(out, fmt.Sprintln("single: single-line mode (default)"))
 	io.WriteString(out, fmt.Sprintln())
