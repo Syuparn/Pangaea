@@ -4842,6 +4842,19 @@ func TestEvalRepr(t *testing.T) {
 			`{_name: "myObj"}.bear.repr`,
 			object.NewPanStr(`{}`),
 		},
+		// child elements have _name
+		{
+			`[{_name: "myObj"}].repr`,
+			object.NewPanStr("[myObj]"),
+		},
+		{
+			`{a: {_name: "value"}}.repr`,
+			object.NewPanStr(`{"a": value}`),
+		},
+		{
+			`[Obj].repr`,
+			object.NewPanStr("[Obj]"),
+		},
 	}
 
 	for _, tt := range tests {
