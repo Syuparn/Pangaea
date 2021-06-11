@@ -43,7 +43,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as arr", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as arr", args[0].Repr()))
 				}
 				other, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
@@ -55,7 +55,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 					return object.NewTypeErr(
 						fmt.Sprintf("%s cannot be treated as arr",
-							object.ReprStr(args[1])))
+							args[1].Repr()))
 				}
 
 				// NOTE: no need to copy each elem because they are immutable
@@ -75,14 +75,14 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if !ok {
 					return object.NewTypeErr(
 						fmt.Sprintf("%s cannot be treated as arr",
-							object.ReprStr(args[0])))
+							args[0].Repr()))
 				}
 				selfElems := self.Elems
 
 				other, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as int", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as int", args[0].Repr()))
 				}
 
 				// NOTE: no need to copy each elem because they are immutable
@@ -196,7 +196,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					if !ok {
 						return object.NewTypeErr(
 							fmt.Sprintf("%s.S returned non-str value %s",
-								object.ReprStr(elem), object.ReprStr(s)))
+								elem.Repr(), s.Repr()))
 					}
 					elemStrs = append(elemStrs, str.Value)
 				}
@@ -230,7 +230,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as arr", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as arr", args[0].Repr()))
 				}
 
 				pairs := make([]object.Pair, len(self.Elems))
@@ -239,12 +239,12 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					arr, ok := object.TraceProtoOfArr(e)
 					if !ok {
 						return object.NewValueErr(
-							fmt.Sprintf(`element %s cannot be treated as arr`, object.ReprStr(e)))
+							fmt.Sprintf(`element %s cannot be treated as arr`, e.Repr()))
 					}
 
 					if len(arr.Elems) != 2 {
 						return object.NewValueErr(
-							fmt.Sprintf(`element %s must have two elements`, object.ReprStr(arr)))
+							fmt.Sprintf(`element %s must have two elements`, arr.Repr()))
 					}
 
 					pairs[i] = object.Pair{
@@ -266,7 +266,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				arr, ok := object.TraceProtoOfArr(args[1])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as arr", object.ReprStr(args[1])))
+						fmt.Sprintf("%s cannot be treated as arr", args[1].Repr()))
 				}
 
 				return arr
@@ -282,7 +282,7 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				self, ok := object.TraceProtoOfArr(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as arr", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as arr", args[0].Repr()))
 				}
 
 				pairs := map[object.SymHash]object.Pair{}
@@ -291,18 +291,18 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					arr, ok := object.TraceProtoOfArr(e)
 					if !ok {
 						return object.NewValueErr(
-							fmt.Sprintf(`element %s cannot be treated as arr`, object.ReprStr(e)))
+							fmt.Sprintf(`element %s cannot be treated as arr`, e.Repr()))
 					}
 
 					if len(arr.Elems) != 2 {
 						return object.NewValueErr(
-							fmt.Sprintf(`element %s must have two elements`, object.ReprStr(arr)))
+							fmt.Sprintf(`element %s must have two elements`, arr.Repr()))
 					}
 
 					k, ok := object.TraceProtoOfStr(arr.Elems[0])
 					if !ok {
 						return object.NewValueErr(
-							fmt.Sprintf(`element key %s cannot be treated as str`, object.ReprStr(arr.Elems[0])))
+							fmt.Sprintf(`element key %s cannot be treated as str`, arr.Elems[0].Repr()))
 					}
 
 					pairs[object.GetSymHash(k.Value)] = object.Pair{

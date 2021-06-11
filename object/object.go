@@ -12,6 +12,7 @@ type PanObjType string
 type PanObject interface {
 	Type() PanObjType
 	Inspect() string
+	Repr() string
 	Proto() PanObject
 }
 

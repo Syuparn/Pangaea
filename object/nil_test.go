@@ -27,6 +27,22 @@ func TestNilInspect(t *testing.T) {
 	}
 }
 
+func TestNilRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanNil
+		expected string
+	}{
+		{NewPanNil(), "nil"},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestNilProto(t *testing.T) {
 	n := NewPanNil()
 	if n.Proto() != BuiltInNilObj {

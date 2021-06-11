@@ -33,6 +33,26 @@ func TestIOInspect(t *testing.T) {
 	}
 }
 
+func TestIORepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanIO
+		expected string
+	}{
+		// keys are sorted so that Inspect() always returns same output
+		{
+			NewPanIO(os.Stdin, os.Stdout),
+			`IO`,
+		},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestIOProto(t *testing.T) {
 	o := NewPanIO(os.Stdin, os.Stdout)
 	if o.Proto() != BuiltInIOObj {

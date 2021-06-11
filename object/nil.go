@@ -16,6 +16,11 @@ func (n *PanNil) Inspect() string {
 	return "nil"
 }
 
+// Repr returns pritty-printed string of this object.
+func (n *PanNil) Repr() string {
+	return n.Inspect()
+}
+
 // Proto returns proto of this object.
 func (n *PanNil) Proto() PanObject {
 	return BuiltInNilObj

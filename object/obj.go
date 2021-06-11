@@ -88,6 +88,46 @@ func (o *PanObj) Inspect() string {
 	return out.String()
 }
 
+// Repr returns pritty-printed string of this object.
+func (o *PanObj) Repr() string {
+	// if self has '_name and it is str, use it
+	// NOTE: only refer _name in self (NOT PROTO)!,
+	// otherwise all children are shown as _name
+	if name, ok := o.extractName(); ok {
+		return name.Value
+	}
+
+	// child repr
+	var out bytes.Buffer
+	pairs := []Pair{}
+
+	for _, p := range *o.Pairs {
+		pairs = append(pairs, p)
+	}
+
+	out.WriteString("{")
+	// NOTE: sort by key order otherwise output changes randomly
+	// depending on inner map structure
+	out.WriteString(sortedPairsRepr(pairs))
+	out.WriteString("}")
+
+	return out.String()
+}
+
+func (o *PanObj) extractName() (*PanStr, bool) {
+	pair, ok := (*o.Pairs)[GetSymHash("_name")]
+	if !ok {
+		return nil, false
+	}
+
+	name, ok := TraceProtoOfStr(pair.Value)
+	if !ok {
+		return nil, false
+	}
+
+	return name, true
+}
+
 // Proto returns proto of this object.
 func (o *PanObj) Proto() PanObject {
 	return o.proto

@@ -219,7 +219,7 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Obj#repr requires at least 1 arg")
 				}
 
-				return object.NewPanStr(object.ReprStr(args[0]))
+				return object.NewPanStr(args[0].Repr())
 			},
 		),
 		"S": f(

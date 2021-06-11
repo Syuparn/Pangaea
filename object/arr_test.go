@@ -50,6 +50,60 @@ func TestArrInspect(t *testing.T) {
 	}
 }
 
+func TestArrRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanArr
+		expected string
+	}{
+		{
+			NewPanArr(),
+			`[]`,
+		},
+		{
+			NewPanArr(NewPanInt(1)),
+			`[1]`,
+		},
+		{
+			NewPanArr(NewPanStr("foo")),
+			`["foo"]`,
+		},
+		{
+			NewPanArr(NewPanFloat(1.0)),
+			`[1.000000]`,
+		},
+		{
+			NewPanArr(NewPanInt(1), NewPanInt(-10)),
+			`[1, -10]`,
+		},
+		{
+			NewPanArr(NewPanInt(1), NewPanStr("foo"), BuiltInFalse),
+			`[1, "foo", false]`,
+		},
+		// elem's '_name can be used
+		{
+			NewPanArr(PanObjInstancePtr(&map[SymHash]Pair{
+				GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("foo")},
+			})),
+			`[foo]`,
+		},
+		{
+			NewPanArr(
+				NewPanArr(PanObjInstancePtr(&map[SymHash]Pair{
+					GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("foo")},
+				})),
+			),
+			`[[foo]]`,
+		},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestArrProto(t *testing.T) {
 	a := NewPanArr()
 	if a.Proto() != BuiltInArrObj {

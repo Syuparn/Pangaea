@@ -23,13 +23,13 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				valObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", args[0].Repr()))
 				}
 
 				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", args[0].Repr()))
 				}
 
 				return object.NewPanArr(val.Value, object.BuiltInNil)
@@ -57,13 +57,13 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				valObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", args[0].Repr()))
 				}
 
 				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", args[0].Repr()))
 				}
 
 				f := args[1]
@@ -93,13 +93,13 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				valObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", args[0].Repr()))
 				}
 
 				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", args[0].Repr()))
 				}
 
 				return val.Value
@@ -116,13 +116,13 @@ func EitherValProps(propContainer map[string]object.PanObject) map[string]object
 				valObj, ok := object.TraceProtoOfObj(args[0])
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", args[0].Repr()))
 				}
 
 				val, ok := (*valObj.Pairs)[object.GetSymHash("_value")]
 				if !ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as EitherVal", object.ReprStr(args[0])))
+						fmt.Sprintf("%s cannot be treated as EitherVal", args[0].Repr()))
 				}
 
 				return val.Value

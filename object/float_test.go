@@ -31,6 +31,25 @@ func TestFloatInspect(t *testing.T) {
 	}
 }
 
+func TestFloatRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanFloat
+		expected string
+	}{
+		{NewPanFloat(1.5), "1.500000"},
+		{NewPanFloat(0.2), "0.200000"},
+		{NewPanFloat(-4.33), "-4.330000"},
+		{NewPanFloat(123.45), "123.450000"},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestFloatProto(t *testing.T) {
 	i := NewPanFloat(1.4)
 	if i.Proto() != BuiltInFloatObj {

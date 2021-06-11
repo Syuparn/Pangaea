@@ -28,6 +28,23 @@ func TestBoolInspect(t *testing.T) {
 	}
 }
 
+func TestBoolRepr(t *testing.T) {
+	tests := []struct {
+		obj      PanBool
+		expected string
+	}{
+		{PanBool{true}, "true"},
+		{PanBool{false}, "false"},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestBoolProto(t *testing.T) {
 	tests := []struct {
 		obj          PanBool

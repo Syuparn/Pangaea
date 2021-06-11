@@ -23,6 +23,16 @@ func TestBuiltInIterInspect(t *testing.T) {
 	}
 }
 
+func TestBuiltInIterRepr(t *testing.T) {
+	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
+	obj := PanBuiltInIter{Fn: f, Env: NewEnv()}
+	expected := `<{|| [builtin]}>`
+	if obj.Repr() != expected {
+		t.Errorf("wrong output. expected=%s, got=%s",
+			expected, obj.Inspect())
+	}
+}
+
 func TestBuiltInIterProto(t *testing.T) {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
 	obj := PanBuiltInIter{Fn: f, Env: NewEnv()}

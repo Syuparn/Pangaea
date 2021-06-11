@@ -20,6 +20,11 @@ func (b *PanBuiltInIter) Inspect() string {
 	return "<{|| [builtin]}>"
 }
 
+// Repr returns pritty-printed string of this object.
+func (b *PanBuiltInIter) Repr() string {
+	return b.Inspect()
+}
+
 // Proto returns proto of this object.
 func (b *PanBuiltInIter) Proto() PanObject {
 	return BuiltInIterObj

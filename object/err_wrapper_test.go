@@ -36,6 +36,31 @@ func TestErrWrapperInspect(t *testing.T) {
 	}
 }
 
+func TestErrWrapperRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanErrWrapper
+		expected string
+	}{
+		{WrapErr(NewPanErr("err")), "[Err: err]"},
+		{WrapErr(NewAssertionErr("err")), "[AssertionErr: err]"},
+		{WrapErr(NewNameErr("err")), "[NameErr: err]"},
+		{WrapErr(NewNoPropErr("err")), "[NoPropErr: err]"},
+		{WrapErr(NewNotImplementedErr("err")), "[NotImplementedErr: err]"},
+		{WrapErr(NewStopIterErr("err")), "[StopIterErr: err]"},
+		{WrapErr(NewSyntaxErr("err")), "[SyntaxErr: err]"},
+		{WrapErr(NewTypeErr("err")), "[TypeErr: err]"},
+		{WrapErr(NewValueErr("err")), "[ValueErr: err]"},
+		{WrapErr(NewZeroDivisionErr("err")), "[ZeroDivisionErr: err]"},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestErrWrapperProto(t *testing.T) {
 	tests := []struct {
 		obj              PanObject

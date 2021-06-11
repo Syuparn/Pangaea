@@ -30,6 +30,25 @@ func TestStrInspect(t *testing.T) {
 	}
 }
 
+func TestStrRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanStr
+		expected string
+	}{
+		{NewPanStr("hello"), `"hello"`},
+		{NewPanStr("_foo"), `"_foo"`},
+		{NewPanStr("a i u e o"), `"a i u e o"`},
+		{NewPanStr(`\a`), `"\a"`},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestStrProto(t *testing.T) {
 	s := NewPanStr("foo")
 	if s.Proto() != BuiltInStrObj {

@@ -36,6 +36,31 @@ func TestErrInspect(t *testing.T) {
 	}
 }
 
+func TestErrRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanErr
+		expected string
+	}{
+		{NewPanErr("err"), "Err: err"},
+		{NewAssertionErr("err"), "AssertionErr: err"},
+		{NewNameErr("err"), "NameErr: err"},
+		{NewNoPropErr("err"), "NoPropErr: err"},
+		{NewNotImplementedErr("err"), "NotImplementedErr: err"},
+		{NewStopIterErr("err"), "StopIterErr: err"},
+		{NewSyntaxErr("err"), "SyntaxErr: err"},
+		{NewTypeErr("err"), "TypeErr: err"},
+		{NewValueErr("err"), "ValueErr: err"},
+		{NewZeroDivisionErr("err"), "ZeroDivisionErr: err"},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestErrProto(t *testing.T) {
 	tests := []struct {
 		obj              PanObject

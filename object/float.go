@@ -26,6 +26,11 @@ func (f *PanFloat) Inspect() string {
 	return fmt.Sprintf("%.6f", f.Value)
 }
 
+// Repr returns pritty-printed string of this object.
+func (f *PanFloat) Repr() string {
+	return f.Inspect()
+}
+
 // Proto returns proto of this object.
 func (f *PanFloat) Proto() PanObject {
 	return BuiltInFloatObj

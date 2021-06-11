@@ -32,6 +32,11 @@ func (f *PanFunc) Inspect() string {
 	return out.String()
 }
 
+// Repr returns pritty-printed string of this object.
+func (f *PanFunc) Repr() string {
+	return f.Inspect()
+}
+
 // Proto returns proto of this object.
 func (f *PanFunc) Proto() PanObject {
 	if f.FuncKind == IterFunc {

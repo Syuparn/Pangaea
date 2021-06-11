@@ -1,7 +1,5 @@
 package object
 
-import ()
-
 // MatchType is a type of PanMatch.
 const MatchType = "MatchType"
 
@@ -19,6 +17,11 @@ func (m *PanMatch) Type() PanObjType {
 func (m *PanMatch) Inspect() string {
 	// delegate to MatchWrapper
 	return m.MatchWrapper.String()
+}
+
+// Repr returns pritty-printed string of this object.
+func (m *PanMatch) Repr() string {
+	return m.Inspect()
 }
 
 // Proto returns proto of this object.

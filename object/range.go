@@ -37,6 +37,20 @@ func (r *PanRange) Inspect() string {
 	return out.String()
 }
 
+// Repr returns pritty-printed string of this object.
+func (r *PanRange) Repr() string {
+	var out bytes.Buffer
+	elems := make([]string, 3)
+	elems[0] = r.Start.Repr()
+	elems[1] = r.Stop.Repr()
+	elems[2] = r.Step.Repr()
+
+	out.WriteString("(")
+	out.WriteString(strings.Join(elems, ":"))
+	out.WriteString(")")
+	return out.String()
+}
+
 // Proto returns proto of this object.
 func (r *PanRange) Proto() PanObject {
 	return BuiltInRangeObj

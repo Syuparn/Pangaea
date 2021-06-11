@@ -21,6 +21,11 @@ func (b *PanBuiltIn) Inspect() string {
 	return "{|| [builtin]}"
 }
 
+// Repr returns pritty-printed string of this object.
+func (b *PanBuiltIn) Repr() string {
+	return b.Inspect()
+}
+
 // Proto returns proto of this object.
 func (b *PanBuiltIn) Proto() PanObject {
 	return BuiltInFuncObj

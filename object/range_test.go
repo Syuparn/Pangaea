@@ -42,6 +42,68 @@ func TestRangeInspect(t *testing.T) {
 	}
 }
 
+func TestRangeRepr(t *testing.T) {
+	tests := []struct {
+		obj      *PanRange
+		expected string
+	}{
+		{
+			NewPanRange(NewPanNil(), NewPanNil(), NewPanNil()),
+			"(nil:nil:nil)",
+		},
+		{
+			NewPanRange(NewPanInt(1), NewPanInt(2), NewPanInt(3)),
+			"(1:2:3)",
+		},
+		{
+			NewPanRange(NewPanNil(), NewPanInt(20), NewPanInt(-1)),
+			"(nil:20:-1)",
+		},
+		{
+			NewPanRange(NewPanStr("a"), NewPanStr("z"), NewPanInt(-1)),
+			`("a":"z":-1)`,
+		},
+		// if elem has prop _name, show it instead
+		{
+			NewPanRange(
+				PanObjInstancePtr(&map[SymHash]Pair{
+					GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("a")},
+				}),
+				NewPanNil(),
+				NewPanNil(),
+			),
+			`(a:nil:nil)`,
+		},
+		{
+			NewPanRange(
+				NewPanNil(),
+				PanObjInstancePtr(&map[SymHash]Pair{
+					GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("b")},
+				}),
+				NewPanNil(),
+			),
+			`(nil:b:nil)`,
+		},
+		{
+			NewPanRange(
+				NewPanNil(),
+				NewPanNil(),
+				PanObjInstancePtr(&map[SymHash]Pair{
+					GetSymHash("_name"): {NewPanStr("_name"), NewPanStr("c")},
+				}),
+			),
+			`(nil:nil:c)`,
+		},
+	}
+
+	for _, tt := range tests {
+		if tt.obj.Repr() != tt.expected {
+			t.Errorf("wrong output: expected=%s, got=%s",
+				tt.expected, tt.obj.Inspect())
+		}
+	}
+}
+
 func TestRangeProto(t *testing.T) {
 	r := NewPanRange(NewPanNil(), NewPanNil(), NewPanNil())
 	if r.Proto() != BuiltInRangeObj {

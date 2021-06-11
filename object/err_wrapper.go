@@ -22,6 +22,11 @@ func (w *PanErrWrapper) Inspect() string {
 	return fmt.Sprintf("[%s]", w.PanErr.Inspect())
 }
 
+// Repr returns pritty-printed string of this object.
+func (w *PanErrWrapper) Repr() string {
+	return w.Inspect()
+}
+
 // Type returns type of this PanObject.
 func (w *PanErrWrapper) Type() PanObjType {
 	return ErrWrapperType
