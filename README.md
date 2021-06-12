@@ -3,7 +3,7 @@
 ![](https://github.com/Syuparn/Pangaea/workflows/Test/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
 
-A programming language for one-liner method chain lovers! (Under construction...)
+<img src="./docs/pictures/pangaea_logo.png" width="640">
 
 # How to run
 
