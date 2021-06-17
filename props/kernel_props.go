@@ -2,6 +2,7 @@ package props
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/Syuparn/pangaea/object"
 )
@@ -12,6 +13,20 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 	// NOTE: inject some built-in functions which relate to parser or evaluator
 	return map[string]object.PanObject{
 		"_name": object.NewPanStr("Kernel"),
+		"argv": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				strs := []object.PanObject{}
+
+				// NOTE: ignore command name `pangaea` itself
+				for _, arg := range os.Args[1:] {
+					strs = append(strs, object.NewPanStr(arg))
+				}
+
+				return object.NewPanArr(strs...)
+			},
+		),
 		"assert": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

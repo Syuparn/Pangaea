@@ -5000,6 +5000,44 @@ func TestEvalNamesOfConsts(t *testing.T) {
 	}
 }
 
+func TestEvalArgv(t *testing.T) {
+	tests := []struct {
+		input    string
+		args     []string
+		expected object.PanObject
+	}{
+		{
+			`Kernel.argv`,
+			[]string{"pangaea", "abc.pangaea"},
+			object.NewPanArr(
+				object.NewPanStr("abc.pangaea"),
+			),
+		},
+		{
+			`Kernel.argv`,
+			[]string{"pangaea", "abc.pangaea", "foo", "bar"},
+			object.NewPanArr(
+				object.NewPanStr("abc.pangaea"),
+				object.NewPanStr("foo"),
+				object.NewPanStr("bar"),
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		// patch os.Args
+		origArgs := os.Args
+		os.Args = tt.args
+
+		defer func() {
+			os.Args = origArgs
+		}()
+
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalPrint(t *testing.T) {
 	tests := []struct {
 		input    string
