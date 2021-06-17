@@ -52,6 +52,9 @@ var BuiltInDiamondObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 // BuiltInKernelObj is an object of Kernel, whose props can be used in top-level.
 var BuiltInKernelObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
+// BuiltInJSONObj is an object of JSON, whose props can be used in top-level.
+var BuiltInJSONObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+
 // BuiltInIterableObj is an object of Iterable, which is mixed-in iterable objects.
 var BuiltInIterableObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
