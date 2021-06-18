@@ -44,6 +44,7 @@ func injectBuiltInProps(ctn map[string]object.PanObject) {
 	injectProps(object.BuiltInIntObj, props.IntProps, ctn)
 	injectProps(object.BuiltInIterObj, props.IterProps, ctn)
 	injectProps(object.BuiltInIterableObj, props.IterableProps, ctn)
+	injectProps(object.BuiltInJSONObj, props.JSONProps, ctn)
 	injectProps(object.BuiltInKernelObj, props.KernelProps, ctn)
 	injectProps(object.BuiltInMatchObj, props.MatchProps, ctn)
 	injectProps(object.BuiltInMapObj, props.MapProps, ctn)
@@ -4991,6 +4992,106 @@ func TestEvalNamesOfConsts(t *testing.T) {
 		{
 			`ZeroDivisionErr._name`,
 			object.NewPanStr("ZeroDivisionErr"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalJSONDec(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			"JSON.dec(`{}`)",
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{}),
+		},
+		{
+			"JSON.dec(`\"b\"`)",
+			object.NewPanStr("b"),
+		},
+		{
+			"JSON.dec(`{\"c\": \"d\"}`)",
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("c"): {Key: object.NewPanStr("c"), Value: object.NewPanStr("d")},
+			}),
+		},
+		{
+			"JSON.dec(`[1, 2]`)",
+			object.NewPanArr(
+				object.NewPanInt(1),
+				object.NewPanInt(2),
+			),
+		},
+		{
+			"JSON.dec(`{\"arrs\": [3, 4]}`)",
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("arrs"): {
+					Key: object.NewPanStr("arrs"),
+					Value: object.NewPanArr(
+						object.NewPanInt(3),
+						object.NewPanInt(4),
+					),
+				},
+			}),
+		},
+		{
+			"JSON.dec(`1`)",
+			object.NewPanInt(1),
+		},
+		{
+			"JSON.dec(`{\"a\": 1, \"b\": 2}`)",
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("a"): {Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+				object.GetSymHash("b"): {Key: object.NewPanStr("b"), Value: object.NewPanInt(2)},
+			}),
+		},
+		{
+			"JSON.dec(`1.5`)",
+			object.NewPanFloat(1.5),
+		},
+		{
+			"JSON.dec(`{\"a\": 1.5}`)",
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("a"): {Key: object.NewPanStr("a"), Value: object.NewPanFloat(1.5)},
+			}),
+		},
+		{
+			"JSON.dec(`null`)",
+			object.BuiltInNil,
+		},
+		{
+			"JSON.dec(`{\"a\": null}`)",
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("a"): {Key: object.NewPanStr("a"), Value: object.BuiltInNil},
+			}),
+		},
+		{
+			"JSON.dec(`{\"a\": {\"b\": 1}}`)",
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("a"): {
+					Key: object.NewPanStr("a"),
+					Value: object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+						object.GetSymHash("b"): {Key: object.NewPanStr("b"), Value: object.NewPanInt(1)},
+					}),
+				},
+			}),
+		},
+		{
+			`JSON.dec`,
+			object.NewTypeErr("JSON.dec requires at least 2 args"),
+		},
+		{
+			`JSON.dec(1)`,
+			object.NewTypeErr("1 cannot be treated as str"),
+		},
+		{
+			`JSON.dec("{")`,
+			object.NewValueErr("failed to decode JSON: unexpected end of JSON input (input `{`)"),
 		},
 	}
 
