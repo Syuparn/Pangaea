@@ -582,6 +582,8 @@ func TestDoubleQuoteStrLiteral(t *testing.T) {
 		{`".hoge"`, ".hoge"},
 		{`"1 + 1"`, "1 + 1"},
 		{`"_"`, "_"},
+		// escape double-quotes
+		{`"\"a\""`, `"a"`},
 	}
 
 	for _, tt := range tests {
@@ -676,6 +678,43 @@ func TestEmbeddedStr(t *testing.T) {
 	if embeddedStr.String() != expectedStr {
 		t.Errorf("wrong str output. expected=`\n%s\n`. got=`\n%s\n`",
 			expectedStr, embeddedStr.String())
+	}
+}
+
+func TestEmbeddedStrEscapedDoubleQuotes(t *testing.T) {
+	input := `"a\"b#{1}c\"d#{2}e\"f"`
+
+	program := testParse(t, input)
+	expr := extractExprStmt(t, program)
+	embeddedStr, ok := expr.(*ast.EmbeddedStr)
+	if !ok {
+		t.Fatalf("expr is not *ast.EmbeddedStr. got=%T: %s", expr, expr.String())
+	}
+
+	// escape in latter piece
+	if embeddedStr.Latter != `e"f` {
+		t.Errorf("str is not `e\"f`. got=`%s`", embeddedStr.Latter)
+	}
+
+	former1 := embeddedStr.Former
+
+	if former1 == nil {
+		t.Fatalf("former1 must not be nil.")
+	}
+
+	// escape in middle piece
+	if former1.Str != `c"d` {
+		t.Errorf("str is not `c\"d`. got=`%s`", former1.Str)
+	}
+
+	former2 := former1.Former
+
+	if former2 == nil {
+		t.Fatalf("former2 must not be nil.")
+	}
+
+	if former2.Str != `a"b` {
+		t.Errorf("str is not `a\"b`. got=`%s`", former2.Str)
 	}
 }
 

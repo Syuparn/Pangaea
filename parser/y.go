@@ -223,7 +223,7 @@ const yyEofCode = 1
 const yyErrCode = 2
 const yyInitialStackSize = 16
 
-//line ./parser/parser.go.y:2091
+//line ./parser/parser.go.y:2100
 
 func Parse(src io.Reader) (*ast.Program, error) {
 	lexer := NewLexer(src)
@@ -357,8 +357,8 @@ func tokenTypes() []simplexer.TokenType {
 		t(INT, `([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
-		t(HEAD_STR_PIECE, `"[^\"\n\r#]*#\{`),
-		t(DOUBLEQUOTE_STR, `"[^\"\n\r]*"`),
+		t(HEAD_STR_PIECE, `"(\\\"|[^\"\n\r#])*#\{`),
+		t(DOUBLEQUOTE_STR, `"(\\\"|[^\"\n\r])*"`),
 		// NOTE: lexer deals with multiline chain
 		// (if parser does, shift/reduce conflict occurs)
 		t(MULTILINE_ADD_CHAIN, fmt.Sprintf(`%s[&~=]`, keepChainRet)),
@@ -435,8 +435,8 @@ func embeddedStrTokenTypes() []simplexer.TokenType {
 	// (otherwise, func call like `{|x| x}("a")` is wrongly lexed to
 	// TAIL_STR_PIECE)
 	return []simplexer.TokenType{
-		t(MID_STR_PIECE, `\}[^\"\n\r#]*#\{`),
-		t(TAIL_STR_PIECE, `\}[^\"\n\r#]*"`),
+		t(MID_STR_PIECE, `\}(\\\"|[^\"\n\r#])*#\{`),
+		t(TAIL_STR_PIECE, `\}(\\\"|[^\"\n\r#])*"`),
 	}
 }
 
@@ -2674,38 +2674,47 @@ yydefault:
 		yyDollar = yyS[yypt-2 : yypt+1]
 //line ./parser/parser.go.y:1242
 		{
+			// unquote escape sequences here
+			// NOTE: doublequotes are unwraped in Unquote
+			unquoted, _ := strconv.Unquote("\"" + yyDollar[2].token.Literal[1:])
 			yyVAL.expr = &ast.EmbeddedStr{
 				Token:  yyDollar[1].formerStrPiece.Token,
 				Former: yyDollar[1].formerStrPiece,
-				Latter: yyDollar[2].token.Literal[1 : len(yyDollar[2].token.Literal)-1],
+				Latter: unquoted,
 				Src:    yylex.(*Lexer).Source,
 			}
 		}
 	case 123:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1253
+//line ./parser/parser.go.y:1256
 		{
+			// unquote escape sequences here
+			// NOTE: doublequotes are unwraped in Unquote
+			unquoted, _ := strconv.Unquote("\"" + yyDollar[2].token.Literal[1:len(yyDollar[2].token.Literal)-2] + "\"")
 			yyVAL.formerStrPiece = &ast.FormerStrPiece{
 				Token:  yyDollar[1].formerStrPiece.Token,
 				Former: yyDollar[1].formerStrPiece,
-				Str:    yyDollar[2].token.Literal[1 : len(yyDollar[2].token.Literal)-2],
+				Str:    unquoted,
 				Expr:   yyDollar[3].expr,
 			}
 		}
 	case 124:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1262
+//line ./parser/parser.go.y:1268
 		{
+			// unquote escape sequences here
+			// NOTE: doublequotes are unwraped in Unquote
+			unquoted, _ := strconv.Unquote(yyDollar[1].token.Literal[:len(yyDollar[1].token.Literal)-2] + "\"")
 			yyVAL.formerStrPiece = &ast.FormerStrPiece{
 				Token:  yyDollar[1].token.Literal,
 				Former: nil,
-				Str:    yyDollar[1].token.Literal[1 : len(yyDollar[1].token.Literal)-2],
+				Str:    unquoted,
 				Expr:   yyDollar[2].expr,
 			}
 		}
 	case 125:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1273
+//line ./parser/parser.go.y:1282
 		{
 			yyVAL.expr = &ast.FuncLiteral{
 				Token:         yyDollar[1].token.Literal,
@@ -2715,7 +2724,7 @@ yydefault:
 		}
 	case 126:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1281
+//line ./parser/parser.go.y:1290
 		{
 			yyVAL.expr = &ast.FuncLiteral{
 				Token: yyDollar[1].token.Literal,
@@ -2730,7 +2739,7 @@ yydefault:
 		}
 	case 127:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1294
+//line ./parser/parser.go.y:1303
 		{
 			yyVAL.expr = &ast.FuncLiteral{
 				Token:         yyDollar[1].token.Literal,
@@ -2740,7 +2749,7 @@ yydefault:
 		}
 	case 128:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1304
+//line ./parser/parser.go.y:1313
 		{
 			yyVAL.expr = &ast.IterLiteral{
 				Token: yyDollar[1].token.Literal,
@@ -2755,7 +2764,7 @@ yydefault:
 		}
 	case 129:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1317
+//line ./parser/parser.go.y:1326
 		{
 			yyVAL.expr = &ast.IterLiteral{
 				Token:         yyDollar[1].token.Literal,
@@ -2765,7 +2774,7 @@ yydefault:
 		}
 	case 130:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1325
+//line ./parser/parser.go.y:1334
 		{
 			yyVAL.expr = &ast.IterLiteral{
 				Token: yyDollar[1].token.Literal,
@@ -2780,7 +2789,7 @@ yydefault:
 		}
 	case 131:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1338
+//line ./parser/parser.go.y:1347
 		{
 			yyVAL.expr = &ast.IterLiteral{
 				Token:         yyDollar[1].token.Literal,
@@ -2790,7 +2799,7 @@ yydefault:
 		}
 	case 132:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1348
+//line ./parser/parser.go.y:1357
 		{
 			yyVAL.expr = &ast.MatchLiteral{
 				Token:    yyDollar[1].token.Literal,
@@ -2800,7 +2809,7 @@ yydefault:
 		}
 	case 133:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1356
+//line ./parser/parser.go.y:1365
 		{
 			patterns := []*ast.FuncComponent{}
 			for _, p := range yyDollar[2].funcComponentList {
@@ -2815,7 +2824,7 @@ yydefault:
 		}
 	case 134:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1371
+//line ./parser/parser.go.y:1380
 		{
 			// NOTE: assigning is nesessary because $3 is passed by reference
 			// which means address of $3 is the last match of funcComponentList
@@ -2825,14 +2834,14 @@ yydefault:
 		}
 	case 135:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1379
+//line ./parser/parser.go.y:1388
 		{
 			comp := yyDollar[1].funcComponent
 			yyVAL.funcComponentList = []*ast.FuncComponent{&comp}
 		}
 	case 136:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1386
+//line ./parser/parser.go.y:1395
 		{
 			yyVAL.funcComponent = ast.FuncComponent{
 				Args:   yyDollar[1].argList.Args,
@@ -2843,7 +2852,7 @@ yydefault:
 		}
 	case 137:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1395
+//line ./parser/parser.go.y:1404
 		{
 			yyVAL.funcComponent = ast.FuncComponent{
 				Args:   []ast.Expr{},
@@ -2854,13 +2863,13 @@ yydefault:
 		}
 	case 138:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1404
+//line ./parser/parser.go.y:1413
 		{
 			yyVAL.funcComponent = yyDollar[1].funcComponent
 		}
 	case 139:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1410
+//line ./parser/parser.go.y:1419
 		{
 			yyVAL.funcComponent = ast.FuncComponent{
 				Args:   yyDollar[1].argList.Args,
@@ -2871,7 +2880,7 @@ yydefault:
 		}
 	case 140:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1421
+//line ./parser/parser.go.y:1430
 		{
 			yyVAL.expr = &ast.DiamondLiteral{
 				Token: yyDollar[1].token.Literal,
@@ -2880,7 +2889,7 @@ yydefault:
 		}
 	case 141:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1430
+//line ./parser/parser.go.y:1439
 		{
 			yyVAL.argList = &ast.ArgList{
 				Args:   []ast.Expr{},
@@ -2889,7 +2898,7 @@ yydefault:
 		}
 	case 142:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1437
+//line ./parser/parser.go.y:1446
 		{
 			yyVAL.argList = &ast.ArgList{
 				Args:   []ast.Expr{},
@@ -2898,19 +2907,19 @@ yydefault:
 		}
 	case 143:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1444
+//line ./parser/parser.go.y:1453
 		{
 			yyVAL.argList = yyDollar[2].argList
 		}
 	case 144:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1448
+//line ./parser/parser.go.y:1457
 		{
 			yyVAL.argList = yyDollar[2].argList
 		}
 	case 145:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1452
+//line ./parser/parser.go.y:1461
 		{
 			yyVAL.argList = &ast.ArgList{
 				Args:   []ast.Expr{},
@@ -2919,7 +2928,7 @@ yydefault:
 		}
 	case 146:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1459
+//line ./parser/parser.go.y:1468
 		{
 			yyVAL.argList = &ast.ArgList{
 				Args:   []ast.Expr{},
@@ -2928,19 +2937,19 @@ yydefault:
 		}
 	case 147:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1466
+//line ./parser/parser.go.y:1475
 		{
 			yyVAL.argList = yyDollar[2].argList
 		}
 	case 148:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line ./parser/parser.go.y:1470
+//line ./parser/parser.go.y:1479
 		{
 			yyVAL.argList = yyDollar[2].argList
 		}
 	case 149:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1476
+//line ./parser/parser.go.y:1485
 		{
 			yyVAL.expr = &ast.PropCallExpr{
 				Token:    "(propCall)",
@@ -2954,7 +2963,7 @@ yydefault:
 		}
 	case 150:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1488
+//line ./parser/parser.go.y:1497
 		{
 			yyVAL.expr = &ast.PropCallExpr{
 				Token:    "(propCall)",
@@ -2968,7 +2977,7 @@ yydefault:
 		}
 	case 151:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1500
+//line ./parser/parser.go.y:1509
 		{
 			yyVAL.expr = &ast.PropCallExpr{
 				Token:    "(propCall)",
@@ -2982,7 +2991,7 @@ yydefault:
 		}
 	case 152:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1512
+//line ./parser/parser.go.y:1521
 		{
 			opIdent := &ast.Ident{
 				Token:     yyDollar[2].token.Literal,
@@ -3002,7 +3011,7 @@ yydefault:
 		}
 	case 153:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1530
+//line ./parser/parser.go.y:1539
 		{
 			opIdent := &ast.Ident{
 				Token:     yyDollar[2].token.Literal,
@@ -3022,7 +3031,7 @@ yydefault:
 		}
 	case 154:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1548
+//line ./parser/parser.go.y:1557
 		{
 			opIdent := &ast.Ident{
 				Token:     yyDollar[2].token.Literal,
@@ -3042,7 +3051,7 @@ yydefault:
 		}
 	case 155:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1566
+//line ./parser/parser.go.y:1575
 		{
 			yyVAL.expr = &ast.LiteralCallExpr{
 				Token:    "(literalCall)",
@@ -3056,7 +3065,7 @@ yydefault:
 		}
 	case 156:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1578
+//line ./parser/parser.go.y:1587
 		{
 			yyVAL.expr = &ast.VarCallExpr{
 				Token:    "(varCall)",
@@ -3070,7 +3079,7 @@ yydefault:
 		}
 	case 157:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1590
+//line ./parser/parser.go.y:1599
 		{
 			yyVAL.expr = &ast.VarCallExpr{
 				Token:    "(varCall)",
@@ -3084,7 +3093,7 @@ yydefault:
 		}
 	case 158:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1602
+//line ./parser/parser.go.y:1611
 		{
 			callIdent := &ast.Ident{
 				Token:     "call",
@@ -3105,7 +3114,7 @@ yydefault:
 		}
 	case 159:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1623
+//line ./parser/parser.go.y:1632
 		{
 			yyVAL.recvAndChain = &ast.RecvAndChain{
 				Recv:  yyDollar[1].expr,
@@ -3114,7 +3123,7 @@ yydefault:
 		}
 	case 160:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1630
+//line ./parser/parser.go.y:1639
 		{
 			yyVAL.recvAndChain = &ast.RecvAndChain{
 				Recv:  nil,
@@ -3123,7 +3132,7 @@ yydefault:
 		}
 	case 161:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1639
+//line ./parser/parser.go.y:1648
 		{
 			yyVAL.argList = &ast.ArgList{
 				Args:   []ast.Expr{},
@@ -3133,28 +3142,28 @@ yydefault:
 		}
 	case 162:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1647
+//line ./parser/parser.go.y:1656
 		{
 			yyVAL.argList = yyDollar[2].argList
 			yylex.(*Lexer).curRule = "callArgs -> lParen argList RPAREN"
 		}
 	case 163:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1652
+//line ./parser/parser.go.y:1661
 		{
 			yyVAL.argList = yyDollar[2].argList
 			yylex.(*Lexer).curRule = "callArgs -> lParen argList RET RPAREN"
 		}
 	case 164:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1657
+//line ./parser/parser.go.y:1666
 		{
 			yyVAL.argList = yyDollar[2].argList
 			yylex.(*Lexer).curRule = "callArgs -> lParen argList comma RPAREN"
 		}
 	case 165:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1662
+//line ./parser/parser.go.y:1671
 		{
 			expansionList := []ast.Expr{}
 			for _, exp := range yyDollar[2].exprList {
@@ -3176,7 +3185,7 @@ yydefault:
 		}
 	case 166:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1682
+//line ./parser/parser.go.y:1691
 		{
 			expansionList := []ast.Expr{}
 			for _, exp := range yyDollar[2].exprList {
@@ -3198,7 +3207,7 @@ yydefault:
 		}
 	case 167:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line ./parser/parser.go.y:1702
+//line ./parser/parser.go.y:1711
 		{
 			argList := yyDollar[2].argList
 			for _, exp := range yyDollar[4].exprList {
@@ -3215,7 +3224,7 @@ yydefault:
 		}
 	case 168:
 		yyDollar = yyS[yypt-6 : yypt+1]
-//line ./parser/parser.go.y:1717
+//line ./parser/parser.go.y:1726
 		{
 			argList := yyDollar[2].argList
 			for _, exp := range yyDollar[4].exprList {
@@ -3232,455 +3241,455 @@ yydefault:
 		}
 	case 169:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1732
+//line ./parser/parser.go.y:1741
 		{
 			yyVAL.argList = yyDollar[1].argList.AppendArg(yyDollar[2].expr)
 			yylex.(*Lexer).curRule = "callArgs -> callArgs funcLiteral"
 		}
 	case 170:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1739
+//line ./parser/parser.go.y:1748
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> PLUS"
 		}
 	case 171:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1744
+//line ./parser/parser.go.y:1753
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> MINUS"
 		}
 	case 172:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1749
+//line ./parser/parser.go.y:1758
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> STAR"
 		}
 	case 173:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1754
+//line ./parser/parser.go.y:1763
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> SLASH"
 		}
 	case 174:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1759
+//line ./parser/parser.go.y:1768
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> DOUBLE_SLASH"
 		}
 	case 175:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1764
+//line ./parser/parser.go.y:1773
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> PERCENT"
 		}
 	case 176:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1769
+//line ./parser/parser.go.y:1778
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> DOUBLE_STAR"
 		}
 	case 177:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1774
+//line ./parser/parser.go.y:1783
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> SPACESHIP"
 		}
 	case 178:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1779
+//line ./parser/parser.go.y:1788
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> EQ"
 		}
 	case 179:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1784
+//line ./parser/parser.go.y:1793
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> NEQ"
 		}
 	case 180:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1789
+//line ./parser/parser.go.y:1798
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> GE"
 		}
 	case 181:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1794
+//line ./parser/parser.go.y:1803
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> LE"
 		}
 	case 182:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1799
+//line ./parser/parser.go.y:1808
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> GT"
 		}
 	case 183:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1804
+//line ./parser/parser.go.y:1813
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> LT"
 		}
 	case 184:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1809
+//line ./parser/parser.go.y:1818
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> BIT_LSHIFT"
 		}
 	case 185:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1814
+//line ./parser/parser.go.y:1823
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> BIT_RSHIFT"
 		}
 	case 186:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1819
+//line ./parser/parser.go.y:1828
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> BIT_AND"
 		}
 	case 187:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1824
+//line ./parser/parser.go.y:1833
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> BIT_OR"
 		}
 	case 188:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1829
+//line ./parser/parser.go.y:1838
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> BIT_XOR"
 		}
 	case 189:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1834
+//line ./parser/parser.go.y:1843
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> BIT_NOT"
 		}
 	case 190:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1839
+//line ./parser/parser.go.y:1848
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> BANG"
 		}
 	case 191:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1844
+//line ./parser/parser.go.y:1853
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> IADD"
 		}
 	case 192:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1849
+//line ./parser/parser.go.y:1858
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "opMethod -> ISUB"
 		}
 	case 193:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1856
+//line ./parser/parser.go.y:1865
 		{
 			yyVAL.chain = ast.MakeChain(yyDollar[1].token.Literal, yyDollar[2].token.Literal, nil)
 			yylex.(*Lexer).curRule = "chain -> ADD_CHAIN MAIN_CHAIN"
 		}
 	case 194:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1861
+//line ./parser/parser.go.y:1870
 		{
 			yyVAL.chain = ast.MakeChain("", yyDollar[1].token.Literal, nil)
 			yylex.(*Lexer).curRule = "chain -> MAIN_CHAIN"
 		}
 	case 195:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1866
+//line ./parser/parser.go.y:1875
 		{
 			yyVAL.chain = ast.MakeChain("", yyDollar[1].token.Literal, yyDollar[3].expr)
 			yylex.(*Lexer).curRule = "chain -> MAIN_CHAIN lParen expr RPAREN"
 		}
 	case 196:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line ./parser/parser.go.y:1871
+//line ./parser/parser.go.y:1880
 		{
 			yyVAL.chain = ast.MakeChain(yyDollar[1].token.Literal, yyDollar[2].token.Literal, yyDollar[4].expr)
 			yylex.(*Lexer).curRule = "chain -> ADD_CHAIN MAIN_CHAIN lParen expr RPAREN"
 		}
 	case 197:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1876
+//line ./parser/parser.go.y:1885
 		{
 			ac := string(yyDollar[1].token.Literal[len(yyDollar[1].token.Literal)-1])
 			yyVAL.chain = ast.MakeChain(ac, yyDollar[2].token.Literal, nil)
 		}
 	case 198:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1881
+//line ./parser/parser.go.y:1890
 		{
 			mc := string(yyDollar[1].token.Literal[len(yyDollar[1].token.Literal)-1])
 			yyVAL.chain = ast.MakeChain("", mc, nil)
 		}
 	case 199:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1886
+//line ./parser/parser.go.y:1895
 		{
 			mc := string(yyDollar[1].token.Literal[len(yyDollar[1].token.Literal)-1])
 			yyVAL.chain = ast.MakeChain("", mc, yyDollar[3].expr)
 		}
 	case 200:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line ./parser/parser.go.y:1891
+//line ./parser/parser.go.y:1900
 		{
 			ac := string(yyDollar[1].token.Literal[len(yyDollar[1].token.Literal)-1])
 			yyVAL.chain = ast.MakeChain(ac, yyDollar[2].token.Literal, yyDollar[4].expr)
 		}
 	case 201:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1898
+//line ./parser/parser.go.y:1907
 		{
 			yyVAL.exprList = append(yyDollar[1].exprList, yyDollar[3].expr)
 		}
 	case 202:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1902
+//line ./parser/parser.go.y:1911
 		{
 			yyVAL.exprList = []ast.Expr{yyDollar[1].expr}
 			yylex.(*Lexer).curRule = "exprList -> expr"
 		}
 	case 203:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1909
+//line ./parser/parser.go.y:1918
 		{
 			yyVAL.argList = yyDollar[1].argList.AppendArg(yyDollar[3].expr)
 			yylex.(*Lexer).curRule = "argList -> argList comma expr"
 		}
 	case 204:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1914
+//line ./parser/parser.go.y:1923
 		{
 			yyVAL.argList = yyDollar[1].argList.AppendKwarg(yyDollar[3].kwargPair.Key, yyDollar[3].kwargPair.Val)
 			yylex.(*Lexer).curRule = "argList -> argList comma pair"
 		}
 	case 205:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1919
+//line ./parser/parser.go.y:1928
 		{
 			yyVAL.argList = ast.ExprToArgList(yyDollar[1].expr)
 			yylex.(*Lexer).curRule = "argList -> expr"
 		}
 	case 206:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1924
+//line ./parser/parser.go.y:1933
 		{
 			yyVAL.argList = ast.KwargPairToArgList(yyDollar[1].kwargPair)
 			yylex.(*Lexer).curRule = "argList -> pair"
 		}
 	case 207:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1931
+//line ./parser/parser.go.y:1940
 		{
 			yyVAL.expr = yyDollar[1].expr
 		}
 	case 208:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1935
+//line ./parser/parser.go.y:1944
 		{
 			yyVAL.expr = yyDollar[1].expr
 		}
 	case 209:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1941
+//line ./parser/parser.go.y:1950
 		{
 			yyVAL.pairList = append(yyDollar[1].pairList, yyDollar[3].pair)
 		}
 	case 210:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1945
+//line ./parser/parser.go.y:1954
 		{
 			yyVAL.pairList = []*ast.Pair{yyDollar[1].pair}
 		}
 	case 211:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1951
+//line ./parser/parser.go.y:1960
 		{
 			yyVAL.exprList = append(yyDollar[1].exprList, yyDollar[4].expr)
 		}
 	case 212:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1955
+//line ./parser/parser.go.y:1964
 		{
 			yyVAL.exprList = []ast.Expr{yyDollar[2].expr}
 		}
 	case 213:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1961
+//line ./parser/parser.go.y:1970
 		{
 			yyVAL.kwargPair = &ast.KwargPair{Key: yyDollar[1].ident, Val: yyDollar[3].expr}
 			yylex.(*Lexer).curRule = "kwargPair -> ident COLON expr"
 		}
 	case 214:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line ./parser/parser.go.y:1968
+//line ./parser/parser.go.y:1977
 		{
 			yyVAL.pair = &ast.Pair{Key: yyDollar[1].expr, Val: yyDollar[3].expr}
 		}
 	case 215:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line ./parser/parser.go.y:1972
+//line ./parser/parser.go.y:1981
 		{
 			pinned := &ast.PinnedIdent{Ident: *yyDollar[2].ident}
 			yyVAL.pair = &ast.Pair{Key: pinned, Val: yyDollar[4].expr}
 		}
 	case 216:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1979
+//line ./parser/parser.go.y:1988
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "lBrace -> LBRACE RET"
 		}
 	case 217:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1984
+//line ./parser/parser.go.y:1993
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "lBrace -> LBRACE RET"
 		}
 	case 218:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:1991
+//line ./parser/parser.go.y:2000
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "lParen -> LPAREN"
 		}
 	case 219:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:1996
+//line ./parser/parser.go.y:2005
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "lParen -> LPAREN RET"
 		}
 	case 220:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2003
+//line ./parser/parser.go.y:2012
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "lBracket -> LBRACKET"
 		}
 	case 221:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:2008
+//line ./parser/parser.go.y:2017
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "lBracket -> LBRACKET RET"
 		}
 	case 222:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2015
+//line ./parser/parser.go.y:2024
 		{
 			yyVAL.token = yyDollar[1].token
 		}
 	case 223:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:2019
+//line ./parser/parser.go.y:2028
 		{
 			yyVAL.token = yyDollar[1].token
 		}
 	case 224:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2025
+//line ./parser/parser.go.y:2034
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "mapLBrace -> MAP_LBRACE"
 		}
 	case 225:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:2030
+//line ./parser/parser.go.y:2039
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "mapLBrace -> MAP_LBRACE RET"
 		}
 	case 226:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2037
+//line ./parser/parser.go.y:2046
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "mapLBrace -> METHOD_LBRACE"
 		}
 	case 227:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:2042
+//line ./parser/parser.go.y:2051
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "mapLBrace -> METHOD_LBRACE RET"
 		}
 	case 228:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2049
+//line ./parser/parser.go.y:2058
 		{
 			yyVAL.token = yyDollar[1].token
 		}
 	case 229:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:2053
+//line ./parser/parser.go.y:2062
 		{
 			yyVAL.token = yyDollar[1].token
 		}
 	case 230:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2059
+//line ./parser/parser.go.y:2068
 		{
 			yyVAL.token = yyDollar[1].token
 		}
 	case 231:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:2063
+//line ./parser/parser.go.y:2072
 		{
 			yyVAL.token = yyDollar[1].token
 		}
 	case 232:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2069
+//line ./parser/parser.go.y:2078
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "breakLine -> SEMICOLON"
 		}
 	case 233:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2074
+//line ./parser/parser.go.y:2083
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "breakLine -> RET"
 		}
 	case 234:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line ./parser/parser.go.y:2081
+//line ./parser/parser.go.y:2090
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "comma -> COMMA"
 		}
 	case 235:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line ./parser/parser.go.y:2086
+//line ./parser/parser.go.y:2095
 		{
 			yyVAL.token = yyDollar[1].token
 			yylex.(*Lexer).curRule = "comma -> COMMA RET"

@@ -1240,10 +1240,13 @@ bareRange
 embeddedStr
 	: formerStrPiece TAIL_STR_PIECE
 	{
+		// unquote escape sequences here
+		// NOTE: doublequotes are unwraped in Unquote
+		unquoted, _ := strconv.Unquote("\""+$2.Literal[1:])
 		$$ = &ast.EmbeddedStr{
 			Token: $1.Token,
 			Former: $1,
-			Latter: $2.Literal[1:len($2.Literal)-1],
+			Latter: unquoted,
 			Src: yylex.(*Lexer).Source,
 		}
 	}
@@ -1251,19 +1254,25 @@ embeddedStr
 formerStrPiece
 	: formerStrPiece MID_STR_PIECE expr
 	{
+		// unquote escape sequences here
+		// NOTE: doublequotes are unwraped in Unquote
+		unquoted, _ := strconv.Unquote("\""+$2.Literal[1:len($2.Literal)-2]+"\"")
 		$$ = &ast.FormerStrPiece{
 			Token: $1.Token,
 			Former: $1,
-			Str: $2.Literal[1:len($2.Literal)-2],
+			Str: unquoted,
 			Expr: $3,
 		}
 	}
 	| HEAD_STR_PIECE expr
 	{
+		// unquote escape sequences here
+		// NOTE: doublequotes are unwraped in Unquote
+		unquoted, _ := strconv.Unquote($1.Literal[:len($1.Literal)-2]+"\"")
 		$$ = &ast.FormerStrPiece{
 			Token: $1.Literal,
 			Former: nil,
-			Str: $1.Literal[1:len($1.Literal)-2],
+			Str: unquoted,
 			Expr: $2,
 		}
 	}
@@ -2222,8 +2231,8 @@ func tokenTypes() []simplexer.TokenType{
 		t(INT, `([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
 		t(BACKQUOTE_STR, "`[^`]*`"),
-		t(HEAD_STR_PIECE, `"[^\"\n\r#]*#\{`),
-		t(DOUBLEQUOTE_STR, `"[^\"\n\r]*"`),
+		t(HEAD_STR_PIECE, `"(\\\"|[^\"\n\r#])*#\{`),
+		t(DOUBLEQUOTE_STR, `"(\\\"|[^\"\n\r])*"`),
 		// NOTE: lexer deals with multiline chain
 		// (if parser does, shift/reduce conflict occurs)
 		t(MULTILINE_ADD_CHAIN, fmt.Sprintf(`%s[&~=]`, keepChainRet)),
@@ -2300,8 +2309,8 @@ func embeddedStrTokenTypes() []simplexer.TokenType {
 	// (otherwise, func call like `{|x| x}("a")` is wrongly lexed to
 	// TAIL_STR_PIECE)
 	return []simplexer.TokenType{
-		t(MID_STR_PIECE, `\}[^\"\n\r#]*#\{`),
-		t(TAIL_STR_PIECE, `\}[^\"\n\r#]*"`),
+		t(MID_STR_PIECE, `\}(\\\"|[^\"\n\r#])*#\{`),
+		t(TAIL_STR_PIECE, `\}(\\\"|[^\"\n\r#])*"`),
 	}
 }
 
