@@ -105,3 +105,54 @@ func TestFindPropAlongProtos(t *testing.T) {
 		}
 	}
 }
+
+func TestFindPropOwner(t *testing.T) {
+	parent := PanObjInstancePtr(&map[SymHash]Pair{
+		GetSymHash("parent"): {Key: NewPanStr("parent"), Value: NewPanInt(1)},
+		GetSymHash("custom"): {Key: NewPanStr("custom"), Value: NewPanStr("parent")},
+	}).(*PanObj)
+
+	child := ChildPanObjPtr(parent, PanObjInstancePtr(&map[SymHash]Pair{
+		GetSymHash("custom"): {Key: NewPanStr("custom"), Value: NewPanStr("child")},
+	}).(*PanObj))
+
+	tests := []struct {
+		obj           PanObject
+		propName      string
+		expectedOwner PanObject
+		expectedBool  bool
+	}{
+		{
+			child,
+			"custom",
+			child,
+			true,
+		},
+		{
+			child,
+			"parent",
+			parent,
+			true,
+		},
+		{
+			child,
+			"notFoundProp",
+			nil,
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		actual, ok := FindPropOwner(tt.obj, GetSymHash(tt.propName))
+
+		if ok != tt.expectedBool {
+			t.Errorf("ok in %s is wrong: expected=%T, got=%T",
+				tt.obj.Inspect(), tt.expectedBool, ok)
+		}
+
+		if actual != tt.expectedOwner {
+			t.Errorf("found owner is wrong: expected=%s, got=%s",
+				actual.Inspect(), tt.obj.Inspect())
+		}
+	}
+}

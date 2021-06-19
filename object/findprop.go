@@ -13,6 +13,19 @@ func FindPropAlongProtos(o PanObject, propHash SymHash) (PanObject, bool) {
 	return nil, false
 }
 
+// FindPropOwner traces proto chain and returns the prop's owner.
+func FindPropOwner(o PanObject, propHash SymHash) (PanObject, bool) {
+	// trace prototype chains
+	for obj := o; obj != nil; obj = obj.Proto() {
+		_, ok := findProp(obj, propHash)
+
+		if ok {
+			return obj, true
+		}
+	}
+	return nil, false
+}
+
 func findProp(o PanObject, propHash SymHash) (PanObject, bool) {
 	obj, ok := o.(*PanObj)
 	if !ok {
