@@ -266,6 +266,25 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"chr": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Int#chr requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfInt(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as int", args[0].Repr()))
+				}
+
+				// NOTE: convert int64 to string via rune to tell the conversion is intentional
+				// otherwise test warns below:
+				//    conversion from int64 to string yields a string of one rune, not a string of digits (did you mean fmt.Sprint(x)?)
+				return object.NewPanStr(string(rune(self.Value)))
+			},
+		),
 		"prime?": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

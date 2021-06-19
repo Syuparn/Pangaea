@@ -347,6 +347,28 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				)
 			},
 		),
+		"ord": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Str#ord requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
+				}
+
+				runes := []rune(self.Value)
+				if len(runes) != 1 {
+					return object.NewValueErr(
+						fmt.Sprintf("length must be 1. got %d (%s)", len(runes), args[0].Repr()))
+				}
+
+				return object.NewPanInt(int64(runes[0]))
+			},
+		),
 		"sub": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
