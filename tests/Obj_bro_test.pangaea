@@ -1,0 +1,3 @@
+assertEq({a: 1}.bro({b: 2}), {b: 2})
+assertEq([1, 2].bro({a: 1}), Arr.bear({a: 1}))
+assertEq(true.bro({a: 1}), 1.bear({a: 1}))
