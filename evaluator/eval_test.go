@@ -250,6 +250,38 @@ func TestEvalIntPrimep(t *testing.T) {
 	}
 }
 
+func TestEvalIntChr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`0x41.chr`,
+			object.NewPanStr("A"),
+		},
+		// unicode
+		{
+			`127843.chr`,
+			object.NewPanStr("🍣"),
+		},
+		// if no args are passed, raise an error
+		{
+			`Int['chr]()`,
+			object.NewTypeErr("Int#chr requires at least 1 arg"),
+		},
+		// if \1 is not int, raise an error
+		{
+			`Int['chr]("a")`,
+			object.NewTypeErr(`"a" cannot be treated as int`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalFloatLiteral(t *testing.T) {
 	tests := []struct {
 		input    string

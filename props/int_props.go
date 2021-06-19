@@ -266,6 +266,22 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		"chr": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Int#chr requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfInt(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as int", args[0].Repr()))
+				}
+
+				return object.NewPanStr(string(self.Value))
+			},
+		),
 		"prime?": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
