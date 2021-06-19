@@ -19,6 +19,8 @@
   min: m{.values.min},
   # nil? returns whether self is nil.
   nil?: m{self == nil},
+  # patch replaces specified values in self
+  patch: m{.bro({**\_, **self})},
   # puts is an alias of p.
   puts: m{.p},
   # tap calls f but returns self
