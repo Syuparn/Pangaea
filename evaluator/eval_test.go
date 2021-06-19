@@ -5074,6 +5074,56 @@ func TestEvalNamesOfConsts(t *testing.T) {
 	}
 }
 
+func TestEvalWhich(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{a: 1}.which('a)`,
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("a"): {Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+			}),
+		},
+		// overrided prop
+		{
+			`{_name: "foo"}.which('_name)`,
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("_name"): {Key: object.NewPanStr("_name"), Value: object.NewPanStr("foo")},
+			}),
+		},
+		{
+			`{a: 1}.which('repr)`,
+			object.BuiltInObjObj,
+		},
+		{
+			`{a: 1}.which('bear)`,
+			object.BuiltInBaseObj,
+		},
+		{
+			`{a: 1}.which('notExist)`,
+			object.BuiltInNil,
+		},
+		{
+			`1.which('prime?)`,
+			object.BuiltInIntObj,
+		},
+		{
+			`{}['which]()`,
+			object.NewTypeErr("Obj#which requires at least 2 args"),
+		},
+		{
+			`{}.which(1)`,
+			object.NewTypeErr("1 cannot be treated as str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalJSONDec(t *testing.T) {
 	tests := []struct {
 		input    string
