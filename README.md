@@ -38,6 +38,25 @@ $ ./pangaea.exe ./example/hello.pangaea
 # Enjoy!
 ```
 
+## What can I do?
+[Examples](https://github.com/Syuparn/Pangaea/tree/master/example) and [unit tests](https://github.com/Syuparn/Pangaea/tree/master/tests) will help you.
+Also, you can find properties of embedded objects by `.keys` method.
+
+```
+# properties of Obj starting with "a"
+>>> Obj.keys.grep("^a")
+["acc", "all?", "ancestors", "any?", "append", "asFor?"]
+# with private properties
+>>> Obj.keys(private?: true)
+["A", "B", "S", "acc", "all?", ...]
+
+# check which property is called
+>>> 1.which('+)
+Int
+>>> 1.which('p)
+Obj
+```
+
 # Requirements
 ## Host language
 - Golang (1.16+)

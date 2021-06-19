@@ -1,6 +1,7 @@
 package props
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/Syuparn/pangaea/object"
@@ -272,6 +273,27 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return object.NewPanArr(values...)
+			},
+		),
+		"which": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Obj#which requires at least 2 args")
+				}
+
+				propName, ok := object.TraceProtoOfStr(args[1])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as str", args[1].Repr()))
+				}
+
+				if owner, ok := object.FindPropOwner(args[0], propName.SymHash()); ok {
+					return owner
+				} else {
+					return object.BuiltInNil
+				}
 			},
 		),
 	}
