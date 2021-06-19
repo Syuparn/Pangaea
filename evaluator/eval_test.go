@@ -482,6 +482,47 @@ func TestEvalStrLen(t *testing.T) {
 	}
 }
 
+func TestEvalStrOrd(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`?a.ord`,
+			object.NewPanInt(97),
+		},
+		// unicode
+		{
+			`"🍣".ord`,
+			object.NewPanInt(127843),
+		},
+		// length must be 1
+		{
+			`"".ord`,
+			object.NewValueErr("length must be 1. got 0 (\"\")"),
+		},
+		{
+			`"abc".ord`,
+			object.NewValueErr("length must be 1. got 3 (\"abc\")"),
+		},
+		// if no args are passed, raise an error
+		{
+			`Str['ord]()`,
+			object.NewTypeErr("Str#ord requires at least 1 arg"),
+		},
+		// if \1 is not str, raise an error
+		{
+			`Str['ord](1)`,
+			object.NewTypeErr(`1 cannot be treated as str`),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalStrLc(t *testing.T) {
 	tests := []struct {
 		input    string
