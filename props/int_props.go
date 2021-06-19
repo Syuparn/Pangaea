@@ -279,7 +279,10 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 						fmt.Sprintf("%s cannot be treated as int", args[0].Repr()))
 				}
 
-				return object.NewPanStr(string(self.Value))
+				// NOTE: convert int64 to string via rune to tell the conversion is intentional
+				// otherwise test warns below:
+				//    conversion from int64 to string yields a string of one rune, not a string of digits (did you mean fmt.Sprint(x)?)
+				return object.NewPanStr(string(rune(self.Value)))
 			},
 		),
 		"prime?": f(
