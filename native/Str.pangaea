@@ -11,6 +11,8 @@
   camel?: m{.camel == self},
   # capital makes first letter of self uppercase and the others lowercase
   capital: m{self[0].uc + self[1:].lc},
+  # decJSON decodes self as json string
+  decJSON: m{JSON.dec(self)},
   # kebab makes self kebab-case
   kebab: m{.sub(`_`, `-`).sub(`([A-Z])`, `-$1`).lc.sub(`^-`, ``)},
   # kebab? returns whether self is kebab-cased.

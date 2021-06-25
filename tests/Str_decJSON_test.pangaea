@@ -1,0 +1,1 @@
+assertEq(`{"a": 1, "b": 2}`.decJSON, {a: 1, b: 2})
