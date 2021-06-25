@@ -1,0 +1,4 @@
+{
+  # All reads all lines from stdin at once
+  All: m{.A.join("\n")},
+}
