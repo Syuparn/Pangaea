@@ -4937,6 +4937,39 @@ func TestEvalRepr(t *testing.T) {
 	}
 }
 
+func TestEvalDedent(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`"  ab".dedent`,
+			object.NewPanStr("ab"),
+		},
+		{
+			`"  ab\n  cd".dedent`,
+			object.NewPanStr("ab\ncd"),
+		},
+		{
+			`"  ab\n    cd\n  ef".dedent`,
+			object.NewPanStr("ab\n  cd\nef"),
+		},
+		{
+			`Str['dedent]()`,
+			object.NewTypeErr("Str#dedent requires at least 1 arg"),
+		},
+		{
+			`Str['dedent](1)`,
+			object.NewTypeErr("1 cannot be treated as str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalNamesOfConsts(t *testing.T) {
 	tests := []struct {
 		input    string
