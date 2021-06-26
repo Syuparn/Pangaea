@@ -4988,6 +4988,96 @@ func TestEvalTraverse(t *testing.T) {
 				),
 			),
 		},
+		// array
+		{
+			`[1, 2].traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+					),
+					object.NewPanInt(2),
+				),
+			),
+		},
+		{
+			`['a, ['b, 'c]].traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("a"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("b"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+						object.NewPanInt(1),
+					),
+					object.NewPanStr("c"),
+				),
+			),
+		},
+		// obj in arr
+		{
+			`['a, {b: 1, c: 2}].traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("a"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+						object.NewPanStr("b"),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+						object.NewPanStr("c"),
+					),
+					object.NewPanInt(2),
+				),
+			),
+		},
+		// arr in obj
+		{
+			`{a: ['b, 'c]}.traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("b"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+						object.NewPanInt(1),
+					),
+					object.NewPanStr("c"),
+				),
+			),
+		},
+		// TODO: map
 		// kwarg "key" selects only pairs containing provided key
 		{
 			`{a: 1, b: {a: 2, c: 3}}.traverse(key: 'a)`,

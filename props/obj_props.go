@@ -241,10 +241,6 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Obj#traverse requires at least 1 arg")
 				}
 
-				if args[0].Type() != object.ObjType {
-					return object.NewPanArr()
-				}
-
 				if k, ok := (*kwargs.Pairs)[object.GetSymHash("key")]; ok {
 					key, ok := object.TraceProtoOfStr(k.Value)
 					if !ok {
@@ -252,10 +248,10 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 							fmt.Sprintf("%s cannot be treated as str", k.Value.Repr()))
 					}
 
-					return traverseSelectedObj(args[0].(*object.PanObj), key)
+					return traverseSelectedObject(args[0], key)
 				}
 
-				return traverseObj(args[0].(*object.PanObj))
+				return traverseObject(args[0])
 			},
 		),
 		"try": f(
@@ -376,8 +372,8 @@ func objIter(o *object.PanObj) object.BuiltInFunc {
 	}
 }
 
-func traverseObj(obj *object.PanObj) *object.PanArr {
-	traversedPairs := traverseObjPairs(obj)
+func traverseObject(obj object.PanObject) *object.PanArr {
+	traversedPairs := traversePairs(obj)
 	elems := make([]object.PanObject, len(traversedPairs))
 
 	for i, tp := range traversedPairs {
@@ -390,8 +386,8 @@ func traverseObj(obj *object.PanObj) *object.PanArr {
 	return object.NewPanArr(elems...)
 }
 
-func traverseSelectedObj(obj *object.PanObj, key object.PanScalar) *object.PanArr {
-	traversedPairs := traverseObjPairs(obj)
+func traverseSelectedObject(obj object.PanObject, key object.PanScalar) *object.PanArr {
+	traversedPairs := traversePairs(obj)
 	filteredPairs := []*traversedPair{}
 	for _, tp := range traversedPairs {
 		if tp.Contains(key) {
@@ -411,22 +407,58 @@ func traverseSelectedObj(obj *object.PanObj, key object.PanScalar) *object.PanAr
 	return object.NewPanArr(elems...)
 }
 
+func traversePairs(obj object.PanObject) []*traversedPair {
+	switch o := obj.(type) {
+	case *object.PanObj:
+		return traverseObjPairs(o)
+	case *object.PanArr:
+		return traverseArrPairs(o)
+	default:
+		return []*traversedPair{}
+	}
+}
+
 func traverseObjPairs(obj *object.PanObj) []*traversedPair {
 	pairs := []*traversedPair{}
 
 	for _, key := range *obj.Keys {
 		p := (*obj.Pairs)[key]
+		traversedPairs := traversePairs(p.Value)
 
-		switch v := p.Value.(type) {
-		case *object.PanObj:
-			traversedPairs := traverseObjPairs(v)
+		if len(traversedPairs) > 0 {
+			// elem is collection
 			for _, tp := range traversedPairs {
 				pairs = append(pairs, tp.PrependKey(p.Key))
 			}
-		default:
+		} else {
+			// elem is not collection
 			pairs = append(pairs, &traversedPair{
 				Keys:  []object.PanObject{p.Key},
-				Value: v,
+				Value: p.Value,
+			})
+		}
+	}
+
+	return pairs
+}
+
+func traverseArrPairs(arr *object.PanArr) []*traversedPair {
+	pairs := []*traversedPair{}
+
+	for i, e := range arr.Elems {
+		key := object.NewPanInt(int64(i))
+		traversedPairs := traversePairs(e)
+
+		if len(traversedPairs) > 0 {
+			// elem is collection
+			for _, tp := range traversedPairs {
+				pairs = append(pairs, tp.PrependKey(key))
+			}
+		} else {
+			// elem is not collection
+			pairs = append(pairs, &traversedPair{
+				Keys:  []object.PanObject{key},
+				Value: e,
 			})
 		}
 	}
