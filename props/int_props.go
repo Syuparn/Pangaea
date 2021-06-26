@@ -2,6 +2,7 @@ package props
 
 import (
 	"fmt"
+	"math"
 	"math/big"
 
 	"github.com/Syuparn/pangaea/object"
@@ -163,6 +164,28 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				if fself, fother, ferr := checkFloatInfixArgs(args, "*", object.NewPanFloat(1)); ferr == nil {
 					return object.NewPanFloat(fself.Value * fother.Value)
+				}
+
+				return err
+			},
+		),
+		"**": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkIntInfixArgs(args, "**", object.NewPanInt(1))
+				if err == nil {
+					res := math.Pow(float64(self.Value), float64(other.Value))
+					// check if f is integer
+					if math.Floor(res) == res {
+						return object.NewPanInt(int64(res))
+					} else {
+						return object.NewPanFloat(res)
+					}
+				}
+
+				if fself, fother, ferr := checkFloatInfixArgs(args, "**", object.NewPanFloat(1)); ferr == nil {
+					return object.NewPanFloat(math.Pow(fself.Value, fother.Value))
 				}
 
 				return err

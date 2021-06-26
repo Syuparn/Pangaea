@@ -7576,6 +7576,76 @@ func TestEvalInfixIntMulErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixIntPower(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`3 ** 2`,
+			object.NewPanInt(9),
+		},
+		{
+			`2 ** -2`,
+			object.NewPanFloat(0.25),
+		},
+		// decendant
+		{
+			`4 ** 2.bear`,
+			object.NewPanInt(16),
+		},
+		// nil is treated as 1
+		{
+			`3 ** nil`,
+			object.NewPanInt(3),
+		},
+		// Int is treated as 0
+		{
+			`2 ** Int`,
+			object.NewPanInt(1),
+		},
+		{
+			`Int ** 3`,
+			object.NewPanInt(0),
+		},
+		// cast to float
+		{
+			`3 ** 2.0`,
+			object.NewPanFloat(9.0),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixIntPowerErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1 ** []`,
+			object.NewTypeErr("[] cannot be treated as int"),
+		},
+		{
+			`1['**]({}, 2)`,
+			object.NewTypeErr("{} cannot be treated as int"),
+		},
+		{
+			`1.**`,
+			object.NewTypeErr("** requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixIntDiv(t *testing.T) {
 	tests := []struct {
 		input    string
