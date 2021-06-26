@@ -1,0 +1,2 @@
+assertEq(<{|i| yield i if i < 6; recur(\ + 1)}>.new(1).avg, 3.0)
+assertRaises(ZeroDivisionErr, "cannot be divided by zero") {<{yield 1 if false}>.avg}

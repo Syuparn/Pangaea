@@ -11,6 +11,10 @@
   any?: m{|f| @^f@B.has?(true)},
   # append appends the elements at the end of self.
   append: m{|i| .chain([i])},
+  # avg returns average of elements.
+  avg: m{._iter.A.{
+    raise ZeroDivisionErr.new("cannot be divided by zero") if .len == 0; .sum / .len
+  }},
   # chain concatenates all iters in arguments.
   chain: m{
     is := \0@_iter._iter
