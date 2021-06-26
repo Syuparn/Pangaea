@@ -7383,7 +7383,7 @@ func TestEvalInfixIntAdd(t *testing.T) {
 			`-5 + 10`,
 			object.NewPanInt(5),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`3 + true`,
 			object.NewPanInt(4),
@@ -7453,7 +7453,7 @@ func TestEvalInfixIntSub(t *testing.T) {
 			`5 - -10`,
 			object.NewPanInt(15),
 		},
-		// decendant of int can be subbed
+		// decendant
 		{
 			`3 - true`,
 			object.NewPanInt(2),
@@ -7519,7 +7519,7 @@ func TestEvalInfixIntMul(t *testing.T) {
 			`2 * 3`,
 			object.NewPanInt(6),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`3 * true`,
 			object.NewPanInt(3),
@@ -7589,7 +7589,7 @@ func TestEvalInfixIntDiv(t *testing.T) {
 			`-5 / 4`,
 			object.NewPanFloat(-1.25),
 		},
-		// decendant of int can be devided
+		// decendant
 		{
 			`3 / true`,
 			object.NewPanFloat(3.0),
@@ -7659,7 +7659,7 @@ func TestEvalInfixIntFloorDiv(t *testing.T) {
 			`-5 // 2`,
 			object.NewPanInt(-3),
 		},
-		// decendant of int can be devided
+		// decendant
 		{
 			`3 // true`,
 			object.NewPanInt(3),
@@ -7916,7 +7916,7 @@ func TestEvalInfixFloatAdd(t *testing.T) {
 			`-5.0 + 10.0`,
 			object.NewPanFloat(5.0),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`3.0 + 1.0.bear`,
 			object.NewPanFloat(4.0),
@@ -7986,7 +7986,7 @@ func TestEvalInfixFloatSub(t *testing.T) {
 			`5.0 - -10.0`,
 			object.NewPanFloat(15.0),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`4.0 - 1.0.bear`,
 			object.NewPanFloat(3.0),
@@ -8056,7 +8056,7 @@ func TestEvalInfixFloatMul(t *testing.T) {
 			`5.0 * -10.0`,
 			object.NewPanFloat(-50.0),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`4.0 * 2.0.bear`,
 			object.NewPanFloat(8.0),
