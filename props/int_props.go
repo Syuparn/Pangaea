@@ -372,6 +372,27 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					fmt.Sprintf("%s cannot be treated as int", args[1].Repr()))
 			},
 		),
+		"sqrt": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Int#sqrt requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfInt(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as int", args[0].Repr()))
+				}
+
+				if self.Value < 0 {
+					return object.NewValueErr(
+						fmt.Sprintf("sqrt of %s is not a real number", self.Repr()))
+				}
+
+				return object.NewPanFloat(math.Sqrt(float64(self.Value)))
+			},
+		),
 	}
 }
 

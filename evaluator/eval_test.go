@@ -250,6 +250,82 @@ func TestEvalIntPrimep(t *testing.T) {
 	}
 }
 
+func TestEvalIntSqrt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`16.sqrt`,
+			object.NewPanFloat(4.0),
+		},
+		// use descendant
+		{
+			`16.bear.sqrt`,
+			object.NewPanFloat(4.0),
+		},
+		// if no args are passed, raise an error
+		{
+			`Int['sqrt]()`,
+			object.NewTypeErr("Int#sqrt requires at least 1 arg"),
+		},
+		// if self is not int, raise an error
+		{
+			`Int['sqrt]("a")`,
+			object.NewTypeErr("\"a\" cannot be treated as int"),
+		},
+		// if self is negative, raise an error
+		// TODO: introduce complex number
+		{
+			`-4.sqrt`,
+			object.NewValueErr("sqrt of -4 is not a real number"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalFloatSqrt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`16.0.sqrt`,
+			object.NewPanFloat(4.0),
+		},
+		// use descendant
+		{
+			`16.0.bear.sqrt`,
+			object.NewPanFloat(4.0),
+		},
+		// if no args are passed, raise an error
+		{
+			`Float['sqrt]()`,
+			object.NewTypeErr("Float#sqrt requires at least 1 arg"),
+		},
+		// if self is not int, raise an error
+		{
+			`Float['sqrt]("a")`,
+			object.NewTypeErr("\"a\" cannot be treated as float"),
+		},
+		// if self is negative, raise an error
+		// TODO: introduce complex number
+		{
+			`-4.0.sqrt`,
+			object.NewValueErr("sqrt of -4.000000 is not a real number"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalIntChr(t *testing.T) {
 	tests := []struct {
 		input    string
