@@ -59,6 +59,8 @@
   select: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if f(*\)}},
   # sum returns sum of elements in self.
   sum: m{$(nil)+},
+  # tally counts how many times element appears in self.
+  tally: m{$(%{}){|acc, i| %{i: acc[i]+1, **acc}}},
   # until returns elements while (element).^cond? is false.
   until: m{|cond?| ._iter.{|it| <{yield n if (n := it.next).^cond?.!}>}},
   # while returns elements while (element).^cond? is true.
