@@ -1,0 +1,6 @@
+# try "cat person.json | pangaea traversejson.pangaea"!
+<>.All.decJSON.traverse(key: 'name)@p
+
+# [["friends", 0, "name"], "Jiro"]
+# [["friends", 1, "name"], "Hanako"]
+# [["name"], "Taro"]
