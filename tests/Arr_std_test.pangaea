@@ -1,0 +1,2 @@
+assertEq([10, 10, 10, 10].std, 0.0)
+assertEq([4, 4, 6, 6].std, 1.0)

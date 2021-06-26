@@ -61,6 +61,8 @@
   reduce: m{|f, init: nil| $(init)^f},
   # select selects elements for which f returns true.
   select: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if f(*\)}},
+  # std returns standard deviation of elements.
+  std: m{avg := .avg; ._iter@{(\ - avg) ** 2}.avg.sqrt},
   # sum returns sum of elements in self.
   sum: m{$(nil)+},
   # tally counts how many times element appears in self.
