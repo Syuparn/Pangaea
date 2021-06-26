@@ -7638,6 +7638,14 @@ func TestEvalInfixIntDivErr(t *testing.T) {
 			`1 / 0`,
 			object.NewZeroDivisionErr("cannot be divided by 0"),
 		},
+		{
+			`1 / 0.0`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+		},
+		{
+			`1 / Int`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+		},
 	}
 
 	for _, tt := range tests {
