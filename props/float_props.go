@@ -121,6 +121,36 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				return object.NewPanFloat(res)
 			},
 		),
+		"*": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkFloatInfixArgs(args, "*", object.NewPanFloat(1.0))
+				if err != nil {
+					return err
+				}
+
+				res := self.Value * other.Value
+				return object.NewPanFloat(res)
+			},
+		),
+		"/": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkFloatInfixArgs(args, "/", object.NewPanFloat(1.0))
+				if err != nil {
+					return err
+				}
+
+				if other.Value == 0 {
+					return object.NewZeroDivisionErr("cannot be divided by zero")
+				}
+
+				res := self.Value / other.Value
+				return object.NewPanFloat(res)
+			},
+		),
 		"_name": object.NewPanStr("Float"),
 		"B": f(
 			func(
@@ -173,12 +203,13 @@ func checkFloatInfixArgs(
 		return nil, nil, object.NewTypeErr(propName + " requires at least 2 args")
 	}
 
-	self, ok := object.TraceProtoOfFloat(args[0])
+	self, ok := toPanFloat(args[0])
 	if !ok {
 		return nil, nil, object.NewTypeErr(
 			fmt.Sprintf("%s cannot be treated as float", args[0].Repr()))
 	}
-	other, ok := object.TraceProtoOfFloat(args[1])
+
+	other, ok := toPanFloat(args[1])
 	if !ok {
 		// NOTE: nil is treated as nilAs (0 in `+` and 1 in `*` for example)
 		_, ok := object.TraceProtoOfNil(args[1])
@@ -191,4 +222,17 @@ func checkFloatInfixArgs(
 	}
 
 	return self, other, nil
+}
+
+func toPanFloat(obj object.PanObject) (*object.PanFloat, bool) {
+	if f, ok := object.TraceProtoOfFloat(obj); ok {
+		return f, true
+	}
+
+	// cast int to float
+	if i, ok := object.TraceProtoOfInt(obj); ok {
+		return object.NewPanFloat(float64(i.Value)), true
+	}
+
+	return nil, false
 }

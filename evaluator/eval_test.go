@@ -7383,7 +7383,7 @@ func TestEvalInfixIntAdd(t *testing.T) {
 			`-5 + 10`,
 			object.NewPanInt(5),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`3 + true`,
 			object.NewPanInt(4),
@@ -7401,6 +7401,11 @@ func TestEvalInfixIntAdd(t *testing.T) {
 		{
 			`Int + 3`,
 			object.NewPanInt(3),
+		},
+		// cast to float
+		{
+			`2 + 3.5`,
+			object.NewPanFloat(5.5),
 		},
 	}
 
@@ -7448,7 +7453,7 @@ func TestEvalInfixIntSub(t *testing.T) {
 			`5 - -10`,
 			object.NewPanInt(15),
 		},
-		// decendant of int can be subbed
+		// decendant
 		{
 			`3 - true`,
 			object.NewPanInt(2),
@@ -7466,6 +7471,11 @@ func TestEvalInfixIntSub(t *testing.T) {
 		{
 			`Int - 3`,
 			object.NewPanInt(-3),
+		},
+		// cast to float
+		{
+			`2 - 1.5`,
+			object.NewPanFloat(0.5),
 		},
 	}
 
@@ -7509,7 +7519,7 @@ func TestEvalInfixIntMul(t *testing.T) {
 			`2 * 3`,
 			object.NewPanInt(6),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`3 * true`,
 			object.NewPanInt(3),
@@ -7527,6 +7537,11 @@ func TestEvalInfixIntMul(t *testing.T) {
 		{
 			`Int * 3`,
 			object.NewPanInt(0),
+		},
+		// cast to float
+		{
+			`2 * 1.5`,
+			object.NewPanFloat(3.0),
 		},
 	}
 
@@ -7574,7 +7589,7 @@ func TestEvalInfixIntDiv(t *testing.T) {
 			`-5 / 4`,
 			object.NewPanFloat(-1.25),
 		},
-		// decendant of int can be devided
+		// decendant
 		{
 			`3 / true`,
 			object.NewPanFloat(3.0),
@@ -7588,6 +7603,11 @@ func TestEvalInfixIntDiv(t *testing.T) {
 		{
 			`Int / 3`,
 			object.NewPanFloat(0.0),
+		},
+		// cast to float
+		{
+			`3 / 1.5`,
+			object.NewPanFloat(2.0),
 		},
 	}
 
@@ -7618,6 +7638,14 @@ func TestEvalInfixIntDivErr(t *testing.T) {
 			`1 / 0`,
 			object.NewZeroDivisionErr("cannot be divided by 0"),
 		},
+		{
+			`1 / 0.0`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+		},
+		{
+			`1 / Int`,
+			object.NewZeroDivisionErr("cannot be divided by 0"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -7639,7 +7667,7 @@ func TestEvalInfixIntFloorDiv(t *testing.T) {
 			`-5 // 2`,
 			object.NewPanInt(-3),
 		},
-		// decendant of int can be devided
+		// decendant
 		{
 			`3 // true`,
 			object.NewPanInt(3),
@@ -7896,7 +7924,7 @@ func TestEvalInfixFloatAdd(t *testing.T) {
 			`-5.0 + 10.0`,
 			object.NewPanFloat(5.0),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`3.0 + 1.0.bear`,
 			object.NewPanFloat(4.0),
@@ -7914,6 +7942,11 @@ func TestEvalInfixFloatAdd(t *testing.T) {
 		{
 			`Float + 3.0`,
 			object.NewPanFloat(3.0),
+		},
+		// cast to float
+		{
+			`1.5 + 3`,
+			object.NewPanFloat(4.5),
 		},
 	}
 
@@ -7961,7 +7994,7 @@ func TestEvalInfixFloatSub(t *testing.T) {
 			`5.0 - -10.0`,
 			object.NewPanFloat(15.0),
 		},
-		// decendant of int can be added
+		// decendant
 		{
 			`4.0 - 1.0.bear`,
 			object.NewPanFloat(3.0),
@@ -7979,6 +8012,11 @@ func TestEvalInfixFloatSub(t *testing.T) {
 		{
 			`Float - 3.0`,
 			object.NewPanFloat(-3.0),
+		},
+		// cast to float
+		{
+			`2.5 - 3`,
+			object.NewPanFloat(-0.5),
 		},
 	}
 
@@ -8004,6 +8042,150 @@ func TestEvalInfixFloatSubErr(t *testing.T) {
 		{
 			`1.0.-`,
 			object.NewTypeErr("- requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatMul(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`3.0 * 1.5`,
+			object.NewPanFloat(4.5),
+		},
+		{
+			`5.0 * -10.0`,
+			object.NewPanFloat(-50.0),
+		},
+		// decendant
+		{
+			`4.0 * 2.0.bear`,
+			object.NewPanFloat(8.0),
+		},
+		// nil is treated as 1.0
+		{
+			`3.0 * nil`,
+			object.NewPanFloat(3.0),
+		},
+		// Float is treated as 0.0
+		{
+			`3.0 * Float`,
+			object.NewPanFloat(0.0),
+		},
+		{
+			`Float * 3.0`,
+			object.NewPanFloat(0.0),
+		},
+		// cast to float
+		{
+			`2.5 * 3`,
+			object.NewPanFloat(7.5),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatMulErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.0 * []`,
+			object.NewTypeErr("[] cannot be treated as float"),
+		},
+		{
+			`0.0['*]({}, 1.0)`,
+			object.NewTypeErr("{} cannot be treated as float"),
+		},
+		{
+			`1.0.*`,
+			object.NewTypeErr("* requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatDiv(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`3.0 / 1.5`,
+			object.NewPanFloat(2.0),
+		},
+		// decendant
+		{
+			`6.0 / 2.0.bear`,
+			object.NewPanFloat(3.0),
+		},
+		// nil is treated as 1.0
+		{
+			`3.0 / nil`,
+			object.NewPanFloat(3.0),
+		},
+		// Float is treated as 0.0
+		{
+			`Float / 3.0`,
+			object.NewPanFloat(0.0),
+		},
+		// cast to float
+		{
+			`7.5 / 3`,
+			object.NewPanFloat(2.5),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatDivErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.0 / []`,
+			object.NewTypeErr("[] cannot be treated as float"),
+		},
+		{
+			`0.0['/]({}, 1.0)`,
+			object.NewTypeErr("{} cannot be treated as float"),
+		},
+		{
+			`1.0./`,
+			object.NewTypeErr("/ requires at least 2 args"),
+		},
+		{
+			`6.0 / 0.0`,
+			object.NewZeroDivisionErr("cannot be divided by zero"),
+		},
+		{
+			`6.0 / 0`,
+			object.NewZeroDivisionErr("cannot be divided by zero"),
+		},
+		{
+			`6.0 / Float`,
+			object.NewZeroDivisionErr("cannot be divided by zero"),
 		},
 	}
 

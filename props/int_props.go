@@ -124,12 +124,16 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
 				self, other, err := checkIntInfixArgs(args, "+", object.NewPanInt(0))
-				if err != nil {
-					return err
+				if err == nil {
+					return object.NewPanInt(self.Value + other.Value)
 				}
 
-				res := self.Value + other.Value
-				return object.NewPanInt(res)
+				if fself, fother, ferr := checkFloatInfixArgs(args, "+", object.NewPanFloat(0)); ferr == nil {
+					return object.NewPanFloat(fself.Value + fother.Value)
+				}
+
+				return err
+
 			},
 		),
 		"-": f(
@@ -137,12 +141,15 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
 				self, other, err := checkIntInfixArgs(args, "-", object.NewPanInt(0))
-				if err != nil {
-					return err
+				if err == nil {
+					return object.NewPanInt(self.Value - other.Value)
 				}
 
-				res := self.Value - other.Value
-				return object.NewPanInt(res)
+				if fself, fother, ferr := checkFloatInfixArgs(args, "-", object.NewPanFloat(0)); ferr == nil {
+					return object.NewPanFloat(fself.Value - fother.Value)
+				}
+
+				return err
 			},
 		),
 		"*": f(
@@ -150,12 +157,15 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
 				self, other, err := checkIntInfixArgs(args, "*", object.NewPanInt(1))
-				if err != nil {
-					return err
+				if err == nil {
+					return object.NewPanInt(self.Value * other.Value)
 				}
 
-				res := self.Value * other.Value
-				return object.NewPanInt(res)
+				if fself, fother, ferr := checkFloatInfixArgs(args, "*", object.NewPanFloat(1)); ferr == nil {
+					return object.NewPanFloat(fself.Value * fother.Value)
+				}
+
+				return err
 			},
 		),
 		"/": f(
@@ -163,17 +173,22 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
 				self, other, err := checkIntInfixArgs(args, "/", object.NewPanInt(1))
-				if err != nil {
-					return err
+				if err == nil {
+					if other.Value == 0 {
+						return object.NewZeroDivisionErr("cannot be divided by 0")
+					}
+					// truediv
+					return object.NewPanFloat(float64(self.Value) / float64(other.Value))
 				}
 
-				if other.Value == 0 {
-					return object.NewZeroDivisionErr("cannot be divided by 0")
+				if fself, fother, ferr := checkFloatInfixArgs(args, "/", object.NewPanFloat(1)); ferr == nil {
+					if fother.Value == 0 {
+						return object.NewZeroDivisionErr("cannot be divided by 0")
+					}
+					return object.NewPanFloat(fself.Value / fother.Value)
 				}
 
-				// truediv
-				res := float64(self.Value) / float64(other.Value)
-				return object.NewPanFloat(res)
+				return err
 			},
 		),
 		"//": f(
@@ -354,8 +369,7 @@ func checkIntInfixArgs(
 	other, ok := object.TraceProtoOfInt(args[1])
 	if !ok {
 		// NOTE: nil is treated as nilAs (0 in `+` and 1 in `*` for example)
-		_, ok := object.TraceProtoOfNil(args[1])
-		if ok {
+		if _, ok := object.TraceProtoOfNil(args[1]); ok {
 			return self, nilAs, nil
 		}
 
