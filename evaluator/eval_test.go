@@ -4937,6 +4937,188 @@ func TestEvalRepr(t *testing.T) {
 	}
 }
 
+func TestEvalTraverse(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.traverse`,
+			object.NewPanArr(),
+		},
+		{
+			`{a: 1, b: 2}.traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("b"),
+					),
+					object.NewPanInt(2),
+				),
+			),
+		},
+		{
+			`{a: 1, b: {c: 2, d: 3}}.traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("b"),
+						object.NewPanStr("c"),
+					),
+					object.NewPanInt(2),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("b"),
+						object.NewPanStr("d"),
+					),
+					object.NewPanInt(3),
+				),
+			),
+		},
+		// array
+		{
+			`[1, 2].traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+					),
+					object.NewPanInt(2),
+				),
+			),
+		},
+		{
+			`['a, ['b, 'c]].traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("a"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("b"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+						object.NewPanInt(1),
+					),
+					object.NewPanStr("c"),
+				),
+			),
+		},
+		// obj in arr
+		{
+			`['a, {b: 1, c: 2}].traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("a"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+						object.NewPanStr("b"),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanInt(1),
+						object.NewPanStr("c"),
+					),
+					object.NewPanInt(2),
+				),
+			),
+		},
+		// arr in obj
+		{
+			`{a: ['b, 'c]}.traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+						object.NewPanInt(0),
+					),
+					object.NewPanStr("b"),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+						object.NewPanInt(1),
+					),
+					object.NewPanStr("c"),
+				),
+			),
+		},
+		// TODO: map
+		// kwarg "key" selects only pairs containing provided key
+		{
+			`{a: 1, b: {a: 2, c: 3}}.traverse(key: 'a)`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("b"),
+						object.NewPanStr("a"),
+					),
+					object.NewPanInt(2),
+				),
+			),
+		},
+		// object other than PanObj
+		{
+			`1.traverse`,
+			object.NewPanArr(),
+		},
+		// error
+		{
+			`Obj['traverse]()`,
+			object.NewTypeErr("Obj#traverse requires at least 1 arg"),
+		},
+		{
+			`{a:1}.traverse(key: 2)`,
+			object.NewTypeErr("2 cannot be treated as str"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalDedent(t *testing.T) {
 	tests := []struct {
 		input    string
