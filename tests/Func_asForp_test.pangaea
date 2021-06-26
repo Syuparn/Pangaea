@@ -1,2 +1,5 @@
 assertEq({|x| x.even?}.asFor?(2), true)
 assertEq({|x| x.even?}.asFor?(3), false)
+# unpack arr (nesessary for key-value === check!)
+assertEq({|k, v| v == 1}.asFor?(["foo", 1]), true)
+assertEq({|k, v| v == 1}.asFor?(["foo", 2]), false)
