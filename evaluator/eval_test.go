@@ -8043,6 +8043,76 @@ func TestEvalInfixFloatSubErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixFloatMul(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`3.0 * 1.5`,
+			object.NewPanFloat(4.5),
+		},
+		{
+			`5.0 * -10.0`,
+			object.NewPanFloat(-50.0),
+		},
+		// decendant of int can be added
+		{
+			`4.0 * 2.0.bear`,
+			object.NewPanFloat(8.0),
+		},
+		// nil is treated as 1.0
+		{
+			`3.0 * nil`,
+			object.NewPanFloat(3.0),
+		},
+		// Float is treated as 0.0
+		{
+			`3.0 * Float`,
+			object.NewPanFloat(0.0),
+		},
+		{
+			`Float * 3.0`,
+			object.NewPanFloat(0.0),
+		},
+		// cast to float
+		{
+			`2.5 * 3`,
+			object.NewPanFloat(7.5),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatMulErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.0 * []`,
+			object.NewTypeErr("[] cannot be treated as float"),
+		},
+		{
+			`0.0['*]({}, 1.0)`,
+			object.NewTypeErr("{} cannot be treated as float"),
+		},
+		{
+			`1.0.*`,
+			object.NewTypeErr("* requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixArrAdd(t *testing.T) {
 	tests := []struct {
 		input    string

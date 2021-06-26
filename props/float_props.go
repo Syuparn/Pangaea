@@ -121,6 +121,19 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				return object.NewPanFloat(res)
 			},
 		),
+		"*": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				self, other, err := checkFloatInfixArgs(args, "*", object.NewPanFloat(1.0))
+				if err != nil {
+					return err
+				}
+
+				res := self.Value * other.Value
+				return object.NewPanFloat(res)
+			},
+		),
 		"_name": object.NewPanStr("Float"),
 		"B": f(
 			func(
