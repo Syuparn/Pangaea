@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dlclark/regexp2"
+	"github.com/lithammer/dedent"
 
 	"github.com/Syuparn/pangaea/object"
 )
@@ -212,6 +213,22 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInFalse
 				}
 				return object.BuiltInTrue
+			},
+		),
+		"dedent": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Str#dedent requires at least 1 arg")
+				}
+				self, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
+				}
+
+				return object.NewPanStr(dedent.Dedent(self.Value))
 			},
 		),
 		"eval":    propContainer["Str_eval"],

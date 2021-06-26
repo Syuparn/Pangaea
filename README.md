@@ -61,13 +61,12 @@ Obj
 ## Host language
 - Golang (1.16+)
 
-## Packages
-
-They are installed automatically.
+## Dependent Packages
 
 - [goyacc](https://godoc.org/golang.org/x/tools/cmd/goyacc)
 - [simplexer](github.com/macrat/simplexer)
 - [dtoa](github.com/tanaton/dtoa)
+- [dedent](https://github.com/lithammer/dedent)
 
 # Introduction (Let's run your REPL!)
 
