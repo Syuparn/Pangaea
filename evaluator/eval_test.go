@@ -4988,7 +4988,25 @@ func TestEvalTraverse(t *testing.T) {
 				),
 			),
 		},
-		// TODO: key kwarg
+		// kwarg "key" selects only pairs containing provided key
+		{
+			`{a: 1, b: {a: 2, c: 3}}.traverse(key: 'a)`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("b"),
+						object.NewPanStr("a"),
+					),
+					object.NewPanInt(2),
+				),
+			),
+		},
 		// object other than PanObj
 		{
 			`1.traverse`,
@@ -4998,6 +5016,10 @@ func TestEvalTraverse(t *testing.T) {
 		{
 			`Obj['traverse]()`,
 			object.NewTypeErr("Obj#traverse requires at least 1 arg"),
+		},
+		{
+			`{a:1}.traverse(key: 2)`,
+			object.NewTypeErr("2 cannot be treated as str"),
 		},
 	}
 

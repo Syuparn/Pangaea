@@ -245,6 +245,16 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewPanArr()
 				}
 
+				if k, ok := (*kwargs.Pairs)[object.GetSymHash("key")]; ok {
+					key, ok := object.TraceProtoOfStr(k.Value)
+					if !ok {
+						return object.NewTypeErr(
+							fmt.Sprintf("%s cannot be treated as str", k.Value.Repr()))
+					}
+
+					return traverseSelectedObj(args[0].(*object.PanObj), key)
+				}
+
 				return traverseObj(args[0].(*object.PanObj))
 			},
 		),
@@ -380,6 +390,27 @@ func traverseObj(obj *object.PanObj) *object.PanArr {
 	return object.NewPanArr(elems...)
 }
 
+func traverseSelectedObj(obj *object.PanObj, key object.PanScalar) *object.PanArr {
+	traversedPairs := traverseObjPairs(obj)
+	filteredPairs := []*traversedPair{}
+	for _, tp := range traversedPairs {
+		if tp.Contains(key) {
+			filteredPairs = append(filteredPairs, tp)
+		}
+	}
+
+	elems := make([]object.PanObject, len(filteredPairs))
+
+	for i, p := range filteredPairs {
+		elems[i] = object.NewPanArr(
+			object.NewPanArr(p.Keys...),
+			p.Value,
+		)
+	}
+
+	return object.NewPanArr(elems...)
+}
+
 func traverseObjPairs(obj *object.PanObj) []*traversedPair {
 	pairs := []*traversedPair{}
 
@@ -413,4 +444,16 @@ func (p *traversedPair) PrependKey(key object.PanObject) *traversedPair {
 		Keys:  append([]object.PanObject{key}, p.Keys...),
 		Value: p.Value,
 	}
+}
+
+func (p *traversedPair) Contains(key object.PanScalar) bool {
+	for _, k := range p.Keys {
+		if s, ok := k.(object.PanScalar); ok {
+			if key.Hash() == s.Hash() {
+				return true
+			}
+		}
+	}
+
+	return false
 }
