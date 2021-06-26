@@ -1,0 +1,1 @@
+assertEq((1:6).std, 2.sqrt)
