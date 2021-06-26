@@ -7402,6 +7402,11 @@ func TestEvalInfixIntAdd(t *testing.T) {
 			`Int + 3`,
 			object.NewPanInt(3),
 		},
+		// cast to float
+		{
+			`2 + 3.5`,
+			object.NewPanFloat(5.5),
+		},
 	}
 
 	for _, tt := range tests {
@@ -7467,6 +7472,11 @@ func TestEvalInfixIntSub(t *testing.T) {
 			`Int - 3`,
 			object.NewPanInt(-3),
 		},
+		// cast to float
+		{
+			`2 - 1.5`,
+			object.NewPanFloat(0.5),
+		},
 	}
 
 	for _, tt := range tests {
@@ -7528,6 +7538,11 @@ func TestEvalInfixIntMul(t *testing.T) {
 			`Int * 3`,
 			object.NewPanInt(0),
 		},
+		// cast to float
+		{
+			`2 * 1.5`,
+			object.NewPanFloat(3.0),
+		},
 	}
 
 	for _, tt := range tests {
@@ -7588,6 +7603,11 @@ func TestEvalInfixIntDiv(t *testing.T) {
 		{
 			`Int / 3`,
 			object.NewPanFloat(0.0),
+		},
+		// cast to float
+		{
+			`3 / 1.5`,
+			object.NewPanFloat(2.0),
 		},
 	}
 
@@ -7915,6 +7935,11 @@ func TestEvalInfixFloatAdd(t *testing.T) {
 			`Float + 3.0`,
 			object.NewPanFloat(3.0),
 		},
+		// cast to float
+		{
+			`1.5 + 3`,
+			object.NewPanFloat(4.5),
+		},
 	}
 
 	for _, tt := range tests {
@@ -7979,6 +8004,11 @@ func TestEvalInfixFloatSub(t *testing.T) {
 		{
 			`Float - 3.0`,
 			object.NewPanFloat(-3.0),
+		},
+		// cast to float
+		{
+			`2.5 - 3`,
+			object.NewPanFloat(-0.5),
 		},
 	}
 
