@@ -4937,6 +4937,76 @@ func TestEvalRepr(t *testing.T) {
 	}
 }
 
+func TestEvalTraverse(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{}.traverse`,
+			object.NewPanArr(),
+		},
+		{
+			`{a: 1, b: 2}.traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("b"),
+					),
+					object.NewPanInt(2),
+				),
+			),
+		},
+		{
+			`{a: 1, b: {c: 2, d: 3}}.traverse`,
+			object.NewPanArr(
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("a"),
+					),
+					object.NewPanInt(1),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("b"),
+						object.NewPanStr("c"),
+					),
+					object.NewPanInt(2),
+				),
+				object.NewPanArr(
+					object.NewPanArr(
+						object.NewPanStr("b"),
+						object.NewPanStr("d"),
+					),
+					object.NewPanInt(3),
+				),
+			),
+		},
+		// TODO: key kwarg
+		// object other than PanObj
+		{
+			`1.traverse`,
+			object.NewPanArr(),
+		},
+		// error
+		{
+			`Obj['traverse]()`,
+			object.NewTypeErr("Obj#traverse requires at least 1 arg"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalDedent(t *testing.T) {
 	tests := []struct {
 		input    string

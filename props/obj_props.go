@@ -233,6 +233,21 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanStr(formattedStr(args[0]))
 			},
 		),
+		"traverse": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Obj#traverse requires at least 1 arg")
+				}
+
+				if args[0].Type() != object.ObjType {
+					return object.NewPanArr()
+				}
+
+				return traverseObj(args[0].(*object.PanObj))
+			},
+		),
 		"try": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -348,5 +363,54 @@ func objIter(o *object.PanObj) object.BuiltInFunc {
 
 		yieldIdx++
 		return yielded
+	}
+}
+
+func traverseObj(obj *object.PanObj) *object.PanArr {
+	traversedPairs := traverseObjPairs(obj)
+	elems := make([]object.PanObject, len(traversedPairs))
+
+	for i, tp := range traversedPairs {
+		elems[i] = object.NewPanArr(
+			object.NewPanArr(tp.Keys...),
+			tp.Value,
+		)
+	}
+
+	return object.NewPanArr(elems...)
+}
+
+func traverseObjPairs(obj *object.PanObj) []*traversedPair {
+	pairs := []*traversedPair{}
+
+	for _, key := range *obj.Keys {
+		p := (*obj.Pairs)[key]
+
+		switch v := p.Value.(type) {
+		case *object.PanObj:
+			traversedPairs := traverseObjPairs(v)
+			for _, tp := range traversedPairs {
+				pairs = append(pairs, tp.PrependKey(p.Key))
+			}
+		default:
+			pairs = append(pairs, &traversedPair{
+				Keys:  []object.PanObject{p.Key},
+				Value: v,
+			})
+		}
+	}
+
+	return pairs
+}
+
+type traversedPair struct {
+	Keys  []object.PanObject
+	Value object.PanObject
+}
+
+func (p *traversedPair) PrependKey(key object.PanObject) *traversedPair {
+	return &traversedPair{
+		Keys:  append([]object.PanObject{key}, p.Keys...),
+		Value: p.Value,
 	}
 }
