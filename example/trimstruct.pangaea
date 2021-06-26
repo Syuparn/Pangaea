@@ -1,0 +1,13 @@
+# trim specific fields from dumped golang struct text
+# try "cat dumped_go_struct.txt | pangaea trimstruct.pangaea"!
+<>@S.flipflop(`^\t*main.Issue\{`, `\}`).join("\n").dedent.p
+
+# main.Issue{
+#     ID:24,
+#     Title:"handle bad request",
+# },
+# main.Issue{
+#     ID:25,
+#     Title:"add new response body",
+# },
+# ...
