@@ -8121,6 +8121,80 @@ func TestEvalInfixFloatMulErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixFloatPower(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`4.0 ** 1.5`,
+			object.NewPanFloat(8.0),
+		},
+		{
+			`3.0 ** 2.0`,
+			object.NewPanFloat(9.0),
+		},
+		{
+			`2.0 ** -2`,
+			object.NewPanFloat(0.25),
+		},
+		// decendant
+		{
+			`4.0 ** 2.0.bear`,
+			object.NewPanFloat(16.0),
+		},
+		// nil is treated as 1.0
+		{
+			`3.0 ** nil`,
+			object.NewPanFloat(3.0),
+		},
+		// Float is treated as 0.0
+		{
+			`3.0 ** Float`,
+			object.NewPanFloat(1.0),
+		},
+		{
+			`Float ** 3.0`,
+			object.NewPanFloat(0.0),
+		},
+		// cast to float
+		{
+			`3.0 ** 2`,
+			object.NewPanFloat(9.0),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixFloatPowerErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.0 ** []`,
+			object.NewTypeErr("[] cannot be treated as float"),
+		},
+		{
+			`0.0['**]({}, 1.0)`,
+			object.NewTypeErr("{} cannot be treated as float"),
+		},
+		{
+			`1.0.**`,
+			object.NewTypeErr("** requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixFloatDiv(t *testing.T) {
 	tests := []struct {
 		input    string
