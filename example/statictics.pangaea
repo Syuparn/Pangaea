@@ -1,0 +1,8 @@
+# try "cat income.csv | pangaea statistics.pangaea"!
+<>.S
+<>@{(\ / ",")[1].I}.{
+  "n                 : #{.len}".p
+  "total income      : #{.sum}".p
+  "average           : #{.avg}".p
+  "standard deviation: #{.std}".p
+}
