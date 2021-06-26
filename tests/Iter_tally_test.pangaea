@@ -1,0 +1,1 @@
+assertEq(<{|i| yield i % 2 if i < 5; recur(i+1)}>.new(1).tally, %{0: 2, 1: 2})
