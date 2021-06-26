@@ -1,4 +1,4 @@
 {
   # asFor? returns whether predicate self is true as for o.
-  asFor?: m{|o| self(o).B},
+  asFor?: m{|o| o.^self.B},
 }
