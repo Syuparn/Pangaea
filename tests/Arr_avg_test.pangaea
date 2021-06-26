@@ -1,0 +1,2 @@
+assertEq([1, 2, 3, 4, 5].avg, 3.0)
+assertRaises(ZeroDivisionErr, "cannot be divided by zero") {[].avg}
