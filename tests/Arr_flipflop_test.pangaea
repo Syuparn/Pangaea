@@ -1,0 +1,19 @@
+assertEq(
+  ['a, 'start, 'b, 'c, 'end, 'd].flipflop('start, 'end),
+  ['start, 'b, 'c, 'end],
+)
+# not found
+assertEq(
+  ['a].flipflop('start, 'end),
+  [],
+)
+# multiple
+assertEq(
+  ['start, 'a, 'end, 'b, 'start, 'c, 'end, 'd].flipflop('start, 'end),
+  ['start, 'a, 'end, 'start, 'c, 'end],
+)
+# only start found
+assertEq(
+  ['a, 'start, 'b].flipflop('start, 'end),
+  ['start, 'b],
+)

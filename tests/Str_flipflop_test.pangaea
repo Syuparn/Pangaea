@@ -1,0 +1,19 @@
+assertEq(
+  "abcdef".flipflop(?c, ?e),
+  [?c, ?d, ?e],
+)
+# not found
+assertEq(
+  "a".flipflop(?b, ?c),
+  [],
+)
+# multiple
+assertEq(
+  "!ab?cd!ef?g".flipflop(?!, ??),
+  [?!, ?a, ?b, ??, ?!, ?e, ?f, ??],
+)
+# only start found
+assertEq(
+  "!ab?cd!e".flipflop("\\!", "\\?"),
+  [?!, ?a, ?b, ??, ?!, ?e],
+)

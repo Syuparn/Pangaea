@@ -30,6 +30,15 @@
   empty?: m{.A.empty?},
   # exclude selects elements for which f returns false.
   exclude: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if !f(*\)}},
+  # flipflop selects elements from start to end.
+  flipflop: m{|start, end|
+    ._iter$({res: [], started: false}){|acc, i|
+      .started.case(%{
+        true: {res: .res+[i], started: i !== end},
+        false: {res: .res+[i], started: true} if i === start else acc,
+      })
+    }.res
+  },
   # find returns the first element which cond? is true. (returns nil if not found)
   find: m{|cond?| ._iter.doUntil(cond?).last.{\ if &.^cond?}},
   # lazyMap works similar to map but returns iter of elements instead.

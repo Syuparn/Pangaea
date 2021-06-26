@@ -1,0 +1,19 @@
+assertEq(
+  10.flipflop(3, 6),
+  [3, 4, 5, 6],
+)
+# not found
+assertEq(
+  1.flipflop(3, 6),
+  [],
+)
+# multiple
+assertEq(
+  8.flipflop({\ % 4 == 1}, {\ % 4 == 3}),
+  [1, 2, 3, 5, 6, 7],
+)
+# only start found
+assertEq(
+  8.flipflop({\ > 6}, {\ < 10}),
+  [7, 8],
+)
