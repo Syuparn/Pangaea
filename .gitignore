@@ -4,6 +4,11 @@ parser/y.output
 pangaea.exe
 # linux/mac binary
 pangaea
+# wasm binary
+web/wasm/*.wasm
+# bundles in playground
+web/playground/*.wasm
+web/playground/wasm_exec.js
 # benchmark results
 runscript/cpu.out
 runscript/runscript.test*
