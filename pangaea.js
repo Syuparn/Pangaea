@@ -7,4 +7,6 @@ fetch("./main.wasm").then(response =>
   WebAssembly.instantiate(bytes, go.importObject)
 ).then(obj => {
   go.run(obj.instance);
+  // HACK: replace "now loading..." with sample code
+  document.getElementById('source').value = `"Hello, world!".p`;
 });
