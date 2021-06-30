@@ -2,6 +2,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 ![](https://github.com/Syuparn/Pangaea/workflows/Test/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
+[![playground](https://img.shields.io/badge/Playground-Try!-blue)](https://syuparn.github.io/Pangaea/)
 
 <img src="./docs/pictures/pangaea_logo.png" width="640">
 
@@ -11,7 +12,7 @@
 
 See [Releases](https://github.com/Syuparn/Pangaea/releases).
 
-## Or custom install
+## Or Build Manially
 
 ```bash:
 $ git clone https://github.com/Syuparn/Pangaea.git
@@ -19,6 +20,10 @@ $ cd ./Pangaea
 $ go generate
 $ go build
 ```
+
+## Or Use Pangaea Playground
+
+Visit https://syuparn.github.io/Pangaea/ !
 
 ## Run
 
