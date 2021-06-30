@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Pangaea Playground</title>
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 class="header-title">Pangaea Playground</h1>
+        <a href="#" class="button" onclick="runScript()">Run!</a>
+    </header>
+    <h2>Source Code</h2>
+    <textarea id="source" rows="7" cols="80">"Hello, world!".p</textarea>
+    <h2>Input</h2>
+    <textarea id="input" rows="3" cols="80"></textarea>
+    <h2>Output</h2>
+    <div><pre id="output"></pre></div>
+    <!-- https://raw.githubusercontent.com/golang/go/go1.16.5/misc/wasm/wasm_exec.js -->
+    <script src="wasm_exec.js"></script>
+    <script src="pangaea.js"></script>
+    <script>
+        function runScript() {
+            const src = document.getElementById('source').value;
+            const stdin = document.getElementById('input').value;
+            const result = pangaea.execute(src, stdin);
+            if (result.errmsg !== '') {
+                document.getElementById("output").textContent = result.errmsg;
+                return;
+            }
+            document.getElementById("output").textContent = result.stdout;
+        }
+    </script>
+</body>
+</html>

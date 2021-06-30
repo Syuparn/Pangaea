@@ -1,0 +1,63 @@
+body {
+    background-color: #222222;
+    margin: 0;
+    font-family: 'Source Code Pro', monospace;
+}
+
+header {
+    display: flex;
+    position: relative;
+    width: 100%;
+    text-align: left;
+    margin: 0 auto;
+    font-size: small;
+    background-color: #2e4d55;
+}
+
+.header-title {
+    margin-left: 2rem;
+    margin-top: 0.1rem;
+    margin-bottom: 0.1rem;
+    font-size: 2rem;
+    color: #c0d32b;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.button {
+    margin-left: 2rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    background-color: #17262b;
+    font-size: 1rem;
+    color: #c0d32b;
+    font-family: 'Source Code Pro', monospace;
+}
+
+textarea {
+    margin-left: 1rem;
+    font-size: 1.2rem;
+    background-color: #17262b;
+    color: #c0d32b;
+    font-family: 'Source Code Pro', monospace;
+}
+
+#output {
+    margin-left: 1rem;
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+    color: #ccc;
+    font-family: 'Source Code Pro', monospace;
+}
+
+h2 {
+    margin-left: 1.5rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.2rem;
+    font-size: 1rem;
+    color: #ccc;
+    font-family: 'Source Code Pro', monospace;
+}
