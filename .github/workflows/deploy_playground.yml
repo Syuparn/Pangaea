@@ -1,0 +1,36 @@
+name: deploy-playground
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.16
+      id: go
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Build WebAssembly
+      run: GOOS=js GOARCH=wasm go build -o main.wasm
+      working-directory: ./web/wasm
+
+    - name: Copy dependencies to playground directory
+      run: |
+        cp ./web/wasm/main.wasm ./web/playground
+        wget -P ./web/playground https://raw.githubusercontent.com/golang/go/go1.16.5/misc/wasm/wasm_exec.js
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./web/playground
