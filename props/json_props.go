@@ -54,6 +54,8 @@ func parseJSONElems(elems interface{}) object.PanObject {
 		return parseJSONArr(e)
 	case map[string]interface{}:
 		return parseJSONMap(e)
+	case bool:
+		return parseJSONBool(e)
 	case nil:
 		return object.BuiltInNil
 	default:
@@ -104,4 +106,11 @@ func parseJSONNum(f float64) object.PanObject {
 	}
 
 	return object.NewPanFloat(float64(f))
+}
+
+func parseJSONBool(b bool) object.PanObject {
+	if b {
+		return object.BuiltInTrue
+	}
+	return object.BuiltInFalse
 }
