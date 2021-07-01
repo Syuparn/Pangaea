@@ -5479,9 +5479,19 @@ func TestEvalJSONDec(t *testing.T) {
 			object.BuiltInNil,
 		},
 		{
-			"JSON.dec(`{\"a\": null}`)",
+			"JSON.dec(`true`)",
+			object.BuiltInTrue,
+		},
+		{
+			"JSON.dec(`false`)",
+			object.BuiltInFalse,
+		},
+		{
+			"JSON.dec(`{\"a\": null, \"b\": true, \"c\": false}`)",
 			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
 				object.GetSymHash("a"): {Key: object.NewPanStr("a"), Value: object.BuiltInNil},
+				object.GetSymHash("b"): {Key: object.NewPanStr("b"), Value: object.BuiltInTrue},
+				object.GetSymHash("c"): {Key: object.NewPanStr("c"), Value: object.BuiltInFalse},
 			}),
 		},
 		{
