@@ -1,0 +1,9 @@
+assertEq(
+  {a: 1, b: 2, c: 3, d: 4}.chunk(2).A,
+  [[["a", 1], ["b", 2]], [["c", 3], ["d", 4]]],
+)
+# with leftovers
+assertEq(
+  {a: 1, b: 2, c: 3}.chunk(2).A,
+  [[["a", 1], ["b", 2]], [["c", 3]]],
+)
