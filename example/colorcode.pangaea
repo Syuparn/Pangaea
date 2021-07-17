@@ -1,0 +1,2 @@
+colorcode := {|s| .chunk(2)@join("")@I(base:16).{"rgb".zip(\)}.A}
+colorcode("2e4d55").p # [["r", 46], ["g", 77], ["b", 85]]
