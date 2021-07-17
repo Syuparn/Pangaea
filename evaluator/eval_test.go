@@ -4542,10 +4542,6 @@ func TestEvalStringify(t *testing.T) {
 			object.NewPanStr("{|x| x}"),
 		},
 		{
-			`10.S`,
-			object.NewPanStr("10"),
-		},
-		{
 			`%{'a: 1}.S`,
 			object.NewPanStr(`%{"a": 1}`),
 		},
@@ -4573,6 +4569,56 @@ func TestEvalStringify(t *testing.T) {
 		{
 			`false.S`,
 			object.NewPanStr("false"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStringifyInt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10.S`,
+			object.NewPanStr("10"),
+		},
+		// specify base
+		{
+			`10.S(base: 16)`,
+			object.NewPanStr("a"),
+		},
+		{
+			`-10.S(base: 2)`,
+			object.NewPanStr("-1010"),
+		},
+		{
+			`35.S(base: 36)`,
+			object.NewPanStr("z"),
+		},
+		{
+			`Int['S]()`,
+			object.NewTypeErr("Int#S requires at least 1 arg"),
+		},
+		{
+			`Int['S]('a)`,
+			object.NewTypeErr("\"a\" cannot be treated as int"),
+		},
+		{
+			`10.S(base: 'a)`,
+			object.NewTypeErr("\"a\" cannot be treated as int"),
+		},
+		{
+			`10.S(base: 0)`,
+			object.NewValueErr("base 0 must be within (2:37)"),
+		},
+		{
+			`10.S(base: 63)`,
+			object.NewValueErr("base 63 must be within (2:37)"),
 		},
 	}
 

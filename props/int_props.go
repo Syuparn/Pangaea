@@ -323,6 +323,28 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.NewPanStr(string(rune(self.Value)))
 			},
 		),
+		"new": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 2 {
+					return object.NewTypeErr("Int#new requires at least 2 args")
+				}
+				i, ok := object.TraceProtoOfInt(args[1])
+				if ok {
+					return i
+				}
+
+				// float is rounded down
+				f, ok := object.TraceProtoOfFloat(args[1])
+				if ok {
+					return object.NewPanInt(int64(f.Value))
+				}
+
+				return object.NewTypeErr(
+					fmt.Sprintf("%s cannot be treated as int", args[1].Repr()))
+			},
+		),
 		"prime?": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -350,26 +372,31 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInFalse
 			},
 		),
-		"new": f(
+		"S": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				if len(args) < 2 {
-					return object.NewTypeErr("Int#new requires at least 2 args")
+				if len(args) < 1 {
+					return object.NewTypeErr("Int#S requires at least 1 arg")
 				}
-				i, ok := object.TraceProtoOfInt(args[1])
-				if ok {
-					return i
-				}
-
-				// float is rounded down
-				f, ok := object.TraceProtoOfFloat(args[1])
-				if ok {
-					return object.NewPanInt(int64(f.Value))
+				self, ok := object.TraceProtoOfInt(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as int", args[0].Repr()))
 				}
 
-				return object.NewTypeErr(
-					fmt.Sprintf("%s cannot be treated as int", args[1].Repr()))
+				// if kwarg `base` is specified
+				if b, ok := (*kwargs.Pairs)[object.GetSymHash("base")]; ok {
+					base, ok := object.TraceProtoOfInt(b.Value)
+					if !ok {
+						return object.NewTypeErr(
+							fmt.Sprintf("%s cannot be treated as int", b.Value.Repr()))
+					}
+
+					return baseString(self, base)
+				}
+
+				return object.NewPanStr(self.Repr())
 			},
 		),
 		"sqrt": f(
@@ -422,6 +449,16 @@ func checkIntInfixArgs(
 	}
 
 	return self, other, nil
+}
+
+func baseString(self, base *object.PanInt) object.PanObject {
+	// NOTE: do not handle base > 36 because Str#I (strconv.Itoa) cannot re-convert it
+	if base.Value < 2 || base.Value > 36 {
+		return object.NewValueErr(
+			fmt.Sprintf("base %s must be within (2:37)", base.Repr()))
+	}
+
+	return object.NewPanStr(big.NewInt(self.Value).Text(int(base.Value)))
 }
 
 func intIter(i *object.PanInt) object.BuiltInFunc {
