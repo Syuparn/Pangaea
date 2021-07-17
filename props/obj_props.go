@@ -228,9 +228,9 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
 				if len(args) < 1 {
-					return object.NewTypeErr("Obj#repr requires at least 1 arg")
+					return object.NewTypeErr("Obj#S requires at least 1 arg")
 				}
-				return object.NewPanStr(formattedStr(args[0]))
+				return formattedStr(args[0], kwargs)
 			},
 		),
 		"traverse": f(
@@ -329,17 +329,19 @@ func toEitherVal(o object.PanObject) object.PanObject {
 	return object.NewPanObj(&pairMap, object.BuiltInEitherValObj)
 }
 
-func formattedStr(o object.PanObject) string {
+func formattedStr(o object.PanObject, kwargs *object.PanObj) object.PanObject {
 	switch o := o.(type) {
 	case *object.PanStr:
 		// not quoted
-		return o.Value
+		return object.NewPanStr(o.Value)
 	case *object.PanFloat:
 		// round values for readability
-		return dtoaWrapper(o.Value)
+		return object.NewPanStr(dtoaWrapper(o.Value))
+	case *object.PanInt:
+		// handle `base` kwarg
+		return formattedIntStr(o, kwargs)
 	default:
-		// same as repr()
-		return o.Inspect()
+		return object.NewPanStr(o.Inspect())
 	}
 }
 

@@ -4542,10 +4542,6 @@ func TestEvalStringify(t *testing.T) {
 			object.NewPanStr("{|x| x}"),
 		},
 		{
-			`10.S`,
-			object.NewPanStr("10"),
-		},
-		{
 			`%{'a: 1}.S`,
 			object.NewPanStr(`%{"a": 1}`),
 		},
@@ -4573,6 +4569,52 @@ func TestEvalStringify(t *testing.T) {
 		{
 			`false.S`,
 			object.NewPanStr("false"),
+		},
+		{
+			`Obj['S]()`,
+			object.NewTypeErr("Obj#S requires at least 1 arg"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStringifyInt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`10.S`,
+			object.NewPanStr("10"),
+		},
+		// specify base
+		{
+			`10.S(base: 16)`,
+			object.NewPanStr("a"),
+		},
+		{
+			`-10.S(base: 2)`,
+			object.NewPanStr("-1010"),
+		},
+		{
+			`35.S(base: 36)`,
+			object.NewPanStr("z"),
+		},
+		{
+			`10.S(base: 'a)`,
+			object.NewTypeErr("\"a\" cannot be treated as int"),
+		},
+		{
+			`10.S(base: 0)`,
+			object.NewValueErr("base 0 must be within (2:37)"),
+		},
+		{
+			`10.S(base: 63)`,
+			object.NewValueErr("base 63 must be within (2:37)"),
 		},
 	}
 
@@ -4698,6 +4740,15 @@ func TestEvalIntify(t *testing.T) {
 			`"-5".I`,
 			object.NewPanInt(-5),
 		},
+		// specify base
+		{
+			`"1010".I(base: 2)`,
+			object.NewPanInt(10),
+		},
+		{
+			`"-5a".I(base: 16)`,
+			object.NewPanInt(-90),
+		},
 	}
 
 	for _, tt := range tests {
@@ -4722,6 +4773,18 @@ func TestEvalIntifyErr(t *testing.T) {
 		{
 			`"-5a".I`,
 			object.NewValueErr("\"-5a\" cannot be converted into int"),
+		},
+		{
+			`"10".I(base: 'a)`,
+			object.NewTypeErr("\"a\" cannot be treated as int"),
+		},
+		{
+			`"10".I(base: 0)`,
+			object.NewValueErr("base 0 must be within (2:37)"),
+		},
+		{
+			`"10".I(base: 63)`,
+			object.NewValueErr("base 63 must be within (2:37)"),
 		},
 	}
 

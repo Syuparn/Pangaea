@@ -267,12 +267,19 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 						fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
 				}
 
-				i, err := strconv.ParseInt(self.Value, 10, 64)
-				if err != nil {
-					return object.NewValueErr(
-						fmt.Sprintf("%s cannot be converted into int", args[0].Repr()))
+				b, ok := (*kwargs.Pairs)[object.GetSymHash("base")]
+				// when kwarg `base` is not specified
+				if !ok {
+					return parseIntInBase(self, 10)
 				}
-				return object.NewPanInt(i)
+
+				base, ok := object.TraceProtoOfInt(b.Value)
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as int", b.Value.Repr()))
+				}
+
+				return parseIntInBase(self, base.Value)
 			},
 		),
 		"lc": f(
@@ -509,6 +516,20 @@ func checkStrInfixArgs(
 	}
 
 	return self, other, nil
+}
+
+func parseIntInBase(s *object.PanStr, base int64) object.PanObject {
+	if base < 2 || base > 36 {
+		return object.NewValueErr(
+			fmt.Sprintf("base %s must be within (2:37)", object.NewPanInt(base).Repr()))
+	}
+
+	i, err := strconv.ParseInt(s.Value, int(base), 64)
+	if err != nil {
+		return object.NewValueErr(
+			fmt.Sprintf("%s cannot be converted into int", s.Repr()))
+	}
+	return object.NewPanInt(i)
 }
 
 func strIter(s *object.PanStr) object.BuiltInFunc {
