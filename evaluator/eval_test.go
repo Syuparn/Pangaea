@@ -4744,6 +4744,15 @@ func TestEvalIntify(t *testing.T) {
 			`"-5".I`,
 			object.NewPanInt(-5),
 		},
+		// specify base
+		{
+			`"1010".I(base: 2)`,
+			object.NewPanInt(10),
+		},
+		{
+			`"-5a".I(base: 16)`,
+			object.NewPanInt(-90),
+		},
 	}
 
 	for _, tt := range tests {
@@ -4768,6 +4777,18 @@ func TestEvalIntifyErr(t *testing.T) {
 		{
 			`"-5a".I`,
 			object.NewValueErr("\"-5a\" cannot be converted into int"),
+		},
+		{
+			`"10".I(base: 'a)`,
+			object.NewTypeErr("\"a\" cannot be treated as int"),
+		},
+		{
+			`"10".I(base: 0)`,
+			object.NewValueErr("base 0 must be within (2:37)"),
+		},
+		{
+			`"10".I(base: 63)`,
+			object.NewValueErr("base 63 must be within (2:37)"),
 		},
 	}
 
