@@ -22,6 +22,8 @@
       yield i.try.next.catch(StopIterErr) {recur(is.next => i); i.next}.abandon
     }>.new(is.next)
   },
+  # chunk separates self into arr of length n.
+  chunk: m{|n| .A.{|a| <{|i| yield a[i:i+n] if i < a.len; recur(i+n)}>.new(0)}},
   # doUntil returns elements while (element_yielded_last).^cond? is false.
   doUntil: m{|cond?|
     ._iter.{|it| <{|ok| yield (n := it.next) if !ok; recur(n.^cond?)}>.new(false)}
