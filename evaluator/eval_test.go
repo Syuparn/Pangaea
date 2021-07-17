@@ -4570,6 +4570,10 @@ func TestEvalStringify(t *testing.T) {
 			`false.S`,
 			object.NewPanStr("false"),
 		},
+		{
+			`Obj['S]()`,
+			object.NewTypeErr("Obj#S requires at least 1 arg"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -4599,14 +4603,6 @@ func TestEvalStringifyInt(t *testing.T) {
 		{
 			`35.S(base: 36)`,
 			object.NewPanStr("z"),
-		},
-		{
-			`Int['S]()`,
-			object.NewTypeErr("Int#S requires at least 1 arg"),
-		},
-		{
-			`Int['S]('a)`,
-			object.NewTypeErr("\"a\" cannot be treated as int"),
 		},
 		{
 			`10.S(base: 'a)`,
