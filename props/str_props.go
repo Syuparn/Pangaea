@@ -550,8 +550,9 @@ func strIter(s *object.PanStr) object.BuiltInFunc {
 
 // TODO: delete it when Split() is implemented in regexp2
 func splitBySep(re *regexp2.Regexp, str string) ([]string, error) {
+	runes := []rune(str)
 	splitted := []string{}
-	m, err := re.FindStringMatch(str)
+	m, err := re.FindRunesMatch(runes)
 	if err != nil {
 		return nil, err
 	}
@@ -561,16 +562,16 @@ func splitBySep(re *regexp2.Regexp, str string) ([]string, error) {
 	}
 
 	sepFrom, sepTo := m.Index, (m.Index + m.Length)
-	splitted = append(splitted, str[0:sepFrom])
+	splitted = append(splitted, string(runes[0:sepFrom]))
 	for m, err := re.FindNextMatch(m); m != nil; m, err = re.FindNextMatch(m) {
 		if err != nil {
 			return nil, err
 		}
 		sepFrom = m.Index
-		splitted = append(splitted, str[sepTo:sepFrom])
+		splitted = append(splitted, string(runes[sepTo:sepFrom]))
 		sepTo = m.Index + m.Length
 	}
-	splitted = append(splitted, str[sepTo:])
+	splitted = append(splitted, string(runes[sepTo:]))
 
 	return splitted, nil
 }

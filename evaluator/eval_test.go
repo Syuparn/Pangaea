@@ -8077,6 +8077,23 @@ func TestEvalInfixStrDiv(t *testing.T) {
 				object.NewPanStr("6"),
 			),
 		},
+		// with non-ascii chars
+		{
+			"`一二,三,四五` / `,`",
+			object.NewPanArr(
+				object.NewPanStr("一二"),
+				object.NewPanStr("三"),
+				object.NewPanStr("四五"),
+			),
+		},
+		{
+			"`太郎と次郎と三郎` / `と`",
+			object.NewPanArr(
+				object.NewPanStr("太郎"),
+				object.NewPanStr("次郎"),
+				object.NewPanStr("三郎"),
+			),
+		},
 		// if no separators found, return whole string
 		{
 			"`a` / `x`",
