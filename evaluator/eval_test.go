@@ -3322,10 +3322,45 @@ func TestEvalListChainPropCall(t *testing.T) {
 				object.NewPanStr("c"),
 			),
 		},
+		// digest check
+		// NOTE: Obj#digest is defined in /native, which cannot be used in eval_test
+		{
+			`
+			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
+			[['a, 1], ['b, 2]]@(MyObj.bear({}))at([0:2])
+			`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+				{Key: object.NewPanStr("b"), Value: object.NewPanInt(2)},
+			}),
+		},
+		{
+			`
+			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
+			[['A, 1], ['B, 2]]=@(MyObj.bear({}))at([0:2])
+			`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("A"), Value: object.NewPanInt(1)},
+				{Key: object.NewPanStr("B"), Value: object.NewPanInt(2)},
+			}),
+		},
 		// if any element raises error, propagate it
 		{
 			`[1, 2, "str", 4]@+(1)`,
 			object.NewTypeErr("1 cannot be treated as str"),
+		},
+		// digest failed
+		{
+			`
+			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
+			['a, 'b]=@(MyObj.bear({}))uc
+			`,
+			object.NewValueErr("element \"A\" cannot be treated as arr"),
+		},
+		// digest not defined
+		{
+			`[['a, 1], ['b, 2]]@(BaseObj)at([0:2])`,
+			object.NewNoPropErr("property `digest` is not defined."),
 		},
 	}
 
@@ -3411,6 +3446,28 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 				object.NewPanInt(6),
 			),
 		},
+		// digest check
+		// NOTE: Obj#digest is defined in /native, which cannot be used in eval_test
+		{
+			`
+			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
+			['a, 'b]@(MyObj.bear({})){[\, .uc]}
+			`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("a"), Value: object.NewPanStr("A")},
+				{Key: object.NewPanStr("b"), Value: object.NewPanStr("B")},
+			}),
+		},
+		{
+			`
+			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
+			['c, 'd]=@(MyObj.bear({})){[\, .uc]}
+			`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("c"), Value: object.NewPanStr("C")},
+				{Key: object.NewPanStr("d"), Value: object.NewPanStr("D")},
+			}),
+		},
 		// if any element raises error, propagate it
 		{
 			`[2, 0, 3]@{|n| 6/n}`,
@@ -3420,6 +3477,19 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 		{
 			`[1]@(_){|n| n + 1}`,
 			object.BuiltInNotImplemented,
+		},
+		// digest failed
+		{
+			`
+			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
+			['a, 'b]=@(MyObj.bear({})){[.uc]}
+			`,
+			object.NewValueErr("element [\"A\"] must have two elements"),
+		},
+		// digest not defined
+		{
+			`['a, 'b]@(BaseObj){[\, .uc]}`,
+			object.NewNoPropErr("property `digest` is not defined."),
 		},
 	}
 

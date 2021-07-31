@@ -134,6 +134,17 @@ func squashNilPropCallListChainMiddleware(next _PropCallMiddlewareHandler) _Prop
 			elems = append(elems, elem)
 		}
 
+		// digest if chainArg is passed
+		if chainArg != object.BuiltInNil {
+			digest, _ := evalProp("digest", chainArg)
+			if digest.Type() == object.ErrType {
+				return digest
+			}
+
+			argsToPass := []object.PanObject{digest, chainArg, object.NewPanArr(elems...)}
+			return evalFuncCall(env, kwargs, argsToPass...)
+		}
+
 		return object.NewPanArr(elems...)
 	}
 }
@@ -166,6 +177,17 @@ func keepNilPropCallListChainMiddleware(next _PropCallMiddlewareHandler) _PropCa
 
 			elem := next(env, nextRecv, propName, nil, chainArg, args, kwargs)
 			elems = append(elems, elem)
+		}
+
+		// digest if chainArg is passed
+		if chainArg != object.BuiltInNil {
+			digest, _ := evalProp("digest", chainArg)
+			if digest.Type() == object.ErrType {
+				return digest
+			}
+
+			argsToPass := []object.PanObject{digest, chainArg, object.NewPanArr(elems...)}
+			return evalFuncCall(env, kwargs, argsToPass...)
 		}
 
 		return object.NewPanArr(elems...)
