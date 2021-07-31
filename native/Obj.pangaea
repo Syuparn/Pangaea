@@ -11,6 +11,8 @@
   bro: m{|o| .proto.bear(o)},
   # case returns value of firstly matched key (or nil if not matched any).
   case: m{|map| map.find {|k, v| self === k}.{|k, v| v}},
+  # digest merges arr pairs with self
+  digest: m{|pairs| {**self, **pairs.O}},
   # kindOf? returns whether other appears in self's proto chain.
   kindOf?: m{|other| self == other || .ancestors.has?(other)},
   # max returns the maximum value in self
