@@ -3353,6 +3353,13 @@ func TestEvalListChainPropCall(t *testing.T) {
 		{
 			`
 			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
+			['a, 'b]@(MyObj.bear({}))uc
+			`,
+			object.NewValueErr("element \"A\" cannot be treated as arr"),
+		},
+		{
+			`
+			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
 			['a, 'b]=@(MyObj.bear({}))uc
 			`,
 			object.NewValueErr("element \"A\" cannot be treated as arr"),
@@ -3360,6 +3367,10 @@ func TestEvalListChainPropCall(t *testing.T) {
 		// digest not defined
 		{
 			`[['a, 1], ['b, 2]]@(BaseObj)at([0:2])`,
+			object.NewNoPropErr("property `digest` is not defined."),
+		},
+		{
+			`[['a, 1], ['b, 2]]=@(BaseObj)at([0:2])`,
 			object.NewNoPropErr("property `digest` is not defined."),
 		},
 	}
@@ -3482,6 +3493,13 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 		{
 			`
 			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
+			['a, 'b]@(MyObj.bear({})){[.uc]}
+			`,
+			object.NewValueErr("element [\"A\"] must have two elements"),
+		},
+		{
+			`
+			MyObj := {digest: m{|pairs| {**self, **pairs.O}}}
 			['a, 'b]=@(MyObj.bear({})){[.uc]}
 			`,
 			object.NewValueErr("element [\"A\"] must have two elements"),
@@ -3489,6 +3507,10 @@ func TestEvalListChainLiteralCall(t *testing.T) {
 		// digest not defined
 		{
 			`['a, 'b]@(BaseObj){[\, .uc]}`,
+			object.NewNoPropErr("property `digest` is not defined."),
+		},
+		{
+			`['a, 'b]=@(BaseObj){[\, .uc]}`,
 			object.NewNoPropErr("property `digest` is not defined."),
 		},
 	}
