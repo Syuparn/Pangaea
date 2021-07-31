@@ -80,6 +80,10 @@ func injectBuiltInProps(
 	go func() {
 		kernelNativesCh <- mustReadNativeCode("Kernel", env)
 	}()
+	mapNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		mapNativesCh <- mustReadNativeCode("Map", env)
+	}()
 	objNativesCh := make(chan *map[object.SymHash]object.Pair)
 	go func() {
 		objNativesCh <- mustReadNativeCode("Obj", env)
@@ -109,6 +113,7 @@ func injectBuiltInProps(
 	iterNatives := <-iterNativesCh
 	iterableNatives := <-iterableNativesCh
 	kernelNatives := <-kernelNativesCh
+	mapNatives := <-mapNativesCh
 	objNatives := <-objNativesCh
 	rangeNatives := <-rangeNativesCh
 	strNatives := <-strNativesCh
@@ -132,7 +137,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInJSONObj, toPairs(props.JSONProps(ctn)))
 	injectProps(object.BuiltInKernelObj, toPairs(props.KernelProps(ctn)), kernelNatives)
 	injectProps(object.BuiltInMatchObj, toPairs(props.MatchProps(ctn)))
-	injectProps(object.BuiltInMapObj, toPairs(props.MapProps(ctn)), iterableNatives)
+	injectProps(object.BuiltInMapObj, toPairs(props.MapProps(ctn)), mapNatives, iterableNatives)
 	injectProps(object.BuiltInNameErr, toPairs(props.NameErrProps(ctn)))
 	injectProps(object.BuiltInNilObj, toPairs(props.NilProps(ctn)))
 	injectProps(object.BuiltInNoPropErr, toPairs(props.NoPropErrProps(ctn)))
