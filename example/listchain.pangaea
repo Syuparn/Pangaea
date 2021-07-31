@@ -1,0 +1,18 @@
+# by default, list-chain returns arr
+{a: 1, b: 2}@{|k, v| [k, v*2]}.p # [['a, 2], ['b, 4]]
+# chainarg can digest result of list-chain
+{a: 1, b: 2}@({}){|k, v| [k, v*2]}.p # {a: 2, b: 4}
+{a: 1, b: 2}@(%{}){|k, v| [k, v*2]}.p # %{'a: 2, 'b: 4}
+{a: 1, b: 2}@({c: 6}){|k, v| [k, v*2]}.p # {a: 2, b: 4, c: 6}
+
+# user-defined obj
+Person := {
+  digest: m{|pairs| pairs@{Person.new(\)}},
+  hello: m{"I am #{.name}!".p},
+  new: _init('name),
+}
+
+['taro, 'jiro, 'hanako]@(Person)capital@hello
+# I am Taro!
+# I am Jiro!
+# I am Hanako!
