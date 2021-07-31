@@ -1,0 +1,2 @@
+assertEq(%{}.digest([['a, 1], ['b, 2]]), %{'a: 1, 'b: 2})
+assertEq(%{'a: 1}.digest([['b, 2]]), %{'a: 1, 'b: 2})

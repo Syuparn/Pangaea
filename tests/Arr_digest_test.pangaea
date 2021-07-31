@@ -1,0 +1,2 @@
+assertEq([].digest([1, 2]), [1, 2])
+assertEq([1].digest([2, 3]), [1, 2, 3])
