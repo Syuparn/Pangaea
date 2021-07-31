@@ -3,6 +3,8 @@
   A: m{self},
   # asFor? returns whether predicate self is true as for o.
   asFor?: m{|o| .has?(o)},
+  # digest merges arr pairs with self
+  digest: m{|pairs| [*self, *pairs]},
   # empty? returns whether self contains elements.
   empty?: m{.len.!},
   # grep filters elements by === match.
