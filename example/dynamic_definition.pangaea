@@ -1,0 +1,11 @@
+Person := {
+  _name: "Person",
+  # define setters
+  **['id, 'name, 'age]@{
+    "set#{.capital}: m{.bro({#{\}: \\2, **\\})},"
+  }.{"{#{.join(? )}}".eval},
+}
+
+person := Person.bear.setId(2).setName("Taro").setAge(20)
+person.proto.repr.p # Person
+person.p # {"age": 20, "id": 2, "name": "Taro"}
