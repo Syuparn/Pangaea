@@ -21,4 +21,5 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
 - Error handling
 - Input and output
 - Expressions and statements
+    - [Statements](./statements.md)
 - Metaprogramming
