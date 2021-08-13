@@ -11,6 +11,7 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [Break lines](./break_lines.md)
 - Object system
 - Operators
+    - [Operators](./operators.md)
 - Variables
 - Control flows
 - Error handling
