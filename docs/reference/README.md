@@ -6,9 +6,9 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [Design concepts](./design_concepts.md)
     - [Origin of name](./origin_of_name.md)
 - Hello, world!
-    - How to run
-    - Comments
-    - Break lines
+    - [How to run](./how_to_run.md)
+    - [Comments](./comments.md)
+    - [Break lines](./break_lines.md)
 - Object system
 - Operators
 - Variables
