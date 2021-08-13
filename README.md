@@ -166,6 +166,7 @@ This is useful only in list context, which removes returned `nil`.
 
 - **Readable one-liner**
 - Interpreted
+- Dynamically typed
 - Prototype-based object oriented
 - Everything is object
 - Immutable objects
