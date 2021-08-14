@@ -7,6 +7,7 @@ To support polymorphism, some methods can control Pangaea syntactic elements.
 |method|usage|
 |-|-|
 |`_literalProxy`|proxies literalcall|
+|`_incBy`|used for range indexing (e.g: `(1:10:2)._iter` generates next value by `._incBy(2)`)|
 |`_iter`|used to generate iterator of the receiver in list/reduce chain|
 |`_missing`|called when no properties found on the prototype chain|
 |`_name`|used in REPL for pretty-printing receivers (e.g: `Obj._name == "Obj"`)|

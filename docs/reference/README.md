@@ -9,6 +9,19 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [How to run](./how_to_run.md)
     - [Comments](./comments.md)
     - [Break lines](./break_lines.md)
+- Objects
+    - [Int](./int.md)
+    - [Float](./float.md)
+    - [Boolean](./boolean.md)
+    - [String](./string.md)
+    - [Array](./array.md)
+    - [Object](./object.md)
+    - [Map](./map.md)
+    - [Range](./range.md)
+    - [Function](./function.md)
+    - [Iterator](./iterator.md)
+    - [Nil](./nil.md)
+    - [Kernel](./kernel.md)
 - Object system
 - Calls
     - [Calls](./calls.md)
