@@ -21,7 +21,9 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [If](./if.md)
     - [Loop](./loop.md)
     - [Case](./case.md)
-- Error handling
+- Errors
+    - [Errors](./errors.md)
+    - [Error handling](./error_handling.md)
 - Input and output
     - [Input and Output](./input_and_output.md)
 - Expressions and statements
