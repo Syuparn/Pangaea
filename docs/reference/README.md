@@ -18,6 +18,9 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [Scopes](./scopes.md)
     - [Assignments](./assignments.md)
 - Control flows
+    - [If](./if.md)
+    - [Loop](./loop.md)
+    - [Case](./case.md)
 - Error handling
 - Input and output
 - Expressions and statements
