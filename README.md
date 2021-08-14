@@ -89,7 +89,7 @@ Looks similar to other language though?
 But Chains in Pangaea has more power...
 
 ## Chain context
-Dot chain is "one of" the method chain in Pangaea.
+Dot chain is "one of" the method chains in Pangaea.
 There are some kinds of chain styles, and each one shows different "context".
 (The concept is from Perl :) )
 

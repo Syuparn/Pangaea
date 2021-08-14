@@ -10,7 +10,9 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [Comments](./comments.md)
     - [Break lines](./break_lines.md)
 - Object system
-- Chains
+- Calls
+    - [Calls](./calls.md)
+    - [Chains](./chains.md)
 - Operators
     - [Operators](./operators.md)
 - Variables
