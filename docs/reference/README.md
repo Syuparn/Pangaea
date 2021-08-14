@@ -23,6 +23,7 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [Case](./case.md)
 - Error handling
 - Input and output
+    - [Input and Output](./input_and_output.md)
 - Expressions and statements
     - [Statements](./statements.md)
 - Metaprogramming
