@@ -3,6 +3,7 @@
 ![](https://github.com/Syuparn/Pangaea/workflows/Test/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
 [![playground](https://img.shields.io/badge/Playground-Try!-blue)](https://syuparn.github.io/Pangaea/)
+[![specification](https://img.shields.io/badge/spec-Reference-orange)](./docs/reference/README.md)
 
 <img src="./docs/pictures/pangaea_logo.png" width="640">
 
@@ -88,7 +89,7 @@ Looks similar to other language though?
 But Chains in Pangaea has more power...
 
 ## Chain context
-Dot chain is "one of" the method chain in Pangaea.
+Dot chain is "one of" the method chains in Pangaea.
 There are some kinds of chain styles, and each one shows different "context".
 (The concept is from Perl :) )
 
@@ -166,9 +167,12 @@ This is useful only in list context, which removes returned `nil`.
 
 - **Readable one-liner**
 - Interpreted
+- Dynamically typed
 - Prototype-based object oriented
 - Everything is object
 - Immutable objects
 - First-class functions with lexical scopes
 - Method chains with context (see above for details)
 - Metaprogramming with magic methods (e.g: `_missing`, `asFor?`)
+
+See [Language Reference](./docs/reference/README.md) for more information.
