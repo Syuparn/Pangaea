@@ -95,7 +95,7 @@ If the receiver does not have the specified property(method), its prototype's pr
 
 If `BaseObj`(ancestor of all objects) does not have the specified property, `_missing` method is called instead.
 
-(See [Inheritance](./inheritance.md) for details about object systems)
+(See [Inheritance](./inheritance.md) and [Object System](./object_system.md) for details about object systems)
 
 ```
 order of property search along the prototype chain

@@ -23,6 +23,9 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [Nil](./nil.md)
     - [Kernel](./kernel.md)
 - Object system
+    - [Object system](./object_system.md)
+    - [Inheritance](./inheritance.md)
+    - [Mix-in](./mix-in.md)
 - Calls
     - [Calls](./calls.md)
     - [Chains](./chains.md)
@@ -45,3 +48,5 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
     - [Statements](./statements.md)
 - Metaprogramming
     - [Metaprogramming](./metaprogramming.md)
+
+:information_source: For convinience, this document writes methods to be used by decendants as `obj#method`, but Pangaea is prototype-based and does not have classes.
