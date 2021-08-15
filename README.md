@@ -3,7 +3,7 @@
 ![](https://github.com/Syuparn/Pangaea/workflows/Test/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
 [![playground](https://img.shields.io/badge/Playground-Try!-blue)](https://syuparn.github.io/Pangaea/)
-[![playground](https://img.shields.io/badge/spec-Reference-orange)](./docs/reference/README.md)
+[![specification](https://img.shields.io/badge/spec-Reference-orange)](./docs/reference/README.md)
 
 <img src="./docs/pictures/pangaea_logo.png" width="640">
 
@@ -174,3 +174,5 @@ This is useful only in list context, which removes returned `nil`.
 - First-class functions with lexical scopes
 - Method chains with context (see above for details)
 - Metaprogramming with magic methods (e.g: `_missing`, `asFor?`)
+
+See [Language Reference](./docs/reference/README.md) for more information.
