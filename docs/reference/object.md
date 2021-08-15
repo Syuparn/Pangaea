@@ -1,6 +1,6 @@
 # Object
 
-`Obj` represents an object, pairs of a property name and a value. All object literal inherits `Obj`.
+`Obj` represents an object, pairs of a property name and a value. All object literals inherit `Obj`.
 objects works as the base of Pangaea object system (See [Inheritance](./inheritance.md)).
 
 ```pangaea

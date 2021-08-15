@@ -1,6 +1,6 @@
 # Array
 
-`Arr` represents an array. All array literal inherits `Arr`.
+`Arr` represents an array. All array literals inherit `Arr`.
 
 ```pangaea
 [1, 2, 3]

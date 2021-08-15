@@ -153,3 +153,47 @@ If no arguments are passed, the initinal value is `nil`.
 # initial accumulator: nil
 (?a:?e)$+ # "abcd" (note that nil + "a" == "a")
 ```
+
+## Anonymous chains
+
+If chain does not have a receiver, it uses the 1st argument of the current function instead.
+This is handy for property calls in methods (note that the receiver is the 1st argument of the method ([Function](./function.md))).
+
+```pangaea
+# anonymous chain in a function
+# .name is same as o.name
+showName := {|o| .name.p}
+showName({name: "Taro"}) # Taro
+
+# property call of a method
+square := {
+  side: 10,
+  # .side is same as self.side
+  area: m{.side ** 2},
+}
+square.area # 100
+```
+
+### Why is anonymous chain introduced?
+
+If anonymous chain were not permitted,
+it would be annoying that you have to write `self` anywhere you refer properties and call private methods.
+
+#### `method()` is shorter than `.method()`!
+
+There was another option to omit `self`; `self` properties can be referred as variables in `self`'s methods. But this confuses properties and local variables.
+
+```
+# REJECTED SYNTAX
+Square := {
+  # self.side can be referred as side
+  area: m{
+    side ** 2
+  },
+  new: m{|side|
+    # Is side a method? or a local variable?
+    "side is #{side}".p
+    square.bear({side: side})
+  },
+}
+```

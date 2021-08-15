@@ -1,6 +1,6 @@
 # Int
 
-`Int` represents an integer. All integer literal inherits `Int`.
+`Int` represents an integer. All integer literals inherit `Int`.
 
 ```pangaea
 10

@@ -1,6 +1,6 @@
 # Float
 
-`Float` represents a float. All float literal inherits `Float`.
+`Float` represents a float. All float literals inherit `Float`.
 
 ```pangaea
 1.23

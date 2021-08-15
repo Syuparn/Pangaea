@@ -1,6 +1,6 @@
 # String
 
-`Str` represents a string. All string literal inherits `Str`.
+`Str` represents a string. All string literals inherit `Str`.
 
 ```pangaea
 "hello"

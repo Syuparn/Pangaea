@@ -1,6 +1,6 @@
 # Map
 
-`Map` represents an associative array. All map literal inherits `Map`.
+`Map` represents an associative array. All map literals inherit `Map`.
 
 ```pangaea
 %{"a": 1, "b": 2}

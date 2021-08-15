@@ -1,6 +1,6 @@
 # Range
 
-`Range` represents a range. All range literal inherits `Range`.
+`Range` represents a range. All range literals inherit `Range`.
 A triplet in a range means *start*, *stop*, and *step* respectively.
 Range is usually used for indexing.
 

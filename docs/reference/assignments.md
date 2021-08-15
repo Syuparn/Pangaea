@@ -25,7 +25,7 @@ a = .b
 ### Why `:=` is not an operator (method)?
 
 If `:=` were an operator, it would be a mutable method that updates environment.
-It can be abused to use environment as *mutable object*, which is not desirable for Pangaea concept. Instead, the idea "environment as mutable object" is encapsulated as iterators.
+It can be abused to use environment as *mutable object*, which is not desirable for Pangaea concept. Instead, the idea "environment as mutable object" is encapsulated as iterators ([Iterator](./iterator.md)).
 
 ## Reassignment
 
