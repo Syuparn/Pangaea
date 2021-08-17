@@ -1,3 +1,6 @@
+// this source code is created originally by MacRat (MIT License)
+// and modified by Syuparn (MIT License)
+
 package simplexer
 
 import (
@@ -55,8 +58,16 @@ func (l *Lexer) readBufIfNeed() {
 	if len(l.buf) < 1024 {
 		buf := make([]byte, 2048)
 		l.reader.Read(buf)
-		l.buf += strings.TrimRight(string(buf), "\x00")
+		l.buf += l.trimRightNullStrings(string(buf))
 	}
+}
+
+func (l *Lexer) trimRightNullStrings(s string) string {
+	if i := strings.Index(s, "\x00"); i >= 0 {
+		return s[:i]
+	}
+	// if no null strings found, return s itself
+	return s
 }
 
 func (l *Lexer) consumeBuffer(t *Token) {
