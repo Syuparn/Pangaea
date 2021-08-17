@@ -2,8 +2,6 @@ github.com/dlclark/regexp2 v1.4.0 h1:F1rxgk7p4uKjwIQxBs9oAXe5CqrXlCduYEJvrF4u93E
 github.com/dlclark/regexp2 v1.4.0/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
 github.com/lithammer/dedent v1.1.0 h1:VNzHMVCBNG1j0fh3OrsFRkVUwStdDArbgBWoPAffktY=
 github.com/lithammer/dedent v1.1.0/go.mod h1:jrXYCQtgg0nJiN+StA2KgR7w6CiQNv9Fd/Z9BP0jIOc=
-github.com/macrat/simplexer v0.0.0-20180110131648-bce8e0661570 h1:ZogDj+/SZbTjeGudnc7KoKoO+6pPZv9bAnCFEH/jxj4=
-github.com/macrat/simplexer v0.0.0-20180110131648-bce8e0661570/go.mod h1:gwtd/9Q5IYQ2OLI6sPHL3wpOS03d8F2bd5jcbdnFMBw=
 github.com/tanaton/dtoa v0.0.0-20190918101016-f12936c87cdb h1:il95NPTEHqAkHbZfBCzEKJdwJJ4xwdpk/s0IsZWYr/4=
 github.com/tanaton/dtoa v0.0.0-20190918101016-f12936c87cdb/go.mod h1:NJ73Q9luv5I1cYrIYSfGC7+oHggSb4YpjpaPGDTHmxI=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

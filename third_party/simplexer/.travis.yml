@@ -1,0 +1,19 @@
+language: go
+
+env:
+  - CC_TEST_REPORTER_ID=c13273b664868621c80b7ebb7cfc13e419b9c38d709d0bf4199b2adb7ec5fc19
+
+before_install:
+  - go get github.com/axw/gocov/gocov
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+
+before_script:
+  - ./cc-test-reporter before-build
+
+script:
+  - go test -coverprofile=cov
+
+after_success:
+  - ./cc-test-reporter format-coverage --input-type gocov cov
+  - ./cc-test-reporter upload-coverage
