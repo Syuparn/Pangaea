@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
 [![playground](https://img.shields.io/badge/Playground-Try!-blue)](https://syuparn.github.io/Pangaea/)
 [![specification](https://img.shields.io/badge/spec-Reference-orange)](./docs/reference/README.md)
+[![GitHub all releases](https://img.shields.io/github/downloads/Syuparn/Pangaea/total)](https://github.com/Syuparn/Pangaea/releases)
 
 <img src="./docs/pictures/pangaea_logo.png" width="640">
 
