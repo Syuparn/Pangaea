@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
 [![playground](https://img.shields.io/badge/Playground-Try!-blue)](https://syuparn.github.io/Pangaea/)
 [![specification](https://img.shields.io/badge/spec-Reference-orange)](./docs/reference/README.md)
+[![GitHub all releases](https://img.shields.io/github/downloads/Syuparn/Pangaea/total)](https://github.com/Syuparn/Pangaea/releases)
 
 <img src="./docs/pictures/pangaea_logo.png" width="640">
 
@@ -70,8 +71,8 @@ Obj
 ## Dependent Packages
 
 - [goyacc](https://godoc.org/golang.org/x/tools/cmd/goyacc)
-- [simplexer](github.com/macrat/simplexer)
-- [dtoa](github.com/tanaton/dtoa)
+- [simplexer](https://github.com/macrat/simplexer)
+- [dtoa](https://github.com/tanaton/dtoa)
 - [dedent](https://github.com/lithammer/dedent)
 
 # Introduction (Let's run your REPL!)
