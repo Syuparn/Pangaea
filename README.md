@@ -70,8 +70,8 @@ Obj
 ## Dependent Packages
 
 - [goyacc](https://godoc.org/golang.org/x/tools/cmd/goyacc)
-- [simplexer](github.com/macrat/simplexer)
-- [dtoa](github.com/tanaton/dtoa)
+- [simplexer](https://github.com/macrat/simplexer)
+- [dtoa](https://github.com/tanaton/dtoa)
 - [dedent](https://github.com/lithammer/dedent)
 
 # Introduction (Let's run your REPL!)
