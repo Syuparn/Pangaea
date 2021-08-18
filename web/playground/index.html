@@ -12,6 +12,7 @@
     <header>
         <h1 class="header-title">Pangaea Playground</h1>
         <a href="#" class="button" onclick="runScript()">Run!</a>
+        <a href="#" class="button" onclick="copyURL()">Share</a>
     </header>
     <h2>Source Code</h2>
     <textarea id="source" rows="7" cols="80">Now loading...</textarea>
@@ -32,6 +33,16 @@
                 return;
             }
             document.getElementById("output").textContent = result.stdout;
+        }
+
+        function copyURL() {
+            navigator.clipboard.writeText(generateURL());
+        }
+
+        function generateURL() {
+            // encode source code into URI fragment
+            const sourceCode = document.getElementById("source").value;
+            return encodeURI(`${location.hostname}${location.pathname}#${sourceCode}`);
         }
     </script>
 </body>
