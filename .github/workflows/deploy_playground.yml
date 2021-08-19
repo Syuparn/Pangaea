@@ -14,7 +14,7 @@ jobs:
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
-        go-version: ^1.16
+        go-version: ^1.17
       id: go
 
     - name: Checkout
@@ -27,7 +27,7 @@ jobs:
     - name: Copy dependencies to playground directory
       run: |
         cp ./web/wasm/main.wasm ./web/playground
-        wget -P ./web/playground https://raw.githubusercontent.com/golang/go/go1.16.5/misc/wasm/wasm_exec.js
+        wget -P ./web/playground https://raw.githubusercontent.com/golang/go/go1.17/misc/wasm/wasm_exec.js
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
