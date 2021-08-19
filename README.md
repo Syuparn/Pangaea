@@ -66,7 +66,7 @@ Obj
 
 # Requirements
 ## Host language
-- Golang (1.16+)
+- Golang (1.17+)
 
 ## Dependent Packages
 
