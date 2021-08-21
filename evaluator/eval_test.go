@@ -2681,6 +2681,15 @@ func TestEvalJumpIfStmt(t *testing.T) {
 			`{|i| raise Err.new("new error") if false; i}(2)`,
 			object.NewPanInt(2),
 		},
+		// recursion
+		{
+			`fact := {|n| return 1 if n == 0; n * fact(n - 1)}; fact(4)`,
+			object.NewPanInt(24),
+		},
+		{
+			`fact := {|n| raise 1 if n == 0; n * fact(n - 1)}; fact(4)`,
+			object.NewPanInt(24),
+		},
 	}
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)

@@ -61,7 +61,7 @@ func evalJumpIfReturn(
 	if err, ok := ret.(*object.PanErr); ok {
 		return appendStackTrace(err, node.Source())
 	}
-	return &object.ReturnObj{PanObject: ret}
+	return ret
 }
 
 func evalJumpIfDefer(
@@ -111,5 +111,5 @@ func evalJumpIfRaise(
 		return appendStackTrace(&err, node.Source())
 	}
 
-	return &object.ReturnObj{PanObject: ret}
+	return ret
 }
