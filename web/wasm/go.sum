@@ -1,5 +1,5 @@
-github.com/Syuparn/pangaea v0.6.1 h1:GP4bIqtnpuLR6/cr5/Bte5MRz0y58iuwMCBAPA0o/8M=
-github.com/Syuparn/pangaea v0.6.1/go.mod h1:pkICsgryMDpg+5x2a3cqpu7UPYj64kCksaRsbB+nrEw=
+github.com/Syuparn/pangaea v0.6.2 h1:VA0HRGLQoibf9kZqrweGzsXUEh9kSFmiNbPrrTyu/6M=
+github.com/Syuparn/pangaea v0.6.2/go.mod h1:+5E/nBoLzeqg21YY9VQDoh4mzZiC6NrW7aqq/sbx+lU=
 github.com/dlclark/regexp2 v1.4.0 h1:F1rxgk7p4uKjwIQxBs9oAXe5CqrXlCduYEJvrF4u93E=
 github.com/dlclark/regexp2 v1.4.0/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
 github.com/lithammer/dedent v1.1.0 h1:VNzHMVCBNG1j0fh3OrsFRkVUwStdDArbgBWoPAffktY=
