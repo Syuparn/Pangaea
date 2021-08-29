@@ -53,9 +53,9 @@ func (e *Executor) execute(
 	in io.Reader,
 	out io.Writer,
 ) (res object.PanObject, errmsg string) {
+	// NOTE: IO must be injected globally otherwise built-in objects cannot refer it
+	e.constEnv.InjectIO(in, out)
 	env := object.NewEnclosedEnv(e.constEnv)
-	// inject IO
-	env.InjectIO(in, out)
 
 	node, err := parser.Parse(src)
 	if err != nil {
