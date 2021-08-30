@@ -3,6 +3,7 @@
 ![](https://github.com/Syuparn/Pangaea/workflows/Test/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
 [![playground](https://img.shields.io/badge/Playground-Try!-blue)](https://syuparn.github.io/Pangaea/)
+[![Pangaea Travel Guide](https://img.shields.io/badge/Tutorial-Pangaea%20Travel%20Guide-red)](https://syuparn.github.io/pangaea-travel-guide)
 [![specification](https://img.shields.io/badge/spec-Reference-orange)](./docs/reference/README.md)
 [![GitHub all releases](https://img.shields.io/github/downloads/Syuparn/Pangaea/total)](https://github.com/Syuparn/Pangaea/releases)
 
@@ -26,6 +27,8 @@ $ go build
 ## Or Use Pangaea Playground
 
 Visit https://syuparn.github.io/Pangaea/ !
+
+Also, you can learn Pangaea syntax by an online tutorial [Pangaea Travel Guide](https://syuparn.github.io/pangaea-travel-guide).
 
 ## Run
 
