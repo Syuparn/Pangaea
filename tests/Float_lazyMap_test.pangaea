@@ -1,0 +1,6 @@
+assertEq(2.5.lazyMap {\ * 3}.A, [3, 6])
+assertEq(0.0.lazyMap {\ * 3}.A, [])
+# lazyMap ignored nil elements the same as map
+assertEq(2.5.lazyMap {\ * 3 if .odd?}.A, [3])
+# lazyMap returns iter (not arr)
+assertEq(2.5.lazyMap {\}.proto, Iter)

@@ -1,0 +1,5 @@
+assertEq(4.5.find {\ > 3}, 4)
+# return the element found first
+assertEq(5.5.find {\ > 3}, 4)
+# if not found, return nil
+assertEq(1.5.find {\ > 3}, nil)

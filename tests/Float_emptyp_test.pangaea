@@ -1,0 +1,2 @@
+assertEq(0.0.empty?, true)
+assertEq(1.5.empty?, false)

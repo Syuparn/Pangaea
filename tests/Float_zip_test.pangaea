@@ -1,0 +1,7 @@
+assertEq(3.5.zip("abc").A, [[1, ?a], [2, ?b], [3, ?c]])
+assertEq(3.5.zip("abc", [4, 5, 6]).A, [[1, ?a, 4], [2, ?b, 5], [3, ?c, 6]])
+# length of returned iter is same as the shortest arg 
+assertEq(3.5.zip("ab").A, [[1, ?a], [2, ?b]])
+assertEq(2.5.zip("abc").A, [[1, ?a], [2, ?b]])
+# zip returns iter (not arr)
+assertEq(3.5.zip("abc").proto, Iter)
