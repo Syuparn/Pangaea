@@ -2,6 +2,7 @@ package props
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/Syuparn/pangaea/object"
 )
@@ -26,6 +27,26 @@ func NumProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				if i, ok := object.TraceProtoOfInt(args[0]); ok {
 					return object.NewPanFloat(float64(i.Value))
+				}
+
+				return object.NewTypeErr(fmt.Sprintf("%s cannot be treated as num",
+					args[0].Repr()))
+			},
+		),
+		"floor": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Num#floor requires at least 1 arg")
+				}
+
+				if i, ok := object.TraceProtoOfInt(args[0]); ok {
+					return i
+				}
+
+				if f, ok := object.TraceProtoOfFloat(args[0]); ok {
+					return object.NewPanInt(int64(math.Floor(f.Value)))
 				}
 
 				return object.NewTypeErr(fmt.Sprintf("%s cannot be treated as num",
