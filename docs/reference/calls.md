@@ -137,6 +137,13 @@ Special variables helps to shorten literal call functions (see [Variables](./var
 3.{\ * 2} # 6
 ```
 
+If the receiver is an array and the arity of literal call function is more than one,
+each element of the array is assigned to the each parameter.
+
+```pangaea
+[1, 2, 3].{|a, b, c| a * 100 + b * 10 + c}.p # 123
+```
+
 ## Variable call
 
 Variable call works similar to literal call, but it uses a variable.
