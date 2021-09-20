@@ -371,6 +371,51 @@ func TestEvalNumFloor(t *testing.T) {
 	}
 }
 
+func TestEvalNumCeil(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`1.0.ceil`,
+			object.NewPanInt(1),
+		},
+		{
+			`1.1.ceil`,
+			object.NewPanInt(2),
+		},
+		{
+			`-1.1.ceil`,
+			object.NewPanInt(-1),
+		},
+		// return self if self is int
+		{
+			`1.ceil`,
+			object.NewPanInt(1),
+		},
+		// use descendant
+		{
+			`2.0.bear.ceil`,
+			object.NewPanInt(2),
+		},
+		// if no args are passed, raise an error
+		{
+			`Float['ceil]()`,
+			object.NewTypeErr("Num#ceil requires at least 1 arg"),
+		},
+		// if self is not int, raise an error
+		{
+			`Num['ceil]("a")`,
+			object.NewTypeErr("\"a\" cannot be treated as num"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalIntChr(t *testing.T) {
 	tests := []struct {
 		input    string
