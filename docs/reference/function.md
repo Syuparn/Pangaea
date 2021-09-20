@@ -21,6 +21,11 @@ h(1) # [1, nil]
 
 # empty function returns nil
 {||}() # nil
+
+# trailing function arguments can be outside the parentheses
+apply := {|a, b, f| f(a, b)}
+# same as `apply(1, 2, {|a, b| (a + b).p})`
+apply(1, 2) {|a, b| (a + b).p} # 3
 ```
 
 Functions can also be used for literal calls ([Calls](./calls.md)).
