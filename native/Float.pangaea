@@ -1,0 +1,4 @@
+{
+  # _iter returns its iterator.
+  _iter: m{.floor._iter},
+}
