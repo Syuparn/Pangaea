@@ -1,0 +1,4 @@
+assertEq(0.0.A, [])
+assertEq(2.0.A, [1, 2])
+assertEq(-2.0.A, [])
+assertEq(2.9.A, [1, 2])

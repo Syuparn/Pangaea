@@ -1,0 +1,5 @@
+assertEq(10.5.all? {\ != 11}, true)
+assertEq(10.5.all? {.odd?}, false)
+# if predicate returns non-bool, all? checks all values are truthy
+assertEq(3.5.all? {\ + 1}, true)
+assertEq(3.5.all? {\ - 1}, false)

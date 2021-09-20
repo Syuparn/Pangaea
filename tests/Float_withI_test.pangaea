@@ -1,0 +1,4 @@
+assertEq(2.5.withI.A, [[0, 1], [1, 2]])
+assertEq(0.0.withI.A, [])
+# withI returns iter (not arr)
+assertEq(2.5.withI.proto, Iter)

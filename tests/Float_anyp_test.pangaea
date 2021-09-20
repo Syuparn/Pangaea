@@ -1,0 +1,5 @@
+assertEq(10.5.any? {.odd?}, true)
+assertEq(3.5.any? {\ == 0}, false)
+# if predicate returns non-bool, any? checks any value is truthy
+assertEq(2.5.any? {\ - 1}, true)
+assertEq(1.5.any? {\ - 1}, false)
