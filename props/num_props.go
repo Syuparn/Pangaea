@@ -73,5 +73,25 @@ func NumProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					args[0].Repr()))
 			},
 		),
+		"round": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Num#round requires at least 1 arg")
+				}
+
+				if i, ok := object.TraceProtoOfInt(args[0]); ok {
+					return i
+				}
+
+				if f, ok := object.TraceProtoOfFloat(args[0]); ok {
+					return object.NewPanInt(int64(math.Round(f.Value)))
+				}
+
+				return object.NewTypeErr(fmt.Sprintf("%s cannot be treated as num",
+					args[0].Repr()))
+			},
+		),
 	}
 }
