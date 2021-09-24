@@ -20,6 +20,10 @@ func TestStrInspect(t *testing.T) {
 		{NewPanStr("_foo"), `"_foo"`},
 		{NewPanStr("a i u e o"), `"a i u e o"`},
 		{NewPanStr(`\a`), `"\a"`},
+		// if str contains doublequotes, wrap it with backquotes instead
+		{NewPanStr(`"a"`), "`\"a\"`"},
+		// if str also contains backquotes, escape it
+		{NewPanStr("\" and `"), "`\" and \\``"},
 	}
 
 	for _, tt := range tests {
