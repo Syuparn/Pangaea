@@ -566,6 +566,37 @@ func TestBackQuoteStrLiteral(t *testing.T) {
 	}
 }
 
+func TestBackQuoteStrLiteralEscape(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		// only backslash ` is escaped (`\`` == "`")
+		{
+			input:    "\\`",
+			expected: "`",
+		},
+		{
+			input:    "\\`abc\\`",
+			expected: "`abc`",
+		},
+	}
+
+	for _, tt := range tests {
+		// NOTE: each input is wrapped by ``
+		input := "`" + tt.input + "`"
+		program := testParse(t, input)
+		expr := extractExprStmt(t, program)
+		str, ok := expr.(*ast.StrLiteral)
+		if !ok {
+			t.Fatalf("expr is not *ast.StrLiteral.got=%T", expr)
+		}
+
+		// IsRaw should be true
+		testStr(t, str, tt.expected, true)
+	}
+}
+
 func TestDoubleQuoteStrLiteral(t *testing.T) {
 	tests := []struct {
 		input    string

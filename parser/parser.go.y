@@ -1129,9 +1129,13 @@ strLiteral
 	}
 	| BACKQUOTE_STR
 	{
+		str := $1.Literal[1:len($1.Literal)-1]
+		// replace escaped backquotes with backquotes
+		str = strings.Replace(str, "\\`", "`", -1)
+
 		$$ = &ast.StrLiteral{
 			Token: $1.Literal,
-			Value: $1.Literal[1:len($1.Literal)-1],
+			Value: str,
 			IsRaw: true,
 			Src: yylex.(*Lexer).Source,
 		}
@@ -2230,7 +2234,7 @@ func tokenTypes() []simplexer.TokenType{
 		t(EXP_INT, `([0-9][0-9_]*[0-9]|[0-9]+)[eE]-?[0-9]+`),
 		t(INT, `([0-9][0-9_]*[0-9]|[0-9]+)`),
 		t(CHAR_STR, `\?(\\[snt\\]|[^\r\n\\])`),
-		t(BACKQUOTE_STR, "`[^`]*`"),
+		t(BACKQUOTE_STR, "`(\\\\`|[^`])*`"),
 		t(HEAD_STR_PIECE, `"(\\\"|[^\"\n\r#])*#\{`),
 		t(DOUBLEQUOTE_STR, `"(\\\"|[^\"\n\r])*"`),
 		// NOTE: lexer deals with multiline chain
