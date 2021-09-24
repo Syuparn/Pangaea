@@ -1,0 +1,3 @@
+assertEq(({|a, b| a + b}.curry)(1)(2), 3)
+assertEq({|a, b| a + b}.curry.args, ['a])
+assertEq(({|a, b| a + b}.curry)(1).args, ['b])
