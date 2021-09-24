@@ -1,4 +1,6 @@
 {
+  # arity returns how many parameters self has
+  arity: m{.args.len},
   # asFor? returns whether predicate self is true as for o.
   asFor?: m{|o| o.^self.B},
 }
