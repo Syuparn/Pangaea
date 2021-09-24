@@ -19,10 +19,13 @@ jobs:
         run: echo TAG=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g") >> $GITHUB_ENV
       - name: Install git-chglog for Release Notes
         run: go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest
+      # NOTE: process substutution cannot be used in goreleaser-action args
+      - name: generate Release Note file
+        run: git-chglog ${{env.TAG}} > /tmp/release_note.md
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist --release-notes <(git-chglog ${{env.TAG}})
+          args: release --rm-dist --release-notes /tmp/release_note.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
