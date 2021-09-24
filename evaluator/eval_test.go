@@ -6336,6 +6336,41 @@ func TestEvalIndexErr(t *testing.T) {
 	}
 }
 
+func TestEvalFuncArgs(t *testing.T) {
+	outerEnv := object.NewEnvWithConsts()
+
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|a, b| a + b}.args`,
+			object.NewPanArr(
+				object.NewPanStr("a"),
+				object.NewPanStr("b"),
+			),
+		},
+		// errors
+		{
+			`Func['args]()`,
+			object.NewTypeErr("Func#args requires at least 1 arg"),
+		},
+		{
+			`Func['args](2)`,
+			object.NewTypeErr("2 cannot be treated as func"),
+		},
+		{
+			`Func['call].args`,
+			object.NewTypeErr("builtin func cannot be inspected"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEvalInEnv(t, tt.input, outerEnv)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalNoPropErr(t *testing.T) {
 	tests := []struct {
 		input    string
