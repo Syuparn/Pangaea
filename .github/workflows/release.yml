@@ -17,6 +17,7 @@ jobs:
           go-version: 1.17
       - name: Set Tag to Env
         run: |
+          git fetch --tags
           echo TAG=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g") >> $GITHUB_ENV
           echo PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1)) >> $GITHUB_ENV
       - name: Install git-chglog for Release Notes
