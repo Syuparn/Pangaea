@@ -2180,8 +2180,8 @@ func tokenTypes() []simplexer.TokenType{
 		// NOTE: Do not use backquote! (otherwise commented out)
 		"doubleSlash": "//",
 		"percent": `%`,
-		"iAdd": `\-%`,
-		"iSub": `\+%`,
+		"iAdd": `\+%`,
+		"iSub": `\-%`,
 	}
 
 	// NOTE: unary and comparison ops cannot be used for compound assign
