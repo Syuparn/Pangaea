@@ -6371,6 +6371,45 @@ func TestEvalFuncArgs(t *testing.T) {
 	}
 }
 
+func TestEvalFuncKwargs(t *testing.T) {
+	outerEnv := object.NewEnvWithConsts()
+
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`{|a, b| a + b}.kwargs`,
+			object.EmptyPanObjPtr(),
+		},
+		{
+			`{|a, b, c: 0, d: "D"| a + b}.kwargs`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("c"), Value: object.NewPanInt(0)},
+				{Key: object.NewPanStr("d"), Value: object.NewPanStr("D")},
+			}),
+		},
+		// errors
+		{
+			`Func['kwargs]()`,
+			object.NewTypeErr("Func#kwargs requires at least 1 arg"),
+		},
+		{
+			`Func['kwargs](2)`,
+			object.NewTypeErr("2 cannot be treated as func"),
+		},
+		{
+			`Func['call].kwargs`,
+			object.NewTypeErr("builtin func cannot be inspected"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEvalInEnv(t, tt.input, outerEnv)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalNoPropErr(t *testing.T) {
 	tests := []struct {
 		input    string
