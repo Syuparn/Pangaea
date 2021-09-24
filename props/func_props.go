@@ -48,6 +48,27 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 			},
 		),
 		"_name": object.NewPanStr("Func"),
+		"args": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Func#args requires at least 1 arg")
+				}
+
+				if f, ok := object.TraceProtoOfFunc(args[0]); ok {
+					return f.Args()
+				}
+
+				if _, ok := object.TraceProtoOfBuiltInFunc(args[0]); ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("builtin func cannot be inspected"))
+				}
+
+				return object.NewTypeErr(
+					fmt.Sprintf("%s cannot be treated as func", args[0].Repr()))
+			},
+		),
 		"B": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -68,6 +89,27 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 			},
 		),
 		"call": propContainer["Func_call"],
+		"kwargs": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Func#kwargs requires at least 1 arg")
+				}
+
+				if f, ok := object.TraceProtoOfFunc(args[0]); ok {
+					return f.Kwargs()
+				}
+
+				if _, ok := object.TraceProtoOfBuiltInFunc(args[0]); ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("builtin func cannot be inspected"))
+				}
+
+				return object.NewTypeErr(
+					fmt.Sprintf("%s cannot be treated as func", args[0].Repr()))
+			},
+		),
 		"new": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,

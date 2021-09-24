@@ -1,4 +1,8 @@
 {
+  # arity returns how many parameters self has
+  arity: m{.args.len},
+  # curry returns curried function of self.
+  curry: m{.args.{.rev$("self(#{.join(",")})"){|b, arg| "{|#{arg}| #{b}}"}}.eval},
   # asFor? returns whether predicate self is true as for o.
   asFor?: m{|o| o.^self.B},
 }

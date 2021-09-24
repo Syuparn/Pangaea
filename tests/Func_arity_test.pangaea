@@ -1,0 +1,4 @@
+assertEq({|a, b| a + b}.arity, 2)
+assertEq({"a".p}.arity, 0)
+# kwargs are ignored
+assertEq({|a, b, c: 1| a + b + c}.arity, 2)
