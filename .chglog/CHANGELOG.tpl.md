@@ -46,4 +46,12 @@
 [{{ .Tag.Name }}]: {{ $.Info.RepositoryURL }}/compare/{{ .Tag.Previous.Name }}...{{ .Tag.Name }}
 {{ end -}}
 {{ end -}}
+{{ end }}
+
+{{ range .Versions -}}
+{{ range .Commits -}}
+{{ if .Subject -}}
+- {{ .Hash.Short }}: {{ .Header }}
+{{ end -}}
+{{ end -}}
 {{ end -}}
