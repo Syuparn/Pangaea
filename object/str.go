@@ -26,6 +26,11 @@ func (s *PanStr) Type() PanObjType {
 
 // Inspect returns formatted source code of this object.
 func (s *PanStr) Inspect() string {
+	if strings.Contains(s.Value, `"`) {
+		// wrap it with backquotes and escape backquotes inside
+		return "`" + strings.Replace(s.Value, "`", "\\`", -1) + "`"
+	}
+
 	return `"` + s.Value + `"`
 }
 
