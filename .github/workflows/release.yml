@@ -18,7 +18,7 @@ jobs:
       - name: Set Tag to Env
         run: echo TAG=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g") >> $GITHUB_ENV
       - name: Install git-chglog for Release Notes
-        run: go install github.com/git-chglog/git-chglog@latest
+        run: go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
