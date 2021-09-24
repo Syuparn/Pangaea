@@ -10,7 +10,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 1
+          # NOTE: fetch all commits for changelogs, otherwise release note gets empty!
+          fetch-depth: 0
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
