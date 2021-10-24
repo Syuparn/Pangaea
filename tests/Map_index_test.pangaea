@@ -1,0 +1,3 @@
+assertEq(%{}.index("a"), -1)
+# === comparison
+assertEq(%{'a: 2, 'b: 3, 'c: 4}.index {|k, v| v.even?}, 0)

@@ -1,0 +1,4 @@
+assertEq(('a:'a).index("b"), -1)
+assertEq(('a:'d).index("b"), 1)
+# === comparison
+assertEq((1:4).index {.odd?}, 0)

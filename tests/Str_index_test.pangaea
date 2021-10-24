@@ -1,0 +1,4 @@
+assertEq("".index("b"), -1)
+assertEq("abcb".index("b"), 1)
+# === comparison
+assertEq("a?b!".index("[a-z]"), 0)
