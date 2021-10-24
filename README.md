@@ -15,7 +15,7 @@
 
 See [Releases](https://github.com/Syuparn/Pangaea/releases).
 
-## Or Build Manially
+## Or Build Manually
 
 ```bash:
 $ git clone https://github.com/Syuparn/Pangaea.git
