@@ -1,0 +1,4 @@
+assertEq(0.index(1), -1)
+assertEq(4.index(2), 1)
+# === comparison
+assertEq(4.index {.odd?}, 0)

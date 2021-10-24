@@ -47,6 +47,10 @@
   },
   # find returns the first element which cond? is true. (returns nil if not found)
   find: m{|cond?| ._iter.doUntil(cond?).last.{\ if &.^cond?}},
+  # index returns the first index of the elements matched by elem (or returns -1 if no elements found).
+  index: m{|elem| .indices(elem).{\[0] if \ else -1}},
+  # indices selects indices of all elements matched by elem.
+  indices: m{|elem| .withI@{|i, e| i if e === elem}},
   # lazyMap works similar to map but returns iter of elements instead.
   lazyMap: m{|f| ._iter.{|it| <{yield it.next.^f}>}},
   # last returns the last element in self without conversion to array.
@@ -61,6 +65,8 @@
   prepend: m{|i| [i].chain(self)},
   # reduce is a wrapper of reducechain.
   reduce: m{|f, init: nil| $(init)^f},
+  # rindex returns the last index of the elements matched by elem (or returns -1 if no elements found).
+  rindex: m{|elem| .indices(elem).{\[-1] if \ else -1}},
   # select selects elements for which f returns true.
   select: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if f(*\)}},
   # std returns standard deviation of elements.

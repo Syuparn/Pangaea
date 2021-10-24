@@ -1,0 +1,4 @@
+assertEq(('a:'a).rindex("b"), -1)
+assertEq(('a:'d).rindex("b"), 1)
+# === comparison
+assertEq((1:4).rindex {.odd?}, 2)

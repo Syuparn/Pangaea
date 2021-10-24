@@ -1,0 +1,4 @@
+assertEq([].index("b"), -1)
+assertEq(["a", "b", "c", "b"].index("b"), 1)
+# === comparison
+assertEq([1, 4, 9, 16].index {.odd?}, 0)
