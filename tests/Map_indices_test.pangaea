@@ -1,0 +1,4 @@
+assertEq(%{}.indices("a"), [])
+assertEq(%{'a: 1, 'b: 2}.indices(['a, 1]), [0])
+# === comparison
+assertEq(%{'a: 2, 'b: 3, 'c: 4}.indices {|k, v| v.even?}, [0, 2])

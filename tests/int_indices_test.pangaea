@@ -1,0 +1,4 @@
+assertEq(0.indices(1), [])
+assertEq(4.indices(2), [1])
+# === comparison
+assertEq(4.indices {.odd?}, [0, 2])

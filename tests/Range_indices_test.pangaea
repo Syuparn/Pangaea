@@ -1,0 +1,4 @@
+assertEq(('a:'a).indices("b"), [])
+assertEq(('a:'d).indices("b"), [1])
+# === comparison
+assertEq((1:4).indices {.odd?}, [0, 2])

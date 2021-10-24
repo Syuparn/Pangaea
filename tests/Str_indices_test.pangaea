@@ -1,0 +1,4 @@
+assertEq("".indices("b"), [])
+assertEq("abcb".indices("b"), [1, 3])
+# === comparison
+assertEq("a?b!".indices("[a-z]"), [0, 2])

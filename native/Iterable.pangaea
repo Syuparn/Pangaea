@@ -47,6 +47,8 @@
   },
   # find returns the first element which cond? is true. (returns nil if not found)
   find: m{|cond?| ._iter.doUntil(cond?).last.{\ if &.^cond?}},
+  # indices selects indices of all elements matched by elem.
+  indices: m{|elem| .withI@{|i, e| i if e === elem}},
   # lazyMap works similar to map but returns iter of elements instead.
   lazyMap: m{|f| ._iter.{|it| <{yield it.next.^f}>}},
   # last returns the last element in self without conversion to array.

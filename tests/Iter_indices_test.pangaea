@@ -1,0 +1,2 @@
+assertEq(<{yield \ if false}>.indices("a"), [])
+assertEq(<{yield "abcb"[\] if \ < 4; recur(\ + 1)}>.new(0).indices("b"), [1, 3])
