@@ -1,0 +1,2 @@
+assertEq(<{yield \ if false}>.rindex("a"), -1)
+assertEq(<{yield "abcb"[\] if \ < 4; recur(\ + 1)}>.new(0).rindex("b"), 3)

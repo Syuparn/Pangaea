@@ -65,6 +65,8 @@
   prepend: m{|i| [i].chain(self)},
   # reduce is a wrapper of reducechain.
   reduce: m{|f, init: nil| $(init)^f},
+  # rindex returns the last index of the elements matched by elem (or returns -1 if no elements found).
+  rindex: m{|elem| .indices(elem).{\[-1] if \ else -1}},
   # select selects elements for which f returns true.
   select: m{|f| @{\ if .proto == Arr else [\]}@{\.unwrap if f(*\)}},
   # std returns standard deviation of elements.

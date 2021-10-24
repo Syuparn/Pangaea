@@ -1,0 +1,4 @@
+assertEq([].rindex("b"), -1)
+assertEq(["a", "b", "c", "b"].rindex("b"), 3)
+# === comparison
+assertEq([1, 4, 9, 16].rindex {.odd?}, 2)
