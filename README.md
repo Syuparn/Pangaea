@@ -180,3 +180,7 @@ This is useful only in list context, which removes returned `nil`.
 - Metaprogramming with magic methods (e.g: `_missing`, `asFor?`)
 
 See [Language Reference](./docs/reference/README.md) for more information.
+
+# Contribution
+
+Any contribution is welcome!
