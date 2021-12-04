@@ -112,6 +112,15 @@ func TestArrProto(t *testing.T) {
 	}
 }
 
+func TestInheritedArrProto(t *testing.T) {
+	arrChild := ChildPanObjPtr(NewPanArr(), EmptyPanObjPtr())
+	a := NewInheritedArr(arrChild)
+	if a.Proto() != arrChild {
+		t.Fatalf("Proto is not arrChild. got=%T (%s)",
+			a.Proto(), a.Proto().Inspect())
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testArrIsPanObject() {
 	var _ PanObject = NewPanArr()
@@ -130,6 +139,37 @@ func TestNewPanArr(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := NewPanArr(tt.elems...)
+
+		if len(actual.Elems) != len(tt.elems) {
+			t.Fatalf("wrong length. expected=%d, got=%d",
+				len(actual.Elems), len(tt.elems))
+		}
+
+		for i, e := range actual.Elems {
+			if e != tt.elems[i] {
+				t.Errorf("elems[%d] is wrong. expected=%s, got=%s",
+					i, tt.elems[i].Inspect(), e.Inspect())
+			}
+		}
+	}
+}
+
+func TestNewInheritedArr(t *testing.T) {
+	// child of Arr
+	proto := ChildPanObjPtr(NewPanArr(), EmptyPanObjPtr())
+
+	tests := []struct {
+		elems []PanObject
+	}{
+		{[]PanObject{}},
+		{[]PanObject{
+			NewPanInt(2),
+			NewPanStr("foo"),
+		}},
+	}
+
+	for _, tt := range tests {
+		actual := NewInheritedArr(proto, tt.elems...)
 
 		if len(actual.Elems) != len(tt.elems) {
 			t.Fatalf("wrong length. expected=%d, got=%d",

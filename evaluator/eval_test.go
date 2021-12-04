@@ -7300,61 +7300,92 @@ func TestEvalInfixStrEq(t *testing.T) {
 
 func TestEvalInfixArrEq(t *testing.T) {
 	tests := []struct {
+		title    string
 		input    string
 		expected object.PanObject
 	}{
 		// true if all elements are equivalent
 		{
+			"empty arr is empty arr",
 			`[] == []`,
 			object.BuiltInTrue,
 		},
 		{
+			"all eleements are equivalent",
 			`[1, "a"] == [1, "a"]`,
 			object.BuiltInTrue,
 		},
 		{
+			"not equal",
 			`[] == 'a`,
 			object.BuiltInFalse,
 		},
 		{
+			"too many elements",
 			`[1, 2] == [1]`,
 			object.BuiltInFalse,
 		},
 		{
+			"too few elements",
 			`[1, 2] == [1, 2, 3]`,
 			object.BuiltInFalse,
 		},
 		{
+			"with different element",
 			`[1, 2] == [1, "2"]`,
 			object.BuiltInFalse,
 		},
 		{
+			"nested comparison",
 			`[1, [2, 3]] == [1, [2, 3]]`,
 			object.BuiltInTrue,
 		},
 		{
+			"nested element is different",
 			`[1, [2, 3]] == [1, [2, 4]]`,
 			object.BuiltInFalse,
 		},
-		// ancestors are also comparable
 		{
-			`[2].bear == [2]`,
-			object.BuiltInTrue,
-		},
-		// Arr is treated as []
-		{
+			"Arr is treated as []",
 			`[] == Arr`,
 			object.BuiltInTrue,
 		},
 		{
+			"Arr is Arr",
 			`Arr == Arr`,
 			object.BuiltInTrue,
+		},
+		{
+			"descendant of array is equivalent",
+			`[2].bear == [2]`,
+			object.BuiltInTrue,
+		},
+		{
+			"descendant of Arr is equivalent",
+			`Arr.bear == Arr`,
+			object.BuiltInTrue,
+		},
+		// FIXME: enable to treat Arr descendant as empty arr
+		/*
+			{
+				"Child is treated as zero value Child()",
+				`Arr.bear => Child; Child() == Child`,
+				object.BuiltInTrue,
+			},
+		*/
+		{
+			"not equivalent because Child(1) is NOT [1]'s proto",
+			`Arr.bear => Child; Child(1) == [1]`,
+			object.BuiltInFalse,
 		},
 	}
 
 	for _, tt := range tests {
-		actual := testEval(t, tt.input)
-		testValue(t, actual, tt.expected)
+		tt := tt // pin
+		t.Run(tt.title, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }
 

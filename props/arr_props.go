@@ -137,7 +137,8 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("Arr#call requires at least 1 arg")
 				}
 
-				return object.NewPanArr(args[1:]...)
+				// NOTE: Arr's descendants also call this
+				return object.NewInheritedArr(args[0], args[1:]...)
 			},
 		),
 		"has?": f(
@@ -324,6 +325,10 @@ func compArrs(
 	env *object.Env,
 ) object.PanObject {
 	if len(a1.Elems) != len(a2.Elems) {
+		return object.BuiltInFalse
+	}
+
+	if a1.Proto() != a2.Proto() {
 		return object.BuiltInFalse
 	}
 

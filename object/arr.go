@@ -14,6 +14,7 @@ var zeroArr = NewPanArr()
 // PanArr is object of arr literal.
 type PanArr struct {
 	Elems []PanObject
+	proto PanObject
 }
 
 // Type returns type of this PanObject.
@@ -51,10 +52,21 @@ func (a *PanArr) Repr() string {
 
 // Proto returns proto of this object.
 func (a *PanArr) Proto() PanObject {
-	return BuiltInArrObj
+	return a.proto
 }
 
 // NewPanArr returns new arr object.
 func NewPanArr(elems ...PanObject) *PanArr {
-	return &PanArr{Elems: elems}
+	return &PanArr{
+		Elems: elems,
+		proto: BuiltInArrObj,
+	}
+}
+
+// NewInheritedArr returns new arr object born of proto.
+func NewInheritedArr(proto PanObject, elems ...PanObject) *PanArr {
+	return &PanArr{
+		Elems: elems,
+		proto: proto,
+	}
 }
