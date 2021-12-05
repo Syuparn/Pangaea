@@ -32,3 +32,9 @@ func (o *DeferObj) Proto() PanObject {
 	// never called
 	panic("deferObj does not have proto")
 }
+
+// Zero returns zero value of this object.
+func (e *DeferObj) Zero() PanObject {
+	// never called
+	panic("deferObj does not have zero")
+}

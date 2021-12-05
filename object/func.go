@@ -45,6 +45,12 @@ func (f *PanFunc) Proto() PanObject {
 	return BuiltInFuncObj
 }
 
+// Zero returns zero value of this object.
+func (f *PanFunc) Zero() PanObject {
+	// TODO: implement zero value
+	return f
+}
+
 // FuncKind is a type of func-like objects.
 // NOTE: The type is used to designate func and iter because their implementation is
 // same type.

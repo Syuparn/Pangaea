@@ -112,6 +112,28 @@ func TestRangeProto(t *testing.T) {
 	}
 }
 
+func TestRangeZero(t *testing.T) {
+	tests := []struct {
+		name string
+		obj  *PanRange
+	}{
+		{"(1:2:3)", NewPanRange(NewPanInt(1), NewPanInt(2), NewPanInt(3))},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.obj.Zero()
+
+			if actual != tt.obj {
+				t.Errorf("zero must be itself (%#v). got=%s (%#v)",
+					tt.obj, actual.Repr(), actual)
+			}
+		})
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testRangeIsPanObject() {
 	var _ PanObject = NewPanRange(NewPanInt(1), NewPanInt(2), NewPanInt(3))

@@ -9,9 +9,6 @@ import (
 // StrType is a type of PanStr.
 const StrType = "StrType"
 
-// used as zero value
-var zeroStr = NewPanStr("")
-
 // PanStr is object of str literal.
 type PanStr struct {
 	Value    string
@@ -42,6 +39,11 @@ func (s *PanStr) Repr() string {
 // Proto returns proto of this object.
 func (s *PanStr) Proto() PanObject {
 	return BuiltInStrObj
+}
+
+// Zero returns zero value of this object.
+func (s *PanStr) Zero() PanObject {
+	return s
 }
 
 // Hash returns hashkey of this object.

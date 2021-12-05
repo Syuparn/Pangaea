@@ -5,25 +5,25 @@ package object
 // package object and package BuiltIn circular reference
 
 // BuiltInIntObj is an object of Int (proto of each int).
-var BuiltInIntObj = NewPanObj(&map[SymHash]Pair{}, BuiltInNumObj)
+var BuiltInIntObj = NewPanObj(&map[SymHash]Pair{}, BuiltInNumObj, WithZero(BuiltInZeroInt))
 
 // BuiltInFloatObj is an object of Float (proto of each float).
-var BuiltInFloatObj = NewPanObj(&map[SymHash]Pair{}, BuiltInNumObj)
+var BuiltInFloatObj = NewPanObj(&map[SymHash]Pair{}, BuiltInNumObj, WithZero(zeroFloat))
 
 // BuiltInNumObj is an object of Num.
 var BuiltInNumObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
 
 // BuiltInNilObj is an object of Nil (proto of nil).
-var BuiltInNilObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+var BuiltInNilObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj, WithZero(BuiltInNil))
 
 // BuiltInStrObj is an object of Str (proto of each str).
-var BuiltInStrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+var BuiltInStrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj, WithZero(zeroStr))
 
 // BuiltInArrObj is an object of Arr (proto of each arr).
-var BuiltInArrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+var BuiltInArrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj, WithZero(zeroArr))
 
 // BuiltInRangeObj is an object of Range (proto of each range).
-var BuiltInRangeObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+var BuiltInRangeObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj, WithZero(zeroRange))
 
 // BuiltInFuncObj is an object of Func (proto of each func).
 var BuiltInFuncObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
@@ -41,7 +41,7 @@ var BuiltInObjObj = NewPanObj(&map[SymHash]Pair{}, BuiltInBaseObj)
 var BuiltInBaseObj = NewPanObj(&map[SymHash]Pair{}, nil)
 
 // BuiltInMapObj is an object of Map (proto of each map).
-var BuiltInMapObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)
+var BuiltInMapObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj, WithZero(zeroMap))
 
 // BuiltInIOObj is an object of IO (proto of each io).
 var BuiltInIOObj = NewPanObj(&map[SymHash]Pair{}, BuiltInObjObj)

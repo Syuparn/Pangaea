@@ -1,0 +1,4 @@
+# child of Arr can bear its child (not Arr's child)
+ChildArr := Arr.bear
+assertEq(ChildArr(1, 2, 3).proto, ChildArr)
+assertEq(ChildArr(1, 2, 3).A, [1, 2, 3])

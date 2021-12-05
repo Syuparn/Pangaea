@@ -26,6 +26,11 @@ func (n *PanNil) Proto() PanObject {
 	return BuiltInNilObj
 }
 
+// Zero returns zero value of this object.
+func (n *PanNil) Zero() PanObject {
+	return BuiltInNil
+}
+
 // Hash returns hashkey of this object.
 func (n *PanNil) Hash() HashKey {
 	return HashKey{NilType, 0}

@@ -42,6 +42,30 @@ func TestBuiltInProto(t *testing.T) {
 	}
 }
 
+func TestBuiltInZero(t *testing.T) {
+	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
+
+	tests := []struct {
+		name string
+		obj  *PanBuiltIn
+	}{
+		{"f", NewPanBuiltInFunc(f)},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.obj.Zero()
+
+			if actual != tt.obj {
+				t.Errorf("zero must be itself (%#v). got=%s (%#v)",
+					tt.obj, actual.Repr(), actual)
+			}
+		})
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testBuiltInIsPanObject() {
 	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }

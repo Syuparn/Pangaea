@@ -1,6 +1,7 @@
 {
   # A converts self into arr.
-  A: m{self},
+  # NOTE: arr descendant is converted into Arr's child
+  A: m{self[:]},
   # asFor? returns whether predicate self is true as for o.
   asFor?: m{|o| .has?(o)},
   # digest merges arr pairs with self

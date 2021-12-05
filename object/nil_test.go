@@ -51,6 +51,28 @@ func TestNilProto(t *testing.T) {
 	}
 }
 
+func TestNilZero(t *testing.T) {
+	tests := []struct {
+		name     string
+		obj      *PanNil
+		expected PanObject
+	}{
+		{"nil", NewPanNil(), BuiltInNil},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.obj.Zero()
+			if actual != tt.expected {
+				t.Errorf("zero value must be %s. got=%s",
+					tt.expected.Repr(), actual.Repr())
+			}
+		})
+	}
+}
+
 func TestNilHash(t *testing.T) {
 	tests := []struct {
 		obj      *PanNil

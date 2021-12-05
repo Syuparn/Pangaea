@@ -64,6 +64,29 @@ func TestBoolProto(t *testing.T) {
 
 }
 
+func TestBoolZero(t *testing.T) {
+	tests := []struct {
+		name string
+		obj  *PanBool
+	}{
+		{"true", BuiltInTrue},
+		{"false", BuiltInFalse},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.obj.Zero()
+
+			if actual != tt.obj {
+				t.Errorf("zero must be itself (%#v). got=%s (%#v)",
+					tt.obj, actual.Repr(), actual)
+			}
+		})
+	}
+}
+
 func TestBoolHash(t *testing.T) {
 	tests := []struct {
 		obj      PanBool

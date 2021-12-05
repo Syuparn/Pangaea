@@ -31,6 +31,11 @@ func (b *PanBuiltIn) Proto() PanObject {
 	return BuiltInFuncObj
 }
 
+// Zero returns zero value of this object.
+func (b *PanBuiltIn) Zero() PanObject {
+	return b
+}
+
 // NewPanBuiltInFunc returns new BuiltInFunc object.
 func NewPanBuiltInFunc(f BuiltInFunc) *PanBuiltIn {
 	return &PanBuiltIn{f}

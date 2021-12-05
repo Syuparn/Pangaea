@@ -14,6 +14,7 @@ type PanObject interface {
 	Inspect() string
 	Repr() string
 	Proto() PanObject
+	Zero() PanObject
 }
 
 // PanScalar is an interface of scalar PanObject, which does not have child components.
