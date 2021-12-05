@@ -129,6 +129,39 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		// NOTE: override bear to set arr zero values
+		"bear": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Arr#bear requires at least 1 arg")
+				}
+				proto := args[0]
+
+				// if soruce is not specified as arg, use {}
+				src := object.EmptyPanObjPtr()
+				if len(args) >= 2 {
+					// `proto.bear(arg)`
+					arg, ok := args[1].(*object.PanObj)
+					if !ok {
+						return object.NewTypeErr("Arr#bear requires obj literal src")
+					}
+					src = arg
+				}
+
+				// if self is concrete value, use it as zero value
+				if proto.Type() == object.ArrType {
+					return object.ChildPanObjPtr(proto, src, object.WithZero(proto))
+				}
+
+				// otherwise zero value is an empty arr inherited from the generated obj
+				return object.ChildPanObjPtr(proto, src,
+					object.WithZeroFromSelf(func(o *object.PanObj) object.PanObject {
+						return object.NewInheritedArr(o)
+					}))
+			},
+		),
 		"call": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -270,7 +303,8 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 						fmt.Sprintf("%s cannot be treated as arr", args[1].Repr()))
 				}
 
-				return arr
+				// NOTE: Arr's descendants also call this
+				return object.NewInheritedArr(args[0], arr.Elems...)
 			},
 		),
 		"O": f(

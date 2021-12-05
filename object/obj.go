@@ -10,16 +10,28 @@ import (
 const ObjType = "ObjType"
 
 // NewPanObj makes new PanObj instance.
-func NewPanObj(pairs *map[SymHash]Pair, proto PanObject) *PanObj {
+func NewPanObj(pairs *map[SymHash]Pair, proto PanObject, options ...panObjOption) *PanObj {
 	publicKeys, privateKeys := keyHashes(pairs)
-	return &PanObj{
+	obj := &PanObj{
 		Pairs:       pairs,
 		Keys:        &publicKeys,
 		PrivateKeys: &privateKeys,
 		proto:       proto,
 	}
+
+	// inherit proto's zero value as default
+	if obj.proto != nil {
+		obj.zero = obj.proto.Zero()
+	}
+
+	for _, op := range options {
+		op(obj)
+	}
+
+	return obj
 }
 
+// FIXME: use PanObjInstancePtr instead
 // PanObjInstance makes new obj literal.
 func PanObjInstance(pairs *map[SymHash]Pair) PanObj {
 	publicKeys, privateKeys := keyHashes(pairs)
@@ -28,6 +40,8 @@ func PanObjInstance(pairs *map[SymHash]Pair) PanObj {
 		Keys:        &publicKeys,
 		PrivateKeys: &privateKeys,
 		proto:       BuiltInObjObj,
+		// use Obj's zero value {}
+		zero: zeroObj,
 	}
 }
 
@@ -43,16 +57,39 @@ func EmptyPanObjPtr() *PanObj {
 	return &i
 }
 
+// FIXME: call NewPanObj inside
 // ChildPanObjPtr makes new child object of proto with props in src.
-func ChildPanObjPtr(proto PanObject, src *PanObj) *PanObj {
+func ChildPanObjPtr(proto PanObject, src *PanObj, options ...panObjOption) *PanObj {
 	// share pairs with src because objects are immutable
-	i := PanObj{
+	obj := &PanObj{
 		Pairs:       src.Pairs,
 		Keys:        src.Keys,
 		PrivateKeys: src.PrivateKeys,
 		proto:       proto,
 	}
-	return &i
+
+	// inherit proto's zero value as default
+	if obj.proto != nil {
+		obj.zero = obj.proto.Zero()
+	}
+
+	for _, op := range options {
+		op(obj)
+	}
+
+	return obj
+}
+
+type panObjOption func(*PanObj)
+
+// WithZero can set zero value to the new *PanObj.
+func WithZero(zero PanObject) panObjOption {
+	return func(o *PanObj) { o.zero = zero }
+}
+
+// WithZeroFromSelf can set zero value created from new object itself.
+func WithZeroFromSelf(f func(*PanObj) PanObject) panObjOption {
+	return func(o *PanObj) { o.zero = f(o) }
 }
 
 // PanObj is object for not only obj literal but also
@@ -62,6 +99,7 @@ type PanObj struct {
 	Keys        *[]SymHash
 	PrivateKeys *[]SymHash
 	proto       PanObject
+	zero        PanObject
 }
 
 // Type returns type of this PanObject.
@@ -131,6 +169,16 @@ func (o *PanObj) extractName() (*PanStr, bool) {
 // Proto returns proto of this object.
 func (o *PanObj) Proto() PanObject {
 	return o.proto
+}
+
+// Zero returns zero value of this object.
+func (o *PanObj) Zero() PanObject {
+	// if unset, use zero value of obj {}.
+	// NOTE: since initializing zeroObj.zero requires zeroObj itself, nil is treated as zeroObj
+	if o.zero == nil {
+		return zeroObj
+	}
+	return o.zero
 }
 
 func keyHashes(pairs *map[SymHash]Pair) ([]SymHash, []SymHash) {

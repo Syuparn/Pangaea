@@ -3,13 +3,14 @@ package object
 // TraceProtoOfArr traces proto chain of obj and returns arr proto.
 func TraceProtoOfArr(obj PanObject) (*PanArr, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
-		// HACK: proto of Arr is zero value [] so that Arr itself can be used as arr object
-		if o == BuiltInArrObj {
-			return zeroArr, true
-		}
-
 		if v, ok := o.(*PanArr); ok {
 			return v, true
+		}
+
+		// HACK: Arr is treated as zero value [] so that Arr itself can be used as arr object
+		// (Arr's descendants are treated as empty arr as well)
+		if a, ok := o.Zero().(*PanArr); ok {
+			return a, true
 		}
 	}
 	return nil, false

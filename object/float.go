@@ -8,9 +8,6 @@ import (
 // FloatType is a type of PanFloat.
 const FloatType = "FloatType"
 
-// used as zero value
-var zeroFloat = NewPanFloat(0.0)
-
 // PanFloat is object of float literal.
 type PanFloat struct {
 	Value float64
@@ -34,6 +31,11 @@ func (f *PanFloat) Repr() string {
 // Proto returns proto of this object.
 func (f *PanFloat) Proto() PanObject {
 	return BuiltInFloatObj
+}
+
+// Zero returns zero value of this object.
+func (f *PanFloat) Zero() PanObject {
+	return f
 }
 
 // Hash returns hashkey of this object.

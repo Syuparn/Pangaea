@@ -35,6 +35,11 @@ func (b *PanBool) Proto() PanObject {
 	return BuiltInZeroInt
 }
 
+// Zero returns zero value of this object.
+func (b *PanBool) Zero() PanObject {
+	return b
+}
+
 // Hash returns hashkey of this object.
 func (b *PanBool) Hash() HashKey {
 	var v uint64

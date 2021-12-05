@@ -405,6 +405,47 @@ func TestObjPrivateKeys(t *testing.T) {
 	}
 }
 
+func TestObjZeroValue(t *testing.T) {
+	tests := []struct {
+		name     string
+		obj      *PanObj
+		expected PanObject
+	}{
+		{
+			"BaseObj has zero value {}",
+			BuiltInBaseObj,
+			zeroObj,
+		},
+		{
+			"Obj has zero value {}",
+			BuiltInObjObj,
+			zeroObj,
+		},
+		{
+			"inherit from proto",
+			ChildPanObjPtr(BuiltInArrObj, EmptyPanObjPtr()),
+			zeroArr,
+		},
+		{
+			"set zero value explicitly",
+			ChildPanObjPtr(EmptyPanObjPtr(), EmptyPanObjPtr(), WithZero(zeroArr)),
+			zeroArr,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.obj.Zero()
+			if actual != tt.expected {
+				t.Errorf("zero value must be %s. got=%s",
+					tt.expected.Repr(), actual.Repr())
+			}
+		})
+	}
+}
+
 func TestEmptyPanObjPtr(t *testing.T) {
 	actual := EmptyPanObjPtr()
 
@@ -454,6 +495,10 @@ func TestChildPanObjPtr(t *testing.T) {
 
 		if actual.Proto() != tt.proto {
 			t.Errorf("Proto must be tt.proto. got=%s", actual.Proto().Inspect())
+		}
+
+		if actual.Zero() != tt.proto.Zero() {
+			t.Errorf("Zero must be %s. got=%s", tt.proto.Zero(), actual.Proto().Inspect())
 		}
 
 		if actual.Pairs != tt.src.Pairs {

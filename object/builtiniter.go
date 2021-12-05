@@ -30,6 +30,12 @@ func (b *PanBuiltInIter) Proto() PanObject {
 	return BuiltInIterObj
 }
 
+// Zero returns zero value of this object.
+func (b *PanBuiltInIter) Zero() PanObject {
+	// TODO: implement zero value
+	return b
+}
+
 // NewPanBuiltInIter returns new BuiltInIter object.
 func NewPanBuiltInIter(f BuiltInFunc, env *Env) *PanBuiltInIter {
 	return &PanBuiltInIter{f, env}

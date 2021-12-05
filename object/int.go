@@ -32,6 +32,11 @@ func (i *PanInt) Proto() PanObject {
 	return BuiltInIntObj
 }
 
+// Zero returns zero value of this object.
+func (i *PanInt) Zero() PanObject {
+	return i
+}
+
 // Hash returns hashkey of this object.
 func (i *PanInt) Hash() HashKey {
 	return HashKey{IntType, uint64(i.Value)}

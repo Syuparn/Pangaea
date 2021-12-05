@@ -8,9 +8,6 @@ import (
 // RangeType is a type of PanRange.
 const RangeType = "RangeType"
 
-// used as zero value
-var zeroRange = NewPanRange(BuiltInNil, BuiltInNil, BuiltInNil)
-
 // PanRange is object of range literal.
 type PanRange struct {
 	Start PanObject
@@ -54,6 +51,11 @@ func (r *PanRange) Repr() string {
 // Proto returns proto of this object.
 func (r *PanRange) Proto() PanObject {
 	return BuiltInRangeObj
+}
+
+// Zero returns zero value of this object.
+func (r *PanRange) Zero() PanObject {
+	return r
 }
 
 // NewPanRange returns new range object.

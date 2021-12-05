@@ -5,45 +5,43 @@ import (
 )
 
 func TestTraceProtoOfArr(t *testing.T) {
-	proto := NewPanArr()
-
 	tests := []struct {
+		name     string
 		obj      PanObject
 		expected *PanArr
 	}{
-		// return proto
 		{
-			NewPanObj(&map[SymHash]Pair{}, proto),
-			proto,
+			"arr returns itself",
+			zeroArr,
+			zeroArr,
 		},
-		// return itself
 		{
-			proto,
-			proto,
-		},
-		// Arr returns zero value [] so that Arr itself can be used as arr object
-		{
+			"Arr returns zero value [] so that Arr itself can be used as arr object",
 			BuiltInArrObj,
 			zeroArr,
 		},
-		// child of Arr
 		{
+			"child of Arr returns zero value []",
 			NewPanObj(&map[SymHash]Pair{}, BuiltInArrObj),
 			zeroArr,
 		},
 	}
 
 	for _, tt := range tests {
-		actual, ok := TraceProtoOfArr(tt.obj)
+		tt := tt // pin
 
-		if !ok {
-			t.Errorf("ok must be true (obj=%v)", tt.obj)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			actual, ok := TraceProtoOfArr(tt.obj)
 
-		if actual != tt.expected {
-			t.Errorf("proto must be %+v(%T). got=%+v(%T)",
-				tt.expected, tt.expected, actual, actual)
-		}
+			if !ok {
+				t.Fatalf("ok must be true (obj=%s)", tt.obj.Repr())
+			}
+
+			if actual != tt.expected {
+				t.Errorf("proto must be %s(%T). got=%s(%T)",
+					tt.expected.Repr(), tt.expected, actual.Repr(), actual)
+			}
+		})
 	}
 }
 

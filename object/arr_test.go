@@ -121,6 +121,32 @@ func TestInheritedArrProto(t *testing.T) {
 	}
 }
 
+func TestArrZero(t *testing.T) {
+	// Arr.bear
+	arrChild := ChildPanObjPtr(BuiltInArrObj, EmptyPanObjPtr())
+
+	tests := []struct {
+		name string
+		obj  *PanArr
+	}{
+		{"[1]", NewPanArr(NewPanInt(1))},
+		{"Child(1)", NewInheritedArr(arrChild, NewPanInt(1))},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.obj.Zero()
+
+			if actual != tt.obj {
+				t.Errorf("zero must be itself (%#v). got=%s (%#v)",
+					tt.obj, actual.Repr(), actual)
+			}
+		})
+	}
+}
+
 // checked by compiler (this function works nothing)
 func testArrIsPanObject() {
 	var _ PanObject = NewPanArr()

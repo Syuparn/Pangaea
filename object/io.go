@@ -44,6 +44,12 @@ func (io *PanIO) Proto() PanObject {
 	return BuiltInIOObj
 }
 
+// Zero returns zero value of this object.
+func (io *PanIO) Zero() PanObject {
+	// TODO: implement zero value
+	return io
+}
+
 // ReadLine reads line from in and returns it as PanStr.
 func (io *PanIO) ReadLine() (*PanStr, bool) {
 	if !io.scanner.Scan() {

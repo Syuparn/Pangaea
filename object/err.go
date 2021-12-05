@@ -35,6 +35,12 @@ func (e *PanErr) Proto() PanObject {
 	return e.proto
 }
 
+// Zero returns zero value of this object.
+func (e *PanErr) Zero() PanObject {
+	// TODO: implement zero value
+	return e
+}
+
 // Message returns error message.
 func (e *PanErr) Message() string {
 	return e.Msg

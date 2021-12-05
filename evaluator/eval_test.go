@@ -7304,7 +7304,6 @@ func TestEvalInfixArrEq(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
-		// true if all elements are equivalent
 		{
 			"empty arr is empty arr",
 			`[] == []`,
@@ -7361,21 +7360,29 @@ func TestEvalInfixArrEq(t *testing.T) {
 			object.BuiltInTrue,
 		},
 		{
-			"descendant of Arr is equivalent",
+			// Arr's zero value is [] but Arr.bear's zero value is Arr.bear()
+			"descendant of Arr is different",
 			`Arr.bear == Arr`,
+			object.BuiltInFalse,
+		},
+		{
+			"Child is treated as zero value Child()",
+			`Arr.bear => Child; Child() == Child`,
 			object.BuiltInTrue,
 		},
-		// FIXME: enable to treat Arr descendant as empty arr
-		/*
-			{
-				"Child is treated as zero value Child()",
-				`Arr.bear => Child; Child() == Child`,
-				object.BuiltInTrue,
-			},
-		*/
 		{
 			"not equivalent because Child(1) is NOT [1]'s proto",
 			`Arr.bear => Child; Child(1) == [1]`,
+			object.BuiltInFalse,
+		},
+		{
+			"Child is treated as zero value Child.new([])",
+			`Arr.bear => Child; Child.new([]) == Child`,
+			object.BuiltInTrue,
+		},
+		{
+			"not equivalent because Child.new([1]) is NOT [1]'s proto",
+			`Arr.bear => Child; Child.new([1]) == [1]`,
 			object.BuiltInFalse,
 		},
 	}

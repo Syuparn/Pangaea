@@ -8,9 +8,6 @@ import (
 // ArrType is a type of PanArr.
 const ArrType = "ArrType"
 
-// used as zero value
-var zeroArr = NewPanArr()
-
 // PanArr is object of arr literal.
 type PanArr struct {
 	Elems []PanObject
@@ -53,6 +50,11 @@ func (a *PanArr) Repr() string {
 // Proto returns proto of this object.
 func (a *PanArr) Proto() PanObject {
 	return a.proto
+}
+
+// Zero returns zero value of this object.
+func (a *PanArr) Zero() PanObject {
+	return a
 }
 
 // NewPanArr returns new arr object.

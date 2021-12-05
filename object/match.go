@@ -29,6 +29,12 @@ func (m *PanMatch) Proto() PanObject {
 	return BuiltInMatchObj
 }
 
+// Zero returns zero value of this object.
+func (m *PanMatch) Zero() PanObject {
+	// TODO: implement zero value
+	return m
+}
+
 // MatchWrapper is a wrapper for match literal ast node.
 // NOTE: keep loose coupling to ast.MatchLiteral and PanMatch
 // ast.MatchLiteral implements MatchWrapper
