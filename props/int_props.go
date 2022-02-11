@@ -179,9 +179,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					// check if f is integer
 					if math.Floor(res) == res {
 						return object.NewPanInt(int64(res))
-					} else {
-						return object.NewPanFloat(res)
 					}
+					return object.NewPanFloat(res)
 				}
 
 				if fself, fother, ferr := checkFloatInfixArgs(args, "**", object.NewPanFloat(1)); ferr == nil {

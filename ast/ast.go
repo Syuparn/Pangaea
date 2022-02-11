@@ -47,7 +47,7 @@ func (p *Program) String() string {
 	return strings.Join(stmts, "\n")
 }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (p *Program) Source() *Source { return p.Stmts[0].Source() }
 
 // ExprStmt is an ast node of statement which consists of just one expression.
@@ -62,7 +62,7 @@ func (es *ExprStmt) isStmt() {}
 // TokenLiteral returns token given by lexer.
 func (es *ExprStmt) TokenLiteral() string { return es.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (es *ExprStmt) Source() *Source { return es.Src }
 
 func (es *ExprStmt) String() string {
@@ -109,7 +109,7 @@ func (js *JumpStmt) isStmt() {}
 // TokenLiteral returns token given by lexer.
 func (js *JumpStmt) TokenLiteral() string { return js.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (js *JumpStmt) Source() *Source { return js.Src }
 func (js *JumpStmt) String() string {
 	var out bytes.Buffer
@@ -136,7 +136,7 @@ func (js *JumpIfStmt) isStmt() {}
 // TokenLiteral returns token given by lexer.
 func (js *JumpIfStmt) TokenLiteral() string { return js.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (js *JumpIfStmt) Source() *Source { return js.Src }
 func (js *JumpIfStmt) String() string {
 	var out bytes.Buffer
@@ -173,7 +173,7 @@ func (i *Ident) isExpr() {}
 func (i *Ident) TokenLiteral() string { return i.Token }
 func (i *Ident) String() string       { return i.Value }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (i *Ident) Source() *Source { return i.Src }
 
 // PinnedIdent is an ast node of identifier with pinned operation `^`.
@@ -214,7 +214,7 @@ func (pc *PropCallExpr) ChainToken() string { return pc.Chain.Token }
 // ChainArg returns chain arg expression of this call.
 func (pc *PropCallExpr) ChainArg() Expr { return pc.Chain.Arg }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (pc *PropCallExpr) Source() *Source { return pc.Src }
 func (pc *PropCallExpr) String() string {
 	var out bytes.Buffer
@@ -259,7 +259,7 @@ func (lc *LiteralCallExpr) ChainToken() string { return lc.Chain.Token }
 // ChainArg returns chain arg expression of this call.
 func (lc *LiteralCallExpr) ChainArg() Expr { return lc.Chain.Arg }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (lc *LiteralCallExpr) Source() *Source { return lc.Src }
 func (lc *LiteralCallExpr) String() string {
 	var out bytes.Buffer
@@ -294,7 +294,7 @@ func (vc *VarCallExpr) ChainToken() string { return vc.Chain.Token }
 // ChainArg returns chain arg expression of this call.
 func (vc *VarCallExpr) ChainArg() Expr { return vc.Chain.Arg }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (vc *VarCallExpr) Source() *Source { return vc.Src }
 func (vc *VarCallExpr) String() string {
 	var out bytes.Buffer
@@ -339,7 +339,7 @@ const (
 type AdditionalChain int
 
 const (
-	// Vanilla is a Type showing no addtional chains.
+	// Vanilla is a Type showing no additional chains.
 	Vanilla AdditionalChain = iota
 	// Lonely is a Type for `&` chain.
 	Lonely
@@ -349,7 +349,7 @@ const (
 	Strict
 )
 
-// MakeChain makes new Chain from main chain literal and addtional chain literal.
+// MakeChain makes new Chain from main chain literal and additional chain literal.
 func MakeChain(addChain string, mainChain string, chainArg Expr) *Chain {
 	var addChainMap = map[string]AdditionalChain{
 		"":  Vanilla,
@@ -511,7 +511,7 @@ func (pe *PrefixExpr) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (pe *PrefixExpr) TokenLiteral() string { return pe.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (pe *PrefixExpr) Source() *Source { return pe.Src }
 func (pe *PrefixExpr) String() string {
 	var out bytes.Buffer
@@ -536,7 +536,7 @@ func (ie *InfixExpr) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (ie *InfixExpr) TokenLiteral() string { return ie.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (ie *InfixExpr) Source() *Source { return ie.Src }
 func (ie *InfixExpr) String() string {
 	var out bytes.Buffer
@@ -562,7 +562,7 @@ func (ae *AssignExpr) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (ae *AssignExpr) TokenLiteral() string { return ae.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (ae *AssignExpr) Source() *Source { return ae.Src }
 func (ae *AssignExpr) String() string {
 	var out bytes.Buffer
@@ -588,7 +588,7 @@ func (es *EmbeddedStr) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (es *EmbeddedStr) TokenLiteral() string { return es.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (es *EmbeddedStr) Source() *Source { return es.Src }
 func (es *EmbeddedStr) String() string {
 	return `"` + es.Former.String() + es.Latter + `"`
@@ -629,7 +629,7 @@ func (sl *StrLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (sl *StrLiteral) TokenLiteral() string { return sl.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (sl *StrLiteral) Source() *Source { return sl.Src }
 func (sl *StrLiteral) String() string {
 	if sl.IsRaw {
@@ -650,7 +650,7 @@ func (sl *SymLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (sl *SymLiteral) TokenLiteral() string { return sl.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (sl *SymLiteral) Source() *Source { return sl.Src }
 func (sl *SymLiteral) String() string  { return "'" + sl.Value }
 
@@ -668,7 +668,7 @@ func (rl *RangeLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (rl *RangeLiteral) TokenLiteral() string { return rl.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (rl *RangeLiteral) Source() *Source { return rl.Src }
 func (rl *RangeLiteral) String() string {
 	var out bytes.Buffer
@@ -707,7 +707,7 @@ func (ie *IfExpr) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (ie *IfExpr) TokenLiteral() string { return ie.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (ie *IfExpr) Source() *Source { return ie.Src }
 func (ie *IfExpr) String() string {
 	var out bytes.Buffer
@@ -733,7 +733,7 @@ func (fl *FuncLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (fl *FuncLiteral) TokenLiteral() string { return fl.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (fl *FuncLiteral) Source() *Source { return fl.Src }
 func (fl *FuncLiteral) String() string {
 	var out bytes.Buffer
@@ -756,7 +756,7 @@ func (il *IterLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (il *IterLiteral) TokenLiteral() string { return il.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (il *IterLiteral) Source() *Source { return il.Src }
 func (il *IterLiteral) String() string {
 	var out bytes.Buffer
@@ -779,7 +779,7 @@ func (ml *MatchLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (ml *MatchLiteral) TokenLiteral() string { return ml.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (ml *MatchLiteral) Source() *Source { return ml.Src }
 func (ml *MatchLiteral) String() string {
 	var out bytes.Buffer
@@ -851,7 +851,7 @@ func (dl *DiamondLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (dl *DiamondLiteral) TokenLiteral() string { return dl.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (dl *DiamondLiteral) Source() *Source { return dl.Src }
 func (dl *DiamondLiteral) String() string  { return "<>" }
 
@@ -868,7 +868,7 @@ func (ol *ObjLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (ol *ObjLiteral) TokenLiteral() string { return ol.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (ol *ObjLiteral) Source() *Source { return ol.Src }
 func (ol *ObjLiteral) String() string {
 	var out bytes.Buffer
@@ -902,7 +902,7 @@ func (ml *MapLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (ml *MapLiteral) TokenLiteral() string { return ml.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (ml *MapLiteral) Source() *Source { return ml.Src }
 func (ml *MapLiteral) String() string {
 	var out bytes.Buffer
@@ -935,7 +935,7 @@ func (al *ArrLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (al *ArrLiteral) TokenLiteral() string { return al.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (al *ArrLiteral) Source() *Source { return al.Src }
 func (al *ArrLiteral) String() string {
 	var out bytes.Buffer
@@ -964,7 +964,7 @@ func (il *IntLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (il *IntLiteral) TokenLiteral() string { return il.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (il *IntLiteral) Source() *Source { return il.Src }
 func (il *IntLiteral) String() string  { return il.Token }
 
@@ -980,11 +980,11 @@ func (fl *FloatLiteral) isExpr() {}
 // TokenLiteral returns token given by lexer.
 func (fl *FloatLiteral) TokenLiteral() string { return fl.Token }
 
-// Source returns stacktrace infomation used for error massages.
+// Source returns stacktrace information used for error massages.
 func (fl *FloatLiteral) Source() *Source { return fl.Src }
 func (fl *FloatLiteral) String() string  { return fl.Token }
 
-// Source is a stacktrace infomation used for error massages.
+// Source is a stacktrace information used for error massages.
 type Source struct {
 	Line         string
 	Pos          Position

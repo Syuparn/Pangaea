@@ -35,8 +35,8 @@ func (io *PanIO) Inspect() string {
 }
 
 // Repr returns pritty-printed string of this object.
-func (i *PanIO) Repr() string {
-	return i.Inspect()
+func (io *PanIO) Repr() string {
+	return io.Inspect()
 }
 
 // Proto returns proto of this object.

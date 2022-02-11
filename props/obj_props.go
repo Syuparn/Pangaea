@@ -312,9 +312,8 @@ func ObjProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				if owner, ok := object.FindPropOwner(args[0], propName.SymHash()); ok {
 					return owner
-				} else {
-					return object.BuiltInNil
 				}
+				return object.BuiltInNil
 			},
 		),
 	}

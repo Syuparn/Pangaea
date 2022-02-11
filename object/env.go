@@ -102,7 +102,7 @@ func (e *Env) Set(h SymHash, obj PanObject) {
 	e.Store[h] = obj
 }
 
-// Items returns all variables in the enviroment as obj.
+// Items returns all variables in the environment as obj.
 func (e *Env) Items() PanObject {
 	pairs := make(map[SymHash]Pair)
 	for h, obj := range e.Store {

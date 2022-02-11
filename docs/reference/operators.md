@@ -116,7 +116,7 @@ false.||("never evaluated".p) # "never evaluated"
 Technically, `a === b` returns true if any of below is true.
 
 - `a == b`: a is equivalent to b
-- `a.kindOf?(b)`: a is a decendant of b (b appears in a's prototype chain).
+- `a.kindOf?(b)`: a is a descendant of b (b appears in a's prototype chain).
 - `b.asFor?(a)`: predicate b is true as for a.
 
 ### examples
