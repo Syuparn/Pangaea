@@ -49,4 +49,4 @@ This document briefly describes syntax, semantics, and design concepts of Pangae
 - Metaprogramming
     - [Metaprogramming](./metaprogramming.md)
 
-:information_source: For convinience, this document writes methods to be used by decendants as `obj#method`, but Pangaea is prototype-based and does not have classes.
+:information_source: For convinience, this document writes methods to be used by descendants as `obj#method`, but Pangaea is prototype-based and does not have classes.

@@ -1742,7 +1742,7 @@ func TestEvalBuiltInCallProp(t *testing.T) {
 			`{}.callProp({a: {|| 2}}, 'a)`,
 			object.NewPanInt(2),
 		},
-		// NOTE: first arg (`self`) is reciever itself! (`{a: m{|x| x}}`)
+		// NOTE: first arg (`self`) is receiver itself! (`{a: m{|x| x}}`)
 		{
 			`{}.callProp({a: m{|x| x}}, 'a, 3)`,
 			object.NewPanInt(3),
@@ -3805,7 +3805,7 @@ func TestEvalReduceChainPropCall(t *testing.T) {
 }
 
 func TestEvalReduceChainPropCallRecvIsAcc(t *testing.T) {
-	// reciever of prop is resolved to acc
+	// receiver of prop is resolved to acc
 	tests := []struct {
 		input    string
 		expected object.PanObject
@@ -6729,7 +6729,7 @@ func TestEvalVarCall(t *testing.T) {
 			`f := {a: "A", call: m{|s| .a + s}}; "B".^f`,
 			object.NewPanStr("AB"),
 		},
-		// built-in cannot be used because signature is wrong (no addtional self)
+		// built-in cannot be used because signature is wrong (no additional self)
 		{
 			`f := {call: Int['-%]}; 2.^f`,
 			object.NewTypeErr("prop 'call in varcall must be func"),
@@ -7888,7 +7888,7 @@ func TestEvalInfixIntAdd(t *testing.T) {
 			`-5 + 10`,
 			object.NewPanInt(5),
 		},
-		// decendant
+		// descendant
 		{
 			`3 + true`,
 			object.NewPanInt(4),
@@ -7958,7 +7958,7 @@ func TestEvalInfixIntSub(t *testing.T) {
 			`5 - -10`,
 			object.NewPanInt(15),
 		},
-		// decendant
+		// descendant
 		{
 			`3 - true`,
 			object.NewPanInt(2),
@@ -8024,7 +8024,7 @@ func TestEvalInfixIntMul(t *testing.T) {
 			`2 * 3`,
 			object.NewPanInt(6),
 		},
-		// decendant
+		// descendant
 		{
 			`3 * true`,
 			object.NewPanInt(3),
@@ -8094,7 +8094,7 @@ func TestEvalInfixIntPower(t *testing.T) {
 			`2 ** -2`,
 			object.NewPanFloat(0.25),
 		},
-		// decendant
+		// descendant
 		{
 			`4 ** 2.bear`,
 			object.NewPanInt(16),
@@ -8164,7 +8164,7 @@ func TestEvalInfixIntDiv(t *testing.T) {
 			`-5 / 4`,
 			object.NewPanFloat(-1.25),
 		},
-		// decendant
+		// descendant
 		{
 			`3 / true`,
 			object.NewPanFloat(3.0),
@@ -8242,7 +8242,7 @@ func TestEvalInfixIntFloorDiv(t *testing.T) {
 			`-5 // 2`,
 			object.NewPanInt(-3),
 		},
-		// decendant
+		// descendant
 		{
 			`3 // true`,
 			object.NewPanInt(3),
@@ -8307,7 +8307,7 @@ func TestEvalInfixStrAdd(t *testing.T) {
 			`"にほ" + "んご"`,
 			object.NewPanStr("にほんご"),
 		},
-		// decendant of str can be added
+		// descendant of str can be added
 		{
 			`"c" + "d".bear`,
 			object.NewPanStr("cd"),
@@ -8457,7 +8457,7 @@ func TestEvalInfixStrDiv(t *testing.T) {
 				object.NewPanStr("a"),
 			),
 		},
-		// decendant of str can be added
+		// descendant of str can be added
 		{
 			`"a,b" / ",".bear`,
 			object.NewPanArr(
@@ -8516,7 +8516,7 @@ func TestEvalInfixFloatAdd(t *testing.T) {
 			`-5.0 + 10.0`,
 			object.NewPanFloat(5.0),
 		},
-		// decendant
+		// descendant
 		{
 			`3.0 + 1.0.bear`,
 			object.NewPanFloat(4.0),
@@ -8586,7 +8586,7 @@ func TestEvalInfixFloatSub(t *testing.T) {
 			`5.0 - -10.0`,
 			object.NewPanFloat(15.0),
 		},
-		// decendant
+		// descendant
 		{
 			`4.0 - 1.0.bear`,
 			object.NewPanFloat(3.0),
@@ -8656,7 +8656,7 @@ func TestEvalInfixFloatMul(t *testing.T) {
 			`5.0 * -10.0`,
 			object.NewPanFloat(-50.0),
 		},
-		// decendant
+		// descendant
 		{
 			`4.0 * 2.0.bear`,
 			object.NewPanFloat(8.0),
@@ -8730,7 +8730,7 @@ func TestEvalInfixFloatPower(t *testing.T) {
 			`2.0 ** -2`,
 			object.NewPanFloat(0.25),
 		},
-		// decendant
+		// descendant
 		{
 			`4.0 ** 2.0.bear`,
 			object.NewPanFloat(16.0),
@@ -8796,7 +8796,7 @@ func TestEvalInfixFloatDiv(t *testing.T) {
 			`3.0 / 1.5`,
 			object.NewPanFloat(2.0),
 		},
-		// decendant
+		// descendant
 		{
 			`6.0 / 2.0.bear`,
 			object.NewPanFloat(3.0),
@@ -8873,7 +8873,7 @@ func TestEvalInfixArrAdd(t *testing.T) {
 				object.NewPanInt(2),
 			),
 		},
-		// decendant of arr can be added
+		// descendant of arr can be added
 		{
 			`[1] + [3].bear`,
 			object.NewPanArr(
@@ -8990,7 +8990,7 @@ func TestEvalInfixIntMod(t *testing.T) {
 			`10 % 3`,
 			object.NewPanInt(1),
 		},
-		// decendant of int can be added
+		// descendant of int can be added
 		{
 			`4 % true`,
 			object.NewPanInt(0),
@@ -9799,7 +9799,7 @@ func TestEvalAssert(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
-		// NOTE: do not pass reciever to assert! (it is a function)
+		// NOTE: do not pass receiver to assert! (it is a function)
 		{
 			`Kernel['assert](true)`,
 			object.BuiltInNil,
@@ -9837,7 +9837,7 @@ func TestEvalAssertEq(t *testing.T) {
 		input    string
 		expected object.PanObject
 	}{
-		// NOTE: do not pass reciever to assertEq! (it is a function)
+		// NOTE: do not pass receiver to assertEq! (it is a function)
 		{
 			`Kernel['assertEq]('a, 'a)`,
 			object.BuiltInNil,

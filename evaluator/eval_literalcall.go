@@ -91,7 +91,7 @@ func handleCallable(
 		return evalFuncCall(env, kwargs, argsToPass...)
 	}
 
-	// NOTE: builtin func is not supported because it cannot recieve addtional self
+	// NOTE: builtin func is not supported because it cannot receive additional self
 	// NOTE: 'call prop in call is not searched to prevent infinite loop
 	return object.NewTypeErr("prop 'call in varcall must be func")
 }
