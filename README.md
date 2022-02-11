@@ -1,5 +1,6 @@
 # Pangaea programming language
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Syuparn/pangaea)](https://goreportcard.com/report/github.com/Syuparn/pangaea)
 ![](https://github.com/Syuparn/Pangaea/workflows/Test/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/Syuparn/Pangaea/branch/master/graph/badge.svg)](https://codecov.io/gh/Syuparn/Pangaea)
 [![playground](https://img.shields.io/badge/Playground-Try!-blue)](https://syuparn.github.io/Pangaea/)
