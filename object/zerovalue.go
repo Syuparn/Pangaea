@@ -7,6 +7,9 @@ func init() {
 	// set protos
 	zeroArr.proto = BuiltInArrObj
 
+	BuiltInOneInt.proto = BuiltInIntObj
+	BuiltInZeroInt.proto = BuiltInIntObj
+
 	// set zero values
 	zeroObj.zero = zeroObj
 }

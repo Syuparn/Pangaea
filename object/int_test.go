@@ -57,6 +57,15 @@ func TestIntProto(t *testing.T) {
 	}
 }
 
+func TestInheritedIntProto(t *testing.T) {
+	intChild := ChildPanObjPtr(BuiltInIntObj, EmptyPanObjPtr())
+	a := NewInheritedInt(intChild, 10)
+	if a.Proto() != intChild {
+		t.Fatalf("Proto is not intChild. got=%T (%s)",
+			a.Proto(), a.Proto().Inspect())
+	}
+}
+
 func TestIntZero(t *testing.T) {
 	tests := []struct {
 		name string
@@ -125,6 +134,26 @@ func TestNewPanInt(t *testing.T) {
 		actual := NewPanInt(tt.i)
 		if actual.Value != tt.i {
 			t.Errorf("wrong value. expected=%d, got=%d", tt.i, actual.Value)
+		}
+	}
+}
+
+func TestNewInheritedInt(t *testing.T) {
+	// child of Int
+	proto := ChildPanObjPtr(BuiltInIntObj, EmptyPanObjPtr())
+
+	tests := []struct {
+		i int64
+	}{
+		{10},
+	}
+
+	for _, tt := range tests {
+		actual := NewInheritedInt(proto, tt.i)
+
+		if actual.Value != tt.i {
+			t.Errorf("value is wrong. expected=%d, got=%d",
+				tt.i, actual.Value)
 		}
 	}
 }

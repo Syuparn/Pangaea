@@ -10,6 +10,7 @@ const IntType = "IntType"
 // PanInt is object of int literal.
 type PanInt struct {
 	Value int64
+	proto PanObject
 }
 
 // Type returns type of this PanObject.
@@ -29,7 +30,7 @@ func (i *PanInt) Repr() string {
 
 // Proto returns proto of this object.
 func (i *PanInt) Proto() PanObject {
-	return BuiltInIntObj
+	return i.proto
 }
 
 // Zero returns zero value of this object.
@@ -51,6 +52,11 @@ func NewPanInt(i int64) *PanInt {
 	case 1:
 		return BuiltInOneInt
 	default:
-		return &PanInt{Value: i}
+		return &PanInt{Value: i, proto: BuiltInIntObj}
 	}
+}
+
+// NewInheritedInt returns new int object born of proto.
+func NewInheritedInt(proto PanObject, i int64) *PanInt {
+	return &PanInt{Value: i, proto: proto}
 }
