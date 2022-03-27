@@ -2829,14 +2829,13 @@ func TestEvalJumpIfStmt(t *testing.T) {
 			`fact := {|n| return 1 if n == 0; n * fact(n - 1)}; fact(4)`,
 			object.NewPanInt(24),
 		},
-		{
-			`fact := {|n| raise 1 if n == 0; n * fact(n - 1)}; fact(4)`,
-			object.NewPanInt(24),
-		},
 	}
 	for _, tt := range tests {
-		actual := testEval(t, tt.input)
-		testValue(t, actual, tt.expected)
+		tt := tt //pin
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }
 
@@ -7118,43 +7117,79 @@ func TestEvalInfix(t *testing.T) {
 
 func TestEvalInfixIntEq(t *testing.T) {
 	tests := []struct {
+		title    string
 		input    string
 		expected object.PanObject
 	}{
 		{
+			"same value",
 			`10 == 10`,
 			object.BuiltInTrue,
 		},
 		{
+			"different value",
 			`10 == 5`,
 			object.BuiltInFalse,
 		},
 		{
+			"int and float",
 			`1 == 1.0`,
 			object.BuiltInFalse,
 		},
 		{
+			"int and str",
 			`1 == "1"`,
 			object.BuiltInFalse,
 		},
-		// ancestor of int is also comparable
 		{
+			"Int is treated as 0",
+			`0 == Int`,
+			object.BuiltInTrue,
+		},
+		{
+			"Int is Int",
+			`Int == Int`,
+			object.BuiltInTrue,
+		},
+		{
+			"descendant of 1 is equivalent",
 			`1 == true`,
 			object.BuiltInTrue,
 		},
 		{
+			"descendant of 0 is equivalent",
 			`0 == false`,
 			object.BuiltInTrue,
 		},
 		{
+			"descendant of 2 is equivalent",
 			`2.bear == 2`,
 			object.BuiltInTrue,
+		},
+		{
+			// Int's zero value is 0 but Int.bear's zero value is Int.bear()
+			"descendant of Int is different",
+			`Int.bear == Int`,
+			object.BuiltInFalse,
+		},
+		{
+			"Child is treated as zero value Child()",
+			`Int.bear => Child; Child.new(0) == Child`,
+			object.BuiltInTrue,
+		},
+		{
+			"not equivalent because Child.new(1) is NOT 1's proto",
+			`Int.bear => Child; Child.new(1) == 1`,
+			object.BuiltInFalse,
 		},
 	}
 
 	for _, tt := range tests {
-		actual := testEval(t, tt.input)
-		testValue(t, actual, tt.expected)
+		tt := tt // pin
+		t.Run(tt.title, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }
 
@@ -7912,6 +7947,11 @@ func TestEvalInfixIntAdd(t *testing.T) {
 			`2 + 3.5`,
 			object.NewPanFloat(5.5),
 		},
+		// child + child == brother
+		{
+			`child := Int.bear; (child.new(1) + child.new(2)).proto == child`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -7982,6 +8022,11 @@ func TestEvalInfixIntSub(t *testing.T) {
 			`2 - 1.5`,
 			object.NewPanFloat(0.5),
 		},
+		// child - child == brother
+		{
+			`child := Int.bear; (child.new(1) - child.new(2)).proto == child`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -8047,6 +8092,11 @@ func TestEvalInfixIntMul(t *testing.T) {
 		{
 			`2 * 1.5`,
 			object.NewPanFloat(3.0),
+		},
+		// child * child == brother
+		{
+			`child := Int.bear; (child.new(1) * child.new(2)).proto == child`,
+			object.BuiltInTrue,
 		},
 	}
 
@@ -8117,6 +8167,11 @@ func TestEvalInfixIntPower(t *testing.T) {
 		{
 			`3 ** 2.0`,
 			object.NewPanFloat(9.0),
+		},
+		// child ** child == brother
+		{
+			`child := Int.bear; (child.new(1) ** child.new(2)).proto == child`,
+			object.BuiltInTrue,
 		},
 	}
 
@@ -8256,6 +8311,11 @@ func TestEvalInfixIntFloorDiv(t *testing.T) {
 		{
 			`Int // 3`,
 			object.NewPanInt(0),
+		},
+		// child // child == brother
+		{
+			`child := Int.bear; (child.new(6) // child.new(2)).proto == child`,
+			object.BuiltInTrue,
 		},
 	}
 
@@ -8995,6 +9055,11 @@ func TestEvalInfixIntMod(t *testing.T) {
 			`4 % true`,
 			object.NewPanInt(0),
 		},
+		// child % child == brother
+		{
+			`child := Int.bear; (child.new(6) % child.new(3)).proto == child`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -9049,6 +9114,11 @@ func TestEvalPrefix(t *testing.T) {
 		{
 			`/~1`,
 			object.NewPanInt(-2),
+		},
+		// -a is a's brother
+		{
+			`child := Int.bear; a := child.new(1); (-a).proto == child`,
+			object.BuiltInTrue,
 		},
 	}
 

@@ -361,42 +361,47 @@ func TestTraceProtoOfFuncFailed(t *testing.T) {
 
 func TestTraceProtoOfInt(t *testing.T) {
 	tests := []struct {
+		name     string
 		obj      PanObject
 		expected *PanInt
 	}{
-		// return proto
 		{
+			"return proto",
 			NewPanObj(&map[SymHash]Pair{}, BuiltInOneInt),
 			BuiltInOneInt,
 		},
-		// return itself
 		{
+			"1 returns itself",
 			BuiltInOneInt,
 			BuiltInOneInt,
 		},
-		// Int returns zero value 0 so that Int itself can be used as int object
 		{
+			"Int returns zero value 0 so that Int itself can be used as int object",
 			BuiltInIntObj,
 			BuiltInZeroInt,
 		},
 		// child of Int
 		{
+			"child of Int returns zero value 0",
 			NewPanObj(&map[SymHash]Pair{}, BuiltInIntObj),
 			BuiltInZeroInt,
 		},
 	}
 
 	for _, tt := range tests {
-		actual, ok := TraceProtoOfInt(tt.obj)
+		tt := tt // pin
+		t.Run(tt.name, func(t *testing.T) {
+			actual, ok := TraceProtoOfInt(tt.obj)
 
-		if !ok {
-			t.Errorf("ok must be true (obj=%v)", tt.obj)
-		}
+			if !ok {
+				t.Errorf("ok must be true (obj=%v)", tt.obj)
+			}
 
-		if actual != tt.expected {
-			t.Errorf("proto must be %+v(%T). got=%+v(%T)",
-				tt.expected, tt.expected, actual, actual)
-		}
+			if actual != tt.expected {
+				t.Errorf("proto must be %+v(%T). got=%+v(%T)",
+					tt.expected, tt.expected, actual, actual)
+			}
+		})
 	}
 }
 

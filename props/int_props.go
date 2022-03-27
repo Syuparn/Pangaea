@@ -34,7 +34,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					res = -1
 				}
 
-				return object.NewPanInt(res)
+				// NOTE: Int's descendants also call this
+				return object.NewInheritedInt(args[0].Proto(), res)
 			},
 		),
 		// NOTE: this cannot be removed (Comparable uses Int#== internally)
@@ -55,6 +56,10 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.BuiltInFalse
 				}
 
+				if self.Proto() != other.Proto() {
+					return object.BuiltInFalse
+				}
+
 				if self.Value == other.Value {
 					return object.BuiltInTrue
 				}
@@ -67,7 +72,7 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
 				if len(args) < 2 {
-					return object.NewTypeErr("== requires at least 2 args")
+					return object.NewTypeErr("!= requires at least 2 args")
 				}
 
 				self, ok := object.TraceProtoOfInt(args[0])
@@ -77,6 +82,10 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 				other, ok := object.TraceProtoOfInt(args[1])
 				if !ok {
+					return object.BuiltInTrue
+				}
+
+				if self.Proto() != other.Proto() {
 					return object.BuiltInTrue
 				}
 
@@ -100,7 +109,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				res := -self.Value
-				return object.NewPanInt(res)
+				// NOTE: Int's descendants also call this
+				return object.NewInheritedInt(args[0].Proto(), res)
 			},
 		),
 		"/~": f(
@@ -117,7 +127,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				res := ^self.Value
-				return object.NewPanInt(res)
+				// NOTE: Int's descendants also call this
+				return object.NewInheritedInt(args[0].Proto(), res)
 			},
 		),
 		"+": f(
@@ -126,7 +137,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			) object.PanObject {
 				self, other, err := checkIntInfixArgs(args, "+", object.NewPanInt(0))
 				if err == nil {
-					return object.NewPanInt(self.Value + other.Value)
+					// NOTE: Int's descendants also call this
+					return object.NewInheritedInt(args[0].Proto(), self.Value+other.Value)
 				}
 
 				if fself, fother, ferr := checkFloatInfixArgs(args, "+", object.NewPanFloat(0)); ferr == nil {
@@ -134,7 +146,6 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				return err
-
 			},
 		),
 		"-": f(
@@ -143,7 +154,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			) object.PanObject {
 				self, other, err := checkIntInfixArgs(args, "-", object.NewPanInt(0))
 				if err == nil {
-					return object.NewPanInt(self.Value - other.Value)
+					// NOTE: Int's descendants also call this
+					return object.NewInheritedInt(args[0].Proto(), self.Value-other.Value)
 				}
 
 				if fself, fother, ferr := checkFloatInfixArgs(args, "-", object.NewPanFloat(0)); ferr == nil {
@@ -159,7 +171,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			) object.PanObject {
 				self, other, err := checkIntInfixArgs(args, "*", object.NewPanInt(1))
 				if err == nil {
-					return object.NewPanInt(self.Value * other.Value)
+					// NOTE: Int's descendants also call this
+					return object.NewInheritedInt(args[0].Proto(), self.Value*other.Value)
 				}
 
 				if fself, fother, ferr := checkFloatInfixArgs(args, "*", object.NewPanFloat(1)); ferr == nil {
@@ -178,7 +191,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					res := math.Pow(float64(self.Value), float64(other.Value))
 					// check if f is integer
 					if math.Floor(res) == res {
-						return object.NewPanInt(int64(res))
+						// NOTE: Int's descendants also call this
+						return object.NewInheritedInt(args[0].Proto(), int64(res))
 					}
 					return object.NewPanFloat(res)
 				}
@@ -231,10 +245,12 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				// HACK: convert round to floor
 				if res < 0 && self.Value%other.Value != 0 {
-					return object.NewPanInt(res - 1)
+					// NOTE: Int's descendants also call this
+					return object.NewInheritedInt(args[0].Proto(), res-1)
 				}
 
-				return object.NewPanInt(res)
+				// NOTE: Int's descendants also call this
+				return object.NewInheritedInt(args[0].Proto(), res)
 			},
 		),
 		"%": f(
@@ -251,7 +267,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				res := self.Value % other.Value
-				return object.NewPanInt(res)
+				// NOTE: Int's descendants also call this
+				return object.NewInheritedInt(args[0].Proto(), res)
 			},
 		),
 		"_incBy": f(
@@ -264,7 +281,8 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				res := self.Value + other.Value
-				return object.NewPanInt(res)
+				// NOTE: Int's descendants also call this
+				return object.NewInheritedInt(args[0].Proto(), res)
 			},
 		),
 		"_iter": f(
@@ -303,6 +321,39 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return object.BuiltInTrue
 			},
 		),
+		// NOTE: override bear to set arr zero values
+		"bear": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("Int#bear requires at least 1 arg")
+				}
+				proto := args[0]
+
+				// if soruce is not specified as arg, use {}
+				src := object.EmptyPanObjPtr()
+				if len(args) >= 2 {
+					// `proto.bear(arg)`
+					arg, ok := args[1].(*object.PanObj)
+					if !ok {
+						return object.NewTypeErr("Int#bear requires obj literal src")
+					}
+					src = arg
+				}
+
+				// if self is concrete value, use it as zero value
+				if proto.Type() == object.IntType {
+					return object.ChildPanObjPtr(proto, src, object.WithZero(proto))
+				}
+
+				// otherwise zero value is 0 inherited from the generated obj
+				return object.ChildPanObjPtr(proto, src,
+					object.WithZeroFromSelf(func(o *object.PanObj) object.PanObject {
+						return object.NewInheritedInt(o, 0)
+					}))
+			},
+		),
 		"chr": f(
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
@@ -331,13 +382,15 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 				i, ok := object.TraceProtoOfInt(args[1])
 				if ok {
-					return i
+					// NOTE: Int's descendants also call this
+					return object.NewInheritedInt(args[0], int64(i.Value))
 				}
 
 				// float is rounded down
 				f, ok := object.TraceProtoOfFloat(args[1])
 				if ok {
-					return object.NewPanInt(int64(f.Value))
+					// NOTE: Int's descendants also call this
+					return object.NewInheritedInt(args[0], int64(f.Value))
 				}
 
 				return object.NewTypeErr(

@@ -74,10 +74,10 @@ var BuiltInEitherValObj = NewPanObj(&map[SymHash]Pair{}, BuiltInEitherObj)
 var BuiltInEitherErrObj = NewPanObj(&map[SymHash]Pair{}, BuiltInEitherObj)
 
 // BuiltInOneInt is an int object `1`.
-var BuiltInOneInt = &PanInt{1}
+var BuiltInOneInt = &PanInt{Value: 1}
 
 // BuiltInZeroInt is an int object `0`.
-var BuiltInZeroInt = &PanInt{0}
+var BuiltInZeroInt = &PanInt{Value: 0}
 
 // BuiltInTrue is a bool object `true`.
 var BuiltInTrue = &PanBool{true}

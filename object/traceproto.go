@@ -74,13 +74,14 @@ func TraceProtoOfFunc(obj PanObject) (*PanFunc, bool) {
 // TraceProtoOfInt traces proto chain of obj and returns int proto.
 func TraceProtoOfInt(obj PanObject) (*PanInt, bool) {
 	for o := obj; o.Proto() != nil; o = o.Proto() {
-		// HACK: proto of Int is zero value 0 so that Int itself can be used as int object
-		if o == BuiltInIntObj {
-			return BuiltInZeroInt, true
-		}
-
 		if v, ok := o.(*PanInt); ok {
 			return v, true
+		}
+
+		// HACK: Int is treated as zero value 0 so that Int itself can be used as int object
+		// (Int's descendants are treated as 0 as well)
+		if i, ok := o.Zero().(*PanInt); ok {
+			return i, true
 		}
 	}
 	return nil, false
