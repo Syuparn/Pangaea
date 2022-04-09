@@ -5,3 +5,13 @@ assertEq(
   2.try.{raise Err.new("err")}.catch(ZeroDivisionErr) {|e| "divided by 0"}.err,
   Either.newErr(Err, "err").err
 )
+
+# user-defined error
+MyErr := Err.bear
+assertEq(2.try.{raise MyErr.new("err")}.catch(MyErr) {|e| "my error!"}.val, nil)
+# other types of errors are not caught
+assertEq(
+  2.try.{raise Err.new("err")}.catch(MyErr) {|e| "error"}.err,
+  Either.newErr(Err, "err").err
+)
+# FIXME: ensure user-defined error is not caught by another user-defined error
