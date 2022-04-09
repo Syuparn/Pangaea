@@ -6,6 +6,7 @@ package object
 func init() {
 	// set protos
 	zeroArr.proto = BuiltInArrObj
+	zeroMap.proto = BuiltInMapObj
 	zeroRange.proto = BuiltInRangeObj
 
 	BuiltInOneInt.proto = BuiltInIntObj
@@ -17,11 +18,16 @@ func init() {
 }
 
 // used as zero value
+// NOTE: constractors cannot be used, otherwise initialization cycle occurs
+
 var zeroArr = &PanArr{}
 var zeroFloat = NewPanFloat(0.0)
-var zeroMap = NewEmptyPanMap()
+var zeroMap = &PanMap{
+	HashKeys:         &[]HashKey{},
+	Pairs:            &map[HashKey]Pair{},
+	NonHashablePairs: &[]Pair{},
+}
 
-// NOTE: EmptyPanObjPtr cannot be used, otherwise initialization cycle occurs
 var zeroObj = &PanObj{
 	Pairs:       &map[SymHash]Pair{},
 	Keys:        &[]SymHash{},

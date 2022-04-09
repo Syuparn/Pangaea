@@ -14,6 +14,7 @@ type PanMap struct {
 	HashKeys         *[]HashKey
 	Pairs            *map[HashKey]Pair
 	NonHashablePairs *[]Pair
+	proto            PanObject
 }
 
 // Type returns type of this PanObject.
@@ -81,7 +82,7 @@ func (m *PanMap) Repr() string {
 
 // Proto returns proto of this object.
 func (m *PanMap) Proto() PanObject {
-	return BuiltInMapObj
+	return m.proto
 }
 
 // Zero returns zero value of this object.
@@ -91,6 +92,11 @@ func (m *PanMap) Zero() PanObject {
 
 // NewPanMap returns new map object.
 func NewPanMap(pairs ...Pair) *PanMap {
+	return NewInheritedMap(BuiltInMapObj, pairs...)
+}
+
+// NewInheritedMap returns new map object born of proto.
+func NewInheritedMap(proto PanObject, pairs ...Pair) *PanMap {
 	hashKeys := []HashKey{}
 	pairMap := map[HashKey]Pair{}
 	nonHashablePairs := []Pair{}
@@ -113,6 +119,7 @@ func NewPanMap(pairs ...Pair) *PanMap {
 		HashKeys:         &hashKeys,
 		Pairs:            &pairMap,
 		NonHashablePairs: &nonHashablePairs,
+		proto:            proto,
 	}
 }
 
@@ -122,5 +129,6 @@ func NewEmptyPanMap() *PanMap {
 		HashKeys:         &[]HashKey{},
 		Pairs:            &map[HashKey]Pair{},
 		NonHashablePairs: &[]Pair{},
+		proto:            BuiltInMapObj,
 	}
 }
