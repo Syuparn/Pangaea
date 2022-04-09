@@ -4323,6 +4323,24 @@ func TestEvalBearProto(t *testing.T) {
 	}
 }
 
+// NOTE: since these objects must be singletons and used for equality check,
+// they bear itself and does not allow descendants.
+func TestEvalBearSingleton(t *testing.T) {
+	tests := []struct {
+		input string
+	}{
+		{`true.bear == true`},
+		{`false.bear == false`},
+		// ignore args
+		{`true.bear({a: 1}) == true`},
+		{`false.bear({a: 1}) == false`},
+	}
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, object.BuiltInTrue)
+	}
+}
+
 func TestEvalBearErr(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -9730,6 +9748,43 @@ func TestEvalIntConstructor(t *testing.T) {
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
 		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalIntNewProto(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`MyInt := Int.bear; MyInt.new(1).proto == MyInt`,
+			object.BuiltInTrue,
+		},
+		{
+			`2.new(5).proto == 2`,
+			object.BuiltInTrue,
+		},
+		{
+			`myone := 1.bear; myone.new(2).proto == myone`,
+			object.BuiltInTrue,
+		},
+		// since true and false are singletons and must not be inherited, new returns Int's child.
+		{
+			`true.new(2).proto == Int`,
+			object.BuiltInTrue,
+		},
+		{
+			`false.new(2).proto == Int`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }
 

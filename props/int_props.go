@@ -331,6 +331,11 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 				proto := args[0]
 
+				// since true and false are singletons and must not be inherited, bear returns self
+				if proto == object.BuiltInTrue || proto == object.BuiltInFalse {
+					return proto
+				}
+
 				// if soruce is not specified as arg, use {}
 				src := object.EmptyPanObjPtr()
 				if len(args) >= 2 {
@@ -380,17 +385,25 @@ func IntProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				if len(args) < 2 {
 					return object.NewTypeErr("Int#new requires at least 2 args")
 				}
+
+				proto := args[0]
+				// since true and false are singletons and must not be inherited, new inherits Int
+				if proto == object.BuiltInTrue || proto == object.BuiltInFalse {
+					proto = object.BuiltInIntObj
+				}
+
 				i, ok := object.TraceProtoOfInt(args[1])
 				if ok {
+
 					// NOTE: Int's descendants also call this
-					return object.NewInheritedInt(args[0], int64(i.Value))
+					return object.NewInheritedInt(proto, int64(i.Value))
 				}
 
 				// float is rounded down
 				f, ok := object.TraceProtoOfFloat(args[1])
 				if ok {
 					// NOTE: Int's descendants also call this
-					return object.NewInheritedInt(args[0], int64(f.Value))
+					return object.NewInheritedInt(proto, int64(f.Value))
 				}
 
 				return object.NewTypeErr(
