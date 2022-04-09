@@ -1,4 +1,4 @@
 {
   # digest merges arr pairs with self
-  digest: m{|pairs| %{**self, **pairs.O}},
+  digest: m{|pairs| %{**self, **pairs.M}},
 }

@@ -51,6 +51,8 @@
   index: m{|elem| .indices(elem).{\[0] if \ else -1}},
   # indices selects indices of all elements matched by elem.
   indices: m{|elem| .withI@{|i, e| i if e === elem}},
+  # keyBy convert self to a map whose keys are generated from f
+  keyBy: m{|f| @(%{}){|e| [f(e), e]}},
   # lazyMap works similar to map but returns iter of elements instead.
   lazyMap: m{|f| ._iter.{|it| <{yield it.next.^f}>}},
   # last returns the last element in self without conversion to array.

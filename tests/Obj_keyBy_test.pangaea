@@ -1,0 +1,6 @@
+assertEq({a: 1, b: 2}.keyBy {\[0]}, %{'a: ['a, 1], 'b: ['b, 2]})
+assertEq({a: 1, b: 2}.keyBy('rev), %{[1, 'a]: ['a, 1], [2, 'b]: ['b, 2]})
+# duplicate keys are ignored
+assertEq({a: 1, b: 1}.keyBy {\[1]}, %{1: ['a, 1]})
+# non-sym keys are ignored (due to Obj._iter's specification)
+assertEq({_a: 1, b: 2}.keyBy {\[0]}, %{'b: ['b, 2]})

@@ -1,0 +1,4 @@
+assertEq(<{yield \ if \ <= 2; recur(\ + 1)}>.new(1).keyBy {.S}, %{"1": 1, "2": 2})
+assertEq(<{yield \ if \ <= 2; recur(\ + 1)}>.new(1).keyBy('even?), %{false: 1, true: 2})
+# duplicate keys are ignored
+assertEq(<{yield \ if \ <= 3; recur(\ + 1)}>.new(1).keyBy('even?), %{false: 1, true: 2})
