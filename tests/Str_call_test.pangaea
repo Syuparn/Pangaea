@@ -1,3 +1,9 @@
+# symbol 'foo can be used as {.foo}
+# func
 assertEq('even?(2), true)
+# method
 assertEq("Ab".map('lc?), [false, true])
+# get prop
+assertEq([{a: 1}, {a: 2}].map('a), [1, 2])
+# error
 assertRaises(ValueErr, "`hello, world!` is not a symbol") {"hello, world!"()}
