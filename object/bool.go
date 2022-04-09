@@ -10,6 +10,7 @@ const BoolType = "BoolType"
 // PanBool is object of bool literal.
 type PanBool struct {
 	Value bool
+	// NOTE: bool does not have proto field because true and false must be singletons.
 }
 
 // Type returns type of this PanObject.
