@@ -235,6 +235,15 @@ func TestMapProto(t *testing.T) {
 	}
 }
 
+func TestInheritedMapProto(t *testing.T) {
+	mapChild := ChildPanObjPtr(BuiltInMapObj, EmptyPanObjPtr())
+	a := NewInheritedMap(mapChild)
+	if a.Proto() != mapChild {
+		t.Fatalf("Proto is not mapChild. got=%T (%s)",
+			a.Proto(), a.Proto().Inspect())
+	}
+}
+
 func TestMapZero(t *testing.T) {
 	tests := []struct {
 		name string
@@ -456,6 +465,69 @@ func TestNewPanMapWithDuplicatedKeys(t *testing.T) {
 
 		for i, pair := range tt.expectedNonHashablePairs {
 			actualPair := (*actual.NonHashablePairs)[i]
+
+			if actualPair.Key != pair.Key {
+				t.Errorf("wrong key. expected=%s, got=%s",
+					pair.Key.Inspect(), actualPair.Key.Inspect())
+			}
+
+			if actualPair.Value != pair.Value {
+				t.Errorf("wrong value. expected=%s, got=%s",
+					pair.Value.Inspect(), actualPair.Value.Inspect())
+			}
+		}
+	}
+}
+
+func TestNewInheritedMap(t *testing.T) {
+	// child of Map
+	proto := ChildPanObjPtr(BuiltInMapObj, EmptyPanObjPtr())
+
+	tests := []struct {
+		pairs []Pair
+	}{
+		{[]Pair{}},
+		{[]Pair{
+			{NewPanStr("foo"), NewPanInt(2)},
+		}},
+		{[]Pair{
+			{NewPanStr("foo"), NewPanInt(2)},
+			{NewPanStr("bar"), BuiltInNil},
+		}},
+	}
+
+	for _, tt := range tests {
+		actual := NewInheritedMap(proto, tt.pairs...)
+
+		if len(*actual.Pairs) != len(tt.pairs) {
+			t.Fatalf("wrong pair length. expected=%d, got=%d",
+				len(tt.pairs), len(*actual.Pairs))
+		}
+
+		if len(*actual.NonHashablePairs) != 0 {
+			t.Fatalf("wrong NonHashablePair length. expected=%d, got=%d",
+				0, len(*actual.NonHashablePairs))
+		}
+
+		if len(*actual.HashKeys) != len(tt.pairs) {
+			t.Fatalf("wrong HashKeys length. expected=%d, got=%d",
+				len(tt.pairs), len(*actual.HashKeys))
+		}
+
+		for i, pair := range tt.pairs {
+			h, _ := pair.Key.(PanScalar)
+
+			// hashkey order check
+			if actualHash := (*actual.HashKeys)[i]; actualHash != h.Hash() {
+				t.Errorf("wrong HashKeys[%d]. expected=%v, got=%v",
+					i, h.Hash(), actualHash)
+			}
+
+			// pair existence check
+			actualPair, ok := (*actual.Pairs)[h.Hash()]
+			if !ok {
+				t.Fatalf("key %s is not found.", pair.Key.Inspect())
+			}
 
 			if actualPair.Key != pair.Key {
 				t.Errorf("wrong key. expected=%s, got=%s",
