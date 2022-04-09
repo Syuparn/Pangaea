@@ -51,6 +51,15 @@ func TestNilProto(t *testing.T) {
 	}
 }
 
+func TestInheritedNilProto(t *testing.T) {
+	nilChild := ChildPanObjPtr(BuiltInIntObj, EmptyPanObjPtr())
+	o := NewInheritedNil(nilChild)
+	if o.Proto() != nilChild {
+		t.Fatalf("Proto is not nilChild. got=%T (%s)",
+			o.Proto(), o.Proto().Inspect())
+	}
+}
+
 func TestNilZero(t *testing.T) {
 	tests := []struct {
 		name     string

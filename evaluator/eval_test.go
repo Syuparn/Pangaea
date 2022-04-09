@@ -9794,24 +9794,44 @@ func TestEvalNilConstructor(t *testing.T) {
 		expected object.PanObject
 	}{
 		{
-			`Nil.new(nil)`,
-			object.BuiltInNil,
-		},
-		// NOTE: not error! (because insufficient args are filled with nil)
-		{
 			`Nil.new`,
 			object.BuiltInNil,
 		},
-		// errors
+		// args are ignored (because nil does not require any info)
 		{
 			`Nil.new(2)`,
-			object.NewTypeErr("2 cannot be treated as nil"),
+			object.BuiltInNil,
 		},
 	}
 
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
 		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalNilNewProto(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			// NOTE: use Obj#== to check Obj equality (Nil#== converts args into *PanNil implicitly)
+			`MyNil := Nil.bear; Obj['==](MyNil.new.proto, MyNil)`,
+			object.BuiltInTrue,
+		},
+		{
+			`MyNil := Nil.bear({my?: true}); MyNil.new.my?`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }
 

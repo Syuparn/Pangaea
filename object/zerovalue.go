@@ -9,6 +9,7 @@ func init() {
 
 	BuiltInOneInt.proto = BuiltInIntObj
 	BuiltInZeroInt.proto = BuiltInIntObj
+	BuiltInNil.proto = BuiltInNilObj
 
 	// set zero values
 	zeroObj.zero = zeroObj

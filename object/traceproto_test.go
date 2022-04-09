@@ -603,45 +603,48 @@ func TestTraceProtoOfMatchFailed(t *testing.T) {
 }
 
 func TestTraceProtoOfNil(t *testing.T) {
-	proto := BuiltInNil
-
 	tests := []struct {
+		name     string
 		obj      PanObject
 		expected *PanNil
 	}{
-		// return proto
 		{
-			NewPanObj(&map[SymHash]Pair{}, proto),
-			proto,
+			"return proto",
+			NewPanObj(&map[SymHash]Pair{}, BuiltInNil),
+			BuiltInNil,
 		},
-		// return itself
 		{
-			proto,
-			proto,
+			"nil returns itself",
+			BuiltInNil,
+			BuiltInNil,
 		},
-		// Nil returns zero value nil so that Nil itself can be used as nil object
 		{
+			"Nil returns zero value nil so that Nil itself can be used as nil object",
 			BuiltInNilObj,
 			BuiltInNil,
 		},
-		// child of Nil
 		{
+			"child of Nil returns zero value nil",
 			NewPanObj(&map[SymHash]Pair{}, BuiltInNilObj),
 			BuiltInNil,
 		},
 	}
 
 	for _, tt := range tests {
-		actual, ok := TraceProtoOfNil(tt.obj)
+		tt := tt // pin
 
-		if !ok {
-			t.Errorf("ok must be true (obj=%v)", tt.obj)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			actual, ok := TraceProtoOfNil(tt.obj)
 
-		if actual != tt.expected {
-			t.Errorf("proto must be %+v(%T). got=%+v(%T)",
-				tt.expected, tt.expected, actual, actual)
-		}
+			if !ok {
+				t.Fatalf("ok must be true (obj=%s)", tt.obj.Repr())
+			}
+
+			if actual != tt.expected {
+				t.Errorf("proto must be %s(%T). got=%s(%T)",
+					tt.expected.Repr(), tt.expected, actual.Repr(), actual)
+			}
+		})
 	}
 }
 
