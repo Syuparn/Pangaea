@@ -112,6 +112,15 @@ func TestRangeProto(t *testing.T) {
 	}
 }
 
+func TestInheritedRangeProto(t *testing.T) {
+	rangeChild := ChildPanObjPtr(BuiltInRangeObj, EmptyPanObjPtr())
+	o := NewInheritedRange(rangeChild, NewPanNil(), NewPanNil(), NewPanNil())
+	if o.Proto() != rangeChild {
+		t.Fatalf("Proto is not rangeChild. got=%T (%s)",
+			o.Proto(), o.Proto().Inspect())
+	}
+}
+
 func TestRangeZero(t *testing.T) {
 	tests := []struct {
 		name string
@@ -150,6 +159,42 @@ func TestNewPanRange(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := NewPanRange(tt.start, tt.stop, tt.step)
+
+		if actual.Start != tt.start {
+			t.Errorf("wrong start. expected=%#v, got=%#v",
+				tt.start, actual.Start)
+		}
+
+		if actual.Stop != tt.stop {
+			t.Errorf("wrong stop. expected=%#v, got=%#v",
+				tt.stop, actual.Stop)
+		}
+
+		if actual.Step != tt.step {
+			t.Errorf("wrong step. expected=%#v, got=%#v",
+				tt.step, actual.Step)
+		}
+	}
+}
+
+func TestNewInheritedRange(t *testing.T) {
+	// child of Range
+	proto := ChildPanObjPtr(BuiltInRangeObj, EmptyPanObjPtr())
+
+	tests := []struct {
+		start PanObject
+		stop  PanObject
+		step  PanObject
+	}{
+		{
+			NewPanInt(1),
+			NewPanInt(2),
+			NewPanInt(3),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := NewInheritedRange(proto, tt.start, tt.stop, tt.step)
 
 		if actual.Start != tt.start {
 			t.Errorf("wrong start. expected=%#v, got=%#v",

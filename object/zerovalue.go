@@ -6,6 +6,7 @@ package object
 func init() {
 	// set protos
 	zeroArr.proto = BuiltInArrObj
+	zeroRange.proto = BuiltInRangeObj
 
 	BuiltInOneInt.proto = BuiltInIntObj
 	BuiltInZeroInt.proto = BuiltInIntObj
@@ -30,5 +31,5 @@ var zeroObj = &PanObj{
 	// zero: zeroObj,
 }
 
-var zeroRange = NewPanRange(BuiltInNil, BuiltInNil, BuiltInNil)
+var zeroRange = &PanRange{Start: BuiltInNil, Stop: BuiltInNil, Step: BuiltInNil}
 var zeroStr = NewPanStr("")

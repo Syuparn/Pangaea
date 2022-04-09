@@ -13,6 +13,7 @@ type PanRange struct {
 	Start PanObject
 	Stop  PanObject
 	Step  PanObject
+	proto PanObject
 }
 
 // Type returns type of this PanObject.
@@ -50,7 +51,7 @@ func (r *PanRange) Repr() string {
 
 // Proto returns proto of this object.
 func (r *PanRange) Proto() PanObject {
-	return BuiltInRangeObj
+	return r.proto
 }
 
 // Zero returns zero value of this object.
@@ -60,5 +61,15 @@ func (r *PanRange) Zero() PanObject {
 
 // NewPanRange returns new range object.
 func NewPanRange(start, stop, step PanObject) *PanRange {
-	return &PanRange{start, stop, step}
+	return NewInheritedRange(BuiltInRangeObj, start, stop, step)
+}
+
+// NewInheritedRange returns new range object born of proto.
+func NewInheritedRange(proto PanObject, start, stop, step PanObject) *PanRange {
+	return &PanRange{
+		Start: start,
+		Stop:  stop,
+		Step:  step,
+		proto: proto,
+	}
 }

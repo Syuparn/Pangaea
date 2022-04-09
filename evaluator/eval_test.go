@@ -9908,6 +9908,31 @@ func TestEvalRangeConstructor(t *testing.T) {
 	}
 }
 
+func TestEvalRangeNewProto(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			// NOTE: use Obj#== to check Obj equality (Range#== converts args into *PanRange implicitly)
+			`MyRange := Range.bear; Obj['==](MyRange.new(1, 10, 2).proto, MyRange)`,
+			object.BuiltInTrue,
+		},
+		{
+			`MyRange := Range.bear({my?: true}); MyRange.new(1, 10, 2).my?`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
+	}
+}
+
 func TestEvalStrConstructor(t *testing.T) {
 	tests := []struct {
 		input    string
