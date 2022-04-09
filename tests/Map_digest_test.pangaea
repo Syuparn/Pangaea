@@ -1,2 +1,4 @@
 assertEq(%{}.digest([['a, 1], ['b, 2]]), %{'a: 1, 'b: 2})
 assertEq(%{'a: 1}.digest([['b, 2]]), %{'a: 1, 'b: 2})
+# non-str keys
+assertEq(%{5: "five"}.digest([[10, "ten"]]), %{5: "five", 10: "ten"})
