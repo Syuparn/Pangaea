@@ -14,6 +14,7 @@ type PanFunc struct {
 	FuncWrapper
 	FuncKind FuncKind
 	Env      *Env
+	// TODO: add proto field to fix inheritance
 }
 
 // Type returns type of this PanObject.
