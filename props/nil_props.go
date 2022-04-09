@@ -1,8 +1,6 @@
 package props
 
 import (
-	"fmt"
-
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -59,17 +57,12 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 			func(
 				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
 			) object.PanObject {
-				if len(args) < 2 {
-					// NOTE: not error because insufficient args are filled with nil!
-					return object.BuiltInNil
-				}
-				n, ok := object.TraceProtoOfNil(args[1])
-				if !ok {
-					return object.NewTypeErr(
-						fmt.Sprintf("%s cannot be treated as nil", args[1].Repr()))
+				if len(args) < 1 {
+					return object.NewTypeErr("Nil#bear requires at least 1 arg")
 				}
 
-				return n
+				// NOTE: Nil's descendants also call this
+				return object.NewInheritedNil(args[0])
 			},
 		),
 	}
