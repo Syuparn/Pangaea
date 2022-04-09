@@ -1,0 +1,4 @@
+assertEq("ab".keyBy {.uc}, %{'A: 'a, 'B: 'b})
+assertEq("ab".keyBy('uc), %{'A: 'a, 'B: 'b})
+# duplicate keys are ignored
+assertEq("aA".keyBy('uc), %{'A: 'a})

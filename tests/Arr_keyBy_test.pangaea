@@ -1,0 +1,4 @@
+assertEq([1, 2].keyBy {.S}, %{"1": 1, "2": 2})
+assertEq([{a: 1}, {a: 2}].keyBy('a), %{1: {a: 1}, 2: {a: 2}})
+# duplicate keys are ignored
+assertEq([{a: 1, b: 2}, {a: 1, c: 3}].keyBy('a), %{1: {a: 1, b: 2}})

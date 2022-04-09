@@ -1,0 +1,4 @@
+assertEq(%{1: "one", 2: "two"}.keyBy {\[1]}, %{"one": [1, "one"], "two": [2, "two"]})
+assertEq(%{1: "one", 2: "two"}.keyBy('rev), %{["one", 1]: [1, "one"], ["two", 2]: [2, "two"]})
+# duplicate keys are ignored
+assertEq(%{1: "num", 2: "num"}.keyBy {\[1]}, %{"num": [1, "num"]})

@@ -1,0 +1,4 @@
+assertEq((1:3).keyBy {.S}, %{"1": 1, "2": 2})
+assertEq((1:3).keyBy('even?), %{false: 1, true: 2})
+# duplicate keys are ignored
+assertEq((1:4).keyBy('even?), %{false: 1, true: 2})
