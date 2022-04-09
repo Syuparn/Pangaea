@@ -46,7 +46,7 @@ func (io *PanIO) Proto() PanObject {
 
 // Zero returns zero value of this object.
 func (io *PanIO) Zero() PanObject {
-	// TODO: implement zero value
+	// TODO: implement zero value when io other than stdin/stdout is introduced
 	return io
 }
 
