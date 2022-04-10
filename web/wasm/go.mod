@@ -1,8 +1,8 @@
 module github.com/Syuparn/pangaea/web/wasm
 
-go 1.17
+go 1.18
 
-require github.com/Syuparn/pangaea v0.7.0
+require github.com/Syuparn/pangaea v0.8.0
 
 require (
 	github.com/dlclark/regexp2 v1.4.0 // indirect
