@@ -66,6 +66,39 @@ On the other hand, `at`(used for indexing) describes how to show internal struct
 4._iter.next # 1
 ```
 
+### keys of obj's list map
+
+`Obj#_iter` ignores private keys and inherited keys. This prevents chain's unexpected behaviour.
+
+If `_iter` returned private keys, meta-properties not intended to be used as data would get into list chains.
+
+```pangaea
+# you don't be bothered by _name prop!
+infixes := {_name: "infixes", add: {\1 + \2}, sub: {\1 - \2}, mul: {\1 * \2}, div: {\1 / \2}}
+
+infixes@{|k, v| "#{k}: #{v(6, 3)}"}@p
+# add: 9
+# div: 2.0
+# mul: 18
+# sub: 3
+```
+
+Also, if `_iter` returned inherited keys, you would have to eliminate prototype's methods.
+
+```pangaea
+# you don't have to worry about tons of Obj's methods!
+Obj.keys.p # ["A", "B", "S", "acc",...]
+
+obj := {a: 1, b: 2, c: 3}
+obj@p
+# ["a", 1]
+# ["b", 2]
+# ["c", 3]
+
+# on the other hand, you can access Obj's method by `at`
+ obj['A].p # {|self| @{|| \}}
+```
+
 ### Reduce Chain
 The receiver is **each element of** left-side value iterator.
 Also, returned value of previous call is passed to 2nd argument
@@ -96,7 +129,7 @@ nil&.capital.puts # nil
 ```
 
 #### Thoughtful Chain
-This chain returns receiver instead if returned value is `nil`.
+This chain returns receiver instead if returned value is `nil` or the call raises an error.
 
 ```pangaea
 (1:16)~@{|i| ['fizz][i%3] + ['buzz][i%5]}.puts # [1, 2, "fizz", 4, "buzz", ..., "fizzbuzz"]
@@ -105,7 +138,12 @@ This chain returns receiver instead if returned value is `nil`.
 
 # (Of course you can use built-in prime function)
 20.select {.prime?}.puts # [2, 3, 5, ..., 19]
+
+# rollback error
+6~./(0) # 6
 ```
+
+This is useful for logics like `.{|x| f(x) if cond else x}`. You can rewrite this to `~.{|x| f(x) if cond}`.
 
 #### Strict Chain
 This chain keeps returned `nil` value.

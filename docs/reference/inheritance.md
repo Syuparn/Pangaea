@@ -95,6 +95,8 @@ account.deposit # 7000
 
 `bear` generates a self's child. If `deposit` is called twice, returned value is a prototype of a prototype of `account`. This makes prototype chains verbose.
 
+For the same reason, the most of built-in methods returns `bro` of self (ex: infix `+`).
+
 #### using constructor
 
 Using `Account.new` in `deposit` seems good. But it does not work in `Account`'s children.

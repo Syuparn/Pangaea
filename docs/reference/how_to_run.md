@@ -54,6 +54,20 @@ Amet
 []
 ```
 
+#### Prettify evaluated values
+
+If REPL's output is long and verbose, consider using `_name` prop.
+
+```pangaea
+# too long...
+> asciis := (?a:?{)@({}){[\,.ord]}
+{"a": 97, "b": 98, "c": 99, ..., "z": 122}
+
+# add _name
+> asciis := {_name: "asciis", **asciis}
+asciis
+```
+
 ### One-liner
 
 With `-e` command, you can execute one-liner script.

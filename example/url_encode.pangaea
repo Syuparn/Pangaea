@@ -1,0 +1,4 @@
+# usage:
+# $ echo "foo/bAr%123" | pangaea url_encode.pangaea
+# foo%2FbAr%25123
+<>.S~@{?% + .ord.S(base:16).uc if !.match("[a-zA-Z0-9]")}$+.p
