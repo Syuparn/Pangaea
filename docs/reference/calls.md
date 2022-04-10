@@ -89,6 +89,26 @@ obj.foo
 obj['foo] # 1 or accesssor?
 ```
 
+### Can I do the same thing by methods?
+
+You can use `Obj#callProp`. This works just as property calls.
+
+```pangaea
+# experiment: compare callProp and call
+myCall := {|o, name| o[name]()} # NOTE: f() is syntax sugar of f.call()
+myPropCall := {|o, name| {}.callProp(o, name)}
+
+robot := {version: 3, greet: m{"hi!".p}}
+
+# call methods
+myCall(robot, 'greet)
+myPropCall(robot, 'greet)
+
+# refer non-callable prop
+myCall(robot, 'version) # NoPropErr: property `call` is not defined.
+myPropCall(robot, 'version) # 3
+```
+
 ### Prototype chains
 
 If the receiver does not have the specified property(method), its prototype's property is called.

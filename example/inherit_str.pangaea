@@ -1,0 +1,7 @@
+# inherit Str
+ExpandingStr := Str.bear({
+  # "foo" -> "f o o"
+  p: m{"\"#{.A.join(` `)}\"".p},
+})
+
+(ExpandingStr.new("hello") + ExpandingStr.new("world")).p # "h e l l o w o r l d"

@@ -41,6 +41,16 @@ For that reason, symbol literal allows only valid property names.
 '+
 ```
 
+Symbol can also be used as function. This is handy for methods which require function args.
+This is inspired by Ruby's `Symbol#to_proc`.
+
+```pangaea
+10.exclude {|i| i.even?} # [1, 3, 5, 7, 9]
+
+# same as above ( 'foo behaves as {.foo} )
+10.exclude('even?)
+```
+
 ### Why are there so many literal forms?
 Because they are neccessary!
 
