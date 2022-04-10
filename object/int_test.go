@@ -157,3 +157,24 @@ func TestNewInheritedInt(t *testing.T) {
 		}
 	}
 }
+
+func TestNewInheritedIntConst(t *testing.T) {
+	tests := []struct {
+		proto    PanObject
+		i        int64
+		expected PanObject
+	}{
+		{BuiltInIntObj, 1, BuiltInOneInt},
+		{BuiltInIntObj, 0, BuiltInZeroInt},
+	}
+
+	for _, tt := range tests {
+		actual := NewInheritedInt(tt.proto, tt.i)
+
+		// equality check (`0` and `1` must be singletons due to boolean inheritance)
+		if actual != tt.expected {
+			t.Errorf("value is different. expected=%p, got=%p",
+				tt.expected, actual)
+		}
+	}
+}

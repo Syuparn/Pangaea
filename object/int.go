@@ -46,17 +46,20 @@ func (i *PanInt) Hash() HashKey {
 // NewPanInt returns new int object.
 // NOTE: `0` and `1` are cached and always same instance are returned.
 func NewPanInt(i int64) *PanInt {
-	switch i {
-	case 0:
-		return BuiltInZeroInt
-	case 1:
-		return BuiltInOneInt
-	default:
-		return &PanInt{Value: i, proto: BuiltInIntObj}
-	}
+	return NewInheritedInt(BuiltInIntObj, i)
 }
 
 // NewInheritedInt returns new int object born of proto.
 func NewInheritedInt(proto PanObject, i int64) *PanInt {
+	// HACK: `0` and `1` must be singletons due to boolean inheritance
+	if proto == BuiltInIntObj {
+		switch i {
+		case 0:
+			return BuiltInZeroInt
+		case 1:
+			return BuiltInOneInt
+		}
+	}
+
 	return &PanInt{Value: i, proto: proto}
 }
