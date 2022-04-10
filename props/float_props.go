@@ -67,13 +67,14 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 					return object.NewTypeErr("\\- requires at least 1 arg")
 				}
 
-				self, ok := object.TraceProtoOfFloat(args[0])
+				f, ok := object.TraceProtoOfFloat(args[0])
 				if !ok {
 					return object.NewTypeErr("\\1 must be float")
 				}
 
-				res := -self.Value
-				return object.NewPanFloat(res)
+				res := -f.Value
+				// NOTE: Float's descendants also call this
+				return object.NewInheritedFloat(args[0], res)
 			},
 		),
 		"/~": f(
@@ -92,7 +93,8 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				v := self.Value
 				// NOTE: go cannot invert float bits directly
 				res := math.Float64frombits(^math.Float64bits(v))
-				return object.NewPanFloat(res)
+				// NOTE: Float's descendants also call this
+				return object.NewInheritedFloat(args[0], res)
 			},
 		),
 		"+": f(
@@ -105,7 +107,8 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				res := self.Value + other.Value
-				return object.NewPanFloat(res)
+				// NOTE: Float's descendants also call this
+				return object.NewInheritedFloat(args[0].Proto(), res)
 			},
 		),
 		"-": f(
@@ -118,7 +121,8 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				res := self.Value - other.Value
-				return object.NewPanFloat(res)
+				// NOTE: Float's descendants also call this
+				return object.NewInheritedFloat(args[0].Proto(), res)
 			},
 		),
 		"*": f(
@@ -131,7 +135,8 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				res := self.Value * other.Value
-				return object.NewPanFloat(res)
+				// NOTE: Float's descendants also call this
+				return object.NewInheritedFloat(args[0].Proto(), res)
 			},
 		),
 		"**": f(
@@ -144,7 +149,8 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				res := math.Pow(self.Value, other.Value)
-				return object.NewPanFloat(res)
+				// NOTE: Float's descendants also call this
+				return object.NewInheritedFloat(args[0].Proto(), res)
 			},
 		),
 		"/": f(
@@ -161,7 +167,8 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 
 				res := self.Value / other.Value
-				return object.NewPanFloat(res)
+				// NOTE: Float's descendants also call this
+				return object.NewInheritedFloat(args[0].Proto(), res)
 			},
 		),
 		"_name": object.NewPanStr("Float"),
@@ -192,12 +199,14 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 				}
 				f, ok := object.TraceProtoOfFloat(args[1])
 				if ok {
-					return f
+					// NOTE: Float's descendants also call this
+					return object.NewInheritedFloat(args[0], f.Value)
 				}
 
 				i, ok := object.TraceProtoOfInt(args[1])
 				if ok {
-					return object.NewPanFloat(float64(i.Value))
+					// NOTE: Float's descendants also call this
+					return object.NewInheritedFloat(args[0], float64(i.Value))
 				}
 
 				return object.NewTypeErr(
@@ -222,7 +231,8 @@ func FloatProps(propContainer map[string]object.PanObject) map[string]object.Pan
 						fmt.Sprintf("sqrt of %s is not a real number", self.Repr()))
 				}
 
-				return object.NewPanFloat(math.Sqrt(self.Value))
+				// NOTE: Float's descendants also call this
+				return object.NewInheritedFloat(args[0].Proto(), math.Sqrt(self.Value))
 			},
 		),
 	}

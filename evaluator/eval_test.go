@@ -280,6 +280,11 @@ func TestEvalIntSqrt(t *testing.T) {
 			`-4.sqrt`,
 			object.NewValueErr("sqrt of -4 is not a real number"),
 		},
+		// child.sqrt == brother
+		{
+			`child := Float.bear({child?: true}); child.new(1.2).sqrt.child?`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -8618,6 +8623,11 @@ func TestEvalInfixFloatAdd(t *testing.T) {
 			`1.5 + 3`,
 			object.NewPanFloat(4.5),
 		},
+		// child + child == brother
+		{
+			`child := Float.bear({child?: true}); (child.new(1.2) + child.new(3.4)).child?`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -8688,6 +8698,11 @@ func TestEvalInfixFloatSub(t *testing.T) {
 			`2.5 - 3`,
 			object.NewPanFloat(-0.5),
 		},
+		// child - child == brother
+		{
+			`child := Float.bear({child?: true}); (child.new(1.2) - child.new(3.4)).child?`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -8757,6 +8772,11 @@ func TestEvalInfixFloatMul(t *testing.T) {
 		{
 			`2.5 * 3`,
 			object.NewPanFloat(7.5),
+		},
+		// child * child == brother
+		{
+			`child := Float.bear({child?: true}); (child.new(1.2) * child.new(3.4)).child?`,
+			object.BuiltInTrue,
 		},
 	}
 
@@ -8832,6 +8852,11 @@ func TestEvalInfixFloatPower(t *testing.T) {
 			`3.0 ** 2`,
 			object.NewPanFloat(9.0),
 		},
+		// child ** child == brother
+		{
+			`child := Float.bear({child?: true}); (child.new(1.2) ** child.new(3.4)).child?`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -8893,6 +8918,11 @@ func TestEvalInfixFloatDiv(t *testing.T) {
 		{
 			`7.5 / 3`,
 			object.NewPanFloat(2.5),
+		},
+		// child / child == brother
+		{
+			`child := Float.bear({child?: true}); (child.new(1.2) / child.new(3.4)).child?`,
+			object.BuiltInTrue,
 		},
 	}
 
@@ -9134,8 +9164,13 @@ func TestEvalPrefix(t *testing.T) {
 			object.NewPanInt(-2),
 		},
 		// -a is a's brother
+		// NOTE: == may not be check equality because it converts args into *PanInt implicitly
 		{
-			`child := Int.bear; a := child.new(1); (-a).proto == child`,
+			`child := Int.bear({child?: true}); a := child.new(1); (-a).proto.child?`,
+			object.BuiltInTrue,
+		},
+		{
+			`child := Float.bear({child?: true}); a := child.new(2.5); (-a).proto.child?`,
 			object.BuiltInTrue,
 		},
 	}
@@ -9668,6 +9703,32 @@ func TestEvalFloatConstructor(t *testing.T) {
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
 		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalFloatNewProto(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			// NOTE: use Obj#== to check Obj equality (Float#== converts args into *PanFloat implicitly)
+			`MyFloat := Float.bear; Obj['==](MyFloat.new(2.5).proto, MyFloat)`,
+			object.BuiltInTrue,
+		},
+		{
+			// int to myFloat
+			`MyFloat := Float.bear; Obj['==](MyFloat.new(2).proto, MyFloat)`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }
 
