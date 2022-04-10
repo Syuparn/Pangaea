@@ -58,6 +58,15 @@ func TestFloatProto(t *testing.T) {
 	}
 }
 
+func TestInheritedFloatProto(t *testing.T) {
+	floatChild := ChildPanObjPtr(BuiltInFloatObj, EmptyPanObjPtr())
+	o := NewInheritedFloat(floatChild, 2.5)
+	if o.Proto() != floatChild {
+		t.Fatalf("Proto is not floatChild. got=%T (%s)",
+			o.Proto(), o.Proto().Inspect())
+	}
+}
+
 func TestFloatZero(t *testing.T) {
 	tests := []struct {
 		name string

@@ -8,6 +8,7 @@ func init() {
 	zeroArr.proto = BuiltInArrObj
 	zeroMap.proto = BuiltInMapObj
 	zeroRange.proto = BuiltInRangeObj
+	zeroFloat.proto = BuiltInFloatObj
 
 	BuiltInOneInt.proto = BuiltInIntObj
 	BuiltInZeroInt.proto = BuiltInIntObj
@@ -21,7 +22,7 @@ func init() {
 // NOTE: constractors cannot be used, otherwise initialization cycle occurs
 
 var zeroArr = &PanArr{}
-var zeroFloat = NewPanFloat(0.0)
+var zeroFloat = &PanFloat{Value: 0.0}
 var zeroMap = &PanMap{
 	HashKeys:         &[]HashKey{},
 	Pairs:            &map[HashKey]Pair{},

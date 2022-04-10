@@ -11,6 +11,7 @@ const FloatType = "FloatType"
 // PanFloat is object of float literal.
 type PanFloat struct {
 	Value float64
+	proto PanObject
 }
 
 // Type returns type of this PanObject.
@@ -30,7 +31,7 @@ func (f *PanFloat) Repr() string {
 
 // Proto returns proto of this object.
 func (f *PanFloat) Proto() PanObject {
-	return BuiltInFloatObj
+	return f.proto
 }
 
 // Zero returns zero value of this object.
@@ -46,5 +47,13 @@ func (f *PanFloat) Hash() HashKey {
 
 // NewPanFloat returns new float object.
 func NewPanFloat(f float64) *PanFloat {
-	return &PanFloat{f}
+	return NewInheritedFloat(BuiltInFloatObj, f)
+}
+
+// NewInheritedFloat returns new float object born of proto.
+func NewInheritedFloat(proto PanObject, f float64) *PanFloat {
+	return &PanFloat{
+		proto: proto,
+		Value: f,
+	}
 }
