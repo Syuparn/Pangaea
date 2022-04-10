@@ -76,7 +76,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					negBytes = append(negBytes, ^b)
 				}
 
-				return object.NewPanStr(string(negBytes))
+				// NOTE: Str's descendants also call this
+				return object.NewInheritedStr(args[0].Proto(), string(negBytes))
 			},
 		),
 		"+": f(
@@ -89,7 +90,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 
 				res := self.Value + other.Value
-				return object.NewPanStr(res)
+				// NOTE: Str's descendants also call this
+				return object.NewInheritedStr(args[0].Proto(), res)
 			},
 		),
 		"*": f(
@@ -118,7 +120,9 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 						fmt.Sprintf("%s is not positive", args[1].Repr()))
 				}
 
-				return object.NewPanStr(strings.Repeat(self.Value, int(n)))
+				res := strings.Repeat(self.Value, int(n))
+				// NOTE: Str's descendants also call this
+				return object.NewInheritedStr(args[0].Proto(), res)
 			},
 		),
 		"/": f(
@@ -146,7 +150,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				for _, s := range splitted {
 					// exclude empty elems
 					if s != "" {
-						strs = append(strs, object.NewPanStr(s))
+						// NOTE: Str's descendants also call this
+						strs = append(strs, object.NewInheritedStr(args[0].Proto(), s))
 					}
 				}
 
@@ -176,7 +181,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				increasedRune := runes[len(runes)-1] + rune(n)
 				newRunes := append(runes[0:len(runes)-1], increasedRune)
 
-				return object.NewPanStr(string(newRunes))
+				// NOTE: Str's descendants also call this
+				return object.NewInheritedStr(args[0].Proto(), string(newRunes))
 			},
 		),
 		"_iter": f(
@@ -192,6 +198,7 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr("\\1 must be int")
 				}
 
+				// TODO: enable to iterate args[0]'s brothers
 				return object.NewPanBuiltInIter(strIter(self), env)
 			},
 		),
@@ -228,7 +235,9 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 						fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
 				}
 
-				return object.NewPanStr(dedent.Dedent(self.Value))
+				res := dedent.Dedent(self.Value)
+				// NOTE: Str's descendants also call this
+				return object.NewInheritedStr(args[0].Proto(), res)
 			},
 		),
 		"eval":    propContainer["Str_eval"],
@@ -294,7 +303,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`\1 must be str`)
 				}
 
-				return object.NewPanStr(strings.ToLower(self.Value))
+				// NOTE: Str's descendants also call this
+				return object.NewInheritedStr(args[0].Proto(), strings.ToLower(self.Value))
 			},
 		),
 		"len": f(
@@ -346,7 +356,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 
 				elems := []object.PanObject{}
 				for _, group := range match.Groups() {
-					elems = append(elems, object.NewPanStr(group.String()))
+					// NOTE: Str's descendants also call this
+					elems = append(elems, object.NewInheritedStr(args[0].Proto(), group.String()))
 				}
 
 				return object.NewPanArr(elems...)
@@ -361,7 +372,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				}
 				str, ok := object.TraceProtoOfStr(args[1])
 				if ok {
-					return str
+					// NOTE: Str's descendants also call this
+					return object.NewInheritedStr(args[0], str.Value)
 				}
 
 				// if \2 is not str, return \2.S
@@ -449,7 +461,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 						fmt.Sprintf("%s is invalid regex pattern", sub.Repr()))
 				}
 
-				return object.NewPanStr(lcReplaced)
+				// NOTE: Str's descendants also call this
+				return object.NewInheritedStr(args[0].Proto(), lcReplaced)
 			},
 		),
 		"sym?": f(
@@ -484,7 +497,8 @@ func StrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 					return object.NewTypeErr(`\1 must be str`)
 				}
 
-				return object.NewPanStr(strings.ToUpper(self.Value))
+				// NOTE: Str's descendants also call this
+				return object.NewInheritedStr(args[0].Proto(), strings.ToUpper(self.Value))
 			},
 		),
 	}

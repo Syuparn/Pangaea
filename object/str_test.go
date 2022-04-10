@@ -61,6 +61,15 @@ func TestStrProto(t *testing.T) {
 	}
 }
 
+func TestInheritedStrProto(t *testing.T) {
+	strChild := ChildPanObjPtr(BuiltInStrObj, EmptyPanObjPtr())
+	o := NewInheritedStr(strChild, "foo")
+	if o.Proto() != strChild {
+		t.Fatalf("Proto is not strChild. got=%T (%s)",
+			o.Proto(), o.Proto().Inspect())
+	}
+}
+
 func TestStrZero(t *testing.T) {
 	tests := []struct {
 		name string
@@ -123,6 +132,35 @@ func TestNewPanStr(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := NewPanStr(tt.str)
+		if actual.Value != tt.str {
+			t.Errorf("wrong value. expected=%s, got=%s", tt.str, actual.Value)
+		}
+
+		if actual.IsPublic != tt.isPublic {
+			t.Errorf("wrong isPublic. expected=%t, got=%t", tt.isPublic, actual.IsPublic)
+		}
+
+		if actual.IsSym != tt.isSym {
+			t.Errorf("wrong isSym. expected=%t, got=%t", tt.isSym, actual.IsSym)
+		}
+	}
+}
+
+func TestNewInheritedStr(t *testing.T) {
+	// child of Str
+	proto := ChildPanObjPtr(BuiltInStrObj, EmptyPanObjPtr())
+
+	tests := []struct {
+		str      string
+		isPublic bool
+		isSym    bool
+	}{
+		{"hoge", true, true},
+		{"hello world", false, false},
+	}
+
+	for _, tt := range tests {
+		actual := NewInheritedStr(proto, tt.str)
 		if actual.Value != tt.str {
 			t.Errorf("wrong value. expected=%s, got=%s", tt.str, actual.Value)
 		}

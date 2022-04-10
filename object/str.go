@@ -14,6 +14,7 @@ type PanStr struct {
 	Value    string
 	IsPublic bool
 	IsSym    bool
+	proto    PanObject
 }
 
 // Type returns type of this PanObject.
@@ -38,7 +39,7 @@ func (s *PanStr) Repr() string {
 
 // Proto returns proto of this object.
 func (s *PanStr) Proto() PanObject {
-	return BuiltInStrObj
+	return s.proto
 }
 
 // Zero returns zero value of this object.
@@ -58,7 +59,12 @@ func (s *PanStr) SymHash() SymHash {
 
 // NewPanStr makes new str object.
 func NewPanStr(s string) *PanStr {
-	return &PanStr{Value: s, IsPublic: isPublic(s), IsSym: isSym(s)}
+	return NewInheritedStr(BuiltInStrObj, s)
+}
+
+// NewInheritedStr returns new str object born of proto.
+func NewInheritedStr(proto PanObject, s string) *PanStr {
+	return &PanStr{Value: s, IsPublic: isPublic(s), IsSym: isSym(s), proto: proto}
 }
 
 var publicPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*[!?]?$`)

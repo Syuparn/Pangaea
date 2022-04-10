@@ -674,32 +674,35 @@ func TestTraceProtoOfObj(t *testing.T) {
 	proto := BuiltInIntObj
 
 	tests := []struct {
+		name     string
 		obj      PanObject
 		expected *PanObj
 	}{
-		// return proto
 		{
+			"return *PanObj from ancestors",
 			BuiltInOneInt,
 			proto,
 		},
-		// return itself
 		{
+			"return itself",
 			proto,
 			proto,
 		},
 	}
 
 	for _, tt := range tests {
-		actual, ok := TraceProtoOfObj(tt.obj)
+		t.Run(tt.name, func(t *testing.T) {
+			actual, ok := TraceProtoOfObj(tt.obj)
 
-		if !ok {
-			t.Errorf("ok must be true (obj=%v)", tt.obj)
-		}
+			if !ok {
+				t.Errorf("ok must be true (obj=%v)", tt.obj)
+			}
 
-		if actual != tt.expected {
-			t.Errorf("proto must be %+v(%T). got=%+v(%T)",
-				tt.expected, tt.expected, actual, actual)
-		}
+			if actual != tt.expected {
+				t.Errorf("proto must be %+v(%T). got=%+v(%T)",
+					tt.expected, tt.expected, actual, actual)
+			}
+		})
 	}
 }
 

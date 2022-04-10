@@ -766,6 +766,11 @@ func TestEvalStrLc(t *testing.T) {
 			`"A".bear.lc`,
 			object.NewPanStr("a"),
 		},
+		// child.lc == brother
+		{
+			`child := Str.bear({child?: true}); child.new("a").lc.child?`,
+			object.BuiltInTrue,
+		},
 		// if no args are passed, raise an error
 		{
 			`Str['lc]()`,
@@ -803,6 +808,11 @@ func TestEvalStrMatch(t *testing.T) {
 				object.NewPanStr("bc"),
 				object.NewPanStr("yyyzz"),
 			),
+		},
+		// child.match returns arr of brother
+		{
+			`child := Str.bear({child?: true}); child.new("a").match("a")[0].child?`,
+			object.BuiltInTrue,
 		},
 		// no match
 		{
@@ -880,6 +890,11 @@ func TestEvalStrSub(t *testing.T) {
 		{
 			"`SIng`.sub(`(Ing)`, `\\U$1\\E\\L$1\\E`)",
 			object.NewPanStr("SINGing"),
+		},
+		// child.sub returns brother
+		{
+			`child := Str.bear({child?: true}); child.new("a").sub("a", "b").child?`,
+			object.BuiltInTrue,
 		},
 		// if no args are passed, raise an error
 		{
@@ -986,6 +1001,11 @@ func TestEvalStrUc(t *testing.T) {
 		{
 			`"a".bear.uc`,
 			object.NewPanStr("A"),
+		},
+		// child.uc returns brother
+		{
+			`child := Str.bear({child?: true}); child.new("a").uc.child?`,
+			object.BuiltInTrue,
 		},
 		// if no args are passed, raise an error
 		{
@@ -5541,6 +5561,11 @@ func TestEvalDedent(t *testing.T) {
 			`"  ab\n    cd\n  ef".dedent`,
 			object.NewPanStr("ab\n  cd\nef"),
 		},
+		// child.dedent == brother
+		{
+			`child := Str.bear({child?: true}); child.new("a").dedent.child?`,
+			object.BuiltInTrue,
+		},
 		{
 			`Str['dedent]()`,
 			object.NewTypeErr("Str#dedent requires at least 1 arg"),
@@ -8400,6 +8425,11 @@ func TestEvalInfixStrAdd(t *testing.T) {
 			`"abc" + nil`,
 			object.NewPanStr("abc"),
 		},
+		// child + child == brother
+		{
+			`child := Str.bear({child?: true}); (child.new("a") + child.new("b")).child?`,
+			object.BuiltInTrue,
+		},
 	}
 
 	for _, tt := range tests {
@@ -8441,6 +8471,11 @@ func TestEvalInfixStrMul(t *testing.T) {
 		{
 			`"w" * 3`,
 			object.NewPanStr("www"),
+		},
+		// child * n == brother
+		{
+			`child := Str.bear({child?: true}); (child.new("a") * 3).child?`,
+			object.BuiltInTrue,
 		},
 	}
 
@@ -8552,6 +8587,11 @@ func TestEvalInfixStrDiv(t *testing.T) {
 		{
 			"`a` / `[`",
 			object.NewValueErr(`"[" is invalid regex pattern`),
+		},
+		// child / x == arr of brother
+		{
+			`child := Str.bear({child?: true}); (child.new("a a") / " ")[0].child?`,
+			object.BuiltInTrue,
 		},
 	}
 
@@ -10022,6 +10062,31 @@ func TestEvalStrConstructor(t *testing.T) {
 	for _, tt := range tests {
 		actual := testEval(t, tt.input)
 		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalStrNewProto(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			// NOTE: use Obj#== to check Obj equality (Str#== converts args into *PanStr implicitly)
+			`MyStr := Str.bear; Obj['==](MyStr.new("foo").proto, MyStr)`,
+			object.BuiltInTrue,
+		},
+		{
+			`MyStr := Str.bear({my?: true}); MyStr.new("foo").my?`,
+			object.BuiltInTrue,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }
 
