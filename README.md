@@ -182,6 +182,28 @@ This is useful only in list context, which removes returned `nil`.
 
 See [Language Reference](./docs/reference/README.md) for more information.
 
+# For Developers
+
+## Directories
+
+|name|description|
+|-|-|
+|.chglog|template of release note|
+|.github|GitHub actions|
+|ast|definition of AST|
+|di|inject native properties into built-in objects|
+|docs|language spec reference|
+|evaluator|evaluator with built-in prop tests|
+|example|pangaea example snippets|
+|native|native properties written in Pangaea|
+|object|definition of Pangaea object system|
+|parser|parser generated from goyacc grammer|
+|props|built-in properties written in Go|
+|runscript|handle interpreter and REPL|
+|tests|native property tests written in Pangaea|
+|third_party|patched dependant Go modules|
+|web|Pangaea Playground|
+
 # Contribution
 
 Any contribution is welcome!
