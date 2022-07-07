@@ -3,3 +3,4 @@ assertEq({a: 1, b: 2}.patch(a: 5, b: 6), {a: 5, b: 6})
 assertEq({a: 1, b: 2}.patch(c: 3), {a: 1, b: 2, c: 3})
 obj := {a: 1}
 assertEq(obj.bear({b: 2}).patch(b: 3), obj.bear({b: 3}))
+assertEq(obj.patch(b: 3).proto, obj.proto)
