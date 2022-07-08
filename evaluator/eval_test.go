@@ -9164,6 +9164,45 @@ func TestEvalInfixNilSubErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixNilMul(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// anything can be multiplied by nil (and nil works as identity element (1)).
+		{
+			`nil * 3`,
+			object.NewPanInt(3),
+		},
+		{
+			`nil * 5.0`,
+			object.NewPanFloat(5.0),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixNilMulErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`nil.*`,
+			object.NewTypeErr("* requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixIntMod(t *testing.T) {
 	tests := []struct {
 		input    string

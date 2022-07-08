@@ -54,6 +54,17 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				)
 			},
 		),
+		"*": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// anything can be multiplied by nil (and nil works as identity unit (1 for example)).
+				if len(args) < 2 {
+					return object.NewTypeErr("* requires at least 2 args")
+				}
+				return args[1]
+			},
+		),
 		"_name": object.NewPanStr("Nil"),
 		"B": f(
 			func(
