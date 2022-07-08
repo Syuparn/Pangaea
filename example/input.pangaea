@@ -1,0 +1,6 @@
+# read stdin
+<>.p # first line
+<>@p # all lines
+<>@A.p # arr of characters
+<>@I.p # convert to int
+<>@IA.p # convert to int arr
