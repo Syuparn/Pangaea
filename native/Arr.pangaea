@@ -2,6 +2,8 @@
   # A converts self into arr.
   # NOTE: arr descendant is converted into Arr's child
   A: m{self[:]},
+  # assign replaces self[i] with v.
+  assign: m{|i, v| .proto.new([*self[:i], v, *self[i+1:]] if i.between?(-.len, .len-1) else self)},
   # asFor? returns whether predicate self is true as for o.
   asFor?: m{|o| .has?(o)},
   # digest merges arr pairs with self
