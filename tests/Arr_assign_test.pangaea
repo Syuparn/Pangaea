@@ -1,0 +1,8 @@
+assertEq([?a, ?b, ?c].assign(1, ?B), [?a, ?B, ?c])
+assertEq([?a, ?b, ?c].assign(-3, ?A), [?A, ?b, ?c])
+# no errors are raised if index is out of range
+assertEq([?a, ?b, ?c].assign(3, ?D), [?a, ?b, ?c])
+assertEq([?a, ?b, ?c].assign(-4, ?G), [?a, ?b, ?c])
+
+arr := [1, 2, 3]
+assertEq(arr.assign(1, ?B).proto, arr.proto)
