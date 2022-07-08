@@ -23,7 +23,30 @@ func TestStartREPL(t *testing.T) {
 		">>> ",
 	}, "\n")
 
-	StartREPL(in, out)
+	StartREPL("", in, out)
+
+	actual := out.String()
+	if actual != expected {
+		t.Errorf("output is wrong: \nexpected: \n%s\nactual: \n%s\n",
+			expected, actual)
+	}
+}
+
+func TestStartREPLPreloadSrc(t *testing.T) {
+	preloadSrc := "a := 2\na.p"
+	in := strings.NewReader("a * 2\n")
+	out := &bytes.Buffer{}
+	expected := strings.Join([]string{
+		"2", // preload
+		fmt.Sprintf("Pangaea %s", Version),
+		"multi : multi-line mode",
+		"single: single-line mode (default)",
+		"",
+		">>> 4",
+		">>> ",
+	}, "\n")
+
+	StartREPL(preloadSrc, in, out)
 
 	actual := out.String()
 	if actual != expected {

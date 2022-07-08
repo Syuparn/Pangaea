@@ -13,13 +13,6 @@ import (
 	"github.com/Syuparn/pangaea/parser"
 )
 
-// Run runs Pangaea script source file.
-func Run(fileName string, in io.Reader, out io.Writer) int {
-	env := setup(in, out)
-	exitCode := run(fileName, in, out, env)
-	return exitCode
-}
-
 // RunTest runs all test script files in path until error is raised.
 func RunTest(path string, in io.Reader, out io.Writer) int {
 	env := setup(in, out)
@@ -32,7 +25,7 @@ func RunTest(path string, in io.Reader, out io.Writer) int {
 
 		out.Write([]byte(fmt.Sprintf("run:  %s\n", path)))
 
-		exitCode = run(path, in, out, env)
+		exitCode = runTest(path, in, out, env)
 		if exitCode != 0 {
 			return fmt.Errorf("test in %s failed", path)
 		}
@@ -51,7 +44,17 @@ func RunSource(src string, in io.Reader, out io.Writer) int {
 	return exitCode
 }
 
-func run(fileName string, in io.Reader, out io.Writer, env *object.Env) int {
+func ReadFile(fileName string) (string, int) {
+	bytes, err := os.ReadFile(fileName)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err.Error()+"\n")
+		return "", 1
+	}
+
+	return string(bytes), 0
+}
+
+func runTest(fileName string, in io.Reader, out io.Writer, env *object.Env) int {
 	fp, err := os.Open(fileName)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err.Error()+"\n")

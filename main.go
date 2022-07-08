@@ -5,17 +5,20 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Syuparn/pangaea/envs"
 	"github.com/Syuparn/pangaea/runscript"
 )
 
 var (
 	oneLiner            = flag.String("e", "", "run one-line script")
+	jargon              = flag.Bool("j", false, fmt.Sprintf("read jargon script saved in $%s", envs.JargonFileKey))
 	readsLines          = flag.Bool("n", false, "assign stdin each line to \\")
 	readsAndWritesLines = flag.Bool("p", false, "similar to -n but also print to evaluated values")
 	version             = flag.Bool("v", false, "show version")
 	testCmdSet          = flag.NewFlagSet("test", flag.ExitOnError)
 )
 
+// TODO: refactor handling of each options (by DDD or something else?)
 func main() {
 	// test mode
 	if len(os.Args) >= 2 && os.Args[1] == "test" {
@@ -35,19 +38,30 @@ func main() {
 		os.Exit(0)
 	}
 
+	src := ""
+	if *jargon {
+		src = readJargon()
+	}
+
 	// run one-liner
 	if *oneLiner != "" {
-		src := wrapSource(*oneLiner, *readsLines, *readsAndWritesLines)
-		exitCode := runOneLiner(src)
+		src += wrapSource(*oneLiner, *readsLines, *readsAndWritesLines)
+		exitCode := run(src)
 		os.Exit(exitCode)
 	}
 
 	if srcFileName := flag.Arg(0); srcFileName != "" {
-		exitCode := runScript(srcFileName)
+		fileSrc, exitCode := runscript.ReadFile(srcFileName)
+		if exitCode != 0 {
+			os.Exit(exitCode)
+		}
+		src += fileSrc
+
+		exitCode = run(src)
 		os.Exit(exitCode)
 	}
 
-	runRepl()
+	runRepl(src)
 }
 
 func runTest(path string) int {
@@ -55,18 +69,13 @@ func runTest(path string) int {
 	return exitCode
 }
 
-func runScript(fileName string) int {
-	exitCode := runscript.Run(fileName, os.Stdin, os.Stdout)
-	return exitCode
-}
-
-func runOneLiner(src string) int {
+func run(src string) int {
 	exitCode := runscript.RunSource(src, os.Stdin, os.Stdout)
 	return exitCode
 }
 
-func runRepl() {
-	runscript.StartREPL(os.Stdin, os.Stdout)
+func runRepl(src string) {
+	runscript.StartREPL(src, os.Stdin, os.Stdout)
 }
 
 func showVersion() {
@@ -81,4 +90,19 @@ func wrapSource(original string, readsLines, readsAndWritesLines bool) string {
 		return fmt.Sprintf(runscript.ReadStdinLinesTemplate, original)
 	}
 	return original
+}
+
+func readJargon() string {
+	fileName := envs.DefaultJargonFile()
+	if n, ok := os.LookupEnv(envs.JargonFileKey); ok {
+		fileName = n
+	}
+
+	bytes, err := os.ReadFile(fileName)
+	// error does not matter
+	if err != nil {
+		return ""
+	}
+
+	return string(bytes) + "\n"
 }
