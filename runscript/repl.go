@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/Syuparn/pangaea/evaluator"
@@ -17,14 +18,20 @@ import (
 )
 
 // StartREPL starts Pangaea interpreter.
-func StartREPL(in io.Reader, out io.Writer) {
+func StartREPL(preloadSrc string, in io.Reader, out io.Writer) {
+	env := setup(in, out)
+	scanner := newScanner(in)
+
+	// eval preloadSrc and update env
+	exitCode := runSource(strings.NewReader(preloadSrc), in, out, env)
+	if exitCode != 0 {
+		fmt.Fprintf(os.Stderr, "errors occurred in preload sources\n\n")
+	}
+
 	io.WriteString(out, fmt.Sprintf("Pangaea %s\n", Version))
 	io.WriteString(out, fmt.Sprintln("multi : multi-line mode"))
 	io.WriteString(out, fmt.Sprintln("single: single-line mode (default)"))
 	io.WriteString(out, fmt.Sprintln())
-
-	scanner := newScanner(in)
-	env := setup(in, out)
 
 	for {
 		io.WriteString(out, scanner.Prompt())
