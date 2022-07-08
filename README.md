@@ -204,6 +204,12 @@ See [Language Reference](./docs/reference/README.md) for more information.
 |third_party|patched dependant Go modules|
 |web|Pangaea Playground|
 
+## Release
+
+Release note and binary is generated automatically by Goreleaser.
+You only need to push a new tag to origin.
+Tag name is set to the binary version (shown by `-v`).
+
 # Contribution
 
 Any contribution is welcome!
