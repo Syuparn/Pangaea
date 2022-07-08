@@ -38,6 +38,65 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return args[1]
 			},
 		),
+		"-": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// anything can be subtracted from nil (and nil works as zero value).
+				if len(args) < 2 {
+					return object.NewTypeErr("- requires at least 2 args")
+				}
+
+				// return -args[1]
+				return propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), args[1], prefixMinusSym,
+				)
+			},
+		),
+		"*": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// anything can be multiplied by nil (and nil works as identity unit (1 for example)).
+				if len(args) < 2 {
+					return object.NewTypeErr("* requires at least 2 args")
+				}
+				return args[1]
+			},
+		),
+		"/": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// anything can be divided by nil (and nil works as 1).
+				if len(args) < 2 {
+					return object.NewTypeErr("/ requires at least 2 args")
+				}
+
+				// return 1 / args[1]
+				return propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), object.NewPanInt(1), divSym, args[1],
+				)
+			},
+		),
+		"//": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// anything can be divided by nil (and nil works as 1).
+				if len(args) < 2 {
+					return object.NewTypeErr("// requires at least 2 args")
+				}
+
+				// return 1 / args[1]
+				return propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), object.NewPanInt(1), floorDivSym, args[1],
+				)
+			},
+		),
 		"_name": object.NewPanStr("Nil"),
 		"B": f(
 			func(
