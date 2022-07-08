@@ -5,9 +5,9 @@
   acc: m{|f, init: nil|
     ._iter.{|it| <{|acc| yield f(acc, it.next) => res; recur(res)}>.new(init)}
   },
-  # all? returns whether all elements meet the predicate f
+  # all? returns whether all elements meet the predicate f.
   all?: m{|f| @^f@B.has?(false).!},
-  # any? returns whether any element meets the predicate f
+  # any? returns whether any element meets the predicate f.
   any?: m{|f| @^f@B.has?(true)},
   # append appends the elements at the end of self.
   append: m{|i| .chain([i])},
@@ -45,13 +45,13 @@
       })
     }.res
   },
-  # find returns the first element which cond? is true. (returns nil if not found)
+  # find returns the first element which cond? is true (returns nil if not found).
   find: m{|cond?| ._iter.doUntil(cond?).last.{\ if &.^cond?}},
   # index returns the first index of the elements matched by elem (or returns -1 if no elements found).
   index: m{|elem| .indices(elem).{\[0] if \ else -1}},
   # indices selects indices of all elements matched by elem.
   indices: m{|elem| .withI@{|i, e| i if e === elem}},
-  # keyBy convert self to a map whose keys are generated from f
+  # keyBy convert self to a map whose keys are generated from f.
   keyBy: m{|f| @(%{}){|e| [f(e), e]}},
   # lazyMap works similar to map but returns iter of elements instead.
   lazyMap: m{|f| ._iter.{|it| <{yield it.next.^f}>}},
@@ -59,9 +59,9 @@
   last: m{${|_, i| i}},
   # map is a wrapper of listchain.
   map: m{|f| @^f},
-  # max returns the maximum element in self
+  # max returns the maximum element in self.
   max: m{.A.{\[1:]$(\[0]){|max, i| i if i > max else max}}},
-  # min returns the minimum element in self
+  # min returns the minimum element in self.
   min: m{.A.{\[1:]$(\[0]){|min, i| i if i < min else min}}},
   # prepend prepends the elements at first of self.
   prepend: m{|i| [i].chain(self)},

@@ -1,25 +1,25 @@
 {
-  # IA converts self into int arr
+  # IA converts self into int arr.
   IA: m{|sep: `\s`| .split(sep: sep)@I},
   # asFor? returns whether predicate self is true as for o.
   asFor?: m{|o| nil~.{o.match(self)}.B},
   # call calls prop of obj whose key is self. This can be used for both of method call and prop reference.
   call: m{|obj| {}.callProp(obj, self) if .sym? else ValueErr.new("`#{self}` is not a symbol")},
-  # camel makes self camelCase
+  # camel makes self camelCase.
   camel: m{self[0].lc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
   # camel? returns whether self is camelCased.
   camel?: m{.camel == self},
-  # capital makes first letter of self uppercase and the others lowercase
+  # capital makes first letter of self uppercase and the others lowercase.
   capital: m{self[0].uc + self[1:].lc},
-  # decJSON decodes self as json string
+  # decJSON decodes self as json string.
   decJSON: m{JSON.dec(self)},
-  # kebab makes self kebab-case
+  # kebab makes self kebab-case.
   kebab: m{.sub(`_`, `-`).sub(`([A-Z])`, `-$1`).lc.sub(`^-`, ``)},
   # kebab? returns whether self is kebab-cased.
   kebab?: m{.kebab == self},
   # lc? returns whether self is lowercased.
   lc?: m{.lc == self},
-  # pascal makes self PascalCase
+  # pascal makes self PascalCase.
   pascal: m{self[0].uc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
   # pascal? returns whether self is PascelCased.
   pascal?: m{.pascal == self},
@@ -31,11 +31,11 @@
   snake: m{.sub(`-`, `_`).sub(`([A-Z])`, `_$1`).lc.sub(`^_`, ``)},
   # snake? returns whether self is snake_cased.
   snake?: m{.snake == self},
-  # split splits self into arr by sep
+  # split splits self into arr by sep.
   split: m{|sep: `\s`| self / sep},
-  # trim trims both side of spaces in self
+  # trim trims both side of spaces in self.
   trim: m{.rm(`(^\s+|\s+$)`)},
-  # truncate truncates self length to len
+  # truncate truncates self length to len.
   truncate: m{|len, end: "..."| self if .len <= len else self[:len-end.len] + end},
   # uc? returns whether self is uppercased.
   uc?: m{.uc == self},
