@@ -1,4 +1,4 @@
 {
-  # != returns whether self and other are different
+  # != returns whether self and other are different.
   '!=: m{|other| !(self == other)},
 }

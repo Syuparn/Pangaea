@@ -6,7 +6,7 @@
   assign: m{|i, v| .proto.new([*self[:i], v, *self[i+1:]] if i.between?(-.len, .len-1) else self)},
   # asFor? returns whether predicate self is true as for o.
   asFor?: m{|o| .has?(o)},
-  # digest merges arr pairs with self
+  # digest merges arr pairs with self.
   digest: m{|pairs| [*self, *pairs]},
   # empty? returns whether self contains elements.
   empty?: m{.len.!},

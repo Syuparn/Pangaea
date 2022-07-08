@@ -13,20 +13,20 @@
   case: m{|map| map.find {|k, v| self === k}.{|k, v| v}},
   # del deletes specified keys in self.
   del: m{\0[1:].{|keys| self@({}){|k, v| [k, v] if keys.has?(k).!}}},
-  # digest merges arr pairs with self
+  # digest merges arr pairs with self.
   digest: m{|pairs| {**self, **pairs.O}},
   # kindOf? returns whether other appears in self's proto chain.
   kindOf?: m{|other| self == other || .ancestors.has?(other)},
-  # max returns the maximum value in self
+  # max returns the maximum value in self.
   max: m{.values.max},
-  # min returns the minimum value in self
+  # min returns the minimum value in self.
   min: m{.values.min},
   # nil? returns whether self is nil.
   nil?: m{self == nil},
-  # patch replaces specified values in self
+  # patch replaces specified values in self.
   patch: m{.bro({**\_, **self})},
   # puts is an alias of p.
   puts: m{.p},
-  # tap calls f but returns self
+  # tap calls f but returns self.
   tap: m{|f| .^f; self},
 }
