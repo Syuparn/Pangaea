@@ -9203,6 +9203,45 @@ func TestEvalInfixNilMulErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixNilDiv(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// anything can be divided by nil (and nil works as identity element (1)).
+		{
+			`nil / 2`,
+			object.NewPanFloat(0.5),
+		},
+		{
+			`nil / 4.0`,
+			object.NewPanFloat(0.25),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixNilDivErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`nil./`,
+			object.NewTypeErr("/ requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixIntMod(t *testing.T) {
 	tests := []struct {
 		input    string

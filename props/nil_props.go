@@ -65,6 +65,22 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return args[1]
 			},
 		),
+		"/": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// anything can be divided by nil (and nil works as 1).
+				if len(args) < 2 {
+					return object.NewTypeErr("/ requires at least 2 args")
+				}
+
+				// return 1 / args[1]
+				return propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), object.NewPanInt(1), divSym, args[1],
+				)
+			},
+		),
 		"_name": object.NewPanStr("Nil"),
 		"B": f(
 			func(
