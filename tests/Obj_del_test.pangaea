@@ -1,0 +1,7 @@
+assertEq({a: 1, b: 2}.del('b), {a: 1})
+assertEq({a: 1, b: 2}.del('b), {a: 1})
+assertEq({a: 1, b: 2}.del('a, 'b), {})
+# no errors are raised if key does not exist
+assertEq({a: 1, b: 2}.del('c), {a: 1, b: 2})
+obj := {a: 1}
+assertEq(obj.del('a).proto, obj.proto)
