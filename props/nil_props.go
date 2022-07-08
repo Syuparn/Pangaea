@@ -38,6 +38,22 @@ func NilProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 				return args[1]
 			},
 		),
+		"-": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				// anything can be subtracted from nil (and nil works as zero value).
+				if len(args) < 2 {
+					return object.NewTypeErr("- requires at least 2 args")
+				}
+
+				// return -args[1]
+				return propContainer["Obj_callProp"].(*object.PanBuiltIn).Fn(
+					env, object.EmptyPanObjPtr(),
+					object.EmptyPanObjPtr(), args[1], prefixMinusSym,
+				)
+			},
+		),
 		"_name": object.NewPanStr("Nil"),
 		"B": f(
 			func(

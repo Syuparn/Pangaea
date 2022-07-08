@@ -9125,6 +9125,45 @@ func TestEvalInfixNilAddErr(t *testing.T) {
 	}
 }
 
+func TestEvalInfixNilSub(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		// anything can be subtracted from nil (and nil works as zero value).
+		{
+			`nil - 1`,
+			object.NewPanInt(-1),
+		},
+		{
+			`nil - 1.0`,
+			object.NewPanFloat(-1.0),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
+func TestEvalInfixNilSubErr(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`nil.-`,
+			object.NewTypeErr("- requires at least 2 args"),
+		},
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalInfixIntMod(t *testing.T) {
 	tests := []struct {
 		input    string
