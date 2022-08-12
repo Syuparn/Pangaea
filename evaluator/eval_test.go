@@ -5167,6 +5167,13 @@ func TestEvalObjectify(t *testing.T) {
 				{Key: object.NewPanStr("b"), Value: object.NewPanStr("2")},
 			}),
 		},
+		// if keys are duplicated, first value is set
+		{
+			`[['a, 1], ['a, 2]].O`,
+			toPanObj([]object.Pair{
+				{Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -5202,6 +5209,16 @@ func TestEvalArrM(t *testing.T) {
 				[]object.Pair{
 					{Key: object.NewPanStr("hi"), Value: object.NewPanInt(1)},
 					{Key: object.NewPanInt(4), Value: object.NewPanStr("2")},
+				},
+				[]object.Pair{},
+			),
+		},
+		// if keys are duplicated, first value is set
+		{
+			`[['a, 1], ['a, 2]].M`,
+			toPanMap(
+				[]object.Pair{
+					{Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
 				},
 				[]object.Pair{},
 			),
