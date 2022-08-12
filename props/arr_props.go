@@ -340,9 +340,11 @@ func ArrProps(propContainer map[string]object.PanObject) map[string]object.PanOb
 							fmt.Sprintf(`element key %s cannot be treated as str`, arr.Elems[0].Repr()))
 					}
 
-					pairs[object.GetSymHash(k.Value)] = object.Pair{
-						Key:   k,
-						Value: arr.Elems[1],
+					if _, exists := pairs[object.GetSymHash(k.Value)]; !exists {
+						pairs[object.GetSymHash(k.Value)] = object.Pair{
+							Key:   k,
+							Value: arr.Elems[1],
+						}
 					}
 				}
 
