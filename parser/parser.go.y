@@ -2134,7 +2134,8 @@ func tryParse(src io.Reader, l *Lexer) (a ast.Node, e error) {
 				m = fmt.Sprintf("%s\n%s", m,
 					l.ErrMsg()) 
 			} else {
-				m = m + "\nbefore lexing"
+				// NOTE: err returned by recover() is type `any` (not `error`)!
+				m = m + fmt.Sprintf(" before lexing: %v", err)
 			}
 			e = errors.New(m)
 		}
@@ -2331,10 +2332,12 @@ func NewLexer(reader io.Reader) *Lexer {
 func (l *Lexer) Lex(lval *yySymType) int {
 	token, err := l.lexer.Scan()
 
-	if _, ok := err.(*simplexer.UnknownTokenError); ok {
-		l.Error(l.unknownTokenErrMsg())
+	if terr, ok := err.(*simplexer.UnknownTokenError); ok {
+		l.Error(l.unknownTokenErrMsg(terr))
+	} else if terr, ok := err.(simplexer.UnknownTokenError); ok {
+		l.Error(l.unknownTokenErrMsg(&terr))
 	} else if err != nil {
-		l.Error(l.ErrMsg())
+		l.Error(fmt.Sprintf("%s\n(type: %T: %+v)", err.Error(), err, err))
 	}
 
 	if token == nil {
@@ -2365,7 +2368,11 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	return int(token.Type.GetID())
 }
 
-func (l *Lexer) unknownTokenErrMsg() string {
+func (l *Lexer) unknownTokenErrMsg(err *simplexer.UnknownTokenError) string {
+	if l.Source == nil {
+		return "Pangaea tried to print unknownTokenErrMsg, but l.Source is nil: " + err.Error()
+	}
+
 	var out bytes.Buffer
 	tok := l.Source.TokenLiteral
 	if tok == "\n" {
