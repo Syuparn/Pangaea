@@ -88,6 +88,10 @@ func injectBuiltInProps(
 	go func() {
 		mapNativesCh <- mustReadNativeCode("Map", env)
 	}()
+	numNativesCh := make(chan *map[object.SymHash]object.Pair)
+	go func() {
+		numNativesCh <- mustReadNativeCode("Num", env)
+	}()
 	objNativesCh := make(chan *map[object.SymHash]object.Pair)
 	go func() {
 		objNativesCh <- mustReadNativeCode("Obj", env)
@@ -119,6 +123,7 @@ func injectBuiltInProps(
 	iterableNatives := <-iterableNativesCh
 	kernelNatives := <-kernelNativesCh
 	mapNatives := <-mapNativesCh
+	numNatives := <-numNativesCh
 	objNatives := <-objNativesCh
 	rangeNatives := <-rangeNativesCh
 	strNatives := <-strNativesCh
@@ -147,7 +152,7 @@ func injectBuiltInProps(
 	injectProps(object.BuiltInNilObj, toPairs(props.NilProps(ctn)))
 	injectProps(object.BuiltInNoPropErr, toPairs(props.NoPropErrProps(ctn)))
 	injectProps(object.BuiltInNotImplementedErr, toPairs(props.NotImplementedErrProps(ctn)))
-	injectProps(object.BuiltInNumObj, toPairs(props.NumProps(ctn)))
+	injectProps(object.BuiltInNumObj, toPairs(props.NumProps(ctn)), numNatives)
 	injectProps(object.BuiltInObjObj, toPairs(props.ObjProps(ctn)), objNatives, iterableNatives)
 	injectProps(object.BuiltInRangeObj, toPairs(props.RangeProps(ctn)), rangeNatives, iterableNatives)
 	injectProps(object.BuiltInStopIterErr, toPairs(props.StopIterErrProps(ctn)))
