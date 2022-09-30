@@ -1,0 +1,4 @@
+assertEq(+5, 5)
+assertEq(+(-5), -5)
+assertEq(+true, true)
+assertEq(+false, false)
