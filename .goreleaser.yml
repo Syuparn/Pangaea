@@ -33,3 +33,6 @@ archives:
       amd64: x86_64
 release:
   prerelease: auto
+  extra_files:
+    # lisences of the dependent modules
+    - glob: ./LICENSE
