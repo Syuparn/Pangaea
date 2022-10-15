@@ -1,3 +1,5 @@
+github.com/Songmu/gocredits v0.3.0 h1:BOredmhBQhrZjanpQpTWVl7aCuQW83Sea85kA0E9lOs=
+github.com/Songmu/gocredits v0.3.0/go.mod h1:GGUAT/3BmUVgvfHxm07agU6Zz+ZSeGg5gvqN6N/CxH0=
 github.com/dlclark/regexp2 v1.4.0 h1:F1rxgk7p4uKjwIQxBs9oAXe5CqrXlCduYEJvrF4u93E=
 github.com/dlclark/regexp2 v1.4.0/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
 github.com/lithammer/dedent v1.1.0 h1:VNzHMVCBNG1j0fh3OrsFRkVUwStdDArbgBWoPAffktY=
