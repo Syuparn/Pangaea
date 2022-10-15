@@ -3,6 +3,7 @@ module github.com/Syuparn/pangaea
 go 1.18
 
 require (
+	github.com/Songmu/gocredits v0.3.0
 	github.com/dlclark/regexp2 v1.4.0
 	github.com/lithammer/dedent v1.1.0
 	github.com/macrat/simplexer v0.0.0-20180110131648-bce8e0661570
