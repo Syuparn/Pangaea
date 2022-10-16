@@ -31,14 +31,13 @@ archives:
       windows: windows
       386: i386
       amd64: x86_64
+  - files:
+    - LICENSE
+    - README.md
+    - CREDITS
 release:
   prerelease: auto
   extra_files:
     - glob: ./LICENSE
     # lisences of the dependent modules
     - glob: ./CREDITS
-archives:
-  - files:
-    - LICENSE
-    - README.md
-    - CREDITS
