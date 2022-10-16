@@ -37,3 +37,8 @@ release:
     - glob: ./LICENSE
     # lisences of the dependent modules
     - glob: ./CREDITS
+archives:
+  - files:
+    - LICENSE
+    - README.md
+    - CREDITS
