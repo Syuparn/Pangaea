@@ -14,6 +14,8 @@
   grep: m{|o| @{\ if \ === o}},
   # rev returns arr with reversed elements.
   rev: m{self[::-1]},
+  # T returns transposed array of self.
+  T: m{Arr['zip](*self).A},
   # unwrap extracts element if there is only one element.
   unwrap: m{self[0] if .len == 1 else self},
 }

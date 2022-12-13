@@ -1,0 +1,5 @@
+assertEq([[1, 2], [3, 4]].T, [[1, 3], [2, 4]])
+# length of returned iter is same as the shortest arg 
+assertEq([[1, 2], [3, 4, 5]].T, [[1, 3], [2, 4]])
+# non-array elements can be handled
+assertEq(["ab", 2].T, [[?a, 1], [?b, 2]])
