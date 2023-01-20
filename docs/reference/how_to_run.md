@@ -78,3 +78,22 @@ Hello, world!
 ```
 
 See `pangaea -h` for details.
+
+### Jargon File
+
+If you write the same scripts frequently, *jargon* file will help you.
+Objects written in jargon file is evaluated beforehand and can be referred in REPL or one-liner.
+
+With `-j` command, a script file defined by environment variable `$PANGAEA_JARGON_FILE` is evaluated by jargon (`~/.jargon.pangaea` by default). 
+
+```.jargon.pangaea
+colorcode := {|s| \[1:].chunk(2)@join("")@I(base:16).{"rgb".zip(\)}.A}
+```
+
+```bash
+$ pangaea -j
+>>> colorcode("#2e4d55")
+[["r", 46], ["g", 77], ["b", 85]]
+```
+
+See `pangaea -h` for details.

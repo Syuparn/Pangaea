@@ -11,7 +11,7 @@ import (
 
 var (
 	oneLiner            = flag.String("e", "", "run one-line script")
-	jargon              = flag.Bool("j", false, fmt.Sprintf("read jargon script saved in $%s", envs.JargonFileKey))
+	jargon              = flag.Bool("j", false, fmt.Sprintf("read jargon script saved in $%s (`~/.jargon.pangaea` by default)", envs.JargonFileKey))
 	readsLines          = flag.Bool("n", false, "assign stdin each line to \\")
 	readsAndWritesLines = flag.Bool("p", false, "similar to -n but also print to evaluated values")
 	version             = flag.Bool("v", false, "show version")
