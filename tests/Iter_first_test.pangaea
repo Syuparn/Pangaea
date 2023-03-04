@@ -1,0 +1,2 @@
+assertEq(<{yield \ if \ < 4; recur(\ + 1)}>.new(1).first, 1)
+assertEq(<{yield 1 if false}>.first, nil)

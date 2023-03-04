@@ -47,6 +47,8 @@
   },
   # find returns the first element which cond? is true (returns nil if not found).
   find: m{|cond?| ._iter.doUntil(cond?).last.{\ if &.^cond?}},
+  # first returns the first element in self without conversion to array.
+  first: m{._iter.try.next.val},
   # index returns the first index of the elements matched by elem (or returns -1 if no elements found).
   index: m{|elem| .indices(elem).{\[0] if \ else -1}},
   # indices selects indices of all elements matched by elem.

@@ -1,0 +1,3 @@
+assertEq(%{"a": 1}.first, ["a", 1])
+assertEq(%{"a": 1, "b": 2}.first, ["a", 1])
+assertEq(%{}.first, nil)
