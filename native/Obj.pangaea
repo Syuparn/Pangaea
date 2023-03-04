@@ -25,6 +25,8 @@
   nil?: m{self == nil},
   # patch replaces specified values in self.
   patch: m{.bro({**\_, **self})},
+  # print prints to the stdout without breakline.
+  print: m{.p(end: "")},
   # puts is an alias of p.
   puts: m{.p},
   # tap calls f but returns self.
