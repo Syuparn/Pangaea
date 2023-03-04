@@ -4,7 +4,7 @@
   # asFor? returns whether predicate self is true as for o.
   asFor?: m{|o| nil~.{o.match(self)}.B},
   # call calls prop of obj whose key is self. This can be used for both of method call and prop reference.
-  call: m{|obj| {}.callProp(obj, self) if .sym? else ValueErr.new("`#{self}` is not a symbol")},
+  call: m{|obj| {}.callProp(obj, self) if .sym? else ValueErr.new("#{self.repr} is not a symbol")},
   # camel makes self camelCase.
   camel: m{self[0].lc + self[1:].sub(`[-_]([a-z])`, `\U$1\E`)},
   # camel? returns whether self is camelCased.
