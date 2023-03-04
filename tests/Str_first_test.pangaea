@@ -1,0 +1,2 @@
+assertEq("abc".first, ?a)
+assertEq("".first, nil)
