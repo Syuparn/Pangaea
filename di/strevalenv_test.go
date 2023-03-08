@@ -40,6 +40,15 @@ func TestEvalStrEvalEnv(t *testing.T) {
 				},
 			}),
 		},
+		{
+			`"x := true".evalEnv`,
+			toPanObj([]object.Pair{
+				{
+					Key:   object.NewPanStr("x"),
+					Value: object.BuiltInTrue,
+				},
+			}),
+		},
 	}
 
 	for _, tt := range tests {

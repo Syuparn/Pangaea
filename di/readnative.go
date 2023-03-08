@@ -47,7 +47,7 @@ func readNativeCode(
 		return nil, e
 	}
 	if obj.Pairs == nil {
-		return nil, errors.New("Pairs must not be nil")
+		return nil, errors.New("pairs must not be nil")
 	}
 
 	return obj.Pairs, nil

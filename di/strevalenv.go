@@ -7,7 +7,7 @@ import (
 )
 
 func strEvalEnv(
-	_ *object.Env,
+	env *object.Env,
 	kwargs *object.PanObj,
 	args ...object.PanObject,
 ) object.PanObject {
@@ -20,11 +20,12 @@ func strEvalEnv(
 		return object.NewTypeErr("\\1 must be str")
 	}
 
-	env := object.NewEnv()
-	result := eval(strings.NewReader(self.Value), env)
+	// NOTE: object.NewEnv cannot be used because an empty env does not have built-in objects
+	newEnv := object.NewEnclosedEnv(env.Global())
+	result := eval(strings.NewReader(self.Value), newEnv)
 	if result.Type() == object.ErrType {
 		return result
 	}
 
-	return env.Items()
+	return newEnv.Items()
 }

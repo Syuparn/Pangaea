@@ -189,3 +189,15 @@ func TestGetInOuter(t *testing.T) {
 			obj.Inspect(), found.Inspect())
 	}
 }
+
+func TestEnvGlobal(t *testing.T) {
+	parent := NewEnv()
+	child := NewEnclosedEnv(parent)
+	grandChild := NewEnclosedEnv(child)
+
+	actual := grandChild.Global()
+	if actual != parent {
+		t.Errorf("wrong env. expected=%+v, got=%+v",
+			parent, actual)
+	}
+}

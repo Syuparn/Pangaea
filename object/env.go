@@ -124,6 +124,18 @@ func (e *Env) Outer() *Env {
 	return e.outer
 }
 
+// Global returns the outer environment.
+func (e *Env) Global() *Env {
+	env := e
+	for {
+		outer := env.Outer()
+		if outer == nil {
+			return env
+		}
+		env = outer
+	}
+}
+
 // InjectIO injects reader and writer for `IO` object
 func (e *Env) InjectIO(in io.Reader, out io.Writer) {
 	// define const `IO` containing io of args
