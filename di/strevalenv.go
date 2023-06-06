@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/Syuparn/pangaea/object"
+	"github.com/Syuparn/pangaea/parser"
 )
 
 func strEvalEnv(
@@ -22,7 +23,7 @@ func strEvalEnv(
 
 	// NOTE: object.NewEnv cannot be used because an empty env does not have built-in objects
 	newEnv := object.NewEnclosedEnv(env.Global())
-	result := eval(strings.NewReader(self.Value), newEnv)
+	result := eval(parser.NewReader(strings.NewReader(self.Value), StrFileName), newEnv)
 	if result.Type() == object.ErrType {
 		return result
 	}

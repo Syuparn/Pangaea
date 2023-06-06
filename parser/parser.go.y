@@ -2103,7 +2103,7 @@ comma
 
 %%
 
-func Parse(src io.Reader) (*ast.Program, error) {	
+func Parse(src *Reader) (*ast.Program, error) {	
 	lexer := NewLexer(src)
 	prog, err := tryParse(src, lexer)
 	
@@ -2147,6 +2147,7 @@ func tryParse(src io.Reader, l *Lexer) (a ast.Node, e error) {
 
 type Lexer struct {
 	lexer        *simplexer.Lexer
+	fileName     string
 	// NOTE: embed final ast in lexer because yyParse cannot return ast
 	program      ast.Node
 	Source		 *ast.Source
@@ -2319,14 +2320,26 @@ func embeddedStrTokenTypes() []simplexer.TokenType {
 	}
 }
 
-func NewLexer(reader io.Reader) *Lexer {
-	l := simplexer.NewLexer(reader)
+type Reader struct {
+	io.Reader
+	fileName string
+}
+
+func NewReader(reader io.Reader, fileName string) *Reader {
+	return &Reader{
+		Reader:   reader,
+		fileName: fileName,
+	}
+}
+
+func NewLexer(reader *Reader) *Lexer {
+	l := simplexer.NewLexer(reader.Reader)
 	l.TokenTypes = tokenTypes()
 	// NOTE: remove "\n" from whitespace list
 	// to use it stmts separator
 	l.Whitespace = simplexer.NewPatternTokenType(
 		-1, []string{" ", "\t"})
-	return &Lexer{ lexer: l }
+	return &Lexer{lexer: l, fileName: reader.fileName}
 }
 
 func (l *Lexer) Lex(lval *yySymType) int {
@@ -2381,7 +2394,7 @@ func (l *Lexer) unknownTokenErrMsg(err *simplexer.UnknownTokenError) string {
 	
 	out.WriteString(fmt.Sprintf("Lexer Error: unknown token '%s'was found\n",
 		tok))
-	out.WriteString("after " + l.Source.Pos.String() + "\n")
+	out.WriteString(fmt.Sprintf("after %s\n", l.Source.Pos.String()))
 	out.WriteString(l.Source.Line + "\n")
 	out.WriteString(fmt.Sprintf("in rule: %s\n", l.curRule))
 	return out.String()
@@ -2395,7 +2408,7 @@ func (l *Lexer) ErrMsg() string {
 	}
 
 	out.WriteString(fmt.Sprintf("Lexer Error in token '%s':\n", tok))
-	out.WriteString("after " + l.Source.Pos.String() + "\n")
+	out.WriteString(fmt.Sprintf("after %s\n", l.Source.Pos.String()))
 	out.WriteString(l.Source.Line + "\n")
 	out.WriteString(fmt.Sprintf("in rule: %s\n", l.curRule))
 	return out.String()
@@ -2410,6 +2423,7 @@ func (l *Lexer) convertSourceInfo(token *simplexer.Token) *ast.Source {
 	pos := ast.Position{
 		Line: token.Position.Line,
 		Column: token.Position.Column,
+		FileName: l.fileName,
 	}
 	return &ast.Source{
 		Line: l.lexer.GetLastLine(),

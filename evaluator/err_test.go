@@ -1,9 +1,10 @@
 package evaluator
 
 import (
-	"github.com/Syuparn/pangaea/object"
 	"strings"
 	"testing"
+
+	"github.com/Syuparn/pangaea/object"
 )
 
 func TestStackTrace(t *testing.T) {
@@ -14,7 +15,7 @@ func TestStackTrace(t *testing.T) {
 		{
 			`*1`,
 			[]string{
-				`line: 1, col: 2`,
+				`"<string>" line: 1, col: 2`,
 				`*1`,
 			},
 		},

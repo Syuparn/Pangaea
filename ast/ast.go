@@ -993,11 +993,12 @@ type Source struct {
 
 // Position is a location of source code.
 type Position struct {
-	Line   int
-	Column int
+	Line     int
+	Column   int
+	FileName string
 }
 
 func (p *Position) String() string {
 	// NOTE: add 1 otherwise first element is shown as 0
-	return fmt.Sprintf("line: %d, col: %d", p.Line+1, p.Column+1)
+	return fmt.Sprintf("%q line: %d, col: %d", p.FileName, p.Line+1, p.Column+1)
 }

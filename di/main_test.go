@@ -32,7 +32,7 @@ func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject
 }
 
 func testParse(t *testing.T, input string) *ast.Program {
-	node, err := parser.Parse(strings.NewReader(input))
+	node, err := parser.Parse(parser.NewReader(strings.NewReader(input), "<stdin>"))
 	if err != nil {
 		msg := fmt.Sprintf("%v\nOccurred in input ```\n%s\n```",
 			err.Error(), input)
