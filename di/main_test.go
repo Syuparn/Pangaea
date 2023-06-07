@@ -19,7 +19,11 @@ func TestMain(m *testing.M) {
 }
 
 func testEval(t *testing.T, input string) object.PanObject {
-	return testEvalInEnv(t, input, object.NewEnvWithConsts())
+	// NOTE: props in Kernel can be accessed directly in top-level
+	env := object.NewEnvWithConsts()
+	env.InjectFrom(object.BuiltInKernelObj)
+
+	return testEvalInEnv(t, input, env)
 }
 
 func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject {

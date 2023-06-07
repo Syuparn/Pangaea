@@ -18,6 +18,7 @@ func TestErrWrapperInspect(t *testing.T) {
 	}{
 		{WrapErr(NewPanErr("err")), "[Err: err]"},
 		{WrapErr(NewAssertionErr("err")), "[AssertionErr: err]"},
+		{WrapErr(NewFileNotFoundErr("err")), "[FileNotFoundErr: err]"},
 		{WrapErr(NewNameErr("err")), "[NameErr: err]"},
 		{WrapErr(NewNoPropErr("err")), "[NoPropErr: err]"},
 		{WrapErr(NewNotImplementedErr("err")), "[NotImplementedErr: err]"},
@@ -43,6 +44,7 @@ func TestErrWrapperRepr(t *testing.T) {
 	}{
 		{WrapErr(NewPanErr("err")), "[Err: err]"},
 		{WrapErr(NewAssertionErr("err")), "[AssertionErr: err]"},
+		{WrapErr(NewFileNotFoundErr("err")), "[FileNotFoundErr: err]"},
 		{WrapErr(NewNameErr("err")), "[NameErr: err]"},
 		{WrapErr(NewNoPropErr("err")), "[NoPropErr: err]"},
 		{WrapErr(NewNotImplementedErr("err")), "[NotImplementedErr: err]"},
@@ -76,6 +78,11 @@ func TestErrWrapperProto(t *testing.T) {
 			WrapErr(NewAssertionErr("err")),
 			BuiltInAssertionErr,
 			"BuiltInAssertionErr",
+		},
+		{
+			WrapErr(NewFileNotFoundErr("err")),
+			BuiltInFileNotFoundErr,
+			"BuiltInFileNotFoundErr",
 		},
 		{
 			WrapErr(NewNameErr("err")),

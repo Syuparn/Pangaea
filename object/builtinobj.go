@@ -169,6 +169,9 @@ var BuiltInErrObj = &PanObj{}
 // BuiltInAssertionErr is an object of AssertionErr (proto of each assertionErr).
 var BuiltInAssertionErr = &PanObj{}
 
+// BuiltInFileNotFoundErr is an object of FileNotFoundErr (proto of each fileNotFoundErr).
+var BuiltInFileNotFoundErr = &PanObj{}
+
 // BuiltInNameErr is an object of NameErr (proto of each nameErr).
 var BuiltInNameErr = &PanObj{}
 

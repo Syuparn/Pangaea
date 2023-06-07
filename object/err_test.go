@@ -18,6 +18,7 @@ func TestErrInspect(t *testing.T) {
 	}{
 		{NewPanErr("err"), "Err: err"},
 		{NewAssertionErr("err"), "AssertionErr: err"},
+		{NewFileNotFoundErr("err"), "FileNotFoundErr: err"},
 		{NewNameErr("err"), "NameErr: err"},
 		{NewNoPropErr("err"), "NoPropErr: err"},
 		{NewNotImplementedErr("err"), "NotImplementedErr: err"},
@@ -43,6 +44,7 @@ func TestErrRepr(t *testing.T) {
 	}{
 		{NewPanErr("err"), "Err: err"},
 		{NewAssertionErr("err"), "AssertionErr: err"},
+		{NewFileNotFoundErr("err"), "FileNotFoundErr: err"},
 		{NewNameErr("err"), "NameErr: err"},
 		{NewNoPropErr("err"), "NoPropErr: err"},
 		{NewNotImplementedErr("err"), "NotImplementedErr: err"},
@@ -76,6 +78,11 @@ func TestErrProto(t *testing.T) {
 			NewAssertionErr("err"),
 			BuiltInAssertionErr,
 			"BuiltInAssertionErr",
+		},
+		{
+			NewFileNotFoundErr("err"),
+			BuiltInFileNotFoundErr,
+			"BuiltInFileNotFoundErr",
 		},
 		{
 			NewNameErr("err"),
@@ -160,6 +167,10 @@ func TestErrKindMethod(t *testing.T) {
 		{
 			NewAssertionErr("err"),
 			"AssertionErr",
+		},
+		{
+			NewFileNotFoundErr("err"),
+			"FileNotFoundErr",
 		},
 		{
 			NewNameErr("err"),

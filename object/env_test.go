@@ -115,6 +115,7 @@ func TestEnvWithConsts(t *testing.T) {
 		{"Err", BuiltInErrObj},
 		{"AssertionErr", BuiltInAssertionErr},
 		{"NameErr", BuiltInNameErr},
+		{"FileNotFoundErr", BuiltInFileNotFoundErr},
 		{"NoPropErr", BuiltInNoPropErr},
 		{"NotImplementedErr", BuiltInNotImplementedErr},
 		{"StopIterErr", BuiltInStopIterErr},

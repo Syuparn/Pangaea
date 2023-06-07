@@ -66,9 +66,9 @@ func TestReadNativeCodeFailed(t *testing.T) {
 		{
 			"testErr",
 			"NameErr: name `undefinedVar` is not defined\n" +
-				"line: 2, col: 1\n" +
+				"\"testdata/testErr.pangaea\" line: 2, col: 1\n" +
 				"undefinedVar\n" +
-				"line: 2, col: 13\n" +
+				"\"testdata/testErr.pangaea\" line: 2, col: 13\n" +
 				"undefinedVar",
 		},
 		{
