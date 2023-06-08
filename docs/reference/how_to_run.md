@@ -101,6 +101,16 @@ taro.greet
 taro.canDrink?.p
 ```
 
+### invite!
+
+`invite!` is similar to `import`, but it sets variables directly to the current scope.
+
+```pangaea
+imvite!("person")
+
+taro := Person.new("Taro", 25)
+```
+
 ### Jargon File
 
 If you write the same scripts frequently, *jargon* file will help you.

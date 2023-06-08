@@ -121,6 +121,7 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 				return object.BuiltInNil
 			},
 		),
-		"import": propContainer["Kernel_import"],
+		"import":  propContainer["Kernel_import"],
+		"invite!": propContainer["Kernel_invite!"],
 	}
 }

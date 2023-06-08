@@ -1,0 +1,2 @@
+# invite! path can be relative
+invite!("invited")
