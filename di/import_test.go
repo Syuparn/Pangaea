@@ -1,12 +1,19 @@
 package di
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/Syuparn/pangaea/object"
 )
 
 func TestEvalKernelImport(t *testing.T) {
+	// NOTE: since form of Abspath is OS-dependent, we use fixture to prepare expected string
+	abspath := func(path string) string {
+		p, _ := filepath.Abs(path)
+		return p
+	}
+
 	tests := []struct {
 		input    string
 		expected object.PanObject
@@ -15,23 +22,35 @@ func TestEvalKernelImport(t *testing.T) {
 		{
 			`import("./testdata/testSuccess.pangaea")`,
 			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
-				object.GetSymHash("a"): {Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
-				object.GetSymHash("b"): {Key: object.NewPanStr("b"), Value: object.NewPanInt(2)},
+				object.GetSymHash("_PANGAEA_SOURCE_PATH"): {Key: object.NewPanStr("_PANGAEA_SOURCE_PATH"), Value: object.NewPanStr(abspath("./testdata/testSuccess.pangaea"))},
+				object.GetSymHash("a"):                    {Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+				object.GetSymHash("b"):                    {Key: object.NewPanStr("b"), Value: object.NewPanInt(2)},
 			}),
 		},
 		// extension
 		{
 			`import("./testdata/testSuccess")`,
 			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
-				object.GetSymHash("a"): {Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
-				object.GetSymHash("b"): {Key: object.NewPanStr("b"), Value: object.NewPanInt(2)},
+				object.GetSymHash("_PANGAEA_SOURCE_PATH"): {Key: object.NewPanStr("_PANGAEA_SOURCE_PATH"), Value: object.NewPanStr(abspath("./testdata/testSuccess.pangaea"))},
+				object.GetSymHash("a"):                    {Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
+				object.GetSymHash("b"):                    {Key: object.NewPanStr("b"), Value: object.NewPanInt(2)},
+			}),
+		},
+		// nested import
+		{
+			`import("./testdata/importing")`,
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("_PANGAEA_SOURCE_PATH"): {Key: object.NewPanStr("_PANGAEA_SOURCE_PATH"), Value: object.NewPanStr(abspath("./testdata/importing.pangaea"))},
+				object.GetSymHash("a"):                    {Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
 			}),
 		},
 	}
 
 	for _, tt := range tests {
-		actual := testEval(t, tt.input)
-		testValue(t, actual, tt.expected)
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }
 
@@ -56,10 +75,16 @@ func TestEvalKernelImportError(t *testing.T) {
 			`import()`,
 			object.NewTypeErr("import requires at least 1 arg"),
 		},
+		{
+			`_PANGAEA_SOURCE_PATH := 1; import("./testdata/testSuccess")`,
+			object.NewTypeErr("_PANGAEA_SOURCE_PATH 1 must be str"),
+		},
 	}
 
 	for _, tt := range tests {
-		actual := testEval(t, tt.input)
-		testValue(t, actual, tt.expected)
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
 	}
 }

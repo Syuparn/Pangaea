@@ -1,0 +1,2 @@
+# import path can be relative
+a := import("imported").a

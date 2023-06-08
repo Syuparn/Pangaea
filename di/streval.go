@@ -22,6 +22,6 @@ func strEval(
 	}
 
 	// TODO: enable to choose whether current env is used or not
-	result := eval(parser.NewReader(strings.NewReader(self.Value), StrFileName), object.NewEnclosedEnv(env))
+	result := eval(parser.NewReader(strings.NewReader(self.Value), object.StrFileName), object.NewEnclosedEnv(env))
 	return result
 }

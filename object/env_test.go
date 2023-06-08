@@ -1,6 +1,7 @@
 package object
 
 import (
+	"path/filepath"
 	"testing"
 )
 
@@ -200,5 +201,59 @@ func TestEnvGlobal(t *testing.T) {
 	if actual != parent {
 		t.Errorf("wrong env. expected=%+v, got=%+v",
 			parent, actual)
+	}
+}
+
+func TestSetSourceFilePath(t *testing.T) {
+	// NOTE: since form of Abspath is OS-dependent, we use fixture to prepare expected string
+	abspath := func(path string) string {
+		p, _ := filepath.Abs(path)
+		return p
+	}
+
+	tests := []struct {
+		fileName string
+		expected PanObject
+	}{
+		{"foo.pangaea", NewPanStr(abspath("foo.pangaea"))},
+		{"/home/mike/myproject/foo.pangaea", NewPanStr(abspath("/home/mike/myproject/foo.pangaea"))},
+	}
+
+	env := NewEnvWithConsts()
+	for _, tt := range tests {
+		env.SetSourceFilePath(tt.fileName)
+		actual, ok := env.Get(GetSymHash("_PANGAEA_SOURCE_PATH"))
+		if !ok {
+			t.Fatalf("object must be set")
+		}
+
+		t.Logf("path: %s\n", tt.expected.Inspect())
+
+		if actual.Type() != tt.expected.Type() {
+			t.Errorf("_PANGAEA_SOURCE_PATH must be %s. got=%s", actual.Type(), tt.expected.Type())
+		}
+
+		if actual.Inspect() != tt.expected.Inspect() {
+			t.Errorf("_PANGAEA_SOURCE_PATH must be %s. got=%s", actual.Inspect(), tt.expected.Inspect())
+		}
+	}
+}
+
+func TestSetSourceFilePathIgnored(t *testing.T) {
+	tests := []struct {
+		fileName string
+	}{
+		{"<stdin>"},
+		{"<string>"},
+		{""},
+	}
+
+	env := NewEnvWithConsts()
+	for _, tt := range tests {
+		env.SetSourceFilePath(tt.fileName)
+		actual, ok := env.Get(GetSymHash("_PANGAEA_SOURCE_PATH"))
+		if ok {
+			t.Errorf("object must not be set: %v", actual.Inspect())
+		}
 	}
 }

@@ -23,7 +23,7 @@ func strEvalEnv(
 
 	// NOTE: object.NewEnv cannot be used because an empty env does not have built-in objects
 	newEnv := object.NewEnclosedEnv(env.Global())
-	result := eval(parser.NewReader(strings.NewReader(self.Value), StrFileName), newEnv)
+	result := eval(parser.NewReader(strings.NewReader(self.Value), object.StrFileName), newEnv)
 	if result.Type() == object.ErrType {
 		return result
 	}

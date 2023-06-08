@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Syuparn/pangaea/di"
 	"github.com/Syuparn/pangaea/envs"
+	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/runscript"
 )
 
@@ -47,7 +47,7 @@ func main() {
 	// run one-liner
 	if *oneLiner != "" {
 		src += wrapSource(*oneLiner, *readsLines, *readsAndWritesLines)
-		exitCode := run(src, di.StrFileName)
+		exitCode := run(src, object.StrFileName)
 		os.Exit(exitCode)
 	}
 
