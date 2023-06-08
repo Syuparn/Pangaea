@@ -88,3 +88,80 @@ func TestEvalKernelImportError(t *testing.T) {
 		})
 	}
 }
+
+func TestEvalKernelInvite(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`invite!("./testdata/testSuccess.pangaea"); a`,
+			object.NewPanInt(1),
+		},
+		{
+			`invite!("./testdata/testSuccess"); a`,
+			object.NewPanInt(1),
+		},
+		{
+			`invite!("./testdata/testSuccess")`,
+			object.BuiltInNil,
+		},
+		// invite! update variables
+		{
+			`a := "original"; invite!("./testdata/testSuccess"); a`,
+			object.NewPanInt(1),
+		},
+		// nested invite
+		{
+			`invite!("./testdata/inviting"); a`,
+			object.NewPanInt(1),
+		},
+		// _PANGAEA_SOURCE_PATH is not changed
+		{
+			`_PANGAEA_SOURCE_PATH := "dummy"; invite!("./testdata/inviting"); _PANGAEA_SOURCE_PATH`,
+			object.NewPanStr("dummy"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
+	}
+}
+
+func TestEvalKernelInviteError(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`invite!("./testdata/notfound")`,
+			object.NewFileNotFoundErr("failed to open \"./testdata/notfound.pangaea\""),
+		},
+		{
+			`invite!("./testdata/syntaxError")`,
+			object.NewSyntaxErr("failed to parse"),
+		},
+		{
+			`invite!(1)`,
+			object.NewTypeErr("\\1 must be str"),
+		},
+		{
+			`invite!()`,
+			object.NewTypeErr("invite! requires at least 1 arg"),
+		},
+		{
+			`_PANGAEA_SOURCE_PATH := 1; invite!("./testdata/testSuccess")`,
+			object.NewTypeErr("_PANGAEA_SOURCE_PATH 1 must be str"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			actual := testEval(t, tt.input)
+			testValue(t, actual, tt.expected)
+		})
+	}
+}

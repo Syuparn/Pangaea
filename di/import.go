@@ -56,3 +56,55 @@ func kernelImport(
 
 	return newEnv.Items()
 }
+
+func kernelInvite(
+	env *object.Env,
+	kwargs *object.PanObj,
+	args ...object.PanObject,
+) object.PanObject {
+	if len(args) < 1 {
+		return object.NewTypeErr("invite! requires at least 1 arg")
+	}
+
+	fileNameObj, ok := args[0].(*object.PanStr)
+	if !ok {
+		return object.NewTypeErr("\\1 must be str")
+	}
+
+	fileName := fileNameObj.Value
+	if !strings.HasSuffix(fileName, ".pangaea") {
+		fileName += ".pangaea"
+	}
+
+	// NOTE: if fileName is relative, it is based on the evaluating source file (not based on where pangaea command is executed)
+	if p, ok := env.Get(object.GetSymHash(object.SourcePathVar)); ok {
+		if p.Type() != object.StrType {
+			return object.NewTypeErr(fmt.Sprintf("%s %s must be str", object.SourcePathVar, p.Inspect()))
+		}
+		sourcePath := p.(*object.PanStr).Value
+		fileName = filepath.Join(filepath.Dir(sourcePath), fileName)
+	}
+
+	f, err := os.Open(fileName)
+	if err != nil {
+		return object.NewFileNotFoundErr(fmt.Sprintf("failed to open %q", fileName))
+	}
+
+	// set invited file path to SourcePathVar to evaluate the file
+	origPath, existsPath := env.Get(object.GetSymHash(object.SourcePathVar))
+	env.SetSourceFilePath(fileName)
+	// HACK: set the original value again for the following process
+	defer func() {
+		if existsPath {
+			env.Set(object.GetSymHash(object.SourcePathVar), origPath)
+		}
+	}()
+
+	// NOTE: pass env directly because invite! expands variables in the file to the current environment
+	result := eval(parser.NewReader(f, fileName), env)
+	if result.Type() == object.ErrType {
+		return result
+	}
+
+	return object.BuiltInNil
+}
