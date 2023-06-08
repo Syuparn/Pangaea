@@ -7,6 +7,7 @@ package object
 
 import (
 	"io"
+	"path/filepath"
 )
 
 // NewEnv makes new environment of variables.
@@ -52,6 +53,7 @@ func NewEnvWithConsts() *Env {
 	env.Set(GetSymHash("nil"), BuiltInNil)
 	env.Set(GetSymHash("Err"), BuiltInErrObj)
 	env.Set(GetSymHash("AssertionErr"), BuiltInAssertionErr)
+	env.Set(GetSymHash("FileNotFoundErr"), BuiltInFileNotFoundErr)
 	env.Set(GetSymHash("NameErr"), BuiltInNameErr)
 	env.Set(GetSymHash("NoPropErr"), BuiltInNoPropErr)
 	env.Set(GetSymHash("NotImplementedErr"), BuiltInNotImplementedErr)
@@ -155,4 +157,15 @@ func (e *Env) InjectFrom(obj *PanObj) {
 	for sym, pair := range *obj.Pairs {
 		e.Set(sym, pair.Value)
 	}
+}
+
+// SetSourceFilePath sets the path of the evaluating source file to _PANGAEA_SOURCE_PATH
+func (e *Env) SetSourceFilePath(path string) {
+	// if path is dummy placeholder, ignore it
+	if path == "" || path == StdinFileName || path == StrFileName {
+		return
+	}
+
+	abspath, _ := filepath.Abs(path)
+	e.Set(GetSymHash(SourcePathVar), NewPanStr(abspath))
 }

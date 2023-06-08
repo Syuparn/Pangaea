@@ -15,7 +15,7 @@ import (
 
 // RunTest runs all test script files in path until error is raised.
 func RunTest(path string, in io.Reader, out io.Writer) int {
-	env := setup(in, out)
+	env := setup(in, out, "")
 	exitCode := 0
 
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
@@ -37,10 +37,10 @@ func RunTest(path string, in io.Reader, out io.Writer) int {
 }
 
 // RunSource runs input src.
-func RunSource(src string, in io.Reader, out io.Writer) int {
-	env := setup(in, out)
+func RunSource(src string, fileName string, in io.Reader, out io.Writer) int {
+	env := setup(in, out, fileName)
 	reader := strings.NewReader(src)
-	exitCode := runSource(reader, in, out, env)
+	exitCode := runSource(parser.NewReader(reader, fileName), in, out, env)
 	return exitCode
 }
 
@@ -61,11 +61,14 @@ func runTest(fileName string, in io.Reader, out io.Writer, env *object.Env) int 
 		return 1
 	}
 
-	exitCode := runSource(fp, in, out, env)
+	inner := object.NewEnclosedEnv(env)
+	inner.SetSourceFilePath(fileName)
+
+	exitCode := runSource(parser.NewReader(fp, fileName), in, out, env)
 	return exitCode
 }
 
-func runSource(fp io.Reader, in io.Reader, out io.Writer, env *object.Env) int {
+func runSource(fp *parser.Reader, in io.Reader, out io.Writer, env *object.Env) int {
 	node, err := parser.Parse(fp)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err.Error()+"\n")
@@ -83,10 +86,13 @@ func runSource(fp io.Reader, in io.Reader, out io.Writer, env *object.Env) int {
 	return 0
 }
 
-func setup(in io.Reader, out io.Writer) *object.Env {
+func setup(in io.Reader, out io.Writer, fileName string) *object.Env {
 	env := object.NewEnvWithConsts()
 	// setup object `IO`
 	env.InjectIO(in, out)
+
+	// set current source file path to env
+	env.SetSourceFilePath(fileName)
 
 	// necessary to setup built-in object props
 	di.InjectBuiltInProps(env)

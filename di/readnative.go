@@ -6,6 +6,7 @@ import (
 
 	"github.com/Syuparn/pangaea/native"
 	"github.com/Syuparn/pangaea/object"
+	"github.com/Syuparn/pangaea/parser"
 )
 
 func mustReadNativeCode(
@@ -36,7 +37,7 @@ func readNativeCode(
 
 	// NOTE: must pass EnclosedEnv otherwise outerenv of func literal cannot work
 	// (cannot call top-level consts for example)
-	result := eval(fp, object.NewEnclosedEnv(env))
+	result := eval(parser.NewReader(fp, fileName), object.NewEnclosedEnv(env))
 	if err, ok := result.(*object.PanErr); ok {
 		return nil, errors.New(err.Inspect() + "\n" + err.StackTrace)
 	}

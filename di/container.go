@@ -21,8 +21,9 @@ func InjectBuiltInProps(env *object.Env) {
 func NewPropContainer() map[string]object.PanObject {
 	return map[string]object.PanObject{
 		// name format: "ObjName_propName"
-		"Str_eval":    &object.PanBuiltIn{Fn: strEval},
-		"Str_evalEnv": &object.PanBuiltIn{Fn: strEvalEnv},
+		"Str_eval":      &object.PanBuiltIn{Fn: strEval},
+		"Str_evalEnv":   &object.PanBuiltIn{Fn: strEvalEnv},
+		"Kernel_import": &object.PanBuiltIn{Fn: kernelImport},
 	}
 }
 

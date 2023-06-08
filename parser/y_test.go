@@ -5790,7 +5790,7 @@ func testRange(t *testing.T, expr ast.Expr,
 }
 
 func testParse(t *testing.T, input string) *ast.Program {
-	ast, err := Parse(strings.NewReader(input))
+	ast, err := Parse(NewReader(strings.NewReader(input), "<stdin>"))
 	if err != nil {
 		msg := fmt.Sprintf("%v\nOccurred in input ```\n%s\n```",
 			err.Error(), input)
@@ -5807,7 +5807,7 @@ func testParse(t *testing.T, input string) *ast.Program {
 }
 
 func testParseErrorOccurred(t *testing.T, input string) {
-	ast, err := Parse(strings.NewReader(input))
+	ast, err := Parse(NewReader(strings.NewReader(input), "<stdin>"))
 	succeeded := err == nil
 	if succeeded {
 		t.Fatalf("expected parse error did not occur in"+

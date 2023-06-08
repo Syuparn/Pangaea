@@ -14,16 +14,17 @@ import (
 	"strings"
 
 	"github.com/Syuparn/pangaea/evaluator"
+	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
 )
 
 // StartREPL starts Pangaea interpreter.
 func StartREPL(preloadSrc string, in io.Reader, out io.Writer) {
-	env := setup(in, out)
+	env := setup(in, out, object.StdinFileName)
 	scanner := newScanner(in)
 
 	// eval preloadSrc and update env
-	exitCode := runSource(strings.NewReader(preloadSrc), in, out, env)
+	exitCode := runSource(parser.NewReader(strings.NewReader(preloadSrc), object.StdinFileName), in, out, env)
 	if exitCode != 0 {
 		fmt.Fprintf(os.Stderr, "errors occurred in preload sources\n\n")
 	}
@@ -40,7 +41,7 @@ func StartREPL(preloadSrc string, in io.Reader, out io.Writer) {
 			return
 		}
 
-		program, err := parser.Parse(strings.NewReader(scanned))
+		program, err := parser.Parse(parser.NewReader(strings.NewReader(scanned), object.StdinFileName))
 
 		if err != nil {
 			io.WriteString(out, err.Error())

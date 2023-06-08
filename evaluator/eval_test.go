@@ -24,6 +24,7 @@ func TestMain(m *testing.M) {
 	// inject stubs
 	ctn["Str_eval"] = object.NewNotImplementedErr("not implemented in evaluator")
 	ctn["Str_evalEnv"] = object.NewNotImplementedErr("not implemented in evaluator")
+	ctn["Kernel_import"] = object.NewNotImplementedErr("not implemented in evaluator")
 	injectBuiltInProps(ctn)
 	ret := m.Run()
 	os.Exit(ret)
@@ -11164,7 +11165,7 @@ func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject
 }
 
 func testParse(t *testing.T, input string) *ast.Program {
-	node, err := parser.Parse(strings.NewReader(input))
+	node, err := parser.Parse(parser.NewReader(strings.NewReader(input), "<string>"))
 	if err != nil {
 		msg := fmt.Sprintf("%v\nOccurred in input ```\n%s\n```",
 			err.Error(), input)

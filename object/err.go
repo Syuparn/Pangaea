@@ -69,6 +69,15 @@ func NewAssertionErr(msg string) *PanErr {
 	}
 }
 
+// NewFileNotFoundErr returns new fileNotFoundErr object.
+func NewFileNotFoundErr(msg string) *PanErr {
+	return &PanErr{
+		ErrKind: FileNotFoundErr,
+		Msg:     msg,
+		proto:   BuiltInFileNotFoundErr,
+	}
+}
+
 // NewNameErr returns new nameErr object.
 func NewNameErr(msg string) *PanErr {
 	return &PanErr{
@@ -151,6 +160,7 @@ type ErrKind string
 const (
 	Err             = "Err"
 	AssertionErr    = "AssertionErr"
+	FileNotFoundErr = "FileNotFoundErr"
 	NameErr         = "NameErr"
 	NoPropErr       = "NoPropErr"
 	NotImplementErr = "NotImplementedErr"

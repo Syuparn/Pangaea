@@ -19,7 +19,11 @@ func TestMain(m *testing.M) {
 }
 
 func testEval(t *testing.T, input string) object.PanObject {
-	return testEvalInEnv(t, input, object.NewEnvWithConsts())
+	// NOTE: props in Kernel can be accessed directly in top-level
+	env := object.NewEnvWithConsts()
+	env.InjectFrom(object.BuiltInKernelObj)
+
+	return testEvalInEnv(t, input, env)
 }
 
 func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject {
@@ -32,7 +36,7 @@ func testEvalInEnv(t *testing.T, input string, env *object.Env) object.PanObject
 }
 
 func testParse(t *testing.T, input string) *ast.Program {
-	node, err := parser.Parse(strings.NewReader(input))
+	node, err := parser.Parse(parser.NewReader(strings.NewReader(input), "<stdin>"))
 	if err != nil {
 		msg := fmt.Sprintf("%v\nOccurred in input ```\n%s\n```",
 			err.Error(), input)

@@ -1,0 +1,6 @@
+# import person.pangaea
+person := import("person")
+
+taro := person.Person.new("Taro", 25)
+taro.greet
+taro.canDrink?.p

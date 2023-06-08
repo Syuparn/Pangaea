@@ -1,0 +1,5 @@
+Person := {
+    new: _init('name, 'age),
+    greet: m{"I'm #{.name}.".p},
+    canDrink?: m{.age >= 20},
+}

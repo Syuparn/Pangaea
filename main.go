@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Syuparn/pangaea/envs"
+	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/runscript"
 )
 
@@ -46,7 +47,7 @@ func main() {
 	// run one-liner
 	if *oneLiner != "" {
 		src += wrapSource(*oneLiner, *readsLines, *readsAndWritesLines)
-		exitCode := run(src)
+		exitCode := run(src, object.StrFileName)
 		os.Exit(exitCode)
 	}
 
@@ -57,7 +58,7 @@ func main() {
 		}
 		src += fileSrc
 
-		exitCode = run(src)
+		exitCode = run(src, srcFileName)
 		os.Exit(exitCode)
 	}
 
@@ -69,8 +70,8 @@ func runTest(path string) int {
 	return exitCode
 }
 
-func run(src string) int {
-	exitCode := runscript.RunSource(src, os.Stdin, os.Stdout)
+func run(src string, fileName string) int {
+	exitCode := runscript.RunSource(src, fileName, os.Stdin, os.Stdout)
 	return exitCode
 }
 

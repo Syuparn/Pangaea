@@ -79,6 +79,28 @@ Hello, world!
 
 See `pangaea -h` for details.
 
+### Import
+
+If you want to make structured applications, you can `import` other source files.
+
+```pangaea
+# person.pangaea
+Person := {
+    new: _init('name, 'age),
+    greet: m{"I'm #{.name}.".p},
+    canDrink?: m{.age >= 20},
+}
+```
+
+```pangaea
+# main.pangaea
+person := import("person")
+
+taro := person.Person.new("Taro", 25)
+taro.greet
+taro.canDrink?.p
+```
+
 ### Jargon File
 
 If you write the same scripts frequently, *jargon* file will help you.
