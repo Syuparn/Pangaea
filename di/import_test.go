@@ -96,6 +96,10 @@ func TestEvalKernelImportError(t *testing.T) {
 			`import("notfound")`,
 			object.NewFileNotFoundErr("failed to read native module \"notfound\": open modules/notfound.pangaea: file does not exist"),
 		},
+		{
+			`import("dummy_native_wrong")`,
+			object.NewSyntaxErr("failed to parse"),
+		},
 	}
 
 	for _, tt := range tests {

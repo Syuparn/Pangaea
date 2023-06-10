@@ -1,0 +1,24 @@
+_internal := import("http/internal")
+
+Response := {
+  new: _init('status, 'body, 'headers),
+}
+
+Client := {
+  get: m{|url, headers: {}, queries: {}|
+    _internal['request](method: 'GET, url: url, headers: headers, queries: queries).{self._toResponse(\)}
+  },
+  post: m{|url, headers: {}, body: ""|
+    _internal['request](method: 'POST, url: url, headers: headers, body: body).{self._toResponse(\)}
+  },
+  put: m{|url, headers: {}, body: ""|
+    _internal['request](method: 'PUT, url: url, headers: headers, body: body).{self._toResponse(\)}
+  },
+  delete: m{|url, headers: {}, queries: {}|
+    _internal['request](method: 'DELETE, url: url, headers: headers, queries: queries).{self._toResponse(\)}
+  },
+  patch: m{|url, headers: {}, body: ""|
+    _internal['request](method: 'PATCH, url: url, headers: headers, body: body).{self._toResponse(\)}
+  },
+  _toResponse: m{|r| Response.new(r.status, r.body, r.headers)},
+}
