@@ -44,6 +44,13 @@ func TestEvalKernelImport(t *testing.T) {
 				object.GetSymHash("a"):                    {Key: object.NewPanStr("a"), Value: object.NewPanInt(1)},
 			}),
 		},
+		// standard module
+		{
+			`import("dummy")`,
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("message"): {Key: object.NewPanStr("message"), Value: object.NewPanStr("This is a dummy module.")},
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -78,6 +85,10 @@ func TestEvalKernelImportError(t *testing.T) {
 		{
 			`_PANGAEA_SOURCE_PATH := 1; import("./testdata/testSuccess")`,
 			object.NewTypeErr("_PANGAEA_SOURCE_PATH 1 must be str"),
+		},
+		{
+			`import("notfound")`,
+			object.NewFileNotFoundErr("module \"notfound\" is not defined"),
 		},
 	}
 
@@ -121,6 +132,11 @@ func TestEvalKernelInvite(t *testing.T) {
 			`_PANGAEA_SOURCE_PATH := "dummy"; invite!("./testdata/inviting"); _PANGAEA_SOURCE_PATH`,
 			object.NewPanStr("dummy"),
 		},
+		// standard module
+		{
+			`invite!("dummy"); message`,
+			object.NewPanStr("This is a dummy module."),
+		},
 	}
 
 	for _, tt := range tests {
@@ -155,6 +171,10 @@ func TestEvalKernelInviteError(t *testing.T) {
 		{
 			`_PANGAEA_SOURCE_PATH := 1; invite!("./testdata/testSuccess")`,
 			object.NewTypeErr("_PANGAEA_SOURCE_PATH 1 must be str"),
+		},
+		{
+			`invite!("notfound")`,
+			object.NewFileNotFoundErr("module \"notfound\" is not defined"),
 		},
 	}
 

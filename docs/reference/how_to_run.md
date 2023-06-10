@@ -94,7 +94,7 @@ Person := {
 
 ```pangaea
 # main.pangaea
-person := import("person")
+person := import("./person")
 
 taro := person.Person.new("Taro", 25)
 taro.greet
@@ -106,7 +106,7 @@ taro.canDrink?.p
 `invite!` is similar to `import`, but it sets variables directly to the current scope.
 
 ```pangaea
-imvite!("person")
+imvite!("./person")
 
 taro := Person.new("Taro", 25)
 ```
