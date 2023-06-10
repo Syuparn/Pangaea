@@ -7,5 +7,6 @@ import (
 // FS exports current directory file system.
 // NOTE: FS must not be declared in di package because
 // path root of unittest differs from runtime one!
-//go:embed *.pangaea testdata/*.pangaea
+//
+//go:embed *.pangaea testdata/*.pangaea modules/*.pangaea
 var FS embed.FS
