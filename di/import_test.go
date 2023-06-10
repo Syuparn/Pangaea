@@ -51,6 +51,12 @@ func TestEvalKernelImport(t *testing.T) {
 				object.GetSymHash("message"): {Key: object.NewPanStr("message"), Value: object.NewPanStr("This is a dummy module.")},
 			}),
 		},
+		{
+			`import("dummy_native")`,
+			object.PanObjInstancePtr(&map[object.SymHash]object.Pair{
+				object.GetSymHash("message"): {Key: object.NewPanStr("message"), Value: object.NewPanStr("This is a dummy module.")},
+			}),
+		},
 	}
 
 	for _, tt := range tests {
@@ -88,7 +94,7 @@ func TestEvalKernelImportError(t *testing.T) {
 		},
 		{
 			`import("notfound")`,
-			object.NewFileNotFoundErr("module \"notfound\" is not defined"),
+			object.NewFileNotFoundErr("failed to read native module \"notfound\": open modules/notfound.pangaea: file does not exist"),
 		},
 	}
 
@@ -137,6 +143,10 @@ func TestEvalKernelInvite(t *testing.T) {
 			`invite!("dummy"); message`,
 			object.NewPanStr("This is a dummy module."),
 		},
+		{
+			`invite!("dummy_native"); message`,
+			object.NewPanStr("This is a dummy module."),
+		},
 	}
 
 	for _, tt := range tests {
@@ -174,7 +184,7 @@ func TestEvalKernelInviteError(t *testing.T) {
 		},
 		{
 			`invite!("notfound")`,
-			object.NewFileNotFoundErr("module \"notfound\" is not defined"),
+			object.NewFileNotFoundErr("failed to read native module \"notfound\": open modules/notfound.pangaea: file does not exist"),
 		},
 	}
 

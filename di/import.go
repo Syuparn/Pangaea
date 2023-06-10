@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Syuparn/pangaea/native"
 	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
 	"github.com/Syuparn/pangaea/props/modules"
@@ -141,11 +142,29 @@ func readSourceFile(env *object.Env, importPath string) (io.Reader, string, *obj
 }
 
 func injectStandardModule(env *object.Env, importPath string) object.PanObject {
-	m, ok := modules.Modules[importPath]
-	if !ok {
-		return object.NewFileNotFoundErr(fmt.Sprintf("module %q is not defined", importPath))
+	// find built-in
+	if m, ok := modules.Modules[importPath]; ok {
+		modules.InjectTo(env, m())
+		return env.Items()
 	}
 
-	modules.InjectTo(env, m())
+	// find native otherwise
+	return injectNativeStandardModule(env, importPath)
+}
+
+func injectNativeStandardModule(env *object.Env, importPath string) object.PanObject {
+	filePath := fmt.Sprintf("modules/%s.pangaea", importPath)
+
+	fp, err := native.FS.Open(filePath)
+	if err != nil {
+		return object.NewFileNotFoundErr(fmt.Sprintf("failed to read native module %q: %s", importPath, err))
+	}
+	defer fp.Close()
+
+	result := eval(parser.NewReader(fp, importPath), env)
+	if result.Type() == object.ErrType {
+		return result
+	}
+
 	return env.Items()
 }
