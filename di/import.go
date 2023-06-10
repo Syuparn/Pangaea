@@ -2,12 +2,14 @@ package di
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/Syuparn/pangaea/object"
 	"github.com/Syuparn/pangaea/parser"
+	"github.com/Syuparn/pangaea/props/modules"
 )
 
 func kernelImport(
@@ -19,42 +21,12 @@ func kernelImport(
 		return object.NewTypeErr("import requires at least 1 arg")
 	}
 
-	fileNameObj, ok := args[0].(*object.PanStr)
+	importPathObj, ok := args[0].(*object.PanStr)
 	if !ok {
 		return object.NewTypeErr("\\1 must be str")
 	}
 
-	fileName := fileNameObj.Value
-	if !strings.HasSuffix(fileName, ".pangaea") {
-		fileName += ".pangaea"
-	}
-
-	// NOTE: if fileName is relative, it is based on the evaluating source file (not based on where pangaea command is executed)
-	if p, ok := env.Get(object.GetSymHash(object.SourcePathVar)); ok {
-		if p.Type() != object.StrType {
-			return object.NewTypeErr(fmt.Sprintf("%s %s must be str", object.SourcePathVar, p.Inspect()))
-		}
-		sourcePath := p.(*object.PanStr).Value
-		fileName = filepath.Join(filepath.Dir(sourcePath), fileName)
-	}
-
-	f, err := os.Open(fileName)
-	if err != nil {
-		return object.NewFileNotFoundErr(fmt.Sprintf("failed to open %q", fileName))
-	}
-
-	// NOTE: object.NewEnv cannot be used because an empty env does not have built-in objects
-	newEnv := object.NewEnclosedEnv(env.Global())
-
-	// set imported file path to SourcePathVar for inner env
-	newEnv.SetSourceFilePath(fileName)
-
-	result := eval(parser.NewReader(f, fileName), newEnv)
-	if result.Type() == object.ErrType {
-		return result
-	}
-
-	return newEnv.Items()
+	return importModule(env, importPathObj.Value)
 }
 
 func kernelInvite(
@@ -66,33 +38,70 @@ func kernelInvite(
 		return object.NewTypeErr("invite! requires at least 1 arg")
 	}
 
-	fileNameObj, ok := args[0].(*object.PanStr)
+	importPathObj, ok := args[0].(*object.PanStr)
 	if !ok {
 		return object.NewTypeErr("\\1 must be str")
 	}
 
-	fileName := fileNameObj.Value
-	if !strings.HasSuffix(fileName, ".pangaea") {
-		fileName += ".pangaea"
+	return inviteModule(env, importPathObj.Value)
+}
+
+func importModule(env *object.Env, importPath string) object.PanObject {
+	// relative path like "./foo/bar"
+	if strings.HasPrefix(importPath, ".") {
+		return importRelative(env, importPath)
 	}
 
-	// NOTE: if fileName is relative, it is based on the evaluating source file (not based on where pangaea command is executed)
-	if p, ok := env.Get(object.GetSymHash(object.SourcePathVar)); ok {
-		if p.Type() != object.StrType {
-			return object.NewTypeErr(fmt.Sprintf("%s %s must be str", object.SourcePathVar, p.Inspect()))
-		}
-		sourcePath := p.(*object.PanStr).Value
-		fileName = filepath.Join(filepath.Dir(sourcePath), fileName)
+	// NOTE: object.NewEnv cannot be used because an empty env does not have built-in objects
+	// NOTE: object.NewEnclosedEnv(env) cannot be used otherwise variables in this env affects the imported module
+	newEnv := object.NewEnclosedEnv(env.Global())
+
+	return injectStandardModule(newEnv, importPath)
+}
+
+func importRelative(env *object.Env, importPath string) object.PanObject {
+	f, importPath, errObj := readSourceFile(env, importPath)
+	if errObj != nil {
+		return errObj
 	}
 
-	f, err := os.Open(fileName)
-	if err != nil {
-		return object.NewFileNotFoundErr(fmt.Sprintf("failed to open %q", fileName))
+	// NOTE: object.NewEnv cannot be used because an empty env does not have built-in objects
+	// NOTE: object.NewEnclosedEnv(env) cannot be used otherwise variables in this env affects the imported module
+	newEnv := object.NewEnclosedEnv(env.Global())
+
+	// set imported file path to SourcePathVar for inner env
+	newEnv.SetSourceFilePath(importPath)
+
+	result := eval(parser.NewReader(f, importPath), newEnv)
+	if result.Type() == object.ErrType {
+		return result
 	}
 
-	// set invited file path to SourcePathVar to evaluate the file
+	return newEnv.Items()
+}
+
+func inviteModule(env *object.Env, importPath string) object.PanObject {
+	// relative path like "./foo/bar"
+	if strings.HasPrefix(importPath, ".") {
+		return inviteRelative(env, importPath)
+	}
+
+	m := injectStandardModule(env, importPath)
+	if m.Type() == object.ErrType {
+		return m
+	}
+
+	return object.BuiltInNil
+}
+
+func inviteRelative(env *object.Env, importPath string) object.PanObject {
+	f, importPath, errObj := readSourceFile(env, importPath)
+	if errObj != nil {
+		return errObj
+	}
+
 	origPath, existsPath := env.Get(object.GetSymHash(object.SourcePathVar))
-	env.SetSourceFilePath(fileName)
+	env.SetSourceFilePath(importPath)
 	// HACK: set the original value again for the following process
 	defer func() {
 		if existsPath {
@@ -100,11 +109,43 @@ func kernelInvite(
 		}
 	}()
 
-	// NOTE: pass env directly because invite! expands variables in the file to the current environment
-	result := eval(parser.NewReader(f, fileName), env)
+	result := eval(parser.NewReader(f, importPath), env)
 	if result.Type() == object.ErrType {
 		return result
 	}
 
 	return object.BuiltInNil
+}
+
+func readSourceFile(env *object.Env, importPath string) (io.Reader, string, *object.PanErr) {
+	// add extension
+	if !strings.HasSuffix(importPath, ".pangaea") {
+		importPath += ".pangaea"
+	}
+
+	// NOTE: if importPath is relative, it is based on the evaluating source file (not based on where pangaea command is executed)
+	if p, ok := env.Get(object.GetSymHash(object.SourcePathVar)); ok {
+		if p.Type() != object.StrType {
+			return nil, "", object.NewTypeErr(fmt.Sprintf("%s %s must be str", object.SourcePathVar, p.Inspect()))
+		}
+		sourcePath := p.(*object.PanStr).Value
+		importPath = filepath.Join(filepath.Dir(sourcePath), importPath)
+	}
+
+	f, err := os.Open(importPath)
+	if err != nil {
+		return nil, "", object.NewFileNotFoundErr(fmt.Sprintf("failed to open %q", importPath))
+	}
+
+	return f, importPath, nil
+}
+
+func injectStandardModule(env *object.Env, importPath string) object.PanObject {
+	m, ok := modules.Modules[importPath]
+	if !ok {
+		return object.NewFileNotFoundErr(fmt.Sprintf("module %q is not defined", importPath))
+	}
+
+	modules.InjectTo(env, m())
+	return env.Items()
 }
