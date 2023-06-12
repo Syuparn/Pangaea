@@ -1,10 +1,13 @@
 package builtin
 
 import (
+	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Syuparn/pangaea/evaluator"
 	"github.com/Syuparn/pangaea/object"
@@ -259,7 +262,7 @@ func TestToHandlerRequest(t *testing.T) {
 			dummyCallback(`{|req| {body: req.queries.foo[0]}}`),
 			"bar",
 		},
-		// TODO: path parameters
+		// NOTE: path parameter cannot be tested here because routing is not defined
 	}
 
 	for _, tt := range tests {
@@ -281,6 +284,60 @@ func TestToHandlerRequest(t *testing.T) {
 
 			if string(rec.Body.Bytes()) != tt.expected {
 				t.Errorf("wrong body. expected=%v, got=%v", tt.expected, string(rec.Body.Bytes()))
+			}
+		})
+	}
+}
+
+func TestToHandlerPathParams(t *testing.T) {
+	tests := []struct {
+		name       string
+		routeURL   string
+		requestURL string
+		callback   *object.PanFunc
+		expected   string
+	}{
+		{
+			"get path param",
+			"/users/:id",
+			"http://localhost:50000/users/12345",
+			// HACK: pick up only 1 element because `Arr#S` is not injected
+			dummyCallback(`{|req| {body: req.params.id}}`),
+			"12345",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt // pin
+
+		t.Run(tt.name, func(t *testing.T) {
+			env := object.NewEnv()
+			ret := newServer(env, object.EmptyPanObjPtr(), newPanHandler(object.NewEnv(), "GET", tt.routeURL, tt.callback))
+			srv, ok := ret.(*panServer)
+			if !ok {
+				t.Fatalf("srv is not *panServer: got=%T", ret)
+			}
+
+			defer srv.server.Shutdown(context.TODO())
+			go func() {
+				errObj := serve(env, object.EmptyPanObjPtr(), srv, object.NewPanStr(":50000"))
+				t.Log(errObj.Inspect())
+			}()
+			time.Sleep(100 * time.Millisecond)
+
+			res, err := http.Get(tt.requestURL)
+			if err != nil {
+				t.Fatalf("error raised: %s", err)
+			}
+
+			var b bytes.Buffer
+			b.ReadFrom(res.Body)
+
+			if res.StatusCode != 200 {
+				t.Errorf("wrong status. expected=%v, got=%v", 200, res.StatusCode)
+			}
+			if string(b.String()) != tt.expected {
+				t.Errorf("wrong body. expected=%v, got=%v", tt.expected, string(b.String()))
 			}
 		})
 	}

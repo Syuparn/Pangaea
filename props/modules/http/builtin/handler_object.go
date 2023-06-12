@@ -168,6 +168,11 @@ func requestToObj(c echo.Context) object.PanObject {
 		queries[k] = object.NewPanArr(elems...)
 	}
 
+	params := map[string]object.PanObject{}
+	for _, name := range c.ParamNames() {
+		params[name] = object.NewPanStr(c.Param(name))
+	}
+
 	return mapToObj(map[string]object.PanObject{
 		"method":  object.NewPanStr(req.Method),
 		"host":    object.NewPanStr(req.Host),
@@ -175,6 +180,6 @@ func requestToObj(c echo.Context) object.PanObject {
 		"body":    object.NewPanStr(b.String()),
 		"headers": mapToObj(headers),
 		"queries": mapToObj(queries),
-		// TODO: path params
+		"params":  mapToObj(params),
 	})
 }
