@@ -1,0 +1,43 @@
+invite!("http")
+
+down := S.serve(
+  S.get("/hello") {"world"},
+  S.post("/users") {|req| {id: 1, name: req.body.decJSON.name}},
+  S.put("/users") {|req| "ok"},
+  S.delete("/users/hoge") {|req| Response.new(status: 204)},
+  S.patch("/users") {|req| "ok"},
+  background: true,
+  url: ":50000",
+)
+defer down()
+
+res := C.get("http://localhost:50000/hello")
+assertEq(res.status, 200)
+assertEq(res.body, "world")
+
+res := C.post("http://localhost:50000/users", body: `{"name": "Taro"}`)
+assertEq(res.status, 200)
+assertEq(res.body, `{"id": 1, "name": "Taro"}`)
+assertEq(res.header("Content-Type"), "application/json; charset=UTF-8")
+
+res := C.put("http://localhost:50000/users")
+assertEq(res.status, 200)
+assertEq(res.body, `ok`)
+
+res := C.delete("http://localhost:50000/users/hoge")
+assertEq(res.status, 204)
+
+res := C.patch("http://localhost:50000/users")
+assertEq(res.status, 200)
+assertEq(res.body, `ok`)
+
+# default port
+down2 := S.serve(
+  S.get("/hello2") {"world2"},
+  background: true,
+)
+defer down2()
+
+res := C.get("http://localhost:8080/hello2")
+assertEq(res.status, 200)
+assertEq(res.body, "world2")
