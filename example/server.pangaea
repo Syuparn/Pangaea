@@ -1,0 +1,22 @@
+invite!("http")
+
+# CAUTION: You should use external DB to update data because all Pangaea objects are immutable and stateless!
+# (this is just a dummy dataset which cannot be updated)
+users := [
+  {id: "1", name: "Taro"},
+  {id: "2", name: "Jiro"},
+  {id: "3", name: "Hanako"},
+]
+
+Server.serve(
+  S.post("users") {|req| Response.new(status: 201, body: {id: "12345", name: req.body.decJSON.name}.S)},
+  S.get("users") {|req| {users: users}},
+  S.get("users/:id") {|req| users.find {.id == req.params.id} || Response.new(status: 404, body: {msg: "User not found"}.S)},
+  S.delete("users/:id") {|req| Response.new(status: 204)},
+)
+
+# try curl to request to the server
+# curl localhost:8080/users
+# curl localhost:8080/users/3
+# curl -XDELETE localhost:8080/users/3
+# curl -XPOST localhost:8080/users -d '{"name": "Taro"}' -H 'Content-Type: application/json'

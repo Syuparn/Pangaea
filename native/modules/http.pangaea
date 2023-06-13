@@ -1,24 +1,51 @@
 _internal := import("http/internal")
 
 Response := {
-  new: _init('status, 'body, 'headers),
+  new: m{|status: 200, body: "", headers: {}| .bear({status: status, body: body, headers: headers})},
+  header: m{|key| .headers[key][0]},
 }
 
 Client := {
-  get: m{|url, headers: {}, queries: {}|
-    _internal['request](method: 'GET, url: url, headers: headers, queries: queries).{self._toResponse(\)}
-  },
-  post: m{|url, headers: {}, body: ""|
-    _internal['request](method: 'POST, url: url, headers: headers, body: body).{self._toResponse(\)}
-  },
-  put: m{|url, headers: {}, body: ""|
-    _internal['request](method: 'PUT, url: url, headers: headers, body: body).{self._toResponse(\)}
-  },
-  delete: m{|url, headers: {}, queries: {}|
-    _internal['request](method: 'DELETE, url: url, headers: headers, queries: queries).{self._toResponse(\)}
-  },
-  patch: m{|url, headers: {}, body: ""|
-    _internal['request](method: 'PATCH, url: url, headers: headers, body: body).{self._toResponse(\)}
-  },
-  _toResponse: m{|r| Response.new(r.status, r.body, r.headers)},
+  _toResponse: m{|r| Response.new(status: r.status, body: r.body, headers: r.headers)},
+  **(['post, 'put, 'patch]@({}){|name|
+    [name, m{|url, headers: {}, body: ""|
+      _internal['request](method: name.uc, url: url, headers: headers, body: body).{self._toResponse(\)}
+    }]
+  }),
+  **(['get, 'delete]@({}){|name|
+    [name, m{|url, headers: {}, queries: {}|
+      _internal['request](method: name.uc, url: url, headers: headers, queries: queries).{self._toResponse(\)}
+    }]
+  }),
 }
+
+# alias
+C := Client
+
+Server := {
+  serve: m{|background: false, url: ":8080"|
+    handlers := \0[1:]
+    _internal['newServer](*handlers).{|srv|
+      return _internal['serve](srv, url) if !background
+      _internal['serveBackground](srv, url)
+      {_internal['stop](srv)} # return stop function
+    }
+  },
+  _wrapCallback: m{|f|
+    {|req|
+      f(req).{|res|
+        return res if res.proto == Response
+        return {body: res} if res.proto == Str
+        {body: res.S, _isJSON: true}
+      }
+    }
+  },
+  **(['get, 'post, 'put, 'delete, 'patch]@({}){|name|
+    [name, m{|url, callback|
+      _internal['newHandler](name.uc, url, ._wrapCallback(callback))
+    }]
+  }),
+}
+
+# alias
+S := Server
