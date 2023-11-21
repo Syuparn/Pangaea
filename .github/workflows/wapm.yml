@@ -1,0 +1,28 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+    - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.21"
+      - name: build wasm
+        run: GOOS=wasip1 GOARCH=wasm go build -o pangaea.wasm
+      # deploy to wapm
+      - name: install wapm cli
+        uses: wasmerio/setup-wasmer@v1
+      - name: publish to wapm
+        uses: wasmerio/wapm-publish@v1
+        with:
+          username: ${{ secrets.WAPM_USERNAME }}
+          token: ${{ secrets.WAPM_TOKEN }}
