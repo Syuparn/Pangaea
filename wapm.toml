@@ -1,9 +1,10 @@
 [package]
-name = "Pangaea"
+name = "Syuparn/pangaea"
 version = "0.12.0"
 description = "A programming language for one-liner method chain lovers!"
 license = "MIT"
 repository = "https://github.com/Syuparn/Pangaea"
+readme = "README.md"
 
 [[module]]
 name = "pangaea"
