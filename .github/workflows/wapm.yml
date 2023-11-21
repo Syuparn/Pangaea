@@ -1,4 +1,4 @@
-name: Deploy
+name: wapm
 
 on:
   push:
@@ -25,4 +25,4 @@ jobs:
         uses: wasmerio/wapm-publish@v1
         with:
           username: ${{ secrets.WAPM_USERNAME }}
-          token: ${{ secrets.WAPM_TOKEN }}
+          password: ${{ secrets.WAPM_PASSWORD }}
