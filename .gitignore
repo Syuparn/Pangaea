@@ -6,6 +6,7 @@ pangaea.exe
 pangaea
 # wasm binary
 web/wasm/*.wasm
+*.wasm
 # bundles in playground
 web/playground/*.wasm
 web/playground/wasm_exec.js
