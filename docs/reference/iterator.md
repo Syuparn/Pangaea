@@ -66,6 +66,13 @@ it2.next # 1
 it2.next # 2
 ```
 
+If you got a `NameErr` from `Iter#next`, you may forget to set an initial value by `new`.
+
+```pangaea
+it := <{|i| yield i; recur i+1}>
+it.next # NameErr: name `i` is not defined
+```
+
 ## Why is iterator designed as a stateful function?
 
 There were 2 more ideas to realize iterators, but they required more syntactic elements than the current design.
