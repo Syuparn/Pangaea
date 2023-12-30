@@ -10379,6 +10379,36 @@ func TestEvalAssertRaises(t *testing.T) {
 	}
 }
 
+func TestEvalRead(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected object.PanObject
+	}{
+		{
+			`read("testdata/sample.txt")`,
+			object.NewPanStr("dummy\n"),
+		},
+		{
+			`read()`,
+			object.NewTypeErr("read requires at least 1 arg"),
+		},
+		{
+			`read(1)`,
+			object.NewTypeErr("1 cannot be treated as str"),
+		},
+		{
+			`read("testdata/notfound.txt")`,
+			object.NewFileNotFoundErr(`"testdata/notfound.txt" cannot be opened: open testdata/notfound.txt: no such file or directory`),
+		},
+		// TODO: add non-text options
+	}
+
+	for _, tt := range tests {
+		actual := testEval(t, tt.input)
+		testValue(t, actual, tt.expected)
+	}
+}
+
 func TestEvalTry(t *testing.T) {
 	tests := []struct {
 		input    string

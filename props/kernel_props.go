@@ -3,6 +3,7 @@ package props
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/Syuparn/pangaea/object"
 )
@@ -123,5 +124,37 @@ func KernelProps(propContainer map[string]object.PanObject) map[string]object.Pa
 		),
 		"import":  propContainer["Kernel_import"],
 		"invite!": propContainer["Kernel_invite!"],
+		"read": f(
+			func(
+				env *object.Env, kwargs *object.PanObj, args ...object.PanObject,
+			) object.PanObject {
+				if len(args) < 1 {
+					return object.NewTypeErr("read requires at least 1 arg")
+				}
+
+				pathObj, ok := object.TraceProtoOfStr(args[0])
+				if !ok {
+					return object.NewTypeErr(
+						fmt.Sprintf("%s cannot be treated as str", args[0].Repr()))
+				}
+
+				filePath := pathObj.Value
+				// HACK: find relative file path
+				if p, ok := env.Get(object.GetSymHash(object.SourcePathVar)); ok {
+					if p.Type() != object.StrType {
+						return object.NewTypeErr(fmt.Sprintf("%s %s must be str", object.SourcePathVar, p.Inspect()))
+					}
+					filePath = filepath.Join(filepath.Dir(filePath), filePath)
+				}
+
+				b, err := os.ReadFile(filePath)
+				if err != nil {
+					return object.NewFileNotFoundErr(
+						fmt.Sprintf("%s cannot be opened: %s", args[0].Repr(), err.Error()))
+				}
+
+				return object.NewPanStr(string(b))
+			},
+		),
 	}
 }
