@@ -171,7 +171,9 @@ func injectProps(
 	pairsList ...*map[object.SymHash]object.Pair,
 ) {
 	for _, pairs := range pairsList {
-		obj.AddPairs(pairs)
+		if err := obj.AddPairs(pairs); err != nil {
+			panic(err.Error())
+		}
 	}
 }
 

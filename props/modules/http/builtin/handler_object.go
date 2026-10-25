@@ -2,6 +2,7 @@ package builtin
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 
@@ -81,11 +82,15 @@ func toHandler(env *object.Env, callback *object.PanFunc) echo.HandlerFunc {
 	call := evaluator.NewPropContainer()["Func_call"].(*object.PanBuiltIn)
 
 	handler := func(c echo.Context) error {
-		reqObj := requestToObj(c)
+		reqObj, err := requestToObj(c)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			return err
+		}
 		res := call.Fn(env, object.EmptyPanObjPtr(), callback, reqObj)
 		if res.Type() == object.ErrType {
 			fmt.Fprintln(os.Stderr, res.Inspect())
-			return fmt.Errorf(res.Inspect())
+			return errors.New(res.Inspect())
 		}
 		// NOTE: all objects inherit Obj
 		resObj, _ := object.TraceProtoOfObj(res)
@@ -103,7 +108,7 @@ func toHandler(env *object.Env, callback *object.PanFunc) echo.HandlerFunc {
 				if !ok {
 					errObj := object.NewTypeErr(fmt.Sprintf("`%s` cannot be treated as str", v.Value.Inspect()))
 					fmt.Fprintln(os.Stderr, errObj.Inspect())
-					return fmt.Errorf(errObj.Inspect())
+					return errors.New(errObj.Inspect())
 				}
 
 				c.Response().Header().Add(key, valueStr.Value)
@@ -118,13 +123,17 @@ func toHandler(env *object.Env, callback *object.PanFunc) echo.HandlerFunc {
 
 		bodyPair, ok := (*resObj.Pairs)[object.GetSymHash("body")]
 		if !ok {
-			return c.String(status, "")
+			// NOTE: do not write even an empty body because some statuses (like 204) do not allow it
+			if c.Response().Header().Get(echo.HeaderContentType) == "" {
+				c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
+			}
+			return c.NoContent(status)
 		}
 		bodyStr, ok := object.TraceProtoOfStr(bodyPair.Value)
 		if !ok {
 			errObj := object.NewTypeErr(fmt.Sprintf("`%s` cannot be treated as str", bodyPair.Value.Inspect()))
 			fmt.Fprintln(os.Stderr, errObj.Inspect())
-			return fmt.Errorf(errObj.Inspect())
+			return errors.New(errObj.Inspect())
 		}
 
 		if isJSONPair, ok := (*resObj.Pairs)[object.GetSymHash("_isJSON")]; ok {
@@ -139,13 +148,15 @@ func toHandler(env *object.Env, callback *object.PanFunc) echo.HandlerFunc {
 	return handler
 }
 
-func requestToObj(c echo.Context) object.PanObject {
+func requestToObj(c echo.Context) (object.PanObject, error) {
 	req := c.Request()
 
 	var b bytes.Buffer
 	if req.Body != nil {
-		b.ReadFrom(req.Body)
-		defer req.Body.Close()
+		// NOTE: request body is closed by the server
+		if _, err := b.ReadFrom(req.Body); err != nil {
+			return nil, err
+		}
 	}
 
 	headers := map[string]object.PanObject{}
@@ -181,5 +192,5 @@ func requestToObj(c echo.Context) object.PanObject {
 		"headers": mapToObj(headers),
 		"queries": mapToObj(queries),
 		"params":  mapToObj(params),
-	})
+	}), nil
 }

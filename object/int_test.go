@@ -112,14 +112,10 @@ func TestIntHash(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testIntIsPanObject() {
-	var _ PanObject = NewPanInt(10)
-}
+// checked by compiler
+var _ PanObject = (*PanInt)(nil)
 
-func testIntIsPanScalar() {
-	var _ PanScalar = NewPanInt(10)
-}
+var _ PanScalar = (*PanInt)(nil)
 
 func TestNewPanInt(t *testing.T) {
 	tests := []struct {

@@ -78,10 +78,8 @@ func TestFuncProto(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testFuncIsPanObject() {
-	var _ PanObject = NewPanFunc(newMockFuncWrapper(), nil)
-}
+// checked by compiler
+var _ PanObject = (*PanFunc)(nil)
 
 func TestNewPanFunc(t *testing.T) {
 	tests := []struct {

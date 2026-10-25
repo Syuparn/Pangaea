@@ -145,10 +145,12 @@ func TestRequest(t *testing.T) {
 			h := func(w http.ResponseWriter, r *http.Request) {
 				actual = r
 				if r.Method != "GET" && r.Body != nil {
-					defer r.Body.Close()
-					actualBody.ReadFrom(r.Body)
+					if _, err := actualBody.ReadFrom(r.Body); err != nil {
+						t.Errorf("failed to read body: %s", err)
+					}
 				}
-				io.WriteString(w, "ok")
+				// NOTE: error is ignored because write failure is detected by the response check
+				_, _ = io.WriteString(w, "ok")
 			}
 
 			ts := httptest.NewServer(http.HandlerFunc(h))
@@ -193,7 +195,9 @@ func TestRequest(t *testing.T) {
 
 			if expected.Body != nil {
 				var expectedBody bytes.Buffer
-				expectedBody.ReadFrom(expected.Body)
+				if _, err := expectedBody.ReadFrom(expected.Body); err != nil {
+					t.Fatalf("failed to read body: %s", err)
+				}
 				if expectedBody.String() != actualBody.String() {
 					t.Errorf("wrong Body. expected=%v, got=%v", expectedBody.String(), actualBody.String())
 				}
@@ -321,7 +325,8 @@ func TestRequestError(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			h := func(w http.ResponseWriter, r *http.Request) {
-				io.WriteString(w, "ok")
+				// NOTE: error is ignored because write failure is detected by the response check
+				_, _ = io.WriteString(w, "ok")
 			}
 
 			ts := httptest.NewServer(http.HandlerFunc(h))
@@ -365,7 +370,8 @@ func TestRequestResponse(t *testing.T) {
 			}),
 			func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Date", "Sun, 1 Jan 2023 01:23:45 GMT") // HACK: fix time-dependent header for comparison
-				io.WriteString(w, "ok")
+				// NOTE: error is ignored because write failure is detected by the response check
+				_, _ = io.WriteString(w, "ok")
 			},
 		},
 		{
@@ -388,7 +394,8 @@ func TestRequestResponse(t *testing.T) {
 			func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Date", "Sun, 1 Jan 2023 01:23:45 GMT") // HACK: fix time-dependent header for comparison
 				w.WriteHeader(http.StatusInternalServerError)
-				io.WriteString(w, "ng")
+				// NOTE: error is ignored because write failure is detected by the response check
+				_, _ = io.WriteString(w, "ng")
 			},
 		},
 	}

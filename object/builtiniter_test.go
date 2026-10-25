@@ -42,11 +42,8 @@ func TestBuiltInIterProto(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testBuiltInIterIsPanObject() {
-	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
-	var _ PanObject = NewPanBuiltInIter(f, NewEnv())
-}
+// checked by compiler
+var _ PanObject = (*PanBuiltInIter)(nil)
 
 func TestNewPanBuiltInIter(t *testing.T) {
 	tests := []struct {

@@ -63,7 +63,7 @@ func TestNewServer(t *testing.T) {
 				t.Fatalf("srv is not *panServer: got=%T", ret)
 			}
 
-			defer srv.server.Shutdown(context.TODO())
+			defer shutdown(t, srv)
 			go func() {
 				err := srv.server.Start(":50000")
 				t.Log(err.Error())
@@ -119,7 +119,7 @@ func TestNewServerNotMatched(t *testing.T) {
 				t.Fatalf("srv is not *panServer: got=%T", ret)
 			}
 
-			defer srv.server.Shutdown(context.TODO())
+			defer shutdown(t, srv)
 			go func() {
 				err := srv.server.Start(":50000")
 				t.Log(err.Error())
@@ -169,7 +169,7 @@ func TestInternalServerError(t *testing.T) {
 				t.Fatalf("srv is not *panServer: got=%T", ret)
 			}
 
-			defer srv.server.Shutdown(context.TODO())
+			defer shutdown(t, srv)
 			go func() {
 				err := srv.server.Start(":50000")
 				t.Log(err.Error())
@@ -251,7 +251,7 @@ func TestServe(t *testing.T) {
 				t.Fatalf("srv is not *panServer: got=%T", ret)
 			}
 
-			defer srv.server.Shutdown(context.TODO())
+			defer shutdown(t, srv)
 			go func() {
 				errObj := serve(env, object.EmptyPanObjPtr(), srv, object.NewPanStr(":50000"))
 				t.Log(errObj.Inspect())
@@ -339,7 +339,7 @@ func TestServeBackground(t *testing.T) {
 				t.Fatalf("srv is not *panServer: got=%T", ret)
 			}
 
-			defer srv.server.Shutdown(context.TODO())
+			defer shutdown(t, srv)
 			ret = serveBackground(env, object.EmptyPanObjPtr(), srv, object.NewPanStr(":50000"))
 			if ret != object.BuiltInNil {
 				t.Errorf("%s must be BuiltInNil", ret.Inspect())
@@ -451,5 +451,12 @@ func TestStopError(t *testing.T) {
 				t.Errorf("wrong value. expected=%v, got=%v", tt.expected.Inspect(), ret.Inspect())
 			}
 		})
+	}
+}
+
+func shutdown(t *testing.T, srv *panServer) {
+	t.Helper()
+	if err := srv.server.Shutdown(context.TODO()); err != nil {
+		t.Errorf("failed to shutdown server: %s", err)
 	}
 }

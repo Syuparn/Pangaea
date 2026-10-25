@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           # NOTE: fetch all commits for changelogs, otherwise release note gets empty!
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v6
         with:
-          go-version: "1.21"
+          go-version: "1.27"
       - name: Set Tag to Env
         run: |
           git fetch --tags
@@ -28,9 +28,9 @@ jobs:
           git-chglog ${{env.TAG}} > /tmp/release_note.md
           cat /tmp/release_note.md
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
-          args: release --rm-dist --release-notes /tmp/release_note.md
+          version: "~> v2"
+          args: release --clean --release-notes /tmp/release_note.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

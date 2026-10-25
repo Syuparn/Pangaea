@@ -23,7 +23,9 @@ func evalArgs(
 				appendStackTrace(err, argNode.Source())
 				return []object.PanObject{}, nil, err
 			}
-			unpackedKwargs.AddPairs(kwargs)
+			if e := unpackedKwargs.AddPairs(kwargs); e != nil {
+				return []object.PanObject{}, nil, object.NewValueErr(e.Error())
+			}
 			continue
 		}
 

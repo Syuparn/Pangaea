@@ -106,7 +106,9 @@ func evalCallArgs(
 	if err != nil {
 		return nil, nil, err
 	}
-	kwargs.AddPairs(unpackedKwargs)
+	if e := kwargs.AddPairs(unpackedKwargs); e != nil {
+		return nil, nil, object.NewValueErr(e.Error())
+	}
 
 	return args, kwargs, nil
 }

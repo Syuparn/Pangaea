@@ -1,3 +1,4 @@
+version: 2
 project_name: pangaea
 env:
   - GO111MODULE=on
@@ -23,6 +24,10 @@ builds:
       - amd64
       - arm
       - arm64
+    ignore:
+      # NOTE: windows/arm is no longer supported since Go 1.26
+      - goos: windows
+        goarch: arm
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     files:

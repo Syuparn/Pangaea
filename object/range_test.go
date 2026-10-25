@@ -143,10 +143,8 @@ func TestRangeZero(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testRangeIsPanObject() {
-	var _ PanObject = NewPanRange(NewPanInt(1), NewPanInt(2), NewPanInt(3))
-}
+// checked by compiler
+var _ PanObject = (*PanRange)(nil)
 
 func TestNewPanRange(t *testing.T) {
 	tests := []struct {

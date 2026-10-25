@@ -119,7 +119,10 @@ func addQueries(u *url.URL, queryObj *object.PanObj) *object.PanErr {
 func responseObj(res *http.Response) object.PanObject {
 	var b bytes.Buffer
 	if res.Body != nil {
-		b.ReadFrom(res.Body)
+		if _, err := b.ReadFrom(res.Body); err != nil {
+			// TODO: create specific error type
+			return object.NewPanErr(err.Error())
+		}
 	}
 
 	headers := map[string]object.PanObject{}

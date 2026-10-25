@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.20
-      id: go
-
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: "1.27"
+      id: go
 
     - name: Build WebAssembly
       run: GOOS=js GOARCH=wasm go build -o main.wasm
@@ -27,10 +27,11 @@ jobs:
     - name: Copy dependencies to playground directory
       run: |
         cp ./web/wasm/main.wasm ./web/playground
-        wget -P ./web/playground https://raw.githubusercontent.com/golang/go/go1.18/misc/wasm/wasm_exec.js
+        # NOTE: wasm_exec.js must match the Go version used to build main.wasm
+        cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" ./web/playground
 
     - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./web/playground

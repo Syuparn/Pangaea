@@ -16,7 +16,7 @@ func (m *PanMatch) Type() PanObjType {
 // Inspect returns formatted source code of this object.
 func (m *PanMatch) Inspect() string {
 	// delegate to MatchWrapper
-	return m.MatchWrapper.String()
+	return m.String()
 }
 
 // Repr returns pritty-printed string of this object.

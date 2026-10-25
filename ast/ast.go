@@ -612,7 +612,7 @@ func (fs *FormerStrPiece) String() string {
 	}
 
 	out.WriteString(fs.Str)
-	out.WriteString(fmt.Sprintf("#{ %s }", fs.Expr.String()))
+	fmt.Fprintf(&out, "#{ %s }", fs.Expr.String())
 	return out.String()
 }
 

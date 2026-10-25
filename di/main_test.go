@@ -40,7 +40,7 @@ func testParse(t *testing.T, input string) *ast.Program {
 	if err != nil {
 		msg := fmt.Sprintf("%v\nOccurred in input ```\n%s\n```",
 			err.Error(), input)
-		t.Fatalf(msg)
+		t.Fatal(msg)
 		t.FailNow()
 	}
 

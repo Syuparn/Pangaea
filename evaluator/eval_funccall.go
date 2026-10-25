@@ -61,12 +61,9 @@ func assignArgsToEnv(
 	args = paddedArgs(args, params)
 
 	for i, param := range params {
-		ident, ok := param.(*object.PanStr)
-
-		if ok {
+		// TODO: pattern matching for non-ident params
+		if ident, ok := param.(*object.PanStr); ok {
 			env.Set(object.GetSymHash(ident.Value), args[i])
-		} else {
-			// TODO: pattern matching
 		}
 	}
 

@@ -2,7 +2,6 @@ package builtin
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -17,9 +16,12 @@ import (
 
 func dummyCallback(input string) *object.PanFunc {
 	// HACK: inject props that are necessary for tests
-	object.BuiltInArrObj.AddPairs(&map[object.SymHash]object.Pair{
+	err := object.BuiltInArrObj.AddPairs(&map[object.SymHash]object.Pair{
 		object.GetSymHash("at"): {Key: object.NewPanStr("at"), Value: evaluator.NewPropContainer()["Arr_at"]},
 	})
+	if err != nil {
+		panic(err.Error())
+	}
 
 	env := object.NewEnvWithConsts()
 	node, err := parser.Parse(parser.NewReader(strings.NewReader(input), "<stdin>"))
@@ -102,10 +104,8 @@ func TestHandlerZero(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testHandlerIsPanObject() {
-	var _ object.PanObject = &panHandler{}
-}
+// checked by compiler
+var _ object.PanObject = (*panHandler)(nil)
 
 func TestToHandler(t *testing.T) {
 	tests := []struct {
@@ -183,8 +183,8 @@ func TestToHandler(t *testing.T) {
 			if rec.Code != tt.status {
 				t.Errorf("wrong status. expected=%v, got=%v", tt.status, rec.Code)
 			}
-			if string(rec.Body.Bytes()) != tt.body {
-				t.Errorf("wrong body. expected=%v, got=%v", tt.body, string(rec.Body.Bytes()))
+			if rec.Body.String() != tt.body {
+				t.Errorf("wrong body. expected=%v, got=%v", tt.body, rec.Body.String())
 			}
 
 			for k, v := range tt.headers {
@@ -282,8 +282,8 @@ func TestToHandlerRequest(t *testing.T) {
 				t.Fatalf("error raised: %s", err)
 			}
 
-			if string(rec.Body.Bytes()) != tt.expected {
-				t.Errorf("wrong body. expected=%v, got=%v", tt.expected, string(rec.Body.Bytes()))
+			if rec.Body.String() != tt.expected {
+				t.Errorf("wrong body. expected=%v, got=%v", tt.expected, rec.Body.String())
 			}
 		})
 	}
@@ -318,7 +318,7 @@ func TestToHandlerPathParams(t *testing.T) {
 				t.Fatalf("srv is not *panServer: got=%T", ret)
 			}
 
-			defer srv.server.Shutdown(context.TODO())
+			defer shutdown(t, srv)
 			go func() {
 				errObj := serve(env, object.EmptyPanObjPtr(), srv, object.NewPanStr(":50000"))
 				t.Log(errObj.Inspect())
@@ -331,7 +331,9 @@ func TestToHandlerPathParams(t *testing.T) {
 			}
 
 			var b bytes.Buffer
-			b.ReadFrom(res.Body)
+			if _, err := b.ReadFrom(res.Body); err != nil {
+				t.Fatalf("failed to read body: %s", err)
+			}
 
 			if res.StatusCode != 200 {
 				t.Errorf("wrong status. expected=%v, got=%v", 200, res.StatusCode)

@@ -62,7 +62,7 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 
 				if _, ok := object.TraceProtoOfBuiltInFunc(args[0]); ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("builtin func cannot be inspected"))
+						"builtin func cannot be inspected")
 				}
 
 				return object.NewTypeErr(
@@ -103,7 +103,7 @@ func FuncProps(propContainer map[string]object.PanObject) map[string]object.PanO
 
 				if _, ok := object.TraceProtoOfBuiltInFunc(args[0]); ok {
 					return object.NewTypeErr(
-						fmt.Sprintf("builtin func cannot be inspected"))
+						"builtin func cannot be inspected")
 				}
 
 				return object.NewTypeErr(

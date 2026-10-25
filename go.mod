@@ -1,6 +1,6 @@
 module github.com/Syuparn/pangaea
 
-go 1.21
+go 1.27
 
 require (
 	github.com/Songmu/gocredits v0.3.0

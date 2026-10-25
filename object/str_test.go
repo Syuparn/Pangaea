@@ -236,11 +236,7 @@ func TestStrIsSym(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testStrIsPanObject() {
-	var _ PanObject = NewPanStr("FOO")
-}
+// checked by compiler
+var _ PanObject = (*PanStr)(nil)
 
-func testStrIsPanScalar() {
-	var _ PanScalar = NewPanStr("ABC")
-}
+var _ PanScalar = (*PanStr)(nil)
