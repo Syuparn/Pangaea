@@ -29,13 +29,18 @@ func StartREPL(preloadSrc string, in io.Reader, out io.Writer) {
 		fmt.Fprintf(os.Stderr, "errors occurred in preload sources\n\n")
 	}
 
-	io.WriteString(out, fmt.Sprintf("Pangaea %s\n", Version))
-	io.WriteString(out, fmt.Sprintln("multi : multi-line mode"))
-	io.WriteString(out, fmt.Sprintln("single: single-line mode (default)"))
-	io.WriteString(out, fmt.Sprintln())
+	header := fmt.Sprintf("Pangaea %s\n", Version) +
+		"multi : multi-line mode\n" +
+		"single: single-line mode (default)\n" +
+		"\n"
+	if !write(out, header) {
+		return
+	}
 
 	for {
-		io.WriteString(out, scanner.Prompt())
+		if !write(out, scanner.Prompt()) {
+			return
+		}
 		scanned, ok := scanner.Scan()
 		if !ok {
 			return
@@ -44,14 +49,27 @@ func StartREPL(preloadSrc string, in io.Reader, out io.Writer) {
 		program, err := parser.Parse(parser.NewReader(strings.NewReader(scanned), object.StdinFileName))
 
 		if err != nil {
-			io.WriteString(out, err.Error())
+			if !write(out, err.Error()) {
+				return
+			}
 			continue
 		}
 
 		evaluated := evaluator.Eval(program, env)
 
-		io.WriteString(out, evaluated.Repr()+"\n")
+		if !write(out, evaluated.Repr()+"\n") {
+			return
+		}
 	}
+}
+
+// write writes s to out. It returns false if writing failed.
+func write(out io.Writer, s string) bool {
+	if _, err := io.WriteString(out, s); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to write output: %s\n", err)
+		return false
+	}
+	return true
 }
 
 func newScanner(in io.Reader) *_Scanner {

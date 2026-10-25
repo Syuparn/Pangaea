@@ -23,7 +23,8 @@ var (
 func main() {
 	// test mode
 	if len(os.Args) >= 2 && os.Args[1] == "test" {
-		testCmdSet.Parse(os.Args[2:])
+		// NOTE: Parse never returns error because testCmdSet exits on error (flag.ExitOnError)
+		_ = testCmdSet.Parse(os.Args[2:])
 		if path := testCmdSet.Arg(0); path != "" {
 			exitCode := runTest(path)
 			os.Exit(exitCode)

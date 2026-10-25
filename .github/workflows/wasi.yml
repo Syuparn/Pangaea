@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v6
         with:
-          go-version: "1.21"
+          go-version: "1.27"
       - name: build wasi
         run: GOOS=wasip1 GOARCH=wasm go build -o pangaea.wasm
       - name: upload wasi
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wasi
           path: pangaea.wasm

@@ -2,7 +2,10 @@ package builtin
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"os"
 
 	"github.com/Syuparn/pangaea/object"
 )
@@ -42,7 +45,9 @@ func serveBackground(env *object.Env, kwargs *object.PanObj, args ...object.PanO
 	}
 
 	go func() {
-		srv.server.Start(urlStr.Value)
+		if err := srv.server.Start(urlStr.Value); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			fmt.Fprintln(os.Stderr, err.Error())
+		}
 	}()
 	return object.BuiltInNil
 }

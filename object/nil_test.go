@@ -104,14 +104,10 @@ func TestNilHash(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testNilIsPanObject() {
-	var _ PanObject = NewPanNil()
-}
+// checked by compiler
+var _ PanObject = (*PanNil)(nil)
 
-func testNilIsScalarObject() {
-	var _ PanScalar = NewPanNil()
-}
+var _ PanScalar = (*PanNil)(nil)
 
 func TestNewPanNil(t *testing.T) {
 	actual := NewPanNil()

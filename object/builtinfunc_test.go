@@ -66,11 +66,8 @@ func TestBuiltInZero(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testBuiltInIsPanObject() {
-	f := func(e *Env, Kwargs *PanObj, args ...PanObject) PanObject { return args[0] }
-	var _ PanObject = NewPanBuiltInFunc(f)
-}
+// checked by compiler
+var _ PanObject = (*PanBuiltIn)(nil)
 
 func TestNewPanBuiltInFunc(t *testing.T) {
 	tests := []struct {

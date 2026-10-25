@@ -78,7 +78,5 @@ func TestServerZero(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testServerIsPanObject() {
-	var _ object.PanObject = NewPanServer()
-}
+// checked by compiler
+var _ object.PanObject = (*panServer)(nil)

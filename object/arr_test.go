@@ -147,10 +147,8 @@ func TestArrZero(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testArrIsPanObject() {
-	var _ PanObject = NewPanArr()
-}
+// checked by compiler
+var _ PanObject = (*PanArr)(nil)
 
 func TestNewPanArr(t *testing.T) {
 	tests := []struct {

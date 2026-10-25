@@ -61,7 +61,5 @@ func TestMatchProto(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testMatchIsPanObject() {
-	var _ PanObject = &PanMatch{&MockMatchWrapper{"%{|1| 2 |foo| foo}"}}
-}
+// checked by compiler
+var _ PanObject = (*PanMatch)(nil)

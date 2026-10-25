@@ -112,7 +112,5 @@ func TestNewLine(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testIOIsPanObject() {
-	var _ PanObject = NewPanIO(os.Stdin, os.Stdout)
-}
+// checked by compiler
+var _ PanObject = (*PanIO)(nil)

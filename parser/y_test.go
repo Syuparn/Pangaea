@@ -810,13 +810,7 @@ func TestObjLiteral(t *testing.T) {
 
 			testSymbol(t, key, tt.keys[i])
 
-			val, ok := pair.Val.(ast.Expr)
-			if !ok {
-				t.Errorf("obj.Pairs[%d].Val is not ast.Expr. got=%T",
-					i, pair.Val)
-			}
-
-			testLiteralExpr(t, val, tt.vals[i])
+			testLiteralExpr(t, pair.Val, tt.vals[i])
 		}
 
 		if len(tt.embedded) != len(obj.EmbeddedExprs) {
@@ -1128,13 +1122,7 @@ func TestObjBreaklines(t *testing.T) {
 
 			testSymbol(t, key, tt.keys[i])
 
-			val, ok := pair.Val.(ast.Expr)
-			if !ok {
-				t.Errorf("obj.Pairs[%d].Val is not ast.Expr. got=%T",
-					i, pair.Val)
-			}
-
-			testLiteralExpr(t, val, tt.vals[i])
+			testLiteralExpr(t, pair.Val, tt.vals[i])
 		}
 
 		if len(tt.embedded) != len(obj.EmbeddedExprs) {
@@ -1238,13 +1226,7 @@ func TestMapLiteral(t *testing.T) {
 				testLiteralExpr(t, pair.Key, expectedKey)
 			}
 
-			val, ok := pair.Val.(ast.Expr)
-			if !ok {
-				t.Errorf("obj.Pairs[%d].Val is not ast.Expr. got=%T",
-					i, pair.Val)
-			}
-
-			testLiteralExpr(t, val, tt.vals[i])
+			testLiteralExpr(t, pair.Val, tt.vals[i])
 		}
 
 		if len(tt.embedded) != len(obj.EmbeddedExprs) {
@@ -1506,13 +1488,7 @@ func TestMapBreaklines(t *testing.T) {
 
 			testSymbol(t, key, tt.keys[i])
 
-			val, ok := pair.Val.(ast.Expr)
-			if !ok {
-				t.Errorf("obj.Pairs[%d].Val is not ast.Expr. got=%T",
-					i, pair.Val)
-			}
-
-			testLiteralExpr(t, val, tt.vals[i])
+			testLiteralExpr(t, pair.Val, tt.vals[i])
 		}
 
 		if len(tt.embedded) != len(obj.EmbeddedExprs) {
@@ -5794,7 +5770,7 @@ func testParse(t *testing.T, input string) *ast.Program {
 	if err != nil {
 		msg := fmt.Sprintf("%v\nOccurred in input ```\n%s\n```",
 			err.Error(), input)
-		t.Fatalf(msg)
+		t.Fatal(msg)
 		t.FailNow()
 	}
 

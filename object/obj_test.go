@@ -519,7 +519,5 @@ func TestChildPanObjPtr(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testObjIsPanObject() {
-	var _ PanObject = &PanObj{}
-}
+// checked by compiler
+var _ PanObject = (*PanObj)(nil)

@@ -159,7 +159,8 @@ func injectNativeStandardModule(env *object.Env, importPath string) object.PanOb
 	if err != nil {
 		return object.NewFileNotFoundErr(fmt.Sprintf("failed to read native module %q: %s", importPath, err))
 	}
-	defer fp.Close()
+	// NOTE: error is ignored because fp is read-only
+	defer func() { _ = fp.Close() }()
 
 	result := eval(parser.NewReader(fp, importPath), env)
 	if result.Type() == object.ErrType {

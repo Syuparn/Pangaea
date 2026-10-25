@@ -126,11 +126,7 @@ func TestBuiltInBools(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testBoolIsPanObject() {
-	var _ PanObject = &PanBool{true}
-}
+// checked by compiler
+var _ PanObject = (*PanBool)(nil)
 
-func testBoolIsPanScalar() {
-	var _ PanScalar = &PanBool{false}
-}
+var _ PanScalar = (*PanBool)(nil)

@@ -115,14 +115,10 @@ func TestFloatHash(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testFloatIsPanObject() {
-	var _ PanObject = NewPanFloat(1.5)
-}
+// checked by compiler
+var _ PanObject = (*PanFloat)(nil)
 
-func testFloatIsPanScalar() {
-	var _ PanScalar = NewPanFloat(1.5)
-}
+var _ PanScalar = (*PanFloat)(nil)
 
 func TestNewPanFloat(t *testing.T) {
 	tests := []struct {

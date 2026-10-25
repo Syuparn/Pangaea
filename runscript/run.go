@@ -18,19 +18,26 @@ func RunTest(path string, in io.Reader, out io.Writer) int {
 	env := setup(in, out, "")
 	exitCode := 0
 
-	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	// NOTE: error is ignored because test failure is already reported by exitCode
+	_ = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if !strings.HasSuffix(path, ".pangaea") {
 			return nil
 		}
 
-		out.Write([]byte(fmt.Sprintf("run:  %s\n", path)))
+		if _, err := fmt.Fprintf(out, "run:  %s\n", path); err != nil {
+			exitCode = 1
+			return err
+		}
 
 		exitCode = runTest(path, in, out, env)
 		if exitCode != 0 {
 			return fmt.Errorf("test in %s failed", path)
 		}
 
-		out.Write([]byte(fmt.Sprintf("pass: %s\n", path)))
+		if _, err := fmt.Fprintf(out, "pass: %s\n", path); err != nil {
+			exitCode = 1
+			return err
+		}
 		return nil
 	})
 	return exitCode

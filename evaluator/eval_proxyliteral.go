@@ -1,7 +1,6 @@
 package evaluator
 
 import (
-	"github.com/Syuparn/pangaea/ast"
 	"github.com/Syuparn/pangaea/object"
 )
 
@@ -33,24 +32,6 @@ func _evalProxyLiteral(
 	ret := evalCall(env, recv, proxy, args, kwargs)
 	if err, ok := ret.(*object.PanErr); ok {
 		return err
-	}
-
-	return ret
-}
-
-func evalProxyLiteral(
-	node ast.Node,
-	env *object.Env,
-	recv object.PanObject,
-	// TODO: duck typing (allow all objs with `call` prop)
-	f *object.PanFunc,
-	proxy object.PanObject,
-) object.PanObject {
-	args := []object.PanObject{f}
-	kwargs := object.EmptyPanObjPtr()
-	ret := evalCall(env, recv, proxy, args, kwargs)
-	if err, ok := ret.(*object.PanErr); ok {
-		return appendStackTrace(err, node.Source())
 	}
 
 	return ret

@@ -27,7 +27,7 @@ func (f *PanFunc) Inspect() string {
 	var out bytes.Buffer
 	out.WriteString(openParen(f.FuncKind))
 	// delegate to FuncWrapper
-	out.WriteString(f.FuncWrapper.String())
+	out.WriteString(f.String())
 	out.WriteString(closeParen(f.FuncKind))
 
 	return out.String()

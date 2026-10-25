@@ -266,10 +266,8 @@ func TestMapZero(t *testing.T) {
 	}
 }
 
-// checked by compiler (this function works nothing)
-func testMapIsPanObject() {
-	var _ PanObject = NewEmptyPanMap()
-}
+// checked by compiler
+var _ PanObject = (*PanMap)(nil)
 
 func TestNewPanMapWithScalarKeys(t *testing.T) {
 	tests := []struct {

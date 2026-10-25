@@ -33,7 +33,8 @@ func readNativeCode(
 			srcName, fileName)
 		return nil, e
 	}
-	defer fp.Close()
+	// NOTE: error is ignored because fp is read-only
+	defer func() { _ = fp.Close() }()
 
 	// NOTE: must pass EnclosedEnv otherwise outerenv of func literal cannot work
 	// (cannot call top-level consts for example)
